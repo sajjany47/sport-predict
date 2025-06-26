@@ -37,43 +37,6 @@ const HomePage = () => {
 
     fetchMatches();
   }, []);
-  // Mock data for demonstration
-  const upcomingMatches = [
-    {
-      id: "1",
-      teamA: { name: "India", flag: "🇮🇳" },
-      teamB: { name: "Australia", flag: "🇦🇺" },
-      date: "2025-01-15",
-      time: "14:30",
-      venue: "Melbourne Cricket Ground",
-      league: "Test Series",
-      status: "upcoming" as const,
-    },
-    {
-      id: "2",
-      teamA: { name: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
-      teamB: { name: "Pakistan", flag: "🇵🇰" },
-      date: "2025-01-16",
-      time: "19:30",
-      venue: "Lord's Cricket Ground",
-      league: "ODI Series",
-      status: "upcoming" as const,
-    },
-    {
-      id: "3",
-      teamA: { name: "South Africa", flag: "🇿🇦" },
-      teamB: { name: "New Zealand", flag: "🇳🇿" },
-      date: "2025-01-17",
-      time: "16:00",
-      venue: "Cape Town Stadium",
-      league: "T20 Series",
-      status: "live" as const,
-      liveScore: {
-        teamAScore: "156/4 (18.2 ov)",
-        teamBScore: "142/8 (20 ov)",
-      },
-    },
-  ];
 
   const customerReviews = [
     {
@@ -322,22 +285,20 @@ const HomePage = () => {
             </Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* {data.slice(0, 6).map((item: any) => (
-             <MatchCard
-                key={item.id}
-                match={item}
-                showPredictButton
-                onClick={() => console.log("Navigate to match details")}
-              />
-            ))} */}
-            {upcomingMatches.map((match) => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                showPredictButton
-                onClick={() => console.log("Navigate to match details")}
-              />
-            ))}
+            {data
+              .filter(
+                (item: any) =>
+                  item.status === "LIVE" || item.status === "NOT_STARTED"
+              )
+              .slice(0, 6)
+              .map((match: any) => (
+                <MatchCard
+                  key={match.matchId}
+                  match={match}
+                  showPredictButton
+                  onClick={() => console.log("Navigate to match details")}
+                />
+              ))}
           </div>
           <div className="text-center mt-8 md:hidden">
             <Button variant="outline" asChild>

@@ -1,9 +1,40 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+interface CricketScore {
+  runs: number;
+  overs: string;
+  balls: string;
+  status: "COMPLETED" | "IN_PROGRESS";
+  wickets: number;
+}
 
 interface Team {
+  squadId: number;
+  teamName: string;
+  teamShortName: string;
+  teamFlagUrl: string;
+  isWinner: boolean | null;
+  color: string;
+  cricketScore: CricketScore[];
+  squadNo: number | null;
+}
+
+interface Tour {
+  id: number;
   name: string;
-  flag: string;
-  players: Player[];
+}
+
+interface Match {
+  matchId: number;
+  matchName: string;
+  matchDescription: string;
+  startTime: string;
+  status: "NOT_STARTED" | "LIVE" | "COMPLETED" | "ABANDONED";
+  venue: string;
+  tour: Tour;
+  format: string;
+  sport: string;
+  teams: Team[];
 }
 
 interface Player {
@@ -26,34 +57,6 @@ interface Player {
   recentForm: string;
 }
 
-interface Match {
-  id: string;
-  teamA: Team;
-  teamB: Team;
-  date: string;
-  time: string;
-  venue: string;
-  league: string;
-  status: 'upcoming' | 'live' | 'completed';
-  liveScore?: {
-    teamAScore: string;
-    teamBScore: string;
-  };
-  result?: {
-    winner: string;
-    margin: string;
-  };
-  prediction?: {
-    winnerPrediction: string;
-    winProbability: number;
-    dream11Team: {
-      captain: Player;
-      viceCaptain: Player;
-      players: Player[];
-    };
-  };
-}
-
 interface MatchState {
   matches: Match[];
   selectedMatch: Match | null;
@@ -69,7 +72,7 @@ const initialState: MatchState = {
 };
 
 const matchSlice = createSlice({
-  name: 'matches',
+  name: "matches",
   initialState,
   reducers: {
     setMatches: (state, action: PayloadAction<Match[]>) => {
@@ -87,5 +90,6 @@ const matchSlice = createSlice({
   },
 });
 
-export const { setMatches, setSelectedMatch, setLoading, setError } = matchSlice.actions;
+export const { setMatches, setSelectedMatch, setLoading, setError } =
+  matchSlice.actions;
 export default matchSlice.reducer;
