@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -182,42 +183,7 @@ const MatchDetailsPage = () => {
         setMatchData({
           ...details.data.data,
           matchInfo: {
-            matchId: 127550,
-            matchName: "West Indies vs Australia",
-            matchDescription: "1st Test",
-            startTime: "2025-06-25T14:00:00.000Z",
-            status: "NOT_STARTED",
-            venue: "Kensington Oval, Bridgetown",
-            tour: {
-              id: 5258,
-              name: "Australia Tour of West Indies, 2025",
-            },
-            format: "TEST",
-            sport: "cricket",
-            teams: [
-              {
-                squadId: 260,
-                teamName: "West Indies",
-                teamShortName: "WI",
-                teamFlagUrl:
-                  "https://d13ir53smqqeyp.cloudfront.net/flags/cr-flags/FC-WIN@2x.png",
-                isWinner: null,
-                color: "#7B0041",
-                cricketScore: [],
-                squadNo: null,
-              },
-              {
-                squadId: 13,
-                teamName: "Australia",
-                teamShortName: "AUS",
-                teamFlagUrl:
-                  "https://d13ir53smqqeyp.cloudfront.net/flags/cr-flags/FC-AUS@2x.png",
-                isWinner: null,
-                color: "#002695",
-                cricketScore: [],
-                squadNo: null,
-              },
-            ],
+            ...selectedMatch,
           },
           GroundWheather: {
             temperature: "28°C",
