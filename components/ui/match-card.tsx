@@ -54,8 +54,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   showPredictButton = false,
   onClick,
 }) => {
-  const team1 = match.teams[0];
-  const team2 = match.teams[1];
+  const team1 = match?.teams[0];
+  const team2 = match?.teams[1];
 
   const formatScore = (team: Team) => {
     if (!team.cricketScore || team.cricketScore.length === 0) {

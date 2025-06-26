@@ -1,83 +1,61 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
-import { RootState } from '@/store';
-import { setMatches } from '@/store/slices/matchSlice';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import MatchCard from '@/components/ui/match-card';
-import { 
-  Trophy, 
-  Target, 
-  Calendar, 
-  CreditCard, 
-  TrendingUp, 
-  Users, 
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { RootState } from "@/store";
+import { setMatches } from "@/store/slices/matchSlice";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import MatchCard from "@/components/ui/match-card";
+import {
+  Trophy,
+  Target,
+  Calendar,
+  CreditCard,
+  TrendingUp,
+  Users,
   Star,
   Clock,
   CheckCircle,
-  AlertCircle
-} from 'lucide-react';
-import Link from 'next/link';
+  AlertCircle,
+} from "lucide-react";
+import Link from "next/link";
+import axios from "axios";
 
 const DashboardPage = () => {
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  const { matches } = useSelector((state: RootState) => state.matches);
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
+  );
+  const [matches, setMatches] = useState([]);
   const dispatch = useDispatch();
   const router = useRouter();
 
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/auth/login');
+      router.push("/auth/login");
     }
   }, [isAuthenticated, router]);
 
-  // Mock matches data
   useEffect(() => {
-    const mockMatches = [
-      {
-        id: '1',
-        teamA: { name: 'India', flag: '🇮🇳' },
-        teamB: { name: 'Australia', flag: '🇦🇺' },
-        date: '2025-01-15',
-        time: '14:30',
-        venue: 'Melbourne Cricket Ground',
-        league: 'Test Series',
-        status: 'upcoming' as const,
-      },
-      {
-        id: '2',
-        teamA: { name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
-        teamB: { name: 'Pakistan', flag: '🇵🇰' },
-        date: '2025-01-16',
-        time: '19:30',
-        venue: 'Lord\'s Cricket Ground',
-        league: 'ODI Series',
-        status: 'upcoming' as const,
-      },
-      {
-        id: '3',
-        teamA: { name: 'South Africa', flag: '🇿🇦' },
-        teamB: { name: 'New Zealand', flag: '🇳🇿' },
-        date: '2025-01-17',
-        time: '16:00',
-        venue: 'Cape Town Stadium',
-        league: 'T20 Series',
-        status: 'live' as const,
-        liveScore: {
-          teamAScore: '156/4 (18.2 ov)',
-          teamBScore: '142/8 (20 ov)',
-        },
-      },
-    ];
-    
-    dispatch(setMatches(mockMatches));
-  }, [dispatch]);
+    const fetchMatches = async () => {
+      try {
+        const response = await axios.post(
+          "/api/schedule",
+          {},
+          { headers: { "Content-Type": "application/json" } }
+        );
+        setMatches(response.data.data);
+      } catch (error) {
+        console.error("Error fetching matches:", error);
+      }
+    };
+
+    fetchMatches();
+  }, []);
 
   const handleMatchClick = (matchId: string) => {
     router.push(`/matches/${matchId}`);
@@ -86,66 +64,66 @@ const DashboardPage = () => {
   // Mock data for dashboard stats
   const dashboardStats = [
     {
-      title: 'Total Predictions',
-      value: '24',
-      change: '+12%',
+      title: "Total Predictions",
+      value: "24",
+      change: "+12%",
       icon: Target,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
     },
     {
-      title: 'Win Rate',
-      value: '87%',
-      change: '+5%',
+      title: "Win Rate",
+      value: "87%",
+      change: "+5%",
       icon: Trophy,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
+      color: "text-green-600",
+      bgColor: "bg-green-100",
     },
     {
-      title: 'Credits Used',
-      value: '18',
-      change: 'This month',
+      title: "Credits Used",
+      value: "18",
+      change: "This month",
       icon: CreditCard,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
+      color: "text-purple-600",
+      bgColor: "bg-purple-100",
     },
     {
-      title: 'Fantasy Points',
-      value: '1,247',
-      change: '+23%',
+      title: "Fantasy Points",
+      value: "1,247",
+      change: "+23%",
       icon: TrendingUp,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
+      color: "text-orange-600",
+      bgColor: "bg-orange-100",
     },
   ];
 
   const recentPredictions = [
     {
-      id: '1',
-      match: 'India vs Australia',
-      prediction: 'India to win',
-      result: 'Won',
+      id: "1",
+      match: "India vs Australia",
+      prediction: "India to win",
+      result: "Won",
       points: 85,
-      date: '2025-01-10',
-      status: 'completed',
+      date: "2025-01-10",
+      status: "completed",
     },
     {
-      id: '2',
-      match: 'England vs Pakistan',
-      prediction: 'England to win',
-      result: 'Lost',
+      id: "2",
+      match: "England vs Pakistan",
+      prediction: "England to win",
+      result: "Lost",
       points: 0,
-      date: '2025-01-09',
-      status: 'completed',
+      date: "2025-01-09",
+      status: "completed",
     },
     {
-      id: '3',
-      match: 'SA vs NZ',
-      prediction: 'South Africa to win',
-      result: 'Pending',
+      id: "3",
+      match: "SA vs NZ",
+      prediction: "South Africa to win",
+      result: "Pending",
       points: 0,
-      date: '2025-01-17',
-      status: 'pending',
+      date: "2025-01-17",
+      status: "pending",
     },
   ];
 
@@ -176,7 +154,9 @@ const DashboardPage = () => {
             </div>
             <div className="mt-4 md:mt-0 flex items-center space-x-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{user.credits}</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {user.credits}
+                </div>
                 <div className="text-sm text-gray-600">Credits Left</div>
               </div>
               <Button asChild>
@@ -198,9 +178,15 @@ const DashboardPage = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                      <p className="text-sm text-green-600 font-medium">{stat.change}</p>
+                      <p className="text-sm font-medium text-gray-600 mb-1">
+                        {stat.title}
+                      </p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {stat.value}
+                      </p>
+                      <p className="text-sm text-green-600 font-medium">
+                        {stat.change}
+                      </p>
                     </div>
                     <div className={`p-3 rounded-full ${stat.bgColor}`}>
                       <Icon className={`h-6 w-6 ${stat.color}`} />
@@ -226,20 +212,18 @@ const DashboardPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {matches.slice(0, 3).map((match) => (
+                  {matches.slice(0, 3).map((match: any) => (
                     <MatchCard
-                      key={match.id}
+                      key={match.matchId}
                       match={match}
                       showPredictButton
-                      onClick={() => handleMatchClick(match.id)}
+                      onClick={() => handleMatchClick(match.matchId)}
                     />
                   ))}
                 </div>
                 <div className="mt-6 text-center">
                   <Button variant="outline" asChild>
-                    <Link href="/matches">
-                      View All Matches
-                    </Link>
+                    <Link href="/matches">View All Matches</Link>
                   </Button>
                 </div>
               </CardContent>
@@ -256,17 +240,22 @@ const DashboardPage = () => {
               <CardContent>
                 <div className="space-y-4">
                   {recentPredictions.map((prediction) => (
-                    <div key={prediction.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div
+                      key={prediction.id}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                    >
                       <div className="flex items-center space-x-4">
-                        <div className={`p-2 rounded-full ${
-                          prediction.status === 'completed' 
-                            ? prediction.result === 'Won' 
-                              ? 'bg-green-100' 
-                              : 'bg-red-100'
-                            : 'bg-yellow-100'
-                        }`}>
-                          {prediction.status === 'completed' ? (
-                            prediction.result === 'Won' ? (
+                        <div
+                          className={`p-2 rounded-full ${
+                            prediction.status === "completed"
+                              ? prediction.result === "Won"
+                                ? "bg-green-100"
+                                : "bg-red-100"
+                              : "bg-yellow-100"
+                          }`}
+                        >
+                          {prediction.status === "completed" ? (
+                            prediction.result === "Won" ? (
                               <CheckCircle className="h-4 w-4 text-green-600" />
                             ) : (
                               <AlertCircle className="h-4 w-4 text-red-600" />
@@ -276,21 +265,29 @@ const DashboardPage = () => {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{prediction.match}</p>
-                          <p className="text-sm text-gray-600">{prediction.prediction}</p>
+                          <p className="font-medium text-gray-900">
+                            {prediction.match}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {prediction.prediction}
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <Badge variant={
-                          prediction.status === 'completed' 
-                            ? prediction.result === 'Won' 
-                              ? 'default' 
-                              : 'destructive'
-                            : 'secondary'
-                        }>
+                        <Badge
+                          variant={
+                            prediction.status === "completed"
+                              ? prediction.result === "Won"
+                                ? "default"
+                                : "destructive"
+                              : "secondary"
+                          }
+                        >
                           {prediction.result}
                         </Badge>
-                        <p className="text-sm text-gray-600 mt-1">{prediction.date}</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {prediction.date}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -313,13 +310,21 @@ const DashboardPage = () => {
                     Browse Matches
                   </Link>
                 </Button>
-                <Button variant="outline" className="w-full justify-start" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  asChild
+                >
                   <Link href="/subscription">
                     <CreditCard className="h-4 w-4 mr-2" />
                     Upgrade Plan
                   </Link>
                 </Button>
-                <Button variant="outline" className="w-full justify-start" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  asChild
+                >
                   <Link href="/dashboard/profile">
                     <Users className="h-4 w-4 mr-2" />
                     Edit Profile
@@ -338,16 +343,19 @@ const DashboardPage = () => {
                   <div className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-3">
                     {user.subscriptionPlan}
                   </div>
-                  <p className="text-2xl font-bold text-gray-900 mb-1">{user.credits}</p>
-                  <p className="text-sm text-gray-600 mb-4">Credits Remaining</p>
-                  <p className="text-xs text-gray-500 mb-4">
-                    Expires: {new Date(user.subscriptionExpiry).toLocaleDateString()}
+                  <p className="text-2xl font-bold text-gray-900 mb-1">
+                    {user.credits}
                   </p>
-                  {user.subscriptionPlan === 'Free' && (
+                  <p className="text-sm text-gray-600 mb-4">
+                    Credits Remaining
+                  </p>
+                  <p className="text-xs text-gray-500 mb-4">
+                    Expires:{" "}
+                    {new Date(user.subscriptionExpiry).toLocaleDateString()}
+                  </p>
+                  {user.subscriptionPlan === "Free" && (
                     <Button size="sm" className="w-full" asChild>
-                      <Link href="/subscription">
-                        Upgrade Now
-                      </Link>
+                      <Link href="/subscription">Upgrade Now</Link>
                     </Button>
                   )}
                 </div>
@@ -364,8 +372,9 @@ const DashboardPage = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-700">
-                  Check player form and head-to-head records before making predictions. 
-                  Our AI considers 50+ factors for accurate predictions!
+                  Check player form and head-to-head records before making
+                  predictions. Our AI considers 50+ factors for accurate
+                  predictions!
                 </p>
               </CardContent>
             </Card>

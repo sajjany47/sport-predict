@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const HomePage = () => {
+  const router = useRouter();
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -162,7 +164,8 @@ const HomePage = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 text-lg font-semibold"
+                className="border-white text-black hover:bg-white hover:text-blue-600 px-8 py-3 text-lg font-semibold"
+                onClick={() => router.push("/matches")}
               >
                 View Live Matches
                 <ChevronRight className="h-5 w-5 ml-2" />
@@ -277,7 +280,12 @@ const HomePage = () => {
                 Get predictions for the hottest cricket matches
               </p>
             </div>
-            <Button variant="outline" asChild className="hidden md:flex">
+            <Button
+              variant="outline"
+              asChild
+              className="hidden md:flex"
+              // onClick={() => router.push("/matches")}
+            >
               <Link href="/matches">
                 View All Matches
                 <ChevronRight className="h-4 w-4 ml-2" />
