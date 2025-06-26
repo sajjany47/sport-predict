@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { setMatches } from "@/store/slices/matchSlice";
+import { setMatches, setSelectedMatch } from "@/store/slices/matchSlice";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -39,12 +39,13 @@ const MatchesPage = () => {
     fetchMatches();
   }, []);
 
-  const handleMatchClick = (matchId: number) => {
+  const handleMatchClick = (match: any) => {
     if (!isAuthenticated) {
       router.push("/auth/login");
       return;
     }
-    router.push(`/matches/${matchId}`);
+    router.push(`/matches/${match.matchId}`);
+    dispatch(setSelectedMatch(match));
   };
 
   const filteredMatches = matches.filter((match: any) => {
@@ -154,7 +155,7 @@ const MatchesPage = () => {
                     key={match.matchId}
                     match={match}
                     showPredictButton
-                    onClick={() => handleMatchClick(match.matchId)}
+                    onClick={() => handleMatchClick(match)}
                   />
                 ))}
               </div>

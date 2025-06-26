@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 interface Player {
   id: number;
@@ -162,376 +163,77 @@ const MatchDetailsPage = () => {
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
-
+  const { selectedMatch } = useSelector((state: RootState) => state.matches);
   const [matchData, setMatchData] = useState<MatchData | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [showPrediction, setShowPrediction] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Mock match data based on the provided structure
   useEffect(() => {
-    const mockMatchData: MatchData = {
-      squadList: [
-        {
-          flag: "https://d13ir53smqqeyp.cloudfront.net/flags/cr-flags/FC-WIN@2x.png",
-          color: "#7B0041",
-          shortName: "WI",
-          playingPlayer: [
-            {
-              id: 2022,
-              name: "Brandon King",
-              shortName: "B King",
-              batStyle: "Right Handed",
-              bowlStyle: "",
-              imageUrl: {
-                src: "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/2022.png",
-              },
-              type: "BAT",
-              fantasyPoints: [
-                {
-                  date: "03/06/25",
-                  match: "ENG vs WI",
-                  bat: "18",
-                  bowl: "0",
-                  field: "0",
-                  total: "22",
-                },
-                {
-                  date: "01/06/25",
-                  match: "WI vs AUS",
-                  bat: "45",
-                  bowl: "0",
-                  field: "8",
-                  total: "53",
-                },
-              ],
-              battingForm: [
-                {
-                  date: "03/06/25",
-                  match: "WI vs ENG",
-                  bo: "1",
-                  run: "16 (20)",
-                  fours_sixes: "2/0",
-                  sr: "80",
-                  out: "catch",
-                },
-                {
-                  date: "01/06/25",
-                  match: "WI vs AUS",
-                  bo: "1",
-                  run: "67 (45)",
-                  fours_sixes: "8/2",
-                  sr: "148.9",
-                  out: "not out",
-                },
-              ],
-              bowlingForm: [
-                {
-                  date: "03/06/25",
-                  match: "WI vs ENG",
-                  o: "DNB",
-                  r: "DNB",
-                  w: "DNB",
-                  m: "DNB",
-                  eco: "DNB",
-                },
-              ],
-              battingStats: [
-                {
-                  year: "All",
-                  mode: "ODI",
-                  matches: "51",
-                  innings: "51",
-                  runs: "1458",
-                  balls: "1737",
-                  notOut: "2",
-                  average: "28.58",
-                  strikeRate: "83.9",
-                  highScore: "112",
-                  fifty: "8",
-                  hundred: "3",
-                  fours: "177",
-                  sixes: "29",
-                },
-                {
-                  year: "All",
-                  mode: "T20",
-                  matches: "62",
-                  innings: "61",
-                  runs: "1499",
-                  balls: "1118",
-                  notOut: "5",
-                  average: "24.17",
-                  strikeRate: "134",
-                  highScore: "85",
-                  fifty: "11",
-                  hundred: "0",
-                  fours: "165",
-                  sixes: "62",
-                },
-              ],
-              bowlingStats: [
-                {
-                  year: "All",
-                  mode: "ODI",
-                  matches: "51",
-                  innings: "0",
-                  balls: "0",
-                  runs: "0",
-                  wicket: "0",
-                  strikeRate: "",
-                  twoWicket: "0",
-                  threeWicket: "0",
-                  fiveWicket: "0",
-                  economy: "",
-                  average: "0",
-                },
-              ],
-              overallStats: {},
-              stadiumStats: {},
-              againstTeamsStats: {},
-            },
-          ],
-          benchPlayer: [
-            {
-              id: 2023,
-              name: "Shai Hope",
-              shortName: "S Hope",
-              batStyle: "Right Handed",
-              bowlStyle: "",
-              imageUrl: {
-                src: "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/2023.png",
-              },
-              type: "WK-BAT",
-              fantasyPoints: [
-                {
-                  date: "03/06/25",
-                  match: "ENG vs WI",
-                  bat: "32",
-                  bowl: "0",
-                  field: "12",
-                  total: "44",
-                },
-              ],
-              battingForm: [
-                {
-                  date: "03/06/25",
-                  match: "WI vs ENG",
-                  bo: "1",
-                  run: "43 (38)",
-                  fours_sixes: "4/1",
-                  sr: "113.2",
-                  out: "bowled",
-                },
-              ],
-              bowlingForm: [
-                {
-                  date: "03/06/25",
-                  match: "WI vs ENG",
-                  o: "DNB",
-                  r: "DNB",
-                  w: "DNB",
-                  m: "DNB",
-                  eco: "DNB",
-                },
-              ],
-              battingStats: [
-                {
-                  year: "All",
-                  mode: "ODI",
-                  matches: "89",
-                  innings: "85",
-                  runs: "3289",
-                  balls: "3876",
-                  notOut: "12",
-                  average: "45.05",
-                  strikeRate: "84.9",
-                  highScore: "170",
-                  fifty: "19",
-                  hundred: "9",
-                  fours: "312",
-                  sixes: "45",
-                },
-              ],
-              bowlingStats: [
-                {
-                  year: "All",
-                  mode: "ODI",
-                  matches: "89",
-                  innings: "0",
-                  balls: "0",
-                  runs: "0",
-                  wicket: "0",
-                  strikeRate: "",
-                  twoWicket: "0",
-                  threeWicket: "0",
-                  fiveWicket: "0",
-                  economy: "",
-                  average: "0",
-                },
-              ],
-              overallStats: {},
-              stadiumStats: {},
-              againstTeamsStats: {},
-            },
-          ],
-        },
-        {
-          flag: "https://d13ir53smqqeyp.cloudfront.net/flags/cr-flags/FC-AUS@2x.png",
-          color: "#002695",
-          shortName: "AUS",
-          playingPlayer: [
-            {
-              id: 3001,
-              name: "David Warner",
-              shortName: "D Warner",
-              batStyle: "Left Handed",
-              bowlStyle: "Right-arm leg-break",
-              imageUrl: {
-                src: "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/3001.png",
-              },
-              type: "BAT",
-              fantasyPoints: [
-                {
-                  date: "05/06/25",
-                  match: "AUS vs WI",
-                  bat: "56",
-                  bowl: "0",
-                  field: "4",
-                  total: "60",
-                },
-              ],
-              battingForm: [
-                {
-                  date: "05/06/25",
-                  match: "AUS vs WI",
-                  bo: "1",
-                  run: "89 (67)",
-                  fours_sixes: "11/3",
-                  sr: "132.8",
-                  out: "lbw",
-                },
-              ],
-              bowlingForm: [
-                {
-                  date: "05/06/25",
-                  match: "AUS vs WI",
-                  o: "DNB",
-                  r: "DNB",
-                  w: "DNB",
-                  m: "DNB",
-                  eco: "DNB",
-                },
-              ],
-              battingStats: [
-                {
-                  year: "All",
-                  mode: "ODI",
-                  matches: "128",
-                  innings: "124",
-                  runs: "5455",
-                  balls: "5691",
-                  notOut: "9",
-                  average: "47.4",
-                  strikeRate: "95.8",
-                  highScore: "179",
-                  fifty: "33",
-                  hundred: "18",
-                  fours: "571",
-                  sixes: "123",
-                },
-              ],
-              bowlingStats: [
-                {
-                  year: "All",
-                  mode: "ODI",
-                  matches: "128",
-                  innings: "2",
-                  balls: "12",
-                  runs: "15",
-                  wicket: "0",
-                  strikeRate: "",
-                  twoWicket: "0",
-                  threeWicket: "0",
-                  fiveWicket: "0",
-                  economy: "7.5",
-                  average: "0",
-                },
-              ],
-              overallStats: {},
-              stadiumStats: {},
-              againstTeamsStats: {},
-            },
-          ],
-          benchPlayer: [],
-        },
-      ],
-      stadiumStats: [
-        {
-          date: "10/11/24",
-          matchTitle: "WI vs ENG (2nd T20I) ENG TO WI 2024 Stats",
-          matchUrl:
-            "https://advancecricket.com/score/wi-vs-eng-2nd-t20i-eng-to-wi-2024/23376630",
-          inn1Score: "WI - 158-8 (20.0)",
-          inn2Score: "ENG - 161-3 (14.5)",
-        },
-        {
-          date: "09/11/24",
-          matchTitle: "WI vs ENG (1st T20I) ENG TO WI 2024 Stats",
-          matchUrl:
-            "https://advancecricket.com/score/wi-vs-eng-1st-t20i-eng-to-wi-2024/67307201",
-          inn1Score: "WI - 182-9 (20.0)",
-          inn2Score: "ENG - 183-2 (16.5)",
-        },
-      ],
-      matchInfo: {
-        matchId: 127550,
-        matchName: "West Indies vs Australia",
-        matchDescription: "1st Test",
-        startTime: "2025-06-25T14:00:00.000Z",
-        status: "NOT_STARTED",
-        venue: "Kensington Oval, Bridgetown",
-        tour: {
-          id: 5258,
-          name: "Australia Tour of West Indies, 2025",
-        },
-        format: "TEST",
-        sport: "cricket",
-        teams: [
-          {
-            squadId: 260,
-            teamName: "West Indies",
-            teamShortName: "WI",
-            teamFlagUrl:
-              "https://d13ir53smqqeyp.cloudfront.net/flags/cr-flags/FC-WIN@2x.png",
-            isWinner: null,
-            color: "#7B0041",
-            cricketScore: [],
-            squadNo: null,
-          },
-          {
-            squadId: 13,
-            teamName: "Australia",
-            teamShortName: "AUS",
-            teamFlagUrl:
-              "https://d13ir53smqqeyp.cloudfront.net/flags/cr-flags/FC-AUS@2x.png",
-            isWinner: null,
-            color: "#002695",
-            cricketScore: [],
-            squadNo: null,
-          },
-        ],
-      },
-      GroundWheather: {
-        temperature: "28°C",
-        humidity: "65%",
-        windSpeed: "12 km/h",
-        conditions: "Partly Cloudy",
-      },
-    };
+    const fetchDetails = async () => {
+      if (params.id) {
+        const details = await axios.post(
+          "/api/match-details",
+          { matchId: Number(params.id), venue: selectedMatch?.venue },
+          { headers: { "Content-Type": "application/json" } }
+        );
 
-    setMatchData(mockMatchData);
+        setMatchData({
+          ...details.data.data,
+          matchInfo: {
+            matchId: 127550,
+            matchName: "West Indies vs Australia",
+            matchDescription: "1st Test",
+            startTime: "2025-06-25T14:00:00.000Z",
+            status: "NOT_STARTED",
+            venue: "Kensington Oval, Bridgetown",
+            tour: {
+              id: 5258,
+              name: "Australia Tour of West Indies, 2025",
+            },
+            format: "TEST",
+            sport: "cricket",
+            teams: [
+              {
+                squadId: 260,
+                teamName: "West Indies",
+                teamShortName: "WI",
+                teamFlagUrl:
+                  "https://d13ir53smqqeyp.cloudfront.net/flags/cr-flags/FC-WIN@2x.png",
+                isWinner: null,
+                color: "#7B0041",
+                cricketScore: [],
+                squadNo: null,
+              },
+              {
+                squadId: 13,
+                teamName: "Australia",
+                teamShortName: "AUS",
+                teamFlagUrl:
+                  "https://d13ir53smqqeyp.cloudfront.net/flags/cr-flags/FC-AUS@2x.png",
+                isWinner: null,
+                color: "#002695",
+                cricketScore: [],
+                squadNo: null,
+              },
+            ],
+          },
+          GroundWheather: {
+            temperature: "28°C",
+            humidity: "65%",
+            windSpeed: "12 km/h",
+            conditions: "Partly Cloudy",
+          },
+        });
+        // setData(details.data.data);
+        // You can use 'details' here if needed
+      } else {
+        setMatchData(null);
+      }
+    };
+    fetchDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const handleGetPrediction = async () => {
