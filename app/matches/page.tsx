@@ -17,7 +17,6 @@ const MatchesPage = () => {
   const [activeTab, setActiveTab] = useState("upcoming");
   const dispatch = useDispatch();
   const router = useRouter();
-  // const { matches } = useSelector((state: RootState) => state.matches);
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const [matches, setMatches] = useState([]);
@@ -179,7 +178,7 @@ const MatchesPage = () => {
                   <MatchCard
                     key={match.matchId}
                     match={match}
-                    onClick={() => handleMatchClick(match.matchId)}
+                    onClick={() => handleMatchClick(match)}
                   />
                 ))}
               </div>
@@ -205,7 +204,7 @@ const MatchesPage = () => {
                   <MatchCard
                     key={match.matchId}
                     match={match}
-                    onClick={() => handleMatchClick(match.matchId)}
+                    onClick={() => handleMatchClick(match)}
                   />
                 ))}
               </div>

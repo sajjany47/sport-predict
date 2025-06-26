@@ -35,10 +35,6 @@ export async function POST(request: Request) {
 
     const data = await axios.get(targetUrl);
 
-    // return new Response(data, {
-    //   status: 200,
-    //   headers: { "Content-Type": "text/html" },
-    // });
     const prepareData = (
       data.data.data.fetchScheduleData.edges[0].tours ?? []
     ).flatMap((item: any) =>

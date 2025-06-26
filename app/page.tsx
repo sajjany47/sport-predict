@@ -18,9 +18,14 @@ import {
 import Link from "next/link";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { setSelectedMatch } from "@/store/slices/matchSlice";
 
 const HomePage = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -128,6 +133,15 @@ const HomePage = () => {
       popular: false,
     },
   ];
+
+  const handleMatchClick = (match: any) => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+    router.push(`/matches/${match.matchId}`);
+    dispatch(setSelectedMatch(match));
+  };
 
   return (
     <div className="min-h-screen">
@@ -304,7 +318,7 @@ const HomePage = () => {
                   key={match.matchId}
                   match={match}
                   showPredictButton
-                  onClick={() => console.log("Navigate to match details")}
+                  onClick={() => handleMatchClick(match)}
                 />
               ))}
           </div>

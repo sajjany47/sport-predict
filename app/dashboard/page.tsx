@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
-import { setMatches } from "@/store/slices/matchSlice";
+import { setMatches, setSelectedMatch } from "@/store/slices/matchSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,8 +57,9 @@ const DashboardPage = () => {
     fetchMatches();
   }, []);
 
-  const handleMatchClick = (matchId: string) => {
-    router.push(`/matches/${matchId}`);
+  const handleMatchClick = (match: any) => {
+    router.push(`/matches/${match.matchId}`);
+    dispatch(setSelectedMatch(match));
   };
 
   // Mock data for dashboard stats
@@ -217,7 +218,7 @@ const DashboardPage = () => {
                       key={match.matchId}
                       match={match}
                       showPredictButton
-                      onClick={() => handleMatchClick(match.matchId)}
+                      onClick={() => handleMatchClick(match)}
                     />
                   ))}
                 </div>
