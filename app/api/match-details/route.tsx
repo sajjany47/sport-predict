@@ -111,7 +111,8 @@ export async function POST(request: NextRequest) {
       return (transformedData = {});
     }
 
-    const stadiumDetails: any = await GetStadiumList("Headingley");
+    const statdiumReqName = body.venue.split(",")[0].trim();
+    const stadiumDetails: any = await GetStadiumList(statdiumReqName);
     const stadium = await StadiumStats(stadiumDetails.url);
 
     const playerDetails = async (
