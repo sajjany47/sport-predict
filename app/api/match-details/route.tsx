@@ -10,6 +10,8 @@ export async function POST(request: NextRequest) {
     let squadListData: any[] = [];
     let prepareStatsList: any[] = [];
     let transformedData: any = {};
+    let stadiumDetails: any = {};
+    let stadium: any = {};
 
     try {
       const payload = {
@@ -32,8 +34,8 @@ export async function POST(request: NextRequest) {
         }
       );
       squadListData = squadList.data.data?.squadSegment ?? [];
-    } catch (error) {
-      return (squadListData = []);
+    } catch (err) {
+      squadListData = [];
     }
 
     try {
@@ -78,8 +80,8 @@ export async function POST(request: NextRequest) {
             return data;
           }
         ) ?? [];
-    } catch (error) {
-      return (prepareStatsList = []);
+    } catch (err) {
+      prepareStatsList = [];
     }
 
     try {
@@ -107,13 +109,22 @@ export async function POST(request: NextRequest) {
         }
       );
       transformedData = TransAdvanceStatData(advanceStats.data ?? {});
-    } catch (error) {
-      return (transformedData = {});
+    } catch (err) {
+      transformedData = {};
     }
 
-    const statdiumReqName = body.venue.split(",")[0].trim();
-    const stadiumDetails: any = await GetStadiumList(statdiumReqName);
-    const stadium = await StadiumStats(stadiumDetails.url);
+    try {
+      const statdiumReqName = body.venue.split(",")[0].trim();
+      stadiumDetails = await GetStadiumList(statdiumReqName);
+      stadium = await StadiumStats(stadiumDetails.url);
+    } catch (err) {
+      stadium = {};
+      stadiumDetails = {};
+    }
+
+    // const statdiumReqName = body.venue.split(",")[0].trim();
+    // const stadiumDetails: any = await GetStadiumList(statdiumReqName);
+    // const stadium = await StadiumStats(stadiumDetails.url);
 
     const playerDetails = async (
       name: string,
@@ -135,7 +146,7 @@ export async function POST(request: NextRequest) {
               item.playingPlayers.map(async (elm: any) => {
                 const playerData = await playerDetails(
                   elm.name,
-                  stadiumDetails.name,
+                  stadiumDetails.name || "",
                   squadListData[index === 0 ? 1 : 0].shortName
                 );
                 return {
@@ -151,7 +162,7 @@ export async function POST(request: NextRequest) {
               item.benchPlayers.map(async (elm: any) => {
                 const playerData = await playerDetails(
                   elm.name,
-                  stadiumDetails.name,
+                  stadiumDetails.name || "",
                   item.shortName
                 );
                 return {
