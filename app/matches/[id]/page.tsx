@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import {
   Trophy,
@@ -34,7 +33,6 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-import Link from "next/link";
 import toast from "react-hot-toast";
 import axios from "axios";
 import SquadDialoge from "./SquadDialoge";
@@ -178,7 +176,6 @@ const MatchDetailsPage = () => {
   );
   const { selectedMatch } = useSelector((state: RootState) => state.matches);
   const [matchData, setMatchData] = useState<MatchData | null>(null);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [showPrediction, setShowPrediction] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -237,22 +234,6 @@ const MatchDetailsPage = () => {
       toast.error("Failed to generate prediction. Please try again.");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const getPlayerTypeColor = (type: string) => {
-    switch (type) {
-      case "BAT":
-        return "bg-blue-100 text-blue-800";
-      case "BOWL":
-        return "bg-green-100 text-green-800";
-      case "ALL":
-        return "bg-purple-100 text-purple-800";
-      case "WK":
-      case "WK-BAT":
-        return "bg-orange-100 text-orange-800";
-      default:
-        return "bg-gray-100 text-gray-800";
     }
   };
 

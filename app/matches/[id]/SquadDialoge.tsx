@@ -12,7 +12,6 @@ import {
 import { Eye } from "lucide-react";
 
 const SquadDialoge = (data: any) => {
-  console.log(data);
   const getPlayerTypeColor = (type: string) => {
     switch (type) {
       case "BAT":
