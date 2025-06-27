@@ -35,7 +35,6 @@ export async function POST(request: Request) {
     const targetUrl = `https://www.fancode.com/graphql?extensions=${extension}&operation=query&operationName=FetchScheduleData&variables=${encodeData}`;
 
     const data = await axios.get(targetUrl);
-    console.log(data.data);
     const prepareData = (
       data.data.data.fetchScheduleData.edges[0].tours ?? []
     ).flatMap((item: any) =>
