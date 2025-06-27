@@ -29,12 +29,13 @@ export async function POST(request: Request) {
         },
       })
     );
-    const extension = `%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%222b388699e2d6baf16f45bf237d62af88027b8ba298c873b8e3b9cf95037dbd2f%22%7D%7D`;
+
+    const extension = `%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22daa7405dc9b181163b7140f8ff190c08155f1cdb925d122725922a7199b3773b%22%7D%7D`;
 
     const targetUrl = `https://www.fancode.com/graphql?extensions=${extension}&operation=query&operationName=FetchScheduleData&variables=${encodeData}`;
 
     const data = await axios.get(targetUrl);
-
+    console.log(data.data);
     const prepareData = (
       data.data.data.fetchScheduleData.edges[0].tours ?? []
     ).flatMap((item: any) =>

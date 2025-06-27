@@ -110,7 +110,14 @@ export async function POST(request: NextRequest) {
       );
       transformedData = TransAdvanceStatData(advanceStats.data ?? {});
     } catch (err) {
-      transformedData = {};
+      transformedData = {
+        recentMatch: [],
+        h2h: {
+          h2hStat: [],
+          recentH2HMatch: [],
+        },
+        teamStrength: [],
+      };
     }
 
     try {
