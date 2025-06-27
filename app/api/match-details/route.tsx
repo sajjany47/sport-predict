@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     let prepareStatsList: any[] = [];
     let transformedData: any = {};
     let stadiumDetails: any = {};
-    let stadium: any = {};
+    let stadium: any = [];
 
     try {
       const payload = {
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
       stadiumDetails = await GetStadiumList(statdiumReqName);
       stadium = await StadiumStats(stadiumDetails.url);
     } catch (err) {
-      stadium = {};
+      stadium = [];
       stadiumDetails = {};
     }
 

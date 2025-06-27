@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { load } from "cheerio";
 import axios from "axios";
+import moment from "moment";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -180,4 +181,19 @@ export const TransAdvanceStatData = (originalData: any) => {
       teamStrength: [],
     };
   }
+};
+
+export const CalculateAverageScore = (data: any) => {
+  const apiAvgScore = Number(data.overview.groundAndWheather.avgScore) ?? null;
+  const stadiumStats = data.stadiumStats.filter((date: any) => {
+    return (
+      moment(date.date, "DD/MM/YY").isSameOrBefore(moment(), "day") &&
+      moment(date.date, "DD/MM/YY").isSameOrAfter(
+        moment().subtract(2, "years"),
+        "day"
+      )
+    );
+  });
+
+  console.log(stadiumStats);
 };

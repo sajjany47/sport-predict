@@ -21,6 +21,8 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setSelectedMatch } from "@/store/slices/matchSlice";
+import { CalculateAverageScore } from "@/lib/utils";
+import { DummyData } from "@/lib/DummyData";
 
 const HomePage = () => {
   const router = useRouter();
@@ -29,6 +31,8 @@ const HomePage = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
+    CalculateAverageScore(DummyData);
+
     const fetchMatches = async () => {
       try {
         const response = await axios.post(

@@ -1,6 +1,7 @@
+import moment from "moment";
 import React from "react";
 
-const GetPrediction = () => {
+const GetPrediction = (data: any) => {
   // stadium Last 10 matches --------
   // Pitch Type---------------
   // Avg Score---------------
@@ -20,6 +21,19 @@ const GetPrediction = () => {
   // Player Against Stadium Bowling Stats----
   // Player Against Team Batting Stats----
   // Player Against Team Bowling Stats----
+  const calculateAverageScore = () => {
+    const apiAvgScore =
+      Number(data.overview.groundAndWheather.avgScore) ?? null;
+    const stadiumStats = data.stadiumStats.filter((date: any) => {
+      return (
+        moment(date.date, "DD/MM/YY").isSameOrBefore(moment(), "day") &&
+        moment(date.date, "DD/MM/YY").isSameOrAfter(
+          moment().subtract(2, "years"),
+          "day"
+        )
+      );
+    });
+  };
 
   return <div>GetPrediction</div>;
 };
