@@ -89,3 +89,84 @@ export const GetStadiumList = async (searchTerm: string) => {
     return [];
   }
 };
+
+export const TransAdvanceStatData = (originalData: any) => {
+  // Extract recent matches
+  const recentMatch = originalData.data.teamHeadToHead.segments
+    .find((segment: any) => segment.type === "RECENT_FORM")
+    .data.squads.map((teamData: any) => {
+      return {
+        teamName: teamData.team.shortName,
+        match: teamData.recentMatches.map((match: any) => {
+          const team1 = match.squads[0];
+          const team2 = match.squads[1];
+          return {
+            team1: team1.team.shortName,
+            team2: team2.team.shortName,
+            format: match.format,
+            status: match.status,
+            date: match.date,
+            location: match.location,
+            result: match.result,
+            team1Score: team1.score,
+            team2Score: team2.score,
+            winner: team1.isWinner
+              ? team1.team.shortName
+              : team2.team.shortName,
+          };
+        }),
+      };
+    });
+
+  // Extract head-to-head data
+  const h2hData = originalData.data.teamHeadToHead.segments.find(
+    (segment: any) => segment.type === "H2H"
+  ).data;
+  const h2h = {
+    h2hStat: h2hData.resultCompare.squads.map((team: any) => ({
+      team1: team.team.shortName,
+      win: team.gameWon,
+      totalPlay: h2hData.resultCompare.totalPlayed,
+    })),
+    recentH2HMatch: [
+      {
+        match: h2hData.recentMatches.matches.map((match: any) => {
+          const team1 = match.squads[0];
+          const team2 = match.squads[1];
+          return {
+            team1: team1.team.shortName,
+            team2: team2.team.shortName,
+            format: match.format,
+            status: match.status,
+            date: match.date,
+            location: match.location,
+            result: match.result,
+            team1Score: team1.score,
+            team2Score: team2.score,
+            winner: team1.isWinner
+              ? team1.team.shortName
+              : team2.team.shortName,
+          };
+        }),
+      },
+    ],
+  };
+
+  // Extract team strengths
+  const teamStrengthData = originalData.data.teamHeadToHead.segments.find(
+    (segment: any) => segment.type === "TEAM_STRENGTH"
+  ).data;
+  const teamStrength = teamStrengthData.squadChaseDefend.data[0].values.map(
+    (value: any, index: any) => ({
+      teamName: teamStrengthData.squads[index].shortName,
+      battingFirstWin: `${value}%`,
+      bowlingFirstWin: `${teamStrengthData.squadChaseDefend.data[1].values[index]}%`,
+    })
+  );
+
+  return {
+    recentMatch,
+    h2h,
+    teamStrength,
+  };
+};
