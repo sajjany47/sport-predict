@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
-import { loginSuccess } from '@/store/slices/authSlice';
-import toast from 'react-hot-toast';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Trophy, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
+import { loginSuccess } from "@/store/slices/authSlice";
+import toast from "react-hot-toast";
 
 const LoginPage = () => {
-  const [activeTab, setActiveTab] = useState('email');
+  const [activeTab, setActiveTab] = useState("email");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    mobile: '',
-    password: '',
-    otp: '',
+    email: "",
+    mobile: "",
+    password: "",
+    otp: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -38,27 +38,28 @@ const LoginPage = () => {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Mock successful login
       const mockUser = {
-        id: '1',
-        username: 'cricket_fan',
+        id: "1",
+        username: "cricket_fan",
         email: formData.email,
-        mobile: '+91 9876543210',
+        mobile: "+91 9876543210",
         credits: 2,
-        subscriptionPlan: 'Free',
-        subscriptionExpiry: '2025-02-15',
+        subscriptionPlan: "Free",
+        subscriptionExpiry: "2025-02-15",
       };
-      
+
       dispatch(loginSuccess(mockUser));
-      toast.success('Login successful!');
-      router.push('/dashboard');
+      toast.success("Login successful!");
+      router.back();
+      // router.push('/dashboard');
     } catch (error) {
-      toast.error('Login failed. Please try again.');
+      toast.error("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -67,14 +68,14 @@ const LoginPage = () => {
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setOtpSent(true);
-      toast.success('OTP sent successfully!');
+      toast.success("OTP sent successfully!");
     } catch (error) {
-      toast.error('Failed to send OTP. Please try again.');
+      toast.error("Failed to send OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -83,27 +84,27 @@ const LoginPage = () => {
   const handleOTPLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Mock successful login
       const mockUser = {
-        id: '1',
-        username: 'cricket_fan',
-        email: 'user@example.com',
+        id: "1",
+        username: "cricket_fan",
+        email: "user@example.com",
         mobile: formData.mobile,
         credits: 2,
-        subscriptionPlan: 'Free',
-        subscriptionExpiry: '2025-02-15',
+        subscriptionPlan: "Free",
+        subscriptionExpiry: "2025-02-15",
       };
-      
+
       dispatch(loginSuccess(mockUser));
-      toast.success('Login successful!');
-      router.push('/dashboard');
+      toast.success("Login successful!");
+      router.push("/dashboard");
     } catch (error) {
-      toast.error('Invalid OTP. Please try again.');
+      toast.error("Invalid OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -118,24 +119,42 @@ const LoginPage = () => {
             <div className="bg-blue-600 p-3 rounded-xl">
               <Trophy className="h-8 w-8 text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">SportPredict</span>
+            <span className="text-2xl font-bold text-gray-900">
+              SportPredict
+            </span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to access your cricket predictions</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome Back
+          </h1>
+          <p className="text-gray-600">
+            Sign in to access your cricket predictions
+          </p>
         </div>
 
         <Card className="shadow-xl border-0">
           <CardHeader>
-            <CardTitle className="text-center text-xl">Login to Your Account</CardTitle>
+            <CardTitle className="text-center text-xl">
+              Login to Your Account
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="email" className="flex items-center space-x-2">
+                <TabsTrigger
+                  value="email"
+                  className="flex items-center space-x-2"
+                >
                   <Mail className="h-4 w-4" />
                   <span>Email</span>
                 </TabsTrigger>
-                <TabsTrigger value="mobile" className="flex items-center space-x-2">
+                <TabsTrigger
+                  value="mobile"
+                  className="flex items-center space-x-2"
+                >
                   <Phone className="h-4 w-4" />
                   <span>Mobile</span>
                 </TabsTrigger>
@@ -166,7 +185,7 @@ const LoginPage = () => {
                       <Input
                         id="password"
                         name="password"
-                        type={showPassword ? 'text' : 'password'}
+                        type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         value={formData.password}
                         onChange={handleInputChange}
@@ -178,17 +197,24 @@ const LoginPage = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                       >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </div>
                   <div className="text-right">
-                    <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
+                    <Link
+                      href="/auth/forgot-password"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
                       Forgot Password?
                     </Link>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Signing In...' : 'Sign In'}
+                    {isLoading ? "Signing In..." : "Sign In"}
                   </Button>
                 </form>
               </TabsContent>
@@ -212,8 +238,12 @@ const LoginPage = () => {
                         />
                       </div>
                     </div>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? 'Sending OTP...' : 'Send OTP'}
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Sending OTP..." : "Send OTP"}
                     </Button>
                   </form>
                 ) : (
@@ -241,8 +271,12 @@ const LoginPage = () => {
                         Change Number
                       </button>
                     </div>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? 'Verifying...' : 'Verify OTP'}
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Verifying..." : "Verify OTP"}
                     </Button>
                   </form>
                 )}
@@ -251,8 +285,11 @@ const LoginPage = () => {
 
             <div className="text-center mt-6">
               <p className="text-gray-600">
-                Don't have an account?{' '}
-                <Link href="/auth/register" className="text-blue-600 hover:underline font-medium">
+                Don't have an account?{" "}
+                <Link
+                  href="/auth/register"
+                  className="text-blue-600 hover:underline font-medium"
+                >
                   Sign Up
                 </Link>
               </p>

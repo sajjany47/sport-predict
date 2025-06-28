@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { logout } from '@/store/slices/authSlice';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import Link from "next/link";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/store";
+import { logout } from "@/store/slices/authSlice";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -21,13 +21,28 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Menu, Trophy, User, Settings, CreditCard, History, LogOut, Home, Info, HelpCircle, Calendar } from 'lucide-react';
+} from "@/components/ui/sheet";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Menu,
+  Trophy,
+  User,
+  Settings,
+  CreditCard,
+  History,
+  LogOut,
+  Home,
+  Info,
+  HelpCircle,
+  Calendar,
+  LayoutDashboard,
+} from "lucide-react";
 
 const Header = () => {
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
+  );
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -36,11 +51,11 @@ const Header = () => {
   };
 
   const navItems = [
-    { href: '/', label: 'Home', icon: Home },
-    { href: '/about', label: 'About', icon: Info },
-    { href: '/support', label: 'Support', icon: HelpCircle },
-    { href: '/matches', label: 'Matches', icon: Calendar },
-    { href: '/subscription', label: 'Subscription', icon: CreditCard },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/about", label: "About", icon: Info },
+    { href: "/support", label: "Support", icon: HelpCircle },
+    { href: "/matches", label: "Matches", icon: Calendar },
+    { href: "/subscription", label: "Subscription", icon: CreditCard },
   ];
 
   return (
@@ -96,7 +111,16 @@ const Header = () => {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/subscription" className="cursor-pointer">
+                  <Link href="/dashboard" className="cursor-pointer">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/dashboard/subscription"
+                    className="cursor-pointer"
+                  >
                     <Settings className="mr-2 h-4 w-4" />
                     Subscription
                   </Link>
@@ -108,7 +132,10 @@ const Header = () => {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="cursor-pointer text-red-600"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </DropdownMenuItem>
@@ -135,7 +162,9 @@ const Header = () => {
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <SheetHeader>
                 <SheetTitle>Navigation</SheetTitle>
-                <SheetDescription>Access all SportPredict features</SheetDescription>
+                <SheetDescription>
+                  Access all SportPredict features
+                </SheetDescription>
               </SheetHeader>
               <div className="grid gap-4 py-4">
                 {navItems.map((item) => {
