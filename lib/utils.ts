@@ -262,7 +262,7 @@ export const CalculateAverageScore = (data: any) => {
     const team2 = ModifyScore(element.inn2Score);
     const totalScore = team1.runs + team2.runs;
     const totalWickets = team1.wickets + team2.wickets;
-    let adjustedScore = totalScore;
+    let adjustedScore = totalScore / 2;
 
     if (matchFormat === "t20i") {
       if (element.mode === "10") adjustedScore += 0.8 * totalScore;
