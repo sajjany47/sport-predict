@@ -115974,4 +115974,60 @@ export const DummyData = {
       ],
     },
   },
+  matchInfo: {
+    matchId: 129252,
+    matchName: "Calabash Giants vs Whiptail Smashers",
+    matchDescription: "Match 8",
+    startTime: "2025-06-27T18:30:00.000Z",
+    status: "COMPLETED",
+    venue: "Daren Sammy National Cricket Stadium, Gros Islet",
+    tour: {
+      id: 5345,
+      name: "St. Lucia T10 Blast, 2025",
+      collectionId: 18721803,
+      collectionSlug: "st-lucia-t10-blast-2025",
+    },
+    format: "T10",
+    sport: "cricket",
+    teams: [
+      {
+        squadId: 11633,
+        teamName: "Calabash Giants",
+        teamShortName: "CBG",
+        teamFlagUrl:
+          "https://d13ir53smqqeyp.cloudfront.net/flags/cr-flags/FC-CBG@2x.png",
+        isWinner: false,
+        color: "#003878",
+        cricketScore: [
+          {
+            runs: 104,
+            overs: "10",
+            balls: "60",
+            status: "COMPLETED",
+            wickets: 7,
+          },
+        ],
+        squadNo: null,
+      },
+      {
+        squadId: 11636,
+        teamName: "Whiptail Smashers",
+        teamShortName: "WTS",
+        teamFlagUrl:
+          "https://d13ir53smqqeyp.cloudfront.net/flags/cr-flags/FC-WTS@2x.png",
+        isWinner: true,
+        color: "#065fa5",
+        cricketScore: [
+          {
+            runs: 110,
+            overs: "8.1",
+            balls: "49",
+            status: "IN_PROGRESS",
+            wickets: 1,
+          },
+        ],
+        squadNo: null,
+      },
+    ],
+  },
 };

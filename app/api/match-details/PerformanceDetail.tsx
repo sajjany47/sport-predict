@@ -278,7 +278,7 @@ export const StadiumStats = async (url: string) => {
     matches.push({
       date,
       matchTitle,
-      matchUrl: `https://advancecricket.com${matchUrl}`,
+      matchUrl: `${matchUrl}`,
       inn1Score: inn1,
       inn2Score: inn2,
     });

@@ -182,18 +182,110 @@ export const TransAdvanceStatData = (originalData: any) => {
     };
   }
 };
+export const DomesticLeagues = [
+  { fullName: "Indian Premier League", shortName: "IPL", overLimit: 20 },
+  { fullName: "Big Bash League", shortName: "BBL", overLimit: 20 },
+  { fullName: "Pakistan Super League", shortName: "PSL", overLimit: 20 },
+  { fullName: "Caribbean Premier League", shortName: "CPL", overLimit: 20 },
+  { fullName: "Bangladesh Premier League", shortName: "BPL", overLimit: 20 },
+  { fullName: "Lanka Premier League", shortName: "LPL", overLimit: 20 },
+  { fullName: "SA20 League", shortName: "SA20", overLimit: 20 },
+  {
+    fullName: "The Hundred (England)",
+    shortName: "The Hundred",
+    overLimit: 17,
+  }, // 100 balls, not overs
+  { fullName: "T20 Blast (England)", shortName: "T20 Blast", overLimit: 20 },
+  {
+    fullName: "Super Smash (New Zealand)",
+    shortName: "Super Smash",
+    overLimit: 20,
+  },
+  { fullName: "Global T20 Canada", shortName: "GT20", overLimit: 20 },
+  { fullName: "Zimbabwe Domestic T20", shortName: "ZD T20", overLimit: 20 },
+  { fullName: "Afghanistan Premier League", shortName: "APL", overLimit: 20 },
+  { fullName: "Nepal T20 League", shortName: "Nepal T20", overLimit: 20 },
+  { fullName: "USA Major League Cricket", shortName: "MLC", overLimit: 20 },
+  { fullName: "Emirates D10", shortName: "UAE D10", overLimit: 10 },
+  { fullName: "Emirates D20", shortName: "UAE D20", overLimit: 20 },
+  { fullName: "Qatar T10 League", shortName: "Qatar T10", overLimit: 10 },
+  { fullName: "Kuwait T20 League", shortName: "Kuwait T20", overLimit: 20 },
+  {
+    fullName: "Ireland Inter-Provincial T20",
+    shortName: "Ireland T20",
+    overLimit: 20,
+  },
+];
+
+export const DetectMode = (url: any) => {
+  if (url.toLowerCase().includes("hundred")) return "17";
+  if (url.toLowerCase().includes("odi")) return "50";
+  if (url.toLowerCase().includes("test")) return "TEST";
+  if (url.toLowerCase().includes("t10")) return "10";
+  if (url.toLowerCase().includes("d10")) return "10";
+  return "20"; // fallback
+};
+
+export const ModifyScore = (score: string) => {
+  const match = score.match(/(\d+)-(\d+)/);
+  const runs = match ? parseInt(match[1]) : 0;
+  const wickets = match ? parseInt(match[2]) : 0;
+
+  return { runs, wickets };
+};
 
 export const CalculateAverageScore = (data: any) => {
   const apiAvgScore = Number(data.overview.groundAndWheather.avgScore) ?? null;
-  const stadiumStats = data.stadiumStats.filter((date: any) => {
-    return (
-      moment(date.date, "DD/MM/YY").isSameOrBefore(moment(), "day") &&
-      moment(date.date, "DD/MM/YY").isSameOrAfter(
-        moment().subtract(2, "years"),
-        "day"
-      )
-    );
+  const stadiumStats = data.stadiumStats
+    .filter((match: any) => {
+      const matchDate = moment(match.date, "DD/MM/YY");
+      const today = moment();
+      const twoYearsAgo = moment().subtract(2, "years");
+
+      return (
+        matchDate.isSameOrBefore(today, "day") &&
+        matchDate.isSameOrAfter(twoYearsAgo, "day")
+      );
+    })
+    .map((match: any) => ({
+      ...match,
+      mode: DetectMode(match.matchUrl),
+    }));
+
+  // let avgScore = { t20: { totalRun: 0, totalWicket: 0, totalMatch: 0 } };
+  const matchFormat = data.matchInfo.format.toLowerCase();
+  let avgScore = 0;
+  let avgWicket = 0;
+  let totalMatch = 0;
+  stadiumStats.forEach((element: any) => {
+    const team1 = ModifyScore(element.inn1Score);
+    const team2 = ModifyScore(element.inn2Score);
+    const totalScore = team1.runs + team2.runs;
+    const totalWickets = team1.wickets + team2.wickets;
+    let adjustedScore = totalScore;
+
+    if (matchFormat === "t20i") {
+      if (element.mode === "10") adjustedScore += 0.8 * totalScore;
+      else if (element.mode === "17") adjustedScore += 0.22 * totalScore;
+      else if (element.mode === "50") adjustedScore -= 0.35 * totalScore;
+      else if (element.mode === "TEST") adjustedScore -= 0.42 * totalScore;
+    } else if (matchFormat === "odi") {
+      if (element.mode === "20") adjustedScore += 0.4 * totalScore;
+      else if (element.mode === "17") adjustedScore += 0.55 * totalScore;
+      else if (element.mode === "10") adjustedScore += 0.7 * totalScore;
+      else if (element.mode === "TEST") adjustedScore -= 0.45 * totalScore;
+    } else if (matchFormat === "test") {
+      if (element.mode === "50") adjustedScore += 0.45 * totalScore;
+      else if (element.mode === "20") adjustedScore += 0.72 * totalScore;
+      else if (element.mode === "10") adjustedScore += 0.9 * totalScore;
+      else if (element.mode === "17") adjustedScore += 0.75 * totalScore;
+    }
+    avgScore += adjustedScore;
+    avgWicket += totalWickets;
+    totalMatch += 1;
   });
 
-  console.log(stadiumStats);
+  console.log("avgScore====>", avgScore);
+  console.log("avgWicket====>", avgWicket);
+  console.log("totalMatch====>", totalMatch);
 };
