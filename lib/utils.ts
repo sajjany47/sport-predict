@@ -285,7 +285,9 @@ export const CalculateAverageScore = (data: any) => {
     totalMatch += 1;
   });
 
-  console.log("avgScore====>", avgScore);
+  // const playerAverage=
+
+  console.log("avgScore====>", avgScore / totalMatch);
   console.log("avgWicket====>", avgWicket);
   console.log("totalMatch====>", totalMatch);
 };

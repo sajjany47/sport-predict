@@ -196,7 +196,12 @@ export async function POST(request: NextRequest) {
           squadList: prepareData,
           stadiumStats: stadium,
           overview: {
-            groundAndWheather: prepareStatsList[0] ?? null,
+            groundAndWheather: prepareStatsList[0] ?? {
+              pitchType: "",
+              avgScore: "",
+              wheatherType: "",
+              temprature: "",
+            },
             stats: transformedData ?? null,
           },
         },
