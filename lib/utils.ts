@@ -285,7 +285,90 @@ export const CalculateAverageScore = (data: any) => {
     totalMatch += 1;
   });
 
-  // const playerAverage=
+  // const team1 = data.squadList[0];
+  // const team2 = data.squadList[1];
+  // const team1Squad =
+  //   team1.playingPlayer.length > 0 ? team1.playingPlayer : team1.benchPlayer;
+  // const team2Squad =
+  //   team2.playingPlayer.length > 0 ? team2.playingPlayer : team2.benchPlayer;
+
+  const a = data.squadList.map((item: any) => {
+    const squad = (
+      item.playingPlayer.length > 0 ? item.playingPlayer : item.benchPlayer
+    ).map((elm: any) => {
+      let playerData: any = {
+        name: elm.name,
+        shortName: elm.shortName,
+        flag: elm.flag,
+        batStyle: elm.batStyle,
+        bowlStyle: elm.bowlStyle,
+        imageUrl: elm.imageUrl.src,
+        type: elm.type,
+      };
+      // Calculate fantasy points
+      const firsttwelveFantasyPoints = elm.fantasyPoints.slice(0, 12);
+      const sumOfFantasyPoints = firsttwelveFantasyPoints.reduce(
+        (acc: any, a: any) => acc + Number(a.total),
+        0
+      );
+
+      // Calculate batting form
+      const firsttwelveBattingForm = elm.battingForm.slice(0, 12);
+      let totalRuns = 0;
+      let totalBalls = 0;
+      let totalSR = 0;
+      firsttwelveBattingForm.forEach((a: any) => {
+        if (a.run !== "DNB") {
+          const runMatch = a.run.match(/^(\d+)\s+\((\d+)\)$/);
+          if (runMatch) {
+            const runs = Number(runMatch[1]);
+            const balls = Number(runMatch[2]);
+            const sr = Number(a.sr);
+
+            totalRuns += runs;
+            totalBalls += balls;
+            totalSR += sr;
+          }
+        }
+      });
+
+      // Calculate bowling form
+      const firsttwelveBowlingForm = elm.bowlingForm.slice(0, 12);
+      let totalOver = 0;
+      let totalWicket = 0;
+      let totalRunConsume = 0;
+      firsttwelveBowlingForm.forEach((a: any) => {
+        if (a.o !== "DNB") {
+          const over = Number(a.o);
+          const runsConsume = Number(a.r);
+          const wicket = Number(a.w);
+
+          totalOver += over;
+          totalWicket += wicket;
+          totalRunConsume += runsConsume;
+        }
+      });
+
+      //Calculate Batting Stats
+      // const filterFormatBattingStats = elm.battingStats.filter((a:any)=>a.mode=== data.matchInfo.format.toLowerCase());
+
+      playerData.bowlingForm = {
+        totalOver: totalOver / firsttwelveBowlingForm.length,
+        totalWicket: totalWicket / firsttwelveBowlingForm.length,
+        totalRunConsume: totalRunConsume / firsttwelveBowlingForm.length,
+      };
+
+      playerData.battingForm = {
+        totalRuns: totalRuns / firsttwelveBattingForm.length,
+        totalBalls: totalBalls / firsttwelveBattingForm.length,
+        totalSR:
+          (totalBalls > 0 ? (totalRuns / totalBalls) * 100 : 0) /
+          firsttwelveBattingForm.length,
+      };
+      playerData.fantasyPoints =
+        sumOfFantasyPoints / firsttwelveFantasyPoints.length;
+    });
+  });
 
   console.log("avgScore====>", avgScore / totalMatch);
   console.log("avgWicket====>", avgWicket);
