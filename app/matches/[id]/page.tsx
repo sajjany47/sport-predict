@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AIPredictionModal from "@/components/ui/ai-prediction-modal";
 
 import {
   Trophy,
@@ -179,6 +180,7 @@ const MatchDetailsPage = () => {
   const [showPrediction, setShowPrediction] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -211,30 +213,37 @@ const MatchDetailsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
-  const handleGetPrediction = async () => {
+  // const handleGetPrediction = async () => {
+  //   if (!isAuthenticated) {
+  //     router.push("/auth/login");
+  //     return;
+  //   }
+
+  //   if (!user || user.credits < 1) {
+  //     toast.error("Insufficient credits. Please purchase more credits.");
+  //     return;
+  //   }
+
+  //   setIsLoading(true);
+  //   try {
+  //     // Simulate API call
+  //     await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  //     dispatch(updateCredits(user.credits - 1));
+  //     setShowPrediction(true);
+  //     toast.success("AI Prediction generated successfully!");
+  //   } catch (error) {
+  //     toast.error("Failed to generate prediction. Please try again.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+  const handleGetPrediction = () => {
     if (!isAuthenticated) {
       router.push("/auth/login");
       return;
     }
-
-    if (!user || user.credits < 1) {
-      toast.error("Insufficient credits. Please purchase more credits.");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      dispatch(updateCredits(user.credits - 1));
-      setShowPrediction(true);
-      toast.success("AI Prediction generated successfully!");
-    } catch (error) {
-      toast.error("Failed to generate prediction. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    setIsPredictionModalOpen(true);
   };
 
   if (!matchData) {
@@ -854,6 +863,12 @@ const MatchDetailsPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+      {/* AI Prediction Modal */}
+      <AIPredictionModal
+        isOpen={isPredictionModalOpen}
+        onClose={() => setIsPredictionModalOpen(false)}
+        match={selectedMatch}
+      />
     </div>
   );
 };
