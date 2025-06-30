@@ -285,21 +285,13 @@ export const CalculateAverageScore = (data: any) => {
     totalMatch += 1;
   });
 
-  // const team1 = data.squadList[0];
-  // const team2 = data.squadList[1];
-  // const team1Squad =
-  //   team1.playingPlayer.length > 0 ? team1.playingPlayer : team1.benchPlayer;
-  // const team2Squad =
-  //   team2.playingPlayer.length > 0 ? team2.playingPlayer : team2.benchPlayer;
-
-  const a = data.squadList.map((item: any) => {
+  const accordingToPlayerStats = data.squadList.map((item: any) => {
     const squad = (
       item.playingPlayer.length > 0 ? item.playingPlayer : item.benchPlayer
     ).map((elm: any) => {
       let playerData: any = {
         name: elm.name,
         shortName: elm.shortName,
-        flag: elm.flag,
         batStyle: elm.batStyle,
         bowlStyle: elm.bowlStyle,
         imageUrl: elm.imageUrl.src,
@@ -350,14 +342,145 @@ export const CalculateAverageScore = (data: any) => {
       });
 
       //Calculate Batting Stats
-      // const filterFormatBattingStats = elm.battingStats.filter((a:any)=>a.mode=== data.matchInfo.format.toLowerCase());
 
+      const battingStats = elm.battingStats.map((a: any) => {
+        if (a.mode === "ODI" || a.mode === "T20" || a.mode === "TEST") {
+          return {
+            innings: a.innings,
+            runs: a.runs,
+            balls: a.balls,
+            type: a.mode,
+          };
+        } else {
+          return {
+            innings: a.innings,
+            runs: a.runs,
+            balls: a.balls,
+            type: "others",
+          };
+        }
+      });
+
+      //Calculate Bowling Stats
+      const bowlingStats = elm.bowlingStats.map((a: any) => {
+        if (a.mode === "ODI" || a.mode === "T20" || a.mode === "TEST") {
+          return {
+            innings: a.innings,
+            runs: a.runs,
+            balls: a.balls,
+            wicket: a.wicket,
+            economy: a.economy,
+            type: a.mode,
+          };
+        } else {
+          return {
+            innings: a.innings,
+            runs: a.runs,
+            balls: a.balls,
+            wicket: a.wicket,
+            economy: a.economy,
+            type: "others",
+          };
+        }
+      });
+
+      //calculate stadium Batting Stats
+
+      let stadiumTotalRuns = 0;
+      let stadiumTotalInnings = 0;
+      let stadiumTotalSR = 0;
+      elm.stadiumStats?.battingStats?.forEach((a: any) => {
+        if (a.run !== "DNB") {
+          const runs = Number(a.runs);
+          const balls = Number(a.balls);
+          const sr = Number(a.sr);
+
+          stadiumTotalRuns += runs;
+          stadiumTotalInnings += balls;
+          stadiumTotalSR += sr;
+        }
+      });
+
+      //Calculate stadium Bowling Stats
+
+      let stadiumTotalBowlingRuns = 0;
+      let stadiumTotalBowlingInnings = 0;
+      let stadiumBowlingOver = 0;
+      let stadiumTotalWicketS = 0;
+      elm.stadiumStats?.bowlingStats?.forEach((a: any) => {
+        if (a.balls !== "DNB") {
+          const runs = Number(a.runs);
+          const balls = Number(a.balls) / 6;
+          const wickets = Number(a.wickets);
+          const innings = Number(a.innings);
+
+          stadiumTotalBowlingRuns += runs;
+          stadiumBowlingOver += balls;
+          stadiumTotalWicketS += wickets;
+          stadiumTotalBowlingInnings += innings;
+        }
+      });
+
+      //calculate Agaist Team Batting Stats
+
+      let againstTeamsTotalRuns = 0;
+      let againstTeamsTotalInnings = 0;
+      let againstTeamsTotalSR = 0;
+      elm.againstTeamsStats?.battingStats?.forEach((a: any) => {
+        if (a.run !== "DNB") {
+          const runs = Number(a.runs);
+          const balls = Number(a.balls);
+          const sr = Number(a.sr);
+
+          againstTeamsTotalRuns += runs;
+          againstTeamsTotalInnings += balls;
+          againstTeamsTotalSR += sr;
+        }
+      });
+
+      //calculate Agaist Team Bowling Stats
+
+      let againstTeamTotalBowlingRuns = 0;
+      let againstTeamTotalBowlingInnings = 0;
+      let againstTeamBowlingOver = 0;
+      let againstTeamTotalWicketS = 0;
+      elm.againstTeamsStats?.bowlingStats?.forEach((a: any) => {
+        if (a.balls !== "DNB") {
+          const runs = Number(a.runs);
+          const balls = Number(a.balls) / 6;
+          const wickets = Number(a.wickets);
+          const innings = Number(a.innings);
+
+          againstTeamTotalBowlingRuns += runs;
+          againstTeamBowlingOver += balls;
+          againstTeamTotalWicketS += wickets;
+          againstTeamTotalBowlingInnings += innings;
+        }
+      });
+
+      playerData.againstTeamBowlingStats = {
+        totalWicket: againstTeamTotalWicketS / againstTeamTotalBowlingInnings,
+        totalAvg: againstTeamTotalBowlingRuns / againstTeamBowlingOver,
+      };
+      playerData.againstTeamBattingStats = {
+        totalRuns: againstTeamsTotalRuns / againstTeamsTotalInnings,
+        totalSR: againstTeamsTotalSR / againstTeamsTotalInnings,
+      };
+      playerData.stadiumBowlingStats = {
+        totalWicket: stadiumTotalWicketS / stadiumTotalBowlingInnings,
+        totalAvg: stadiumTotalBowlingRuns / stadiumBowlingOver,
+      };
+      playerData.stadiumBattingStats = {
+        totalRuns: stadiumTotalRuns / stadiumTotalInnings,
+        totalSR: stadiumTotalSR / stadiumTotalInnings,
+      };
+      playerData.bowlingStats = bowlingStats;
+      playerData.battingStats = battingStats;
       playerData.bowlingForm = {
         totalOver: totalOver / firsttwelveBowlingForm.length,
         totalWicket: totalWicket / firsttwelveBowlingForm.length,
         totalRunConsume: totalRunConsume / firsttwelveBowlingForm.length,
       };
-
       playerData.battingForm = {
         totalRuns: totalRuns / firsttwelveBattingForm.length,
         totalBalls: totalBalls / firsttwelveBattingForm.length,
@@ -367,10 +490,26 @@ export const CalculateAverageScore = (data: any) => {
       };
       playerData.fantasyPoints =
         sumOfFantasyPoints / firsttwelveFantasyPoints.length;
+
+      return playerData;
     });
+
+    return {
+      flag: item.flag,
+      color: item.color,
+      shortName: item.shortName,
+      squad: squad,
+    };
   });
 
-  console.log("avgScore====>", avgScore / totalMatch);
-  console.log("avgWicket====>", avgWicket);
-  console.log("totalMatch====>", totalMatch);
+  const avgPrepare = {
+    stadiumAvg: {
+      avgScore: avgScore / totalMatch,
+      avgWicket: avgWicket,
+      totalMatch: totalMatch,
+    },
+    accordingToPlayerStats: accordingToPlayerStats,
+  };
+
+  console.log(avgPrepare);
 };
