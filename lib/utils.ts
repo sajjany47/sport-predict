@@ -544,8 +544,62 @@ export const CalculateAverageScore = (data: any) => {
 
   // Calculate Player Average Score
 
-  const team1 = accordingToPlayerStats[0];
-  const team2 = accordingToPlayerStats[1];
+  const sortPrepareData: any[] = [];
+
+  accordingToPlayerStats.forEach((element: any) => {
+    const againstTeamBowlingStats = [...element.squad].sort(
+      (a, b) =>
+        b.againstTeamBowlingStats.totalWicket -
+        a.againstTeamBowlingStats.totalWicket
+    );
+    const againstTeamBattingStats = [...element.squad].sort(
+      (a, b) =>
+        b.againstTeamBattingStats.totalRuns -
+        a.againstTeamBattingStats.totalRuns
+    );
+    const stadiumBattingStats = [...element.squad].sort(
+      (a, b) =>
+        b.stadiumBattingStats.totalRuns - a.stadiumBattingStats.totalRuns
+    );
+    const stadiumBowlingStats = [...element.squad].sort(
+      (a, b) =>
+        b.stadiumBowlingStats.totalWicket - a.stadiumBowlingStats.totalWicket
+    );
+    const battingStats = [...element.squad].sort(
+      (a, b) => b.battingStats.totalRuns - a.battingStats.totalRuns
+    );
+    const bowlingStats = [...element.squad].sort(
+      (a, b) => b.bowlingStats.totalWicket - a.bowlingStats.totalWicket
+    );
+    const battingForm = [...element.squad].sort(
+      (a, b) => b.battingForm.totalRuns - a.battingForm.totalRuns
+    );
+    const bowlingForm = [...element.squad].sort(
+      (a, b) => b.bowlingForm.totalWicket - a.bowlingForm.totalWicket
+    );
+    const fantasyPoint = [...element.squad].sort(
+      (a, b) => b.fantasyPoints - a.fantasyPoints
+    );
+
+    sortPrepareData.push({
+      flag: element.flag,
+      color: element.color,
+      shortName: element.shortName,
+      squad: {
+        againstTeamBowlingStats: againstTeamBowlingStats,
+        againstTeamBattingStats: againstTeamBattingStats,
+        stadiumBattingStats: stadiumBattingStats,
+        stadiumBowlingStats: stadiumBowlingStats,
+        battingStats: battingStats,
+        bowlingStats: bowlingStats,
+        battingForm: battingForm,
+        bowlingForm: bowlingForm,
+        fantasyPoint: fantasyPoint,
+      },
+    });
+  });
+
+  console.log(sortPrepareData);
 
   return { stadiumAVerageScore: stadiumAVerageScore };
 
