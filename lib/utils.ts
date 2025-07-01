@@ -234,6 +234,28 @@ export const ModifyScore = (score: string) => {
   return { runs, wickets };
 };
 
+export const DynamicSort = (key: any, order = "asc") => {
+  return function (a: any, b: any) {
+    const valA = a[key];
+    const valB = b[key];
+
+    // Handle string and number comparison
+    if (typeof valA === "string" && typeof valB === "string") {
+      return order === "asc"
+        ? valA.localeCompare(valB)
+        : valB.localeCompare(valA);
+    } else {
+      return order === "asc" ? valA - valB : valB - valA;
+    }
+  };
+
+  // Sort by age ascending
+  // data.sort(dynamicSort("age", "asc"));
+
+  // Sort by name descending
+  // data.sort(dynamicSort("name", "desc"));
+};
+
 export const CalculateAverageScore = (data: any) => {
   const apiAvgScore = Number(data.overview.groundAndWheather.avgScore) ?? null;
   const stadiumStats = data.stadiumStats
@@ -261,7 +283,7 @@ export const CalculateAverageScore = (data: any) => {
     const team1 = ModifyScore(element.inn1Score);
     const team2 = ModifyScore(element.inn2Score);
     const totalScore = team1.runs + team2.runs;
-    const totalWickets = team1.wickets + team2.wickets;
+    const totalWickets = (team1.wickets + team2.wickets) / 2;
     let adjustedScore = totalScore / 2;
 
     if (matchFormat === "t20i") {
@@ -512,6 +534,20 @@ export const CalculateAverageScore = (data: any) => {
     },
     accordingToPlayerStats: accordingToPlayerStats,
   };
+
+  //Calculate average and winner prediction.................................................................
+
+  const stadiumAVerageScore = {
+    avgScore: avgScore / totalMatch || apiAvgScore,
+    avgWicket: avgWicket / totalMatch,
+  };
+
+  // Calculate Player Average Score
+
+  const team1 = accordingToPlayerStats[0];
+  const team2 = accordingToPlayerStats[1];
+
+  return { stadiumAVerageScore: stadiumAVerageScore };
 
   console.log(avgPrepare);
 };
