@@ -605,3 +605,22 @@ export const CalculateAverageScore = (data: any) => {
 
   console.log(avgPrepare);
 };
+
+const AnanlysisStats = (data: any) => {
+  const filterBat = data.filter((item: any) => item.type === "BAT");
+  const filterBowl = data.filter((item: any) => item.type === "BOWL");
+  const filterAllRounder = data.filter((item: any) => item.type === "AR");
+
+  const totalRecentBat = filterBat.reduce(
+    (acc: number, item: any) => acc + item.battingForm.totalRuns,
+    0
+  );
+  const totalStadiumBat = filterBat.reduce(
+    (acc: number, item: any) => acc + item.stadiumBattingStats.totalRuns,
+    0
+  );
+  const totalagainstTeamBat = filterBat.reduce(
+    (acc: number, item: any) => acc + item.againstTeamBattingStats.totalRuns,
+    0
+  );
+};
