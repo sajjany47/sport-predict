@@ -542,6 +542,15 @@ export const CalculateAverageScore = (data: any) => {
     avgWicket: avgWicket / totalMatch,
   };
 
+  const team1AvgScore = AnanlysisAvgScore({
+    squad: avgPrepare.accordingToPlayerStats[0].squad,
+    stadiumAvg: stadiumAVerageScore.avgScore,
+  });
+  const team2AvgScore = AnanlysisAvgScore({
+    squad: avgPrepare.accordingToPlayerStats[1].squad,
+    stadiumAvg: stadiumAVerageScore.avgScore,
+  });
+
   // Calculate Player Average Score
 
   const sortPrepareData: any[] = [];
@@ -599,28 +608,65 @@ export const CalculateAverageScore = (data: any) => {
     });
   });
 
-  console.log(sortPrepareData);
+  console.log({ team1AvgScore, team2AvgScore });
 
   return { stadiumAVerageScore: stadiumAVerageScore };
-
-  console.log(avgPrepare);
 };
 
-const AnanlysisStats = (data: any) => {
-  const filterBat = data.filter((item: any) => item.type === "BAT");
-  const filterBowl = data.filter((item: any) => item.type === "BOWL");
-  const filterAllRounder = data.filter((item: any) => item.type === "AR");
-
-  const totalRecentBat = filterBat.reduce(
+const AnanlysisAvgScore = (data: any) => {
+  const totalRecentBat = data.squad.reduce(
     (acc: number, item: any) => acc + item.battingForm.totalRuns,
     0
   );
-  const totalStadiumBat = filterBat.reduce(
+  const totalStadiumBat = data.squad.reduce(
     (acc: number, item: any) => acc + item.stadiumBattingStats.totalRuns,
     0
   );
-  const totalagainstTeamBat = filterBat.reduce(
+  const totalagainstTeamBat = data.squad.reduce(
     (acc: number, item: any) => acc + item.againstTeamBattingStats.totalRuns,
     0
   );
+  const totalBattingStats = data.squad.reduce(
+    (acc: number, item: any) => acc + item.battingStats.totalRuns,
+    0
+  );
+
+  const totalRecentBowl = data.squad.reduce(
+    (acc: number, item: any) => acc + item.bowlingForm.totalWicket,
+    0
+  );
+  const totalStadiumBowl = data.squad.reduce(
+    (acc: number, item: any) => acc + item.stadiumBowlingStats.totalWicket,
+    0
+  );
+  const totalagainstTeamBowl = data.squad.reduce(
+    (acc: number, item: any) => acc + item.againstTeamBowlingStats.totalWicket,
+    0
+  );
+  const totalBowlStats = data.squad.reduce(
+    (acc: number, item: any) => acc + item.bowlingStats.totalWicket,
+    0
+  );
+
+  const playerTotalScore =
+    (Number(totalRecentBat) +
+      Number(totalStadiumBat) +
+      Number(totalagainstTeamBat) +
+      Number(totalBattingStats)) /
+      data.squad.length || 0;
+
+  const avgScore = Math.floor(
+    (playerTotalScore * 11 + data.stadiumAvg) / 2 + 14
+  );
+
+  const playerTotalWicket =
+    (Number(totalBowlStats) +
+      Number(totalagainstTeamBowl) +
+      Number(totalStadiumBowl) +
+      Number(totalRecentBowl)) /
+      data.squad.length || 0;
+
+  const avgWicket = Math.floor((playerTotalWicket * 11) / 2 + 2);
+
+  return { avgScore, avgWicket };
 };
