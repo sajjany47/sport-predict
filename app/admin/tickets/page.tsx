@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
 import { setTickets, updateTicketStatus } from "@/store/slices/adminSlice";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -36,6 +37,7 @@ import toast from "react-hot-toast";
 const AdminTicketsPage = () => {
   const { tickets } = useSelector((state: RootState) => state.admin);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
@@ -133,6 +135,10 @@ const AdminTicketsPage = () => {
       updateTicketStatus({ id: ticketId, status: newStatus, assignedTo })
     );
     toast.success(`Ticket status updated to ${newStatus}`);
+  };
+
+  const handleViewTicket = (ticketId: string) => {
+    router.push(`/admin/tickets/${ticketId}`);
   };
 
   const getStatusIcon = (status: string) => {
@@ -428,7 +434,11 @@ const AdminTicketsPage = () => {
                             </div>
                           </div>
                           <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewTicket(ticket.id)}
+                            >
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </Button>

@@ -13,6 +13,7 @@ import {
   Settings,
   Home,
   LogOut,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
@@ -60,15 +61,21 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 text-white">
+    <div className="flex flex-col h-full bg-gray-900 text-white overflow-y-auto">
       {/* Header */}
-      <div className="p-6 border-b border-gray-700">
+      <div className="p-6 border-b border-gray-700 flex-shrink-0">
+        <div className="flex items-center space-x-2 mb-2">
+          <div className="bg-blue-600 p-2 rounded-lg">
+            <Trophy className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-lg font-bold">SportPredict</span>
+        </div>
         <h2 className="text-xl font-bold">Admin Panel</h2>
-        <p className="text-gray-400 text-sm">SportPredict Management</p>
+        <p className="text-gray-400 text-sm">Management Dashboard</p>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
+      <nav className="flex-1 p-4 overflow-y-auto">
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -95,10 +102,10 @@ const AdminSidebar = () => {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-gray-700 flex-shrink-0">
         <Button
           variant="ghost"
-          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
+          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800 mb-2"
           asChild
         >
           <Link href="/">
@@ -109,7 +116,7 @@ const AdminSidebar = () => {
         <Button
           variant="ghost"
           onClick={handleLogout}
-          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800 mt-2"
+          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
         >
           <LogOut className="h-4 w-4 mr-2" />
           Logout

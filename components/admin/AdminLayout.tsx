@@ -27,14 +27,16 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         </div>
       ) : (
         <div className="min-h-screen bg-gray-50 flex">
-          {/* Sidebar */}
-          <div className="w-64 bg-gray-900 shadow-lg">
+          {/* Fixed Sidebar */}
+          <div className="fixed left-0 top-0 h-full w-64 bg-gray-900 shadow-lg z-30">
             <AdminSidebar />
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col">
-            <main className="flex-1 p-8">{children}</main>
+          {/* Main Content with left margin and scrollable */}
+          <div className="flex-1 ml-64">
+            <main className="min-h-screen overflow-y-auto">
+              <div className="p-8">{children}</div>
+            </main>
           </div>
         </div>
       )}

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
 import { setOrders, updateOrderStatus } from "@/store/slices/adminSlice";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -37,6 +38,7 @@ import toast from "react-hot-toast";
 const AdminOrdersPage = () => {
   const { orders } = useSelector((state: RootState) => state.admin);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
@@ -112,6 +114,10 @@ const AdminOrdersPage = () => {
   const handleStatusChange = (orderId: string, newStatus: string) => {
     dispatch(updateOrderStatus({ id: orderId, status: newStatus }));
     toast.success(`Order status updated to ${newStatus}`);
+  };
+
+  const handleViewOrder = (orderId: string) => {
+    router.push(`/admin/orders/${orderId}`);
   };
 
   const getStatusIcon = (status: string) => {
@@ -389,7 +395,11 @@ const AdminOrdersPage = () => {
                             </div>
                           </div>
                           <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewOrder(order.id)}
+                            >
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
                             </Button>
