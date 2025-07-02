@@ -1,8 +1,9 @@
-import { configureStore } from '@reduxjs/toolkit';
-import authSlice from './slices/authSlice';
-import matchSlice from './slices/matchSlice';
-import subscriptionSlice from './slices/subscriptionSlice';
-import helpdeskSlice from './slices/helpdeskSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import authSlice from "./slices/authSlice";
+import matchSlice from "./slices/matchSlice";
+import subscriptionSlice from "./slices/subscriptionSlice";
+import helpdeskSlice from "./slices/helpdeskSlice";
+import adminSlice from "./slices/adminSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     matches: matchSlice,
     subscription: subscriptionSlice,
     helpdesk: helpdeskSlice,
+    admin: adminSlice,
   },
 });
 

@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface User {
   id: string;
@@ -8,6 +8,7 @@ interface User {
   credits: number;
   subscriptionPlan: string;
   subscriptionExpiry: string;
+  role?: "user" | "admin";
 }
 
 interface AuthState {
@@ -25,7 +26,7 @@ const initialState: AuthState = {
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     loginStart: (state) => {
@@ -55,7 +56,10 @@ const authSlice = createSlice({
         state.user.credits = action.payload;
       }
     },
-    updateSubscription: (state, action: PayloadAction<{ plan: string; expiry: string }>) => {
+    updateSubscription: (
+      state,
+      action: PayloadAction<{ plan: string; expiry: string }>
+    ) => {
       if (state.user) {
         state.user.subscriptionPlan = action.payload.plan;
         state.user.subscriptionExpiry = action.payload.expiry;

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React, { useState } from "react";
@@ -42,20 +43,41 @@ const LoginPage = () => {
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (
+        formData.email === "admin@sportpredict.com" &&
+        formData.password === "admin123"
+      ) {
+        const adminUser = {
+          id: "admin",
+          username: "Admin",
+          email: formData.email,
+          mobile: "+91 9999999999",
+          credits: 999,
+          subscriptionPlan: "Admin",
+          subscriptionExpiry: "2025-12-31",
+          role: "admin" as const,
+        };
 
-      // Mock successful login
-      const mockUser = {
-        id: "1",
-        username: "cricket_fan",
-        email: formData.email,
-        mobile: "+91 9876543210",
-        credits: 2,
-        subscriptionPlan: "Free",
-        subscriptionExpiry: "2025-02-15",
-      };
+        dispatch(loginSuccess(adminUser));
+        toast.success("Admin login successful!");
+        // router.push("/admin");
+        // return;
+      } else {
+        const mockUser = {
+          id: "1",
+          username: "cricket_fan",
+          email: formData.email,
+          mobile: "+91 9876543210",
+          credits: 2,
+          subscriptionPlan: "Free",
+          subscriptionExpiry: "2025-02-15",
+          role: 'user' as const,
+        };
 
-      dispatch(loginSuccess(mockUser));
-      toast.success("Login successful!");
+        dispatch(loginSuccess(mockUser));
+        toast.success("Login successful!");
+      }
+
       router.back();
       // router.push('/dashboard');
     } catch (error) {
