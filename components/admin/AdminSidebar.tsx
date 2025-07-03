@@ -14,6 +14,7 @@ import {
   Home,
   LogOut,
   Trophy,
+  Database,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
@@ -52,6 +53,11 @@ const AdminSidebar = () => {
       title: "Finance",
       href: "/admin/finance",
       icon: DollarSign,
+    },
+    {
+      title: "Stats",
+      href: "/admin/stats",
+      icon: Database,
     },
     {
       title: "Settings",

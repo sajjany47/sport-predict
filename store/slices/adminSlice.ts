@@ -37,6 +37,26 @@ interface AdminTicket {
   assignedTo?: string;
 }
 
+interface Player {
+  id: string;
+  originalName: string;
+  publicName: string;
+  team: string;
+  dob: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Stadium {
+  id: string;
+  name: string;
+  publicName: string;
+  country: string;
+  state: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface FinanceStats {
   totalRevenue: number;
   monthlyRevenue: number;
@@ -50,6 +70,8 @@ interface AdminState {
   users: AdminUser[];
   orders: AdminOrder[];
   tickets: AdminTicket[];
+  players: Player[];
+  stadiums: Stadium[];
   financeStats: FinanceStats;
   loading: boolean;
   error: string | null;
@@ -59,6 +81,8 @@ const initialState: AdminState = {
   users: [],
   orders: [],
   tickets: [],
+  players: [],
+  stadiums: [],
   financeStats: {
     totalRevenue: 0,
     monthlyRevenue: 0,
@@ -83,6 +107,36 @@ const adminSlice = createSlice({
     },
     setTickets: (state, action: PayloadAction<AdminTicket[]>) => {
       state.tickets = action.payload;
+    },
+    setPlayers: (state, action: PayloadAction<Player[]>) => {
+      state.players = action.payload;
+    },
+    setStadiums: (state, action: PayloadAction<Stadium[]>) => {
+      state.stadiums = action.payload;
+    },
+    addPlayer: (state, action: PayloadAction<Player>) => {
+      state.players.unshift(action.payload);
+    },
+    updatePlayer: (state, action: PayloadAction<Player>) => {
+      const index = state.players.findIndex((p) => p.id === action.payload.id);
+      if (index !== -1) {
+        state.players[index] = action.payload;
+      }
+    },
+    deletePlayer: (state, action: PayloadAction<string>) => {
+      state.players = state.players.filter((p) => p.id !== action.payload);
+    },
+    addStadium: (state, action: PayloadAction<Stadium>) => {
+      state.stadiums.unshift(action.payload);
+    },
+    updateStadium: (state, action: PayloadAction<Stadium>) => {
+      const index = state.stadiums.findIndex((s) => s.id === action.payload.id);
+      if (index !== -1) {
+        state.stadiums[index] = action.payload;
+      }
+    },
+    deleteStadium: (state, action: PayloadAction<string>) => {
+      state.stadiums = state.stadiums.filter((s) => s.id !== action.payload);
     },
     setFinanceStats: (state, action: PayloadAction<FinanceStats>) => {
       state.financeStats = action.payload;
@@ -131,6 +185,14 @@ export const {
   setUsers,
   setOrders,
   setTickets,
+  setPlayers,
+  setStadiums,
+  addPlayer,
+  updatePlayer,
+  deletePlayer,
+  addStadium,
+  updateStadium,
+  deleteStadium,
   setFinanceStats,
   updateUserStatus,
   updateOrderStatus,
