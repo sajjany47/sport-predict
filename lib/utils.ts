@@ -529,12 +529,12 @@ export const CalculateAverageScore = (data: any) => {
   const avgPrepare = {
     stadiumAvg: {
       avgScore: avgScore / totalMatch || apiAvgScore,
-      avgWicket: avgWicket,
+      avgWicket: avgWicket / totalMatch,
       totalMatch: totalMatch,
     },
     accordingToPlayerStats: accordingToPlayerStats,
   };
-
+  console.log(avgPrepare);
   //Calculate average and winner prediction.................................................................
 
   const stadiumAVerageScore = {
@@ -608,8 +608,6 @@ export const CalculateAverageScore = (data: any) => {
     });
   });
 
-  console.log({ team1AvgScore, team2AvgScore });
-
   return { stadiumAVerageScore: stadiumAVerageScore };
 };
 
@@ -667,6 +665,16 @@ const AnanlysisAvgScore = (data: any) => {
       data.squad.length || 0;
 
   const avgWicket = Math.floor((playerTotalWicket * 11) / 2 + 2);
+
+  let totalWicket = 0;
+  let totalRunConsume = 0;
+
+  data.squad.forEach((item: any) => {
+    const form = item.bowlingForm;
+    totalWicket += form.totalWicket;
+    // totalOver += form.totalOver;
+    totalRunConsume += form.totalRunConsume;
+  });
 
   return { avgScore, avgWicket };
 };

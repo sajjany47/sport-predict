@@ -116035,7 +116035,7 @@ export const DummyData = {
 export const ModifyAverage = {
   stadiumAvg: {
     avgScore: 163.4,
-    avgWicket: 113,
+    avgWicket: 5.65,
     totalMatch: 10,
   },
   accordingToPlayerStats: [
