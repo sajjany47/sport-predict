@@ -256,6 +256,24 @@ export const DynamicSort = (key: any, order = "asc") => {
   // data.sort(dynamicSort("name", "desc"));
 };
 
+export const CalculateWinnerPrediction = (team: any, opponent: any) => {
+  const scoreWeight = 0.4; // scoring power
+  const wicketWeight = 0.3; // wicket-taking
+  const defenseWeight = 0.3; // run consumption
+
+  // Normalize by using both teams’ data
+  const maxScore = Math.max(team.avgScore, opponent.avgScore);
+  const maxWicket = Math.max(team.avgWicket, opponent.avgWicket);
+  const maxRunConsume = Math.max(team.avgRunconsume, opponent.avgRunconsume);
+
+  const score = (team.avgScore / maxScore) * scoreWeight;
+  const wickets = (team.avgWicket / maxWicket) * wicketWeight;
+  const defense =
+    ((maxRunConsume - team.avgRunconsume) / maxRunConsume) * defenseWeight;
+
+  return score + wickets + defense;
+};
+
 export const CalculateAverageScore = (data: any) => {
   const apiAvgScore = Number(data.overview.groundAndWheather.avgScore) ?? null;
 
@@ -283,6 +301,49 @@ export const CalculateAverageScore = (data: any) => {
   };
 
   //Calculate average and winner prediction.................................................................
+  const team1AvgScore = AnanlysisAvgScore({
+    squad: avgPrepare.accordingToPlayerStats[0].squad,
+    stadiumAvg: avgPrepare.stadiumAvg,
+  });
+  const team2AvgScore = AnanlysisAvgScore({
+    squad: avgPrepare.accordingToPlayerStats[1].squad,
+    stadiumAvg: avgPrepare.stadiumAvg,
+  });
+
+  const team1Score = CalculateWinnerPrediction(team1AvgScore, team2AvgScore);
+  const team2Score = CalculateWinnerPrediction(team2AvgScore, team1AvgScore);
+
+  // Convert to probabilities
+  const totalScore = team1Score + team2Score;
+  const team1Prob = (team1Score / totalScore) * 100;
+  const team2Prob = (team2Score / totalScore) * 100;
+  // ..............................calculate average score and winner prediction........................................................
+  const result = {
+    firstInningScore: {
+      team1: {
+        min: team1AvgScore.avgScore - 10,
+        max: team1AvgScore.avgScore + 20,
+        predicted: team1AvgScore.avgScore,
+      },
+      team2: {
+        min: team2AvgScore.avgScore - 10,
+        max: team2AvgScore.avgScore + 20,
+        predicted: team2AvgScore.avgScore,
+      },
+    },
+    winnerPrediction: {
+      team1: {
+        probability: team1Prob.toFixed(2),
+        confidence: Number(team1Prob) > Number(team2Prob) ? "High" : "Medium",
+      },
+      team2: {
+        probability: team2Prob.toFixed(2),
+        confidence: Number(team2Prob) > Number(team1Prob) ? "High" : "Medium",
+      },
+    },
+  };
+
+  console.log(result);
 
   // Calculate Player Average Score
 
@@ -341,14 +402,6 @@ export const CalculateAverageScore = (data: any) => {
     });
   });
 
-  const team1AvgScore = AnanlysisAvgScore({
-    squad: avgPrepare.accordingToPlayerStats[0].squad,
-    stadiumAvg: avgPrepare.stadiumAvg,
-  });
-  const team2AvgScore = AnanlysisAvgScore({
-    squad: avgPrepare.accordingToPlayerStats[1].squad,
-    stadiumAvg: avgPrepare.stadiumAvg,
-  });
   console.log("team1AvgScore=====>", team1AvgScore);
 
   return { stadiumAVerageScore: avgPrepare.stadiumAvg };
