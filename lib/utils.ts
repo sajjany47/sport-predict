@@ -281,7 +281,7 @@ export const CalculateAverageScore = (data: any) => {
     },
     accordingToPlayerStats: accordingToPlayerStats,
   };
-  console.log("accordingToPlayerStats", accordingToPlayerStats);
+
   //Calculate average and winner prediction.................................................................
 
   // Calculate Player Average Score
@@ -350,12 +350,11 @@ export const CalculateAverageScore = (data: any) => {
     stadiumAvg: avgPrepare.stadiumAvg,
   });
   console.log("team1AvgScore=====>", team1AvgScore);
-  console.log("avgPrepare.stadiumAvg=====>", avgPrepare.stadiumAvg);
+
   return { stadiumAVerageScore: avgPrepare.stadiumAvg };
 };
 
 export const AnanlysisAvgScore = (data: any) => {
-  console.log(data);
   // Calculate Bowler Avg Runs Consume and Avg Wicket
   let totalWicket = 0;
   let totalRunConsume = 0;
@@ -372,7 +371,9 @@ export const AnanlysisAvgScore = (data: any) => {
       Number(item.stadiumBowlingStats.totalAvg) +
       Number(item.bowlingForm.totalAvg);
   });
-  const avgWicket = Math.floor((totalWicket / data.squad.length) * 11 + 2);
+  const avgWicket = Math.floor(
+    ((totalWicket / data.squad.length) * 11 + data.stadiumAvg.avgWicket) / 2 + 2
+  );
   const avgRunconsume = Math.floor(
     (totalRunConsume / data.squad.length) * 11 + 14
   );
@@ -390,9 +391,9 @@ export const AnanlysisAvgScore = (data: any) => {
   });
 
   const avgScore = Math.floor(
-    ((totalScore / data.squad.length) * 11 + data.stadiumAvg) / 2 + 14
+    ((totalScore / data.squad.length) * 11 + data.stadiumAvg.avgScore) / 2 + 14
   );
-  console.log("avgRunconsume====>", avgRunconsume);
+
   return { avgScore, avgWicket, avgRunconsume };
 };
 
@@ -551,10 +552,11 @@ export const GetBowlingStats = (
     innings = 0;
 
   stats?.forEach((a) => {
+    const correctWicketKey = a.wickets ? Number(a.wickets) : Number(a.wicket);
     if (a.balls !== "DNB") {
       runs += Number(a.runs);
       balls += Number(a.balls);
-      wickets += Number(a.wickets);
+      wickets += correctWicketKey;
       innings += Number(a.innings);
     }
   });

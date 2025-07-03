@@ -116036,7 +116036,6 @@ export const ModifyAverage = {
   stadiumAvg: {
     avgScore: 163.4,
     avgWicket: 5.65,
-    totalMatch: 10,
   },
   accordingToPlayerStats: [
     {
@@ -116052,21 +116051,14 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/1187.png",
           type: "BAT",
-          againstTeamBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
+          fantasyPoints: 29.833333333333332,
+          battingForm: {
+            totalRuns: 19,
+            totalSR: 52.48618784530387,
           },
-          againstTeamBattingStats: {
-            totalRuns: 0,
-            totalSR: 0,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 7.333333333333333,
-          },
-          stadiumBattingStats: {
-            totalRuns: 5,
-            totalSR: 0.4166666666666667,
+          bowlingForm: {
+            totalWicket: 0.25,
+            totalAvg: 5.677083333333334,
           },
           battingStats: {
             totalRuns: 22.428571428571427,
@@ -116074,19 +116066,24 @@ export const ModifyAverage = {
           },
           bowlingStats: {
             totalWicket: 0,
-            totalAvg: 5.693877551020408,
+            totalAvg: 5.6938775510204085,
           },
-          bowlingForm: {
-            totalOver: 1.5999999999999999,
-            totalWicket: 0.08333333333333333,
-            totalRunConsume: 9.083333333333334,
+          stadiumBattingStats: {
+            totalRuns: 5,
+            totalSR: 0.4166666666666667,
           },
-          battingForm: {
-            totalRuns: 15.833333333333334,
-            totalBalls: 30.166666666666668,
-            totalSR: 4.373848987108656,
+          stadiumBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 7.333333333333333,
           },
-          fantasyPoints: 29.833333333333332,
+          againstTeamBattingStats: {
+            totalRuns: 0,
+            totalSR: 0,
+          },
+          againstTeamBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
         },
         {
           name: "John Campbell",
@@ -116096,41 +116093,39 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/13946.png",
           type: "BAT",
-          againstTeamBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
+          fantasyPoints: 36.916666666666664,
+          battingForm: {
+            totalRuns: 18.916666666666668,
+            totalSR: 128.24858757062148,
           },
-          againstTeamBattingStats: {
-            totalRuns: 0,
-            totalSR: 0,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 13,
-          },
-          stadiumBattingStats: {
-            totalRuns: 26.5,
-            totalSR: 0.8983050847457628,
+          bowlingForm: {
+            totalWicket: 0.75,
+            totalAvg: 11.857142857142858,
           },
           battingStats: {
             totalRuns: 26.204545454545453,
             totalSR: 1.1622983870967742,
           },
           bowlingStats: {
-            totalWicket: 0,
+            totalWicket: 0.5,
             totalAvg: 8.235294117647058,
           },
-          bowlingForm: {
-            totalOver: 0.5833333333333334,
-            totalWicket: 0.25,
-            totalRunConsume: 6.916666666666667,
+          stadiumBattingStats: {
+            totalRuns: 26.5,
+            totalSR: 0.8983050847457628,
           },
-          battingForm: {
-            totalRuns: 18.916666666666668,
-            totalBalls: 14.75,
-            totalSR: 10.68738229755179,
+          stadiumBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 13,
           },
-          fantasyPoints: 36.916666666666664,
+          againstTeamBattingStats: {
+            totalRuns: 0,
+            totalSR: 0,
+          },
+          againstTeamBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
         },
         {
           name: "Keacy Carty",
@@ -116140,21 +116135,14 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/9279.png",
           type: "BAT",
-          againstTeamBowlingStats: {
+          fantasyPoints: 82.58333333333333,
+          battingForm: {
+            totalRuns: 70.08333333333333,
+            totalSR: 102.937576499388,
+          },
+          bowlingForm: {
             totalWicket: 0,
             totalAvg: 0,
-          },
-          againstTeamBattingStats: {
-            totalRuns: 46,
-            totalSR: 0.7624309392265194,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
-          },
-          stadiumBattingStats: {
-            totalRuns: 41.285714285714285,
-            totalSR: 0.9116719242902208,
           },
           battingStats: {
             totalRuns: 36.52238805970149,
@@ -116164,17 +116152,22 @@ export const ModifyAverage = {
             totalWicket: 0,
             totalAvg: 6.72,
           },
-          bowlingForm: {
-            totalOver: 0,
+          stadiumBattingStats: {
+            totalRuns: 41.285714285714285,
+            totalSR: 0.9116719242902208,
+          },
+          stadiumBowlingStats: {
             totalWicket: 0,
-            totalRunConsume: 0,
+            totalAvg: 0,
           },
-          battingForm: {
-            totalRuns: 70.08333333333333,
-            totalBalls: 68.08333333333333,
-            totalSR: 8.578131374949,
+          againstTeamBattingStats: {
+            totalRuns: 46,
+            totalSR: 0.7624309392265194,
           },
-          fantasyPoints: 82.58333333333333,
+          againstTeamBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
         },
         {
           name: "Brandon King",
@@ -116184,21 +116177,14 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/2022.png",
           type: "BAT",
-          againstTeamBowlingStats: {
+          fantasyPoints: 21.416666666666668,
+          battingForm: {
+            totalRuns: 13.7,
+            totalSR: 80.11695906432749,
+          },
+          bowlingForm: {
             totalWicket: 0,
             totalAvg: 0,
-          },
-          againstTeamBattingStats: {
-            totalRuns: 23.25,
-            totalSR: 1.273972602739726,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
-          },
-          stadiumBattingStats: {
-            totalRuns: 25.333333333333332,
-            totalSR: 1.023076923076923,
           },
           battingStats: {
             totalRuns: 24.563318777292576,
@@ -116208,17 +116194,22 @@ export const ModifyAverage = {
             totalWicket: 0,
             totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 0,
+          stadiumBattingStats: {
+            totalRuns: 25.333333333333332,
+            totalSR: 1.023076923076923,
+          },
+          stadiumBowlingStats: {
             totalWicket: 0,
-            totalRunConsume: 0,
+            totalAvg: 0,
           },
-          battingForm: {
-            totalRuns: 11.416666666666666,
-            totalBalls: 14.25,
-            totalSR: 6.676413255360624,
+          againstTeamBattingStats: {
+            totalRuns: 23.25,
+            totalSR: 1.273972602739726,
           },
-          fantasyPoints: 21.416666666666668,
+          againstTeamBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
         },
         {
           name: "Shai Hope",
@@ -116228,21 +116219,14 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/5996.png",
           type: "WK",
-          againstTeamBowlingStats: {
+          fantasyPoints: 47.666666666666664,
+          battingForm: {
+            totalRuns: 33.166666666666664,
+            totalSR: 114.69740634005763,
+          },
+          bowlingForm: {
             totalWicket: 0,
             totalAvg: 0,
-          },
-          againstTeamBattingStats: {
-            totalRuns: 22.625,
-            totalSR: 0.6464285714285715,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
-          },
-          stadiumBattingStats: {
-            totalRuns: 30.77777777777778,
-            totalSR: 0.9326599326599326,
           },
           battingStats: {
             totalRuns: 34.656565656565654,
@@ -116252,17 +116236,22 @@ export const ModifyAverage = {
             totalWicket: 0,
             totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 0,
+          stadiumBattingStats: {
+            totalRuns: 30.77777777777778,
+            totalSR: 0.9326599326599326,
+          },
+          stadiumBowlingStats: {
             totalWicket: 0,
-            totalRunConsume: 0,
+            totalAvg: 0,
           },
-          battingForm: {
-            totalRuns: 33.166666666666664,
-            totalBalls: 28.916666666666668,
-            totalSR: 9.558117195004803,
+          againstTeamBattingStats: {
+            totalRuns: 22.625,
+            totalSR: 0.6464285714285715,
           },
-          fantasyPoints: 47.666666666666664,
+          againstTeamBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
         },
         {
           name: "Roston Chase",
@@ -116272,41 +116261,39 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/9998.png",
           type: "AR",
-          againstTeamBowlingStats: {
-            totalWicket: 0.5,
-            totalAvg: 5.015625,
+          fantasyPoints: 40.5,
+          battingForm: {
+            totalRuns: 25.77777777777778,
+            totalSR: 97.07112970711297,
           },
-          againstTeamBattingStats: {
-            totalRuns: 26.6,
-            totalSR: 0.8525641025641025,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 1,
-            totalAvg: 4.962962962962963,
-          },
-          stadiumBattingStats: {
-            totalRuns: 10.75,
-            totalSR: 1.1025641025641026,
+          bowlingForm: {
+            totalWicket: 0.8,
+            totalAvg: 6.894736842105263,
           },
           battingStats: {
             totalRuns: 22.54861111111111,
             totalSR: 0.9914503816793893,
           },
           bowlingStats: {
-            totalWicket: 0,
-            totalAvg: 5.593454713067526,
+            totalWicket: 0.8741721854304636,
+            totalAvg: 5.593454713067527,
           },
-          bowlingForm: {
-            totalOver: 1.5833333333333333,
-            totalWicket: 0.3333333333333333,
-            totalRunConsume: 10.916666666666666,
+          stadiumBattingStats: {
+            totalRuns: 10.75,
+            totalSR: 1.1025641025641026,
           },
-          battingForm: {
-            totalRuns: 19.333333333333332,
-            totalBalls: 19.916666666666668,
-            totalSR: 8.089260808926081,
+          stadiumBowlingStats: {
+            totalWicket: 1,
+            totalAvg: 4.962962962962963,
           },
-          fantasyPoints: 40.5,
+          againstTeamBattingStats: {
+            totalRuns: 26.6,
+            totalSR: 0.8525641025641025,
+          },
+          againstTeamBowlingStats: {
+            totalWicket: 0.5,
+            totalAvg: 5.015625,
+          },
         },
         {
           name: "Justin Greaves",
@@ -116316,7 +116303,28 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/17222.png",
           type: "AR",
-          againstTeamBowlingStats: {
+          fantasyPoints: 56.75,
+          battingForm: {
+            totalRuns: 39.45454545454545,
+            totalSR: 108.77192982456141,
+          },
+          bowlingForm: {
+            totalWicket: 0.5,
+            totalAvg: 6.145833333333333,
+          },
+          battingStats: {
+            totalRuns: 32.234042553191486,
+            totalSR: 0.933456561922366,
+          },
+          bowlingStats: {
+            totalWicket: 0.9,
+            totalAvg: 5.733128834355828,
+          },
+          stadiumBattingStats: {
+            totalRuns: 24.2,
+            totalSR: 1.0254237288135593,
+          },
+          stadiumBowlingStats: {
             totalWicket: 0,
             totalAvg: 0,
           },
@@ -116324,33 +116332,10 @@ export const ModifyAverage = {
             totalRuns: 4.5,
             totalSR: 0.6,
           },
-          stadiumBowlingStats: {
+          againstTeamBowlingStats: {
             totalWicket: 0,
             totalAvg: 0,
           },
-          stadiumBattingStats: {
-            totalRuns: 24.2,
-            totalSR: 1.0254237288135593,
-          },
-          battingStats: {
-            totalRuns: 32.234042553191486,
-            totalSR: 0.933456561922366,
-          },
-          bowlingStats: {
-            totalWicket: 0,
-            totalAvg: 5.733128834355829,
-          },
-          bowlingForm: {
-            totalOver: 4,
-            totalWicket: 0.3333333333333333,
-            totalRunConsume: 24.583333333333332,
-          },
-          battingForm: {
-            totalRuns: 36.166666666666664,
-            totalBalls: 33.25,
-            totalSR: 9.064327485380117,
-          },
-          fantasyPoints: 56.75,
         },
         {
           name: "Jomel Warrican",
@@ -116360,11 +116345,24 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/6571.png",
           type: "BOWL",
-          againstTeamBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
+          fantasyPoints: 35.916666666666664,
+          battingForm: {
+            totalRuns: 11.666666666666666,
+            totalSR: 56.451612903225815,
           },
-          againstTeamBattingStats: {
+          bowlingForm: {
+            totalWicket: 1.2222222222222223,
+            totalAvg: 5.335463258785943,
+          },
+          battingStats: {
+            totalRuns: 5.9,
+            totalSR: 0.6820809248554913,
+          },
+          bowlingStats: {
+            totalWicket: 0.9347826086956522,
+            totalAvg: 6.159049360146252,
+          },
+          stadiumBattingStats: {
             totalRuns: 0,
             totalSR: 0,
           },
@@ -116372,29 +116370,14 @@ export const ModifyAverage = {
             totalWicket: 0,
             totalAvg: 0,
           },
-          stadiumBattingStats: {
+          againstTeamBattingStats: {
             totalRuns: 0,
             totalSR: 0,
           },
-          battingStats: {
-            totalRuns: 5.9,
-            totalSR: 0.6820809248554913,
-          },
-          bowlingStats: {
+          againstTeamBowlingStats: {
             totalWicket: 0,
-            totalAvg: 6.159049360146253,
+            totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 2.6083333333333334,
-            totalWicket: 0.9166666666666666,
-            totalRunConsume: 13.916666666666666,
-          },
-          battingForm: {
-            totalRuns: 2.9166666666666665,
-            totalBalls: 5.166666666666667,
-            totalSR: 4.704301075268818,
-          },
-          fantasyPoints: 35.916666666666664,
         },
         {
           name: "Alzarri Joseph",
@@ -116404,41 +116387,39 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/9289.png",
           type: "BOWL",
-          againstTeamBowlingStats: {
-            totalWicket: 1.7,
-            totalAvg: 6.58307210031348,
+          fantasyPoints: 32.333333333333336,
+          battingForm: {
+            totalRuns: 15.666666666666666,
+            totalSR: 134.28571428571428,
           },
-          againstTeamBattingStats: {
-            totalRuns: 10.25,
-            totalSR: 0.640625,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 2.4,
-            totalAvg: 5.287671232876712,
-          },
-          stadiumBattingStats: {
-            totalRuns: 18.25,
-            totalSR: 0.8902439024390244,
+          bowlingForm: {
+            totalWicket: 0.625,
+            totalAvg: 8.516129032258064,
           },
           battingStats: {
             totalRuns: 8.297297297297296,
             totalSR: 0.8994140625,
           },
           bowlingStats: {
-            totalWicket: 0,
+            totalWicket: 1.4054054054054055,
             totalAvg: 6.785463729479445,
           },
-          bowlingForm: {
-            totalOver: 2.5833333333333335,
-            totalWicket: 0.4166666666666667,
-            totalRunConsume: 22,
+          stadiumBattingStats: {
+            totalRuns: 18.25,
+            totalSR: 0.8902439024390244,
           },
-          battingForm: {
-            totalRuns: 7.833333333333333,
-            totalBalls: 5.833333333333333,
-            totalSR: 11.19047619047619,
+          stadiumBowlingStats: {
+            totalWicket: 2.4,
+            totalAvg: 5.287671232876712,
           },
-          fantasyPoints: 32.333333333333336,
+          againstTeamBattingStats: {
+            totalRuns: 10.25,
+            totalSR: 0.640625,
+          },
+          againstTeamBowlingStats: {
+            totalWicket: 1.7,
+            totalAvg: 6.58307210031348,
+          },
         },
         {
           name: "Shamar Joseph",
@@ -116448,11 +116429,24 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/127261.png",
           type: "BOWL",
-          againstTeamBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
+          fantasyPoints: 31.25,
+          battingForm: {
+            totalRuns: 1.6666666666666667,
+            totalSR: 71.42857142857143,
           },
-          againstTeamBattingStats: {
+          bowlingForm: {
+            totalWicket: 1,
+            totalAvg: 8.944099378881988,
+          },
+          battingStats: {
+            totalRuns: 1.9090909090909092,
+            totalSR: 0.6176470588235294,
+          },
+          bowlingStats: {
+            totalWicket: 0.88,
+            totalAvg: 9.08994708994709,
+          },
+          stadiumBattingStats: {
             totalRuns: 0,
             totalSR: 0,
           },
@@ -116460,29 +116454,14 @@ export const ModifyAverage = {
             totalWicket: 0,
             totalAvg: 12.727272727272727,
           },
-          stadiumBattingStats: {
+          againstTeamBattingStats: {
             totalRuns: 0,
             totalSR: 0,
           },
-          battingStats: {
-            totalRuns: 1.9090909090909092,
-            totalSR: 0.6176470588235294,
-          },
-          bowlingStats: {
+          againstTeamBowlingStats: {
             totalWicket: 0,
-            totalAvg: 9.08994708994709,
+            totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 4.0249999999999995,
-            totalWicket: 1,
-            totalRunConsume: 36,
-          },
-          battingForm: {
-            totalRuns: 0.8333333333333334,
-            totalBalls: 1.1666666666666667,
-            totalSR: 5.9523809523809526,
-          },
-          fantasyPoints: 31.25,
         },
         {
           name: "Jayden Seales",
@@ -116492,41 +116471,39 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/28558.png",
           type: "BOWL",
-          againstTeamBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
+          fantasyPoints: 47.666666666666664,
+          battingForm: {
+            totalRuns: 9.5,
+            totalSR: 172.72727272727272,
           },
-          againstTeamBattingStats: {
-            totalRuns: 0,
-            totalSR: 0,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0.6666666666666666,
-            totalAvg: 6.571428571428571,
-          },
-          stadiumBattingStats: {
-            totalRuns: 13.333333333333334,
-            totalSR: 1.6,
+          bowlingForm: {
+            totalWicket: 1.3636363636363635,
+            totalAvg: 6.336898395721925,
           },
           battingStats: {
             totalRuns: 5.333333333333333,
             totalSR: 0.7757575757575758,
           },
           bowlingStats: {
-            totalWicket: 0,
+            totalWicket: 1.0909090909090908,
             totalAvg: 6.182669789227167,
           },
-          bowlingForm: {
-            totalOver: 6.233333333333333,
-            totalWicket: 1.25,
-            totalRunConsume: 39.5,
+          stadiumBattingStats: {
+            totalRuns: 13.333333333333334,
+            totalSR: 1.6,
           },
-          battingForm: {
-            totalRuns: 3.1666666666666665,
-            totalBalls: 1.8333333333333333,
-            totalSR: 14.393939393939393,
+          stadiumBowlingStats: {
+            totalWicket: 0.6666666666666666,
+            totalAvg: 6.571428571428571,
           },
-          fantasyPoints: 47.666666666666664,
+          againstTeamBattingStats: {
+            totalRuns: 0,
+            totalSR: 0,
+          },
+          againstTeamBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
         },
       ],
     },
@@ -116543,21 +116520,14 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/1023.png",
           type: "BAT",
-          againstTeamBowlingStats: {
+          fantasyPoints: 38.25,
+          battingForm: {
+            totalRuns: 24.25,
+            totalSR: 119.26229508196722,
+          },
+          bowlingForm: {
             totalWicket: 0,
             totalAvg: 0,
-          },
-          againstTeamBattingStats: {
-            totalRuns: 23.125,
-            totalSR: 0.7613168724279835,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
-          },
-          stadiumBattingStats: {
-            totalRuns: 0,
-            totalSR: 0,
           },
           battingStats: {
             totalRuns: 32.26,
@@ -116567,17 +116537,22 @@ export const ModifyAverage = {
             totalWicket: 0,
             totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 0,
+          stadiumBattingStats: {
+            totalRuns: 0,
+            totalSR: 0,
+          },
+          stadiumBowlingStats: {
             totalWicket: 0,
-            totalRunConsume: 0,
+            totalAvg: 0,
           },
-          battingForm: {
-            totalRuns: 24.25,
-            totalBalls: 20.333333333333332,
-            totalSR: 9.938524590163935,
+          againstTeamBattingStats: {
+            totalRuns: 23.125,
+            totalSR: 0.7613168724279835,
           },
-          fantasyPoints: 38.25,
+          againstTeamBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
         },
         {
           name: "Sam Konstas",
@@ -116587,21 +116562,14 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/148316.png",
           type: "BAT",
-          againstTeamBowlingStats: {
+          fantasyPoints: 35.833333333333336,
+          battingForm: {
+            totalRuns: 19.916666666666668,
+            totalSR: 91.22137404580153,
+          },
+          bowlingForm: {
             totalWicket: 0,
             totalAvg: 0,
-          },
-          againstTeamBattingStats: {
-            totalRuns: 0,
-            totalSR: 0,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
-          },
-          stadiumBattingStats: {
-            totalRuns: 0,
-            totalSR: 0,
           },
           battingStats: {
             totalRuns: 19.818181818181817,
@@ -116611,17 +116579,22 @@ export const ModifyAverage = {
             totalWicket: 0,
             totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 0,
+          stadiumBattingStats: {
+            totalRuns: 0,
+            totalSR: 0,
+          },
+          stadiumBowlingStats: {
             totalWicket: 0,
-            totalRunConsume: 0,
+            totalAvg: 0,
           },
-          battingForm: {
-            totalRuns: 19.916666666666668,
-            totalBalls: 21.833333333333332,
-            totalSR: 7.60178117048346,
+          againstTeamBattingStats: {
+            totalRuns: 0,
+            totalSR: 0,
           },
-          fantasyPoints: 35.833333333333336,
+          againstTeamBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
         },
         {
           name: "Cameron Green",
@@ -116631,41 +116604,39 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/13088.png",
           type: "AR",
-          againstTeamBowlingStats: {
-            totalWicket: 1,
-            totalAvg: 6.411764705882353,
+          fantasyPoints: 68.33333333333333,
+          battingForm: {
+            totalRuns: 32.77777777777778,
+            totalSR: 125.53191489361701,
           },
-          againstTeamBattingStats: {
-            totalRuns: 31.25,
-            totalSR: 0.7861635220125787,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
-          },
-          stadiumBattingStats: {
-            totalRuns: 0,
-            totalSR: 0,
+          bowlingForm: {
+            totalWicket: 1.2,
+            totalAvg: 7.564102564102564,
           },
           battingStats: {
             totalRuns: 24.375,
             totalSR: 1.0910478128179044,
           },
           bowlingStats: {
-            totalWicket: 0,
+            totalWicket: 0.675,
             totalAvg: 6.876120189773326,
           },
-          bowlingForm: {
-            totalOver: 2.6,
+          stadiumBattingStats: {
+            totalRuns: 0,
+            totalSR: 0,
+          },
+          stadiumBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
+          againstTeamBattingStats: {
+            totalRuns: 31.25,
+            totalSR: 0.7861635220125787,
+          },
+          againstTeamBowlingStats: {
             totalWicket: 1,
-            totalRunConsume: 19.666666666666668,
+            totalAvg: 6.411764705882353,
           },
-          battingForm: {
-            totalRuns: 24.583333333333332,
-            totalBalls: 19.583333333333332,
-            totalSR: 10.460992907801417,
-          },
-          fantasyPoints: 68.33333333333333,
         },
         {
           name: "Josh Inglis",
@@ -116675,21 +116646,14 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/player-images/8220.png",
           type: "WK",
-          againstTeamBowlingStats: {
+          fantasyPoints: 54.083333333333336,
+          battingForm: {
+            totalRuns: 23.363636363636363,
+            totalSR: 150.29239766081872,
+          },
+          bowlingForm: {
             totalWicket: 0,
             totalAvg: 0,
-          },
-          againstTeamBattingStats: {
-            totalRuns: 25.5,
-            totalSR: 1.4711538461538463,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
-          },
-          stadiumBattingStats: {
-            totalRuns: 0,
-            totalSR: 0,
           },
           battingStats: {
             totalRuns: 26.543956043956044,
@@ -116699,17 +116663,22 @@ export const ModifyAverage = {
             totalWicket: 0,
             totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 0,
+          stadiumBattingStats: {
+            totalRuns: 0,
+            totalSR: 0,
+          },
+          stadiumBowlingStats: {
             totalWicket: 0,
-            totalRunConsume: 0,
+            totalAvg: 0,
           },
-          battingForm: {
-            totalRuns: 21.416666666666668,
-            totalBalls: 14.25,
-            totalSR: 12.524366471734893,
+          againstTeamBattingStats: {
+            totalRuns: 25.5,
+            totalSR: 1.4711538461538463,
           },
-          fantasyPoints: 54.083333333333336,
+          againstTeamBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
         },
         {
           name: "Travis Head",
@@ -116719,41 +116688,39 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/1443.png",
           type: "BAT",
-          againstTeamBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 4.833333333333333,
+          fantasyPoints: 48.666666666666664,
+          battingForm: {
+            totalRuns: 31.166666666666668,
+            totalSR: 162.6086956521739,
           },
-          againstTeamBattingStats: {
-            totalRuns: 2.5,
-            totalSR: 0.7142857142857143,
-          },
-          stadiumBowlingStats: {
+          bowlingForm: {
             totalWicket: 0,
             totalAvg: 0,
-          },
-          stadiumBattingStats: {
-            totalRuns: 23,
-            totalSR: 1.6428571428571428,
           },
           battingStats: {
             totalRuns: 33.41004184100419,
             totalSR: 1.2435757670144838,
           },
           bowlingStats: {
+            totalWicket: 0.5274725274725275,
+            totalAvg: 6.597675705589374,
+          },
+          stadiumBattingStats: {
+            totalRuns: 23,
+            totalSR: 1.6428571428571428,
+          },
+          stadiumBowlingStats: {
             totalWicket: 0,
-            totalAvg: 6.597675705589375,
+            totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 0,
+          againstTeamBattingStats: {
+            totalRuns: 2.5,
+            totalSR: 0.7142857142857143,
+          },
+          againstTeamBowlingStats: {
             totalWicket: 0,
-            totalRunConsume: 0,
+            totalAvg: 4.833333333333333,
           },
-          battingForm: {
-            totalRuns: 31.166666666666668,
-            totalBalls: 19.166666666666668,
-            totalSR: 13.550724637681158,
-          },
-          fantasyPoints: 48.666666666666664,
         },
         {
           name: "Beau Webster",
@@ -116763,11 +116730,24 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/1635.png",
           type: "AR",
-          againstTeamBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
+          fantasyPoints: 54.833333333333336,
+          battingForm: {
+            totalRuns: 25.272727272727273,
+            totalSR: 136.9458128078818,
           },
-          againstTeamBattingStats: {
+          bowlingForm: {
+            totalWicket: 1,
+            totalAvg: 9.21951219512195,
+          },
+          battingStats: {
+            totalRuns: 21.66393442622951,
+            totalSR: 1.0683104284559417,
+          },
+          bowlingStats: {
+            totalWicket: 0.6428571428571429,
+            totalAvg: 6.8752941176470594,
+          },
+          stadiumBattingStats: {
             totalRuns: 0,
             totalSR: 0,
           },
@@ -116775,29 +116755,14 @@ export const ModifyAverage = {
             totalWicket: 0,
             totalAvg: 0,
           },
-          stadiumBattingStats: {
+          againstTeamBattingStats: {
             totalRuns: 0,
             totalSR: 0,
           },
-          battingStats: {
-            totalRuns: 21.66393442622951,
-            totalSR: 1.0683104284559417,
-          },
-          bowlingStats: {
+          againstTeamBowlingStats: {
             totalWicket: 0,
-            totalAvg: 6.8752941176470594,
+            totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 1.7083333333333333,
-            totalWicket: 0.6666666666666666,
-            totalRunConsume: 15.75,
-          },
-          battingForm: {
-            totalRuns: 23.166666666666668,
-            totalBalls: 16.916666666666668,
-            totalSR: 11.412151067323483,
-          },
-          fantasyPoints: 54.833333333333336,
         },
         {
           name: "Alex Carey",
@@ -116807,21 +116772,14 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/player-images/1643.png",
           type: "WK",
-          againstTeamBowlingStats: {
+          fantasyPoints: 57.75,
+          battingForm: {
+            totalRuns: 42.4,
+            totalSR: 115.84699453551912,
+          },
+          bowlingForm: {
             totalWicket: 0,
             totalAvg: 0,
-          },
-          againstTeamBattingStats: {
-            totalRuns: 25.571428571428573,
-            totalSR: 0.7748917748917749,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
-          },
-          stadiumBattingStats: {
-            totalRuns: 37.333333333333336,
-            totalSR: 0.7368421052631579,
           },
           battingStats: {
             totalRuns: 28.55026455026455,
@@ -116831,17 +116789,22 @@ export const ModifyAverage = {
             totalWicket: 0,
             totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 0,
+          stadiumBattingStats: {
+            totalRuns: 37.333333333333336,
+            totalSR: 0.7368421052631579,
+          },
+          stadiumBowlingStats: {
             totalWicket: 0,
-            totalRunConsume: 0,
+            totalAvg: 0,
           },
-          battingForm: {
-            totalRuns: 35.333333333333336,
-            totalBalls: 30.5,
-            totalSR: 9.653916211293259,
+          againstTeamBattingStats: {
+            totalRuns: 25.571428571428573,
+            totalSR: 0.7748917748917749,
           },
-          fantasyPoints: 57.75,
+          againstTeamBowlingStats: {
+            totalWicket: 0,
+            totalAvg: 0,
+          },
         },
         {
           name: "Pat Cummins",
@@ -116851,41 +116814,39 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/player-images/opta-cricket/1172.png",
           type: "BOWL",
-          againstTeamBowlingStats: {
-            totalWicket: 1.6666666666666667,
-            totalAvg: 6.966666666666667,
+          fantasyPoints: 43.666666666666664,
+          battingForm: {
+            totalRuns: 12.125,
+            totalSR: 170.17543859649123,
           },
-          againstTeamBattingStats: {
-            totalRuns: 5,
-            totalSR: 0.6666666666666666,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 2,
-            totalAvg: 5.75,
-          },
-          stadiumBattingStats: {
-            totalRuns: 0,
-            totalSR: 0,
+          bowlingForm: {
+            totalWicket: 1.1666666666666667,
+            totalAvg: 8.514150943396226,
           },
           battingStats: {
             totalRuns: 10.261437908496733,
             totalSR: 1.0902777777777777,
           },
           bowlingStats: {
-            totalWicket: 0,
+            totalWicket: 1.3008474576271187,
             totalAvg: 6.468538480822261,
           },
-          bowlingForm: {
-            totalOver: 3.533333333333333,
-            totalWicket: 1.1666666666666667,
-            totalRunConsume: 30.083333333333332,
+          stadiumBattingStats: {
+            totalRuns: 0,
+            totalSR: 0,
           },
-          battingForm: {
-            totalRuns: 8.083333333333334,
-            totalBalls: 4.75,
-            totalSR: 14.181286549707602,
+          stadiumBowlingStats: {
+            totalWicket: 2,
+            totalAvg: 5.75,
           },
-          fantasyPoints: 43.666666666666664,
+          againstTeamBattingStats: {
+            totalRuns: 5,
+            totalSR: 0.6666666666666666,
+          },
+          againstTeamBowlingStats: {
+            totalWicket: 1.6666666666666667,
+            totalAvg: 6.966666666666667,
+          },
         },
         {
           name: "Mitchell Starc",
@@ -116895,41 +116856,39 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/1080.png",
           type: "BOWL",
-          againstTeamBowlingStats: {
-            totalWicket: 2.3,
-            totalAvg: 5.841269841269841,
+          fantasyPoints: 51.916666666666664,
+          battingForm: {
+            totalRuns: 1,
+            totalSR: 50,
           },
-          againstTeamBattingStats: {
-            totalRuns: 8.3,
-            totalSR: 0.6916666666666667,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 2.6,
-            totalAvg: 5.246231155778894,
-          },
-          stadiumBattingStats: {
-            totalRuns: 9,
-            totalSR: 0.54,
+          bowlingForm: {
+            totalWicket: 1.1,
+            totalAvg: 10.327380952380953,
           },
           battingStats: {
             totalRuns: 6.152,
             totalSR: 0.8010416666666667,
           },
           bowlingStats: {
-            totalWicket: 0,
-            totalAvg: 6.157701303040427,
+            totalWicket: 1.616326530612245,
+            totalAvg: 6.157701303040428,
           },
-          bowlingForm: {
-            totalOver: 2.8000000000000003,
-            totalWicket: 0.9166666666666666,
-            totalRunConsume: 28.916666666666668,
+          stadiumBattingStats: {
+            totalRuns: 9,
+            totalSR: 0.54,
           },
-          battingForm: {
-            totalRuns: 0.5833333333333334,
-            totalBalls: 1.1666666666666667,
-            totalSR: 4.166666666666667,
+          stadiumBowlingStats: {
+            totalWicket: 2.6,
+            totalAvg: 5.2462311557788945,
           },
-          fantasyPoints: 51.916666666666664,
+          againstTeamBattingStats: {
+            totalRuns: 8.3,
+            totalSR: 0.6916666666666667,
+          },
+          againstTeamBowlingStats: {
+            totalWicket: 2.3,
+            totalAvg: 5.841269841269841,
+          },
         },
         {
           name: "Nathan Lyon",
@@ -116939,41 +116898,39 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/1160.png",
           type: "BOWL",
-          againstTeamBowlingStats: {
-            totalWicket: 2,
-            totalAvg: 4.444444444444445,
+          fantasyPoints: 27.666666666666668,
+          battingForm: {
+            totalRuns: 3.6,
+            totalSR: 78.26086956521739,
           },
-          againstTeamBattingStats: {
-            totalRuns: 4,
-            totalSR: 0.8,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 0,
-            totalAvg: 0,
-          },
-          stadiumBattingStats: {
-            totalRuns: 0,
-            totalSR: 0,
+          bowlingForm: {
+            totalWicket: 0.9,
+            totalAvg: 5.852459016393443,
           },
           battingStats: {
             totalRuns: 3.5142857142857142,
             totalSR: 0.8723404255319149,
           },
           bowlingStats: {
+            totalWicket: 1.013157894736842,
+            totalAvg: 5.809386281588448,
+          },
+          stadiumBattingStats: {
+            totalRuns: 0,
+            totalSR: 0,
+          },
+          stadiumBowlingStats: {
             totalWicket: 0,
-            totalAvg: 5.8093862815884485,
+            totalAvg: 0,
           },
-          bowlingForm: {
-            totalOver: 5.083333333333333,
-            totalWicket: 0.75,
-            totalRunConsume: 29.75,
+          againstTeamBattingStats: {
+            totalRuns: 4,
+            totalSR: 0.8,
           },
-          battingForm: {
-            totalRuns: 1.5,
-            totalBalls: 1.9166666666666667,
-            totalSR: 6.521739130434782,
+          againstTeamBowlingStats: {
+            totalWicket: 2,
+            totalAvg: 4.444444444444445,
           },
-          fantasyPoints: 27.666666666666668,
         },
         {
           name: "Josh Hazlewood",
@@ -116983,41 +116940,39 @@ export const ModifyAverage = {
           imageUrl:
             "https://d13ir53smqqeyp.cloudfront.net/fc-player-images/1020.png",
           type: "BOWL",
-          againstTeamBowlingStats: {
-            totalWicket: 1.7222222222222223,
-            totalAvg: 5.731034482758621,
+          fantasyPoints: 54,
+          battingForm: {
+            totalRuns: 0,
+            totalSR: 0,
           },
-          againstTeamBattingStats: {
-            totalRuns: 3.6666666666666665,
-            totalSR: 1.5714285714285714,
-          },
-          stadiumBowlingStats: {
-            totalWicket: 2,
-            totalAvg: 4.032,
-          },
-          stadiumBattingStats: {
-            totalRuns: 0.5,
-            totalSR: 0.5,
+          bowlingForm: {
+            totalWicket: 1.8333333333333333,
+            totalAvg: 8.853211009174311,
           },
           battingStats: {
             totalRuns: 3.3035714285714284,
             totalSR: 0.8333333333333334,
           },
           bowlingStats: {
-            totalWicket: 0,
-            totalAvg: 5.8162473040977725,
+            totalWicket: 1.4123711340206186,
+            totalAvg: 5.816247304097771,
           },
-          bowlingForm: {
-            totalOver: 3.6333333333333333,
-            totalWicket: 1.8333333333333333,
-            totalRunConsume: 32.166666666666664,
+          stadiumBattingStats: {
+            totalRuns: 0.5,
+            totalSR: 0.5,
           },
-          battingForm: {
-            totalRuns: 0,
-            totalBalls: 0.08333333333333333,
-            totalSR: 0,
+          stadiumBowlingStats: {
+            totalWicket: 2,
+            totalAvg: 4.032,
           },
-          fantasyPoints: 54,
+          againstTeamBattingStats: {
+            totalRuns: 3.6666666666666665,
+            totalSR: 1.5714285714285714,
+          },
+          againstTeamBowlingStats: {
+            totalWicket: 1.7222222222222223,
+            totalAvg: 5.731034482758621,
+          },
         },
       ],
     },
