@@ -262,215 +262,9 @@ export const CalculateAverageScore = (data: any) => {
   const stadiumAvg = StadiumAvgScore(data);
 
   const accordingToPlayerStats = data.squadList.map((item: any) => {
-    const squad = (
-      item.playingPlayer.length > 0 ? item.playingPlayer : item.benchPlayer
-    ).map((elm: any) => {
-      let playerData: any = {
-        name: elm.name,
-        shortName: elm.shortName,
-        batStyle: elm.batStyle,
-        bowlStyle: elm.bowlStyle,
-        imageUrl: elm.imageUrl.src,
-        type: elm.type,
-      };
-      // Calculate fantasy points
-      const firsttwelveFantasyPoints = elm.fantasyPoints.slice(0, 12);
-      const sumOfFantasyPoints = firsttwelveFantasyPoints.reduce(
-        (acc: any, a: any) => acc + Number(a.total),
-        0
-      );
-
-      // Calculate batting form
-      const firsttwelveBattingForm = elm.battingForm.slice(0, 12);
-      let totalRuns = 0;
-      let totalBalls = 0;
-      let totalSR = 0;
-      firsttwelveBattingForm.forEach((a: any) => {
-        if (a.run !== "DNB") {
-          const runMatch = a.run.match(/^(\d+)\s+\((\d+)\)$/);
-          if (runMatch) {
-            const runs = Number(runMatch[1]);
-            const balls = Number(runMatch[2]);
-            const sr = Number(a.sr);
-
-            totalRuns += runs;
-            totalBalls += balls;
-            totalSR += sr;
-          }
-        }
-      });
-
-      // Calculate bowling form
-      const firsttwelveBowlingForm = elm.bowlingForm.slice(0, 12);
-      let totalOver = 0;
-      let totalWicket = 0;
-      let totalRunConsume = 0;
-      firsttwelveBowlingForm.forEach((a: any) => {
-        if (a.o !== "DNB") {
-          const over = Number(a.o);
-          const runsConsume = Number(a.r);
-          const wicket = Number(a.w);
-
-          totalOver += over;
-          totalWicket += wicket;
-          totalRunConsume += runsConsume;
-        }
-      });
-
-      //Calculate Batting Stats
-
-      let battingStatsTotalRuns = 0;
-      let battingStatsTotalInnings = 0;
-      let battingStatsTotalBall = 0;
-      elm.battingStats?.forEach((a: any) => {
-        if (a.run !== "DNB") {
-          const runs = Number(a.runs);
-          const balls = Number(a.balls);
-          const innings = Number(a.innings);
-
-          battingStatsTotalRuns += runs;
-          battingStatsTotalInnings += innings;
-          battingStatsTotalBall += balls;
-        }
-      });
-
-      //Calculate Bowling Stats
-
-      let bowlingStatsBowlingRuns = 0;
-      let bowlingStatsTotalBowlingInnings = 0;
-      let bowlingStatsBowlingOver = 0;
-      let bowlingStatsTotalWicketS = 0;
-      elm.bowlingStats?.forEach((a: any) => {
-        if (a.balls !== "DNB") {
-          const runs = Number(a.runs);
-          const balls = Number(a.balls) / 6;
-          const wickets = Number(a.wickets);
-          const innings = Number(a.innings);
-
-          bowlingStatsBowlingRuns += runs;
-          bowlingStatsBowlingOver += balls;
-          bowlingStatsTotalWicketS += wickets;
-          bowlingStatsTotalBowlingInnings += innings;
-        }
-      });
-
-      //calculate stadium Batting Stats
-
-      let stadiumTotalRuns = 0;
-      let stadiumTotalInnings = 0;
-      let stadiumTotalBowl = 0;
-      elm.stadiumStats?.battingStats?.forEach((a: any) => {
-        if (a.run !== "DNB") {
-          const runs = Number(a.runs);
-          const balls = Number(a.balls);
-          const totalInnings = Number(a.innings);
-
-          stadiumTotalRuns += runs;
-          stadiumTotalBowl += balls;
-          stadiumTotalInnings += totalInnings;
-        }
-      });
-
-      //Calculate stadium Bowling Stats
-
-      let stadiumTotalBowlingRuns = 0;
-      let stadiumTotalBowlingInnings = 0;
-      let stadiumBowlingOver = 0;
-      let stadiumTotalWicketS = 0;
-      elm.stadiumStats?.bowlingStats?.forEach((a: any) => {
-        if (a.balls !== "DNB") {
-          const runs = Number(a.runs);
-          const balls = Number(a.balls) / 6;
-          const wickets = Number(a.wickets);
-          const innings = Number(a.innings);
-
-          stadiumTotalBowlingRuns += runs;
-          stadiumBowlingOver += balls;
-          stadiumTotalWicketS += wickets;
-          stadiumTotalBowlingInnings += innings;
-        }
-      });
-
-      //calculate Agaist Team Batting Stats
-
-      let againstTeamsTotalRuns = 0;
-      let againstTeamsTotalInnings = 0;
-      let againstTeamsTotalBowl = 0;
-      elm.againstTeamsStats?.battingStats?.forEach((a: any) => {
-        if (a.run !== "DNB") {
-          const runs = Number(a.runs);
-          const balls = Number(a.balls);
-          const totalInning = Number(a.innings);
-
-          againstTeamsTotalRuns += runs;
-          againstTeamsTotalInnings += totalInning;
-          againstTeamsTotalBowl += balls;
-        }
-      });
-
-      //calculate Agaist Team Bowling Stats
-
-      let againstTeamTotalBowlingRuns = 0;
-      let againstTeamTotalBowlingInnings = 0;
-      let againstTeamBowlingOver = 0;
-      let againstTeamTotalWicketS = 0;
-      elm.againstTeamsStats?.bowlingStats?.forEach((a: any) => {
-        if (a.balls !== "DNB") {
-          const runs = Number(a.runs);
-          const balls = Number(a.balls) / 6;
-          const wickets = Number(a.wickets);
-          const innings = Number(a.innings);
-
-          againstTeamTotalBowlingRuns += runs;
-          againstTeamBowlingOver += balls;
-          againstTeamTotalWicketS += wickets;
-          againstTeamTotalBowlingInnings += innings;
-        }
-      });
-
-      playerData.againstTeamBowlingStats = {
-        totalWicket:
-          againstTeamTotalWicketS / againstTeamTotalBowlingInnings || 0,
-        totalAvg: againstTeamTotalBowlingRuns / againstTeamBowlingOver || 0,
-      };
-      playerData.againstTeamBattingStats = {
-        totalRuns: againstTeamsTotalRuns / againstTeamsTotalInnings || 0,
-        totalSR: againstTeamsTotalRuns / againstTeamsTotalBowl || 0,
-      };
-      playerData.stadiumBowlingStats = {
-        totalWicket: stadiumTotalWicketS / stadiumTotalBowlingInnings || 0,
-        totalAvg: stadiumTotalBowlingRuns / stadiumBowlingOver || 0,
-      };
-      playerData.stadiumBattingStats = {
-        totalRuns: stadiumTotalRuns / stadiumTotalInnings || 0,
-        totalSR: stadiumTotalRuns / stadiumTotalBowl || 0,
-      };
-      playerData.battingStats = {
-        totalRuns: battingStatsTotalRuns / battingStatsTotalInnings || 0,
-        totalSR: battingStatsTotalRuns / battingStatsTotalBall || 0,
-      };
-      playerData.bowlingStats = {
-        totalWicket:
-          bowlingStatsTotalWicketS / bowlingStatsTotalBowlingInnings || 0,
-        totalAvg: bowlingStatsBowlingRuns / bowlingStatsBowlingOver || 0,
-      };
-      playerData.bowlingForm = {
-        totalOver: totalOver / firsttwelveBowlingForm.length || 0,
-        totalWicket: totalWicket / firsttwelveBowlingForm.length || 0,
-        totalRunConsume: totalRunConsume / firsttwelveBowlingForm.length || 0,
-      };
-      playerData.battingForm = {
-        totalRuns: totalRuns / firsttwelveBattingForm.length || 0,
-        totalBalls: totalBalls / firsttwelveBattingForm.length || 0,
-        totalSR:
-          (totalBalls > 0 ? (totalRuns / totalBalls) * 100 : 0) /
-            firsttwelveBattingForm.length || 0,
-      };
-      playerData.fantasyPoints =
-        sumOfFantasyPoints / firsttwelveFantasyPoints.length || 0;
-
-      return playerData;
-    });
+    const players =
+      item.playingPlayer.length > 0 ? item.playingPlayer : item.benchPlayer;
+    const squad = players.map(ExtractPlayerData);
 
     return {
       flag: item.flag,
@@ -560,7 +354,7 @@ export const CalculateAverageScore = (data: any) => {
   return { stadiumAVerageScore: avgPrepare.stadiumAvg };
 };
 
-const AnanlysisAvgScore = (data: any) => {
+export const AnanlysisAvgScore = (data: any) => {
   console.log(data);
   // Calculate Bowler Avg Runs Consume and Avg Wicket
   let totalWicket = 0;
@@ -602,7 +396,7 @@ const AnanlysisAvgScore = (data: any) => {
   return { avgScore, avgWicket, avgRunconsume };
 };
 
-const StadiumAvgScore = (data: any) => {
+export const StadiumAvgScore = (data: any) => {
   const stadiumStats = data.stadiumStats
     .filter((match: any) => {
       const matchDate = moment(match.date, "DD/MM/YY");
@@ -654,5 +448,149 @@ const StadiumAvgScore = (data: any) => {
   return {
     avgWicket: avgWicket / totalMatch,
     avgScore: avgScore / totalMatch,
+  };
+};
+
+export const ParseOvers = (overStr: string): number => {
+  const [overs, balls] = overStr.split(".").map(Number);
+  return (overs || 0) + (balls || 0) / 6;
+};
+export const GetFantasyPoints = (points: any[]): number => {
+  const sliced = points.slice(0, 12);
+  const total = sliced.reduce((acc, p) => acc + Number(p.total || 0), 0);
+  return sliced.length ? total / sliced.length : 0;
+};
+export const GetBattingForm = (
+  form: any[]
+): {
+  totalRuns: number;
+  totalSR: number;
+} => {
+  const sliced = form.slice(0, 12);
+  let runs = 0,
+    balls = 0,
+    innings = 0;
+
+  sliced.forEach((a) => {
+    if (a.run !== "DNB") {
+      const match = a.run.match(/^(\d+)\s+\((\d+)\)$/);
+      if (match) {
+        runs += Number(match[1]);
+        balls += Number(match[2]);
+        innings++;
+      }
+    }
+  });
+
+  return {
+    totalRuns: innings ? runs / innings : 0,
+    totalSR: balls ? (runs / balls) * 100 : 0,
+  };
+};
+
+export const GetBowlingForm = (
+  form: any[]
+): {
+  totalWicket: number;
+  totalAvg: number;
+} => {
+  const sliced = form.slice(0, 12);
+  let runs = 0,
+    overs = 0,
+    wickets = 0,
+    innings = 0;
+
+  sliced.forEach((a) => {
+    if (a.o !== "DNB") {
+      overs += Number(a.o);
+      runs += Number(a.r);
+      wickets += Number(a.w);
+      innings++;
+    }
+  });
+
+  return {
+    totalWicket: innings ? wickets / innings : 0,
+    totalAvg: overs ? runs / overs : 0,
+  };
+};
+
+export const GetBattingStats = (
+  stats: any[]
+): {
+  totalRuns: number;
+  totalSR: number;
+} => {
+  let runs = 0,
+    balls = 0,
+    innings = 0;
+
+  stats?.forEach((a) => {
+    if (a.run !== "DNB") {
+      runs += Number(a.runs);
+      balls += Number(a.balls);
+      innings += Number(a.innings);
+    }
+  });
+
+  return {
+    totalRuns: innings ? runs / innings : 0,
+    totalSR: balls ? runs / balls : 0,
+  };
+};
+
+export const GetBowlingStats = (
+  stats: any[]
+): {
+  totalWicket: number;
+  totalAvg: number;
+} => {
+  let runs = 0,
+    balls = 0,
+    wickets = 0,
+    innings = 0;
+
+  stats?.forEach((a) => {
+    if (a.balls !== "DNB") {
+      runs += Number(a.runs);
+      balls += Number(a.balls);
+      wickets += Number(a.wickets);
+      innings += Number(a.innings);
+    }
+  });
+
+  const overs = balls / 6;
+  return {
+    totalWicket: innings ? wickets / innings : 0,
+    totalAvg: overs ? runs / overs : 0,
+  };
+};
+
+export const ExtractPlayerData = (elm: any): any => {
+  return {
+    name: elm.name,
+    shortName: elm.shortName,
+    batStyle: elm.batStyle,
+    bowlStyle: elm.bowlStyle,
+    imageUrl: elm.imageUrl?.src || "",
+    type: elm.type,
+
+    fantasyPoints: GetFantasyPoints(elm.fantasyPoints),
+
+    battingForm: GetBattingForm(elm.battingForm),
+    bowlingForm: GetBowlingForm(elm.bowlingForm),
+
+    battingStats: GetBattingStats(elm.battingStats),
+    bowlingStats: GetBowlingStats(elm.bowlingStats),
+
+    stadiumBattingStats: GetBattingStats(elm.stadiumStats?.battingStats),
+    stadiumBowlingStats: GetBowlingStats(elm.stadiumStats?.bowlingStats),
+
+    againstTeamBattingStats: GetBattingStats(
+      elm.againstTeamsStats?.battingStats
+    ),
+    againstTeamBowlingStats: GetBowlingStats(
+      elm.againstTeamsStats?.bowlingStats
+    ),
   };
 };
