@@ -258,54 +258,8 @@ export const DynamicSort = (key: any, order = "asc") => {
 
 export const CalculateAverageScore = (data: any) => {
   const apiAvgScore = Number(data.overview.groundAndWheather.avgScore) ?? null;
-  const stadiumStats = data.stadiumStats
-    .filter((match: any) => {
-      const matchDate = moment(match.date, "DD/MM/YY");
-      const today = moment();
-      const twoYearsAgo = moment().subtract(2, "years");
 
-      return (
-        matchDate.isSameOrBefore(today, "day") &&
-        matchDate.isSameOrAfter(twoYearsAgo, "day")
-      );
-    })
-    .map((match: any) => ({
-      ...match,
-      mode: DetectMode(match.matchUrl),
-    }));
-
-  // let avgScore = { t20: { totalRun: 0, totalWicket: 0, totalMatch: 0 } };
-  const matchFormat = data.matchInfo.format.toLowerCase();
-  let avgScore = 0;
-  let avgWicket = 0;
-  let totalMatch = 0;
-  stadiumStats.forEach((element: any) => {
-    const team1 = ModifyScore(element.inn1Score);
-    const team2 = ModifyScore(element.inn2Score);
-    const totalScore = team1.runs + team2.runs;
-    const totalWickets = (team1.wickets + team2.wickets) / 2;
-    let adjustedScore = totalScore / 2;
-
-    if (matchFormat === "t20i") {
-      if (element.mode === "10") adjustedScore += 0.8 * totalScore;
-      else if (element.mode === "17") adjustedScore += 0.22 * totalScore;
-      else if (element.mode === "50") adjustedScore -= 0.35 * totalScore;
-      else if (element.mode === "TEST") adjustedScore -= 0.42 * totalScore;
-    } else if (matchFormat === "odi") {
-      if (element.mode === "20") adjustedScore += 0.4 * totalScore;
-      else if (element.mode === "17") adjustedScore += 0.55 * totalScore;
-      else if (element.mode === "10") adjustedScore += 0.7 * totalScore;
-      else if (element.mode === "TEST") adjustedScore -= 0.45 * totalScore;
-    } else if (matchFormat === "test") {
-      if (element.mode === "50") adjustedScore += 0.45 * totalScore;
-      else if (element.mode === "20") adjustedScore += 0.72 * totalScore;
-      else if (element.mode === "10") adjustedScore += 0.9 * totalScore;
-      else if (element.mode === "17") adjustedScore += 0.75 * totalScore;
-    }
-    avgScore += adjustedScore;
-    avgWicket += totalWickets;
-    totalMatch += 1;
-  });
+  const stadiumAvg = StadiumAvgScore(data);
 
   const accordingToPlayerStats = data.squadList.map((item: any) => {
     const squad = (
@@ -528,28 +482,13 @@ export const CalculateAverageScore = (data: any) => {
 
   const avgPrepare = {
     stadiumAvg: {
-      avgScore: avgScore / totalMatch || apiAvgScore,
-      avgWicket: avgWicket / totalMatch,
-      totalMatch: totalMatch,
+      avgScore: stadiumAvg.avgScore || apiAvgScore,
+      avgWicket: stadiumAvg.avgWicket,
     },
     accordingToPlayerStats: accordingToPlayerStats,
   };
-  console.log(avgPrepare);
+  console.log("accordingToPlayerStats", accordingToPlayerStats);
   //Calculate average and winner prediction.................................................................
-
-  const stadiumAVerageScore = {
-    avgScore: avgScore / totalMatch || apiAvgScore,
-    avgWicket: avgWicket / totalMatch,
-  };
-
-  const team1AvgScore = AnanlysisAvgScore({
-    squad: avgPrepare.accordingToPlayerStats[0].squad,
-    stadiumAvg: stadiumAVerageScore.avgScore,
-  });
-  const team2AvgScore = AnanlysisAvgScore({
-    squad: avgPrepare.accordingToPlayerStats[1].squad,
-    stadiumAvg: stadiumAVerageScore.avgScore,
-  });
 
   // Calculate Player Average Score
 
@@ -608,73 +547,112 @@ export const CalculateAverageScore = (data: any) => {
     });
   });
 
-  return { stadiumAVerageScore: stadiumAVerageScore };
+  const team1AvgScore = AnanlysisAvgScore({
+    squad: avgPrepare.accordingToPlayerStats[0].squad,
+    stadiumAvg: avgPrepare.stadiumAvg,
+  });
+  const team2AvgScore = AnanlysisAvgScore({
+    squad: avgPrepare.accordingToPlayerStats[1].squad,
+    stadiumAvg: avgPrepare.stadiumAvg,
+  });
+  console.log("team1AvgScore=====>", team1AvgScore);
+  console.log("avgPrepare.stadiumAvg=====>", avgPrepare.stadiumAvg);
+  return { stadiumAVerageScore: avgPrepare.stadiumAvg };
 };
 
 const AnanlysisAvgScore = (data: any) => {
-  const totalRecentBat = data.squad.reduce(
-    (acc: number, item: any) => acc + item.battingForm.totalRuns,
-    0
-  );
-  const totalStadiumBat = data.squad.reduce(
-    (acc: number, item: any) => acc + item.stadiumBattingStats.totalRuns,
-    0
-  );
-  const totalagainstTeamBat = data.squad.reduce(
-    (acc: number, item: any) => acc + item.againstTeamBattingStats.totalRuns,
-    0
-  );
-  const totalBattingStats = data.squad.reduce(
-    (acc: number, item: any) => acc + item.battingStats.totalRuns,
-    0
-  );
-
-  const totalRecentBowl = data.squad.reduce(
-    (acc: number, item: any) => acc + item.bowlingForm.totalWicket,
-    0
-  );
-  const totalStadiumBowl = data.squad.reduce(
-    (acc: number, item: any) => acc + item.stadiumBowlingStats.totalWicket,
-    0
-  );
-  const totalagainstTeamBowl = data.squad.reduce(
-    (acc: number, item: any) => acc + item.againstTeamBowlingStats.totalWicket,
-    0
-  );
-  const totalBowlStats = data.squad.reduce(
-    (acc: number, item: any) => acc + item.bowlingStats.totalWicket,
-    0
-  );
-
-  const playerTotalScore =
-    (Number(totalRecentBat) +
-      Number(totalStadiumBat) +
-      Number(totalagainstTeamBat) +
-      Number(totalBattingStats)) /
-      data.squad.length || 0;
-
-  const avgScore = Math.floor(
-    (playerTotalScore * 11 + data.stadiumAvg) / 2 + 14
-  );
-
-  const playerTotalWicket =
-    (Number(totalBowlStats) +
-      Number(totalagainstTeamBowl) +
-      Number(totalStadiumBowl) +
-      Number(totalRecentBowl)) /
-      data.squad.length || 0;
-
-  const avgWicket = Math.floor((playerTotalWicket * 11) / 2 + 2);
-
+  console.log(data);
+  // Calculate Bowler Avg Runs Consume and Avg Wicket
   let totalWicket = 0;
   let totalRunConsume = 0;
 
   data.squad.forEach((item: any) => {
-    const form = item.bowlingForm;
-    totalWicket += form.totalWicket;
-    // totalOver += form.totalOver;
-    totalRunConsume += form.totalRunConsume;
+    totalWicket +=
+      Number(item.bowlingStats.totalWicket) +
+      Number(item.againstTeamBowlingStats.totalWicket) +
+      Number(item.stadiumBowlingStats.totalWicket) +
+      Number(item.bowlingForm.totalWicket);
+    totalRunConsume +=
+      Number(item.bowlingStats.totalAvg) +
+      Number(item.againstTeamBowlingStats.totalAvg) +
+      Number(item.stadiumBowlingStats.totalAvg) +
+      Number(item.bowlingForm.totalAvg);
+  });
+  const avgWicket = Math.floor((totalWicket / data.squad.length) * 11 + 2);
+  const avgRunconsume = Math.floor(
+    (totalRunConsume / data.squad.length) * 11 + 14
+  );
+
+  //Calculate Avg Score using player stats and Ground Stats
+
+  let totalScore = 0;
+
+  data.squad.forEach((item: any) => {
+    totalScore +=
+      Number(item.battingStats.totalRuns) +
+      Number(item.againstTeamBattingStats.totalRuns) +
+      Number(item.stadiumBattingStats.totalRuns) +
+      Number(item.battingForm.totalRuns);
   });
 
-  return { avgScore, avgWicket };
+  const avgScore = Math.floor(
+    ((totalScore / data.squad.length) * 11 + data.stadiumAvg) / 2 + 14
+  );
+  console.log("avgRunconsume====>", avgRunconsume);
+  return { avgScore, avgWicket, avgRunconsume };
+};
+
+const StadiumAvgScore = (data: any) => {
+  const stadiumStats = data.stadiumStats
+    .filter((match: any) => {
+      const matchDate = moment(match.date, "DD/MM/YY");
+      const today = moment();
+      const twoYearsAgo = moment().subtract(2, "years");
+
+      return (
+        matchDate.isSameOrBefore(today, "day") &&
+        matchDate.isSameOrAfter(twoYearsAgo, "day")
+      );
+    })
+    .map((match: any) => ({
+      ...match,
+      mode: DetectMode(match.matchUrl),
+    }));
+
+  const matchFormat = data.matchInfo.format.toLowerCase();
+  let avgScore = 0;
+  let avgWicket = 0;
+  let totalMatch = 0;
+  stadiumStats.forEach((element: any) => {
+    const team1 = ModifyScore(element.inn1Score);
+    const team2 = ModifyScore(element.inn2Score);
+    const totalScore = team1.runs + team2.runs;
+    const totalWickets = (team1.wickets + team2.wickets) / 2;
+    let adjustedScore = totalScore / 2;
+
+    if (matchFormat === "t20i") {
+      if (element.mode === "10") adjustedScore += 0.8 * totalScore;
+      else if (element.mode === "17") adjustedScore += 0.22 * totalScore;
+      else if (element.mode === "50") adjustedScore -= 0.35 * totalScore;
+      else if (element.mode === "TEST") adjustedScore -= 0.42 * totalScore;
+    } else if (matchFormat === "odi") {
+      if (element.mode === "20") adjustedScore += 0.4 * totalScore;
+      else if (element.mode === "17") adjustedScore += 0.55 * totalScore;
+      else if (element.mode === "10") adjustedScore += 0.7 * totalScore;
+      else if (element.mode === "TEST") adjustedScore -= 0.45 * totalScore;
+    } else if (matchFormat === "test") {
+      if (element.mode === "50") adjustedScore += 0.45 * totalScore;
+      else if (element.mode === "20") adjustedScore += 0.72 * totalScore;
+      else if (element.mode === "10") adjustedScore += 0.9 * totalScore;
+      else if (element.mode === "17") adjustedScore += 0.75 * totalScore;
+    }
+    avgScore += Number(adjustedScore);
+    avgWicket += Number(totalWickets);
+    totalMatch += 1;
+  });
+
+  return {
+    avgWicket: avgWicket / totalMatch,
+    avgScore: avgScore / totalMatch,
+  };
 };
