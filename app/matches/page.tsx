@@ -11,6 +11,7 @@ import MatchCard from "@/components/ui/match-card";
 import { Search, Filter, Calendar, Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import moment from "moment";
 
 const MatchesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,7 +27,10 @@ const MatchesPage = () => {
       try {
         const response = await axios.post(
           "/api/schedule",
-          {},
+          {
+            fromDate: moment().subtract(1, "days").format("YYYY-MM-DD"),
+            toDate: moment().format("YYYY-MM-DD"),
+          },
           { headers: { "Content-Type": "application/json" } }
         );
         setMatches(response.data.data);

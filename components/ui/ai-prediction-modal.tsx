@@ -28,6 +28,11 @@ import {
   X,
 } from "lucide-react";
 import { CalculatAIPrediction } from "@/lib/utils";
+import { useParams, useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import toast from "react-hot-toast";
+import { updateCredits } from "@/store/slices/authSlice";
 
 interface Team {
   squadId: number;
@@ -52,6 +57,11 @@ interface AIPredictionModalProps {
 }
 
 const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [predictionData, setPredictionData] = useState<any>(null);
 
@@ -60,13 +70,30 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
 
   const handleGetPrediction = async () => {
     setIsLoading(true);
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+
+    if (!user || user.credits < 1) {
+      toast.error("Insufficient credits. Please purchase more credits.");
+      return;
+    }
+
+    try {
+      const data = CalculatAIPrediction(match);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setPredictionData(data);
+      setIsLoading(false);
+      dispatch(updateCredits(user.credits - 1));
+      toast.success("AI Prediction generated successfully!");
+    } catch (error) {
+      toast.error("Failed to generate prediction. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
 
     // Simulate API call
-    const data = CalculatAIPrediction(match);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log(data);
-    setPredictionData(data);
-    setIsLoading(false);
   };
 
   const getRoleIcon = (role: string) => {
@@ -110,9 +137,9 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
               </div>
               <span>AI Match Prediction</span>
             </DialogTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            {/* <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-4 w-4" />
-            </Button>
+            </Button> */}
           </div>
           <div className="flex items-center space-x-4 text-sm text-gray-600">
             <div className="flex items-center space-x-2">
