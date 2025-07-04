@@ -375,16 +375,16 @@ export const AnalyzeFantasyData = (data: any) => {
       })),
     },
     keyPlayers: {
-      [team1Data.teamName]: team1Data.keyPlayers,
-      [team2Data.teamName]: team2Data.keyPlayers,
+      team1: team1Data.keyPlayers,
+      team2: team2Data.keyPlayers,
     },
     topBatsman: {
-      [team1Data.teamName]: team1Data.topBatsman,
-      [team2Data.teamName]: team2Data.topBatsman,
+      team1: team1Data.topBatsman,
+      team2: team2Data.topBatsman,
     },
     topBowler: {
-      [team1Data.teamName]: team1Data.topBowler,
-      [team2Data.teamName]: team2Data.topBowler,
+      team1: team1Data.topBowler,
+      team2: team2Data.topBowler,
     },
   };
 };

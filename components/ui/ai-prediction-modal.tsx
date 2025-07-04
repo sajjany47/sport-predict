@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState } from "react";
@@ -26,6 +27,7 @@ import {
   Brain,
   X,
 } from "lucide-react";
+import { CalculatAIPrediction } from "@/lib/utils";
 
 interface Team {
   squadId: number;
@@ -49,179 +51,21 @@ interface AIPredictionModalProps {
   match: Match;
 }
 
-const AIPredictionModal: React.FC<AIPredictionModalProps> = ({
-  isOpen,
-  onClose,
-  match,
-}) => {
+const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [predictionData, setPredictionData] = useState<any>(null);
 
-  const team1 = match.teams[0];
-  const team2 = match.teams[1];
-
-  // Mock AI prediction data
-  const mockPredictionData = {
-    firstInningScore: {
-      team1: { min: 165, max: 185, predicted: 175 },
-      team2: { min: 155, max: 175, predicted: 165 },
-    },
-    winnerPrediction: {
-      team1: { probability: 65, confidence: "High" },
-      team2: { probability: 35, confidence: "Medium" },
-    },
-    dream11Team: {
-      captain: {
-        id: 1,
-        name: "Virat Kohli",
-        team: team1.teamShortName,
-        role: "BAT",
-        points: 95,
-        form: "Excellent",
-      },
-      viceCaptain: {
-        id: 2,
-        name: "Pat Cummins",
-        team: team2.teamShortName,
-        role: "BOWL",
-        points: 88,
-        form: "Good",
-      },
-      players: [
-        {
-          id: 3,
-          name: "Rohit Sharma",
-          team: team1.teamShortName,
-          role: "BAT",
-          points: 85,
-        },
-        {
-          id: 4,
-          name: "Steve Smith",
-          team: team2.teamShortName,
-          role: "BAT",
-          points: 82,
-        },
-        {
-          id: 5,
-          name: "Ravindra Jadeja",
-          team: team1.teamShortName,
-          role: "ALL",
-          points: 78,
-        },
-        {
-          id: 6,
-          name: "Glenn Maxwell",
-          team: team2.teamShortName,
-          role: "ALL",
-          points: 75,
-        },
-        {
-          id: 7,
-          name: "Jasprit Bumrah",
-          team: team1.teamShortName,
-          role: "BOWL",
-          points: 80,
-        },
-        {
-          id: 8,
-          name: "Josh Hazlewood",
-          team: team2.teamShortName,
-          role: "BOWL",
-          points: 77,
-        },
-        {
-          id: 9,
-          name: "KL Rahul",
-          team: team1.teamShortName,
-          role: "WK",
-          points: 72,
-        },
-      ],
-    },
-    keyPlayers: {
-      team1: [
-        {
-          name: "Virat Kohli",
-          role: "BAT",
-          impact: "High",
-          recentForm: "85, 67, 92, 45, 78",
-        },
-        {
-          name: "Jasprit Bumrah",
-          role: "BOWL",
-          impact: "High",
-          recentForm: "3/25, 2/34, 4/18, 1/45, 2/28",
-        },
-        {
-          name: "Ravindra Jadeja",
-          role: "ALL",
-          impact: "Medium",
-          recentForm: "45, 23, 67, 34, 56",
-        },
-      ],
-      team2: [
-        {
-          name: "Steve Smith",
-          role: "BAT",
-          impact: "High",
-          recentForm: "78, 45, 89, 23, 67",
-        },
-        {
-          name: "Pat Cummins",
-          role: "BOWL",
-          impact: "High",
-          recentForm: "2/35, 3/28, 1/42, 4/22, 2/31",
-        },
-        {
-          name: "Glenn Maxwell",
-          role: "ALL",
-          impact: "Medium",
-          recentForm: "34, 67, 23, 89, 45",
-        },
-      ],
-    },
-    topBatsman: {
-      team1: {
-        name: "Virat Kohli",
-        predictedRuns: "65-85",
-        probability: "78%",
-        recentAvg: 67.5,
-        venueAvg: 72.3,
-      },
-      team2: {
-        name: "Steve Smith",
-        predictedRuns: "55-75",
-        probability: "72%",
-        recentAvg: 60.4,
-        venueAvg: 68.1,
-      },
-    },
-    topBowler: {
-      team1: {
-        name: "Jasprit Bumrah",
-        predictedWickets: "2-4",
-        probability: "85%",
-        recentAvg: 2.8,
-        venueAvg: 3.1,
-      },
-      team2: {
-        name: "Pat Cummins",
-        predictedWickets: "2-3",
-        probability: "80%",
-        recentAvg: 2.5,
-        venueAvg: 2.9,
-      },
-    },
-  };
+  const team1 = match.matchInfo.teams[0];
+  const team2 = match.matchInfo.teams[1];
 
   const handleGetPrediction = async () => {
     setIsLoading(true);
 
     // Simulate API call
+    const data = CalculatAIPrediction(match);
     await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    setPredictionData(mockPredictionData);
+    console.log(data);
+    setPredictionData(data);
     setIsLoading(false);
   };
 
