@@ -867,7 +867,7 @@ const MatchDetailsPage = () => {
       <AIPredictionModal
         isOpen={isPredictionModalOpen}
         onClose={() => setIsPredictionModalOpen(false)}
-        match={selectedMatch}
+        match={{ ...matchData, matchInfo: selectedMatch }}
       />
     </div>
   );

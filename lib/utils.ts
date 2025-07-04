@@ -389,7 +389,7 @@ export const AnalyzeFantasyData = (data: any) => {
   };
 };
 
-export const CalculateAverageScore = (data: any) => {
+export const CalculatAIPrediction = (data: any) => {
   const apiAvgScore = Number(data.overview.groundAndWheather.avgScore) ?? null;
 
   const stadiumAvg = StadiumAvgScore(data);
