@@ -274,6 +274,121 @@ export const CalculateWinnerPrediction = (team: any, opponent: any) => {
   return score + wickets + defense;
 };
 
+export const AnalyzeFantasyData = (data: any) => {
+  const getTopPlayers = (squad: any) =>
+    [...squad].sort((a, b) => b.fantasyPoints - a.fantasyPoints);
+
+  const getTopBatsman = (squad: any) =>
+    [...squad]
+      .filter((p) => p.type === "BAT" || p.type === "WK" || p.type === "AR")
+      .sort((a, b) => b.battingForm.totalRuns - a.battingForm.totalRuns)[0];
+
+  const getTopBowler = (squad: any) =>
+    [...squad]
+      .filter((p) => p.type === "BOWL" || p.type === "AR")
+      .sort((a, b) => b.bowlingForm.totalWicket - a.bowlingForm.totalWicket)[0];
+
+  const formatBatsman = (player: any) => {
+    const recentAvg = player.battingForm.totalRuns || 0;
+    const venueAvg = player.stadiumBattingStats.totalRuns || 0;
+
+    // Weighted formula for probability (you can tweak weights)
+    const score = recentAvg * 0.7 + venueAvg * 0.3;
+    const probability = Math.min(100, Math.round((score / 50) * 100)); // Assuming 50 is "excellent" base
+
+    return {
+      name: player.name,
+      predictedRuns: `${Math.round(recentAvg - 10)}-${Math.round(
+        recentAvg + 10
+      )}`,
+      probability: `${probability}%`,
+      recentAvg: parseFloat(recentAvg.toFixed(1)),
+      venueAvg: parseFloat(venueAvg.toFixed(1)),
+    };
+  };
+
+  const formatBowler = (player: any) => {
+    const recentAvg = player.bowlingForm.totalWicket || 0;
+    const venueAvg = player.stadiumBowlingStats.totalWicket || 0;
+
+    // Weighted formula for probability
+    const score = recentAvg * 0.6 + venueAvg * 0.4;
+    const probability = Math.min(100, Math.round((score / 3) * 100)); // 3 wickets = strong bowler performance
+
+    return {
+      name: player.name,
+      predictedWickets: `${Math.floor(recentAvg)}-${Math.ceil(recentAvg + 1)}`,
+      probability: `${probability}%`,
+      recentAvg: parseFloat(recentAvg.toFixed(1)),
+      venueAvg: parseFloat(venueAvg.toFixed(1)),
+    };
+  };
+
+  const teamData = data.map((team: any) => {
+    const topPlayers = getTopPlayers(team.squad);
+    const topBat = getTopBatsman(team.squad);
+    const topBowl = getTopBowler(team.squad);
+
+    return {
+      teamName: team.shortName,
+      topPlayers,
+      topBatsman: formatBatsman(topBat),
+      topBowler: formatBowler(topBowl),
+      keyPlayers: topPlayers.slice(0, 5).map((p) => ({
+        name: p.name,
+        role: p.type,
+        impact: p.fantasyPoints > 40 ? "High" : "Medium",
+        recentForm: `${p.fantasyPoints.toFixed(0)}, ...`,
+      })),
+    };
+  });
+
+  const [team1Data, team2Data] = teamData;
+
+  return {
+    dream11Team: {
+      captain: {
+        name: team1Data.topPlayers[0].name,
+        team: team1Data.teamName,
+        role: team1Data.topPlayers[0].type,
+        points: parseFloat(team1Data.topPlayers[0].fantasyPoints.toFixed(1)),
+        form: "Excellent",
+      },
+      viceCaptain: {
+        name: team2Data.topPlayers[0].name,
+        team: team2Data.teamName,
+        role: team2Data.topPlayers[0].type,
+        points: parseFloat(team2Data.topPlayers[0].fantasyPoints.toFixed(1)),
+        form: "Good",
+      },
+      players: [
+        ...team1Data.topPlayers.slice(0, 4),
+        ...team2Data.topPlayers.slice(0, 4),
+      ].map((p, i) => ({
+        id: i + 1,
+        name: p.name,
+        team: team1Data.teamName.includes(p.name)
+          ? team1Data.teamName
+          : team2Data.teamName,
+        role: p.type,
+        points: parseFloat(p.fantasyPoints.toFixed(1)),
+      })),
+    },
+    keyPlayers: {
+      [team1Data.teamName]: team1Data.keyPlayers,
+      [team2Data.teamName]: team2Data.keyPlayers,
+    },
+    topBatsman: {
+      [team1Data.teamName]: team1Data.topBatsman,
+      [team2Data.teamName]: team2Data.topBatsman,
+    },
+    topBowler: {
+      [team1Data.teamName]: team1Data.topBowler,
+      [team2Data.teamName]: team2Data.topBowler,
+    },
+  };
+};
+
 export const CalculateAverageScore = (data: any) => {
   const apiAvgScore = Number(data.overview.groundAndWheather.avgScore) ?? null;
 
@@ -318,6 +433,12 @@ export const CalculateAverageScore = (data: any) => {
   const team1Prob = (team1Score / totalScore) * 100;
   const team2Prob = (team2Score / totalScore) * 100;
   // ..............................calculate average score and winner prediction........................................................
+
+  //Calculate Fantasy Team List and Key Player.................................................................................
+
+  const fantasyData = AnalyzeFantasyData(avgPrepare.accordingToPlayerStats);
+
+  //..........................Calculate Fantasy Team List and Key Player........................................................
   const result = {
     firstInningScore: {
       team1: {
@@ -341,70 +462,12 @@ export const CalculateAverageScore = (data: any) => {
         confidence: Number(team2Prob) > Number(team1Prob) ? "High" : "Medium",
       },
     },
+    ...fantasyData,
   };
 
   console.log(result);
 
-  // Calculate Player Average Score
-
-  const sortPrepareData: any[] = [];
-
-  accordingToPlayerStats.forEach((element: any) => {
-    const againstTeamBowlingStats = [...element.squad].sort(
-      (a, b) =>
-        b.againstTeamBowlingStats.totalWicket -
-        a.againstTeamBowlingStats.totalWicket
-    );
-    const againstTeamBattingStats = [...element.squad].sort(
-      (a, b) =>
-        b.againstTeamBattingStats.totalRuns -
-        a.againstTeamBattingStats.totalRuns
-    );
-    const stadiumBattingStats = [...element.squad].sort(
-      (a, b) =>
-        b.stadiumBattingStats.totalRuns - a.stadiumBattingStats.totalRuns
-    );
-    const stadiumBowlingStats = [...element.squad].sort(
-      (a, b) =>
-        b.stadiumBowlingStats.totalWicket - a.stadiumBowlingStats.totalWicket
-    );
-    const battingStats = [...element.squad].sort(
-      (a, b) => b.battingStats.totalRuns - a.battingStats.totalRuns
-    );
-    const bowlingStats = [...element.squad].sort(
-      (a, b) => b.bowlingStats.totalWicket - a.bowlingStats.totalWicket
-    );
-    const battingForm = [...element.squad].sort(
-      (a, b) => b.battingForm.totalRuns - a.battingForm.totalRuns
-    );
-    const bowlingForm = [...element.squad].sort(
-      (a, b) => b.bowlingForm.totalWicket - a.bowlingForm.totalWicket
-    );
-    const fantasyPoint = [...element.squad].sort(
-      (a, b) => b.fantasyPoints - a.fantasyPoints
-    );
-
-    sortPrepareData.push({
-      flag: element.flag,
-      color: element.color,
-      shortName: element.shortName,
-      squad: {
-        againstTeamBowlingStats: againstTeamBowlingStats,
-        againstTeamBattingStats: againstTeamBattingStats,
-        stadiumBattingStats: stadiumBattingStats,
-        stadiumBowlingStats: stadiumBowlingStats,
-        battingStats: battingStats,
-        bowlingStats: bowlingStats,
-        battingForm: battingForm,
-        bowlingForm: bowlingForm,
-        fantasyPoint: fantasyPoint,
-      },
-    });
-  });
-
-  console.log("team1AvgScore=====>", team1AvgScore);
-
-  return { stadiumAVerageScore: avgPrepare.stadiumAvg };
+  return result;
 };
 
 export const AnanlysisAvgScore = (data: any) => {
