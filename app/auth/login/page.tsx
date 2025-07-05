@@ -44,8 +44,8 @@ const LoginPage = () => {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       if (
-        formData.email === "admin@sportpredict.com" &&
-        formData.password === "admin123"
+        formData.email === "sajjany47@gmail.com" &&
+        formData.password === "123456"
       ) {
         const adminUser = {
           id: "admin",
@@ -71,7 +71,7 @@ const LoginPage = () => {
           credits: 2,
           subscriptionPlan: "Free",
           subscriptionExpiry: "2025-02-15",
-          role: 'user' as const,
+          role: "user" as const,
         };
 
         dispatch(loginSuccess(mockUser));
