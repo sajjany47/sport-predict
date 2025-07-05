@@ -28,8 +28,8 @@ const MatchesPage = () => {
         const response = await axios.post(
           "/api/schedule",
           {
-            fromDate: moment().subtract(1, "days").format("YYYY-MM-DD"),
-            toDate: moment().format("YYYY-MM-DD"),
+            fromDate: moment().format("YYYY-MM-DD"),
+            toDate: moment().add(1, "days").format("YYYY-MM-DD"),
           },
           { headers: { "Content-Type": "application/json" } }
         );

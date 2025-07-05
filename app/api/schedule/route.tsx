@@ -10,8 +10,7 @@ export async function POST(request: Request) {
       : moment().format("YYYY-MM-DD");
     const toDate = body.toDate
       ? moment(body.toDate).format("YYYY-MM-DD")
-      : moment().format("YYYY-MM-DD");
-
+      : moment().add(1, "days").format("YYYY-MM-DD");
     const encodeData = encodeURIComponent(
       JSON.stringify({
         filter: {
