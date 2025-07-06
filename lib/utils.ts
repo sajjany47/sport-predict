@@ -41,9 +41,7 @@ export const GetPSearchList = async (searchTerm: string) => {
         });
       }
     });
-    // if (type) {
-    //   console.log(playerList);
-    // }
+
     if (playerList.length === 0) {
       throw new Error("No players found");
     }
@@ -259,7 +257,7 @@ export const DynamicSort = (key: any, order = "asc") => {
 export const CalculateWinnerPrediction = (team: any, opponent: any) => {
   const scoreWeight = 0.4; // scoring power
   const wicketWeight = 0.3; // wicket-taking
-  const defenseWeight = 0.3; // run consumption
+  const defenseWeight = 0.4; // run consumption
 
   // Normalize by using both teams’ data
   const maxScore = Math.max(team.avgScore, opponent.avgScore);
@@ -420,6 +418,7 @@ export const CalculatAIPrediction = (data: any) => {
     squad: avgPrepare.accordingToPlayerStats[0].squad,
     stadiumAvg: avgPrepare.stadiumAvg,
   });
+
   const team2AvgScore = AnanlysisAvgScore({
     squad: avgPrepare.accordingToPlayerStats[1].squad,
     stadiumAvg: avgPrepare.stadiumAvg,
@@ -443,12 +442,12 @@ export const CalculatAIPrediction = (data: any) => {
     firstInningScore: {
       team1: {
         min: team1AvgScore.avgScore - 10,
-        max: team1AvgScore.avgScore + 20,
+        max: team1AvgScore.avgScore + 10,
         predicted: team1AvgScore.avgScore,
       },
       team2: {
         min: team2AvgScore.avgScore - 10,
-        max: team2AvgScore.avgScore + 20,
+        max: team2AvgScore.avgScore + 10,
         predicted: team2AvgScore.avgScore,
       },
     },
@@ -465,49 +464,49 @@ export const CalculatAIPrediction = (data: any) => {
     ...fantasyData,
   };
 
-  console.log(result);
-
   return result;
 };
 
 export const AnanlysisAvgScore = (data: any) => {
-  // Calculate Bowler Avg Runs Consume and Avg Wicket
+  // Calculate Bowler Avg Runs Consumed and Avg Wickets
   let totalWicket = 0;
   let totalRunConsume = 0;
 
-  data.squad.forEach((item: any) => {
+  data?.squad?.forEach((item: any) => {
     totalWicket +=
-      Number(item.bowlingStats.totalWicket) +
-      Number(item.againstTeamBowlingStats.totalWicket) +
-      Number(item.stadiumBowlingStats.totalWicket) +
-      Number(item.bowlingForm.totalWicket);
+      Number(item?.bowlingStats?.totalWicket || 0) +
+      Number(item?.againstTeamBowlingStats?.totalWicket || 0) +
+      Number(item?.stadiumBowlingStats?.totalWicket || 0) +
+      Number(item?.bowlingForm?.totalWicket || 0);
+
     totalRunConsume +=
-      Number(item.bowlingStats.totalAvg) +
-      Number(item.againstTeamBowlingStats.totalAvg) +
-      Number(item.stadiumBowlingStats.totalAvg) +
-      Number(item.bowlingForm.totalAvg);
+      Number(item?.bowlingStats?.totalAvg || 0) +
+      Number(item?.againstTeamBowlingStats?.totalAvg || 0) +
+      Number(item?.stadiumBowlingStats?.totalAvg || 0) +
+      Number(item?.bowlingForm?.totalAvg || 0);
   });
+
+  const playerCount = data?.squad?.length || 1;
+
   const avgWicket = Math.floor(
-    ((totalWicket / data.squad.length) * 11 + data.stadiumAvg.avgWicket) / 2 + 2
-  );
-  const avgRunconsume = Math.floor(
-    (totalRunConsume / data.squad.length) * 11 + 14
+    totalWicket / playerCount + (data?.stadiumAvg?.avgWicket || 0) + 2
   );
 
-  //Calculate Avg Score using player stats and Ground Stats
+  const avgRunconsume = Math.floor((totalRunConsume / playerCount) * 11 + 14);
 
+  // Calculate Avg Score using player stats and Ground Stats
   let totalScore = 0;
 
-  data.squad.forEach((item: any) => {
+  data?.squad?.forEach((item: any) => {
     totalScore +=
-      Number(item.battingStats.totalRuns) +
-      Number(item.againstTeamBattingStats.totalRuns) +
-      Number(item.stadiumBattingStats.totalRuns) +
-      Number(item.battingForm.totalRuns);
+      Number(item?.battingStats?.totalRuns || 0) +
+      Number(item?.againstTeamBattingStats?.totalRuns || 0) +
+      Number(item?.stadiumBattingStats?.totalRuns || 0) +
+      Number(item?.battingForm?.totalRuns || 0);
   });
 
   const avgScore = Math.floor(
-    ((totalScore / data.squad.length) * 11 + data.stadiumAvg.avgScore) / 2 + 14
+    totalScore / playerCount + (data?.stadiumAvg?.avgScore || 0) + 11
   );
 
   return { avgScore, avgWicket, avgRunconsume };
@@ -601,7 +600,7 @@ export const GetBattingForm = (
 
   return {
     totalRuns: innings ? runs / innings : 0,
-    totalSR: balls ? (runs / balls) * 100 : 0,
+    totalSR: balls ? runs / balls : 0,
   };
 };
 

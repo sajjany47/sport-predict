@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
@@ -15,6 +16,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     (state: RootState) => state.auth
   );
   const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to login if not authenticated or not an admin
+    if (!isAuthenticated || user?.role !== "admin") {
+      router.push("/auth/login");
+    }
+  }, []);
 
   return (
     <>

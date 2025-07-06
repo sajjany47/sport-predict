@@ -37,6 +37,7 @@ import {
 import toast from "react-hot-toast";
 import axios from "axios";
 import SquadDialoge from "./SquadDialoge";
+import CustomLoader from "@/components/ui/CustomLoader";
 
 interface Player {
   id: number;
@@ -243,19 +244,12 @@ const MatchDetailsPage = () => {
       router.push("/auth/login");
       return;
     }
+    if (!user || user.credits < 1) {
+      router.push("/subscription");
+      return;
+    }
     setIsPredictionModalOpen(true);
   };
-
-  if (!matchData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading match details...</p>
-        </div>
-      </div>
-    );
-  }
 
   const getFormIcon = (result: string) => {
     if (result.includes("won") || result.includes("beat")) {
@@ -283,593 +277,625 @@ const MatchDetailsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Matches
-          </Button>
+    <>
+      {matchData ? (
+        <div className="min-h-screen bg-gray-50">
+          <div className="container mx-auto px-4 py-8">
+            {/* Header */}
+            <div className="mb-8">
+              <Button
+                variant="ghost"
+                onClick={() => router.back()}
+                className="mb-4"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Matches
+              </Button>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-              <div>
-                <Badge className="mb-2">{matchData.matchInfo.format}</Badge>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {matchData.matchInfo.matchName}
-                </h1>
-                <p className="text-gray-600">
-                  {matchData.matchInfo.matchDescription}
-                </p>
-              </div>
-              <div className="mt-4 md:mt-0">
-                <Button
-                  onClick={handleGetPrediction}
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Generating...</span>
-                    </div>
-                  ) : (
-                    <>
-                      <Zap className="h-4 w-4 mr-2" />
-                      Get AI Prediction
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {/* Teams */}
-            <div className="flex items-center justify-center space-x-8 mb-6">
-              {matchData?.matchInfo?.teams?.map((team, index) => (
-                <div key={team.squadId} className="text-center">
-                  <div
-                    className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2 border-4"
-                    style={{ borderColor: team.color }}
-                  >
-                    <img
-                      src={team.teamFlagUrl}
-                      alt={team.teamName}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h3 className="font-semibold text-gray-900">
-                    {team.teamName}
-                  </h3>
-                  <p className="text-sm text-gray-600">{team.teamShortName}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Match Info */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div className="flex items-center justify-center space-x-2">
-                <Calendar className="h-5 w-5 text-gray-500" />
-                <span className="text-gray-700">
-                  {new Date(matchData.matchInfo.startTime).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="flex items-center justify-center space-x-2">
-                <Clock className="h-5 w-5 text-gray-500" />
-                <span className="text-gray-700">
-                  {new Date(matchData.matchInfo.startTime).toLocaleTimeString()}
-                </span>
-              </div>
-              <div className="flex items-center justify-center space-x-2">
-                <MapPin className="h-5 w-5 text-gray-500" />
-                <span className="text-gray-700">
-                  {matchData.matchInfo.venue}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Prediction Results */}
-        {showPrediction && (
-          <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Zap className="h-6 w-6 text-blue-600" />
-                <span>AI Prediction Results</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="bg-white rounded-lg p-4 shadow-md">
-                    <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                    <h3 className="font-semibold text-gray-900">
-                      Match Winner
-                    </h3>
-                    <p className="text-lg font-bold text-blue-600">
-                      West Indies
-                    </p>
-                    <p className="text-sm text-gray-600">72% Win Probability</p>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="bg-white rounded-lg p-4 shadow-md">
-                    <Crown className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-                    <h3 className="font-semibold text-gray-900">
-                      Dream11 Captain
-                    </h3>
-                    <p className="text-lg font-bold text-purple-600">
-                      Brandon King
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Expected: 65+ points
-                    </p>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="bg-white rounded-lg p-4 shadow-md">
-                    <Star className="h-8 w-8 text-orange-500 mx-auto mb-2" />
-                    <h3 className="font-semibold text-gray-900">
-                      Vice Captain
-                    </h3>
-                    <p className="text-lg font-bold text-orange-600">
-                      David Warner
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Expected: 55+ points
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="squads">Squads</TabsTrigger>
-            <TabsTrigger value="stadium">Stadium Stats</TabsTrigger>
-            <TabsTrigger value="weather">Weather</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            {/* Ground & Weather */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Sun className="h-5 w-5 text-yellow-500" />
-                  <span>Ground & Weather Conditions</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <Gauge className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Pitch Type</p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {matchData?.overview.groundAndWheather.pitchType}
-                    </p>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <BarChart3 className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Average Score</p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {matchData.overview.groundAndWheather.avgScore}
-                    </p>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <CloudRain className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Weather</p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {matchData.overview.groundAndWheather.wheatherType}
-                    </p>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <Thermometer className="h-8 w-8 text-orange-500 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Temperature</p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {matchData.overview.groundAndWheather.temprature}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  <span>Recent Form (Last 5 Matches)</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {matchData.overview.stats.recentMatch.map((teamData) => (
-                    <div key={teamData.teamName} className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <img
-                            src={
-                              matchData.matchInfo.teams.find(
-                                (t) => t.teamShortName === teamData.teamName
-                              )?.teamFlagUrl
-                            }
-                            alt={teamData.teamName}
-                            className="w-8 h-8 rounded-full"
-                          />
-                          <h3 className="font-semibold text-lg">
-                            {teamData.teamName}
-                          </h3>
-                        </div>
-                        <div className="flex space-x-1">
-                          {teamData.match
-                            .slice(0, 5)
-                            .map((match: any, index: number) => (
-                              <div
-                                key={index}
-                                className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${getFormColor(
-                                  match.result,
-                                  teamData.teamName
-                                )}`}
-                              >
-                                {match.winner === teamData.teamName ? "W" : "L"}
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        {teamData.match
-                          .slice(0, 3)
-                          .map((match: any, index: any) => (
-                            <div
-                              key={index}
-                              className="p-3 bg-gray-50 rounded-lg"
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center space-x-2">
-                                  {getFormIcon(match.result)}
-                                  <span className="font-medium text-sm">
-                                    {match.team1} vs {match.team2}
-                                  </span>
-                                </div>
-                                <Badge variant="outline" className="text-xs">
-                                  {match.format}
-                                </Badge>
-                              </div>
-                              <p className="text-xs text-gray-600 mb-1">
-                                {match.date} • {match.location}
-                              </p>
-                              <p className="text-sm font-medium text-gray-900">
-                                {match.result}
-                              </p>
-                              <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-                                <div>
-                                  <span className="text-gray-600">
-                                    {match.team1}:{" "}
-                                  </span>
-                                  <span className="font-medium">
-                                    {formatScore(match.team1Score)}
-                                  </span>
-                                </div>
-                                <div>
-                                  <span className="text-gray-600">
-                                    {match.team2}:{" "}
-                                  </span>
-                                  <span className="font-medium">
-                                    {formatScore(match.team2Score)}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Head to Head */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
-                  <span>Head to Head Record</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-6">
-                  <div className="flex items-center justify-center space-x-8">
-                    {matchData.overview.stats.h2h.h2hStat.map((stat) => (
-                      <div key={stat.team1} className="text-center">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <img
-                            src={
-                              matchData.matchInfo.teams.find(
-                                (t) => t.teamShortName === stat.team1
-                              )?.teamFlagUrl
-                            }
-                            alt={stat.team1}
-                            className="w-8 h-8 rounded-full"
-                          />
-                          <span className="font-semibold">{stat.team1}</span>
-                        </div>
-                        <div className="text-2xl font-bold text-blue-600">
-                          {stat.win}
-                        </div>
-                        <div className="text-sm text-gray-600">Wins</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-center mt-4">
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                  <div>
+                    <Badge className="mb-2">{matchData.matchInfo.format}</Badge>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                      {matchData.matchInfo.matchName}
+                    </h1>
                     <p className="text-gray-600">
-                      Total Matches:{" "}
-                      {matchData.overview.stats.h2h.h2hStat[0]?.totalPlay || 0}
+                      {matchData.matchInfo.matchDescription}
                     </p>
+                  </div>
+                  <div className="mt-4 md:mt-0">
+                    <Button
+                      onClick={handleGetPrediction}
+                      disabled={isLoading}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>Generating...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <Zap className="h-4 w-4 mr-2" />
+                          Get AI Prediction
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-900 mb-3">
-                    Recent H2H Matches
-                  </h4>
-                  {matchData.overview.stats.h2h.recentH2HMatch[0]?.match
-                    .slice(0, 3)
-                    .map((match: any, index: any) => (
-                      <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center space-x-2">
-                            {getFormIcon(match.result)}
-                            <span className="font-medium">
-                              {match.team1} vs {match.team2}
-                            </span>
-                          </div>
-                          <Badge variant="outline">{match.format}</Badge>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-1">
-                          {match.date} • {match.location}
-                        </p>
-                        <p className="text-sm font-medium text-gray-900 mb-2">
-                          {match.result}
-                        </p>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div>
-                            <span className="text-gray-600">
-                              {match.team1}:{" "}
-                            </span>
-                            <span className="font-medium">
-                              {formatScore(match.team1Score)}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">
-                              {match.team2}:{" "}
-                            </span>
-                            <span className="font-medium">
-                              {formatScore(match.team2Score)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Team Strengths */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Shield className="h-5 w-5 text-purple-600" />
-                  <span>Team Strengths</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {matchData.overview.stats.teamStrength.map((team) => (
-                    <div key={team.teamName} className="space-y-4">
-                      <div className="flex items-center space-x-3">
+                {/* Teams */}
+                <div className="flex items-center justify-center space-x-8 mb-6">
+                  {matchData?.matchInfo?.teams?.map((team, index) => (
+                    <div key={team.squadId} className="text-center">
+                      <div
+                        className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2 border-4"
+                        style={{ borderColor: team.color }}
+                      >
                         <img
-                          src={
-                            matchData.matchInfo.teams.find(
-                              (t) => t.teamShortName === team.teamName
-                            )?.teamFlagUrl
-                          }
+                          src={team.teamFlagUrl}
                           alt={team.teamName}
-                          className="w-8 h-8 rounded-full"
+                          className="w-full h-full object-cover"
                         />
-                        <h3 className="font-semibold text-lg">
-                          {team.teamName}
-                        </h3>
                       </div>
-
-                      <div className="space-y-3">
-                        <div>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm text-gray-600">
-                              Batting First Win %
-                            </span>
-                            <span className="font-semibold">
-                              {team.battingFirstWin}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-blue-600 h-2 rounded-full"
-                              style={{ width: team.battingFirstWin }}
-                            ></div>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm text-gray-600">
-                              Bowling First Win %
-                            </span>
-                            <span className="font-semibold">
-                              {team.bowlingFirstWin}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-green-600 h-2 rounded-full"
-                              style={{ width: team.bowlingFirstWin }}
-                            ></div>
-                          </div>
-                        </div>
-                      </div>
+                      <h3 className="font-semibold text-gray-900">
+                        {team.teamName}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {team.teamShortName}
+                      </p>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          <TabsContent value="squads" className="space-y-6">
-            {matchData?.squadList?.map((squad) => (
-              <Card key={squad.shortName}>
+                {/* Match Info */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Calendar className="h-5 w-5 text-gray-500" />
+                    <span className="text-gray-700">
+                      {new Date(
+                        matchData.matchInfo.startTime
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <Clock className="h-5 w-5 text-gray-500" />
+                    <span className="text-gray-700">
+                      {new Date(
+                        matchData.matchInfo.startTime
+                      ).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <MapPin className="h-5 w-5 text-gray-500" />
+                    <span className="text-gray-700">
+                      {matchData.matchInfo.venue}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Prediction Results */}
+            {showPrediction && (
+              <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-3">
-                    <img
-                      src={squad.flag}
-                      alt={squad.shortName}
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <span>{squad.shortName} Squad</span>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Zap className="h-6 w-6 text-blue-600" />
+                    <span>AI Prediction Results</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Tabs defaultValue="playing" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="playing">
-                        Playing XI ({squad.playingPlayer.length})
-                      </TabsTrigger>
-                      <TabsTrigger value="bench">
-                        Bench ({squad.benchPlayer.length})
-                      </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="playing" className="mt-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <SquadDialoge data={squad?.playingPlayer} />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center">
+                      <div className="bg-white rounded-lg p-4 shadow-md">
+                        <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                        <h3 className="font-semibold text-gray-900">
+                          Match Winner
+                        </h3>
+                        <p className="text-lg font-bold text-blue-600">
+                          West Indies
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          72% Win Probability
+                        </p>
                       </div>
-                    </TabsContent>
-
-                    <TabsContent value="bench" className="mt-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <SquadDialoge data={squad?.benchPlayer} />
+                    </div>
+                    <div className="text-center">
+                      <div className="bg-white rounded-lg p-4 shadow-md">
+                        <Crown className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                        <h3 className="font-semibold text-gray-900">
+                          Dream11 Captain
+                        </h3>
+                        <p className="text-lg font-bold text-purple-600">
+                          Brandon King
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Expected: 65+ points
+                        </p>
                       </div>
-                    </TabsContent>
-                  </Tabs>
+                    </div>
+                    <div className="text-center">
+                      <div className="bg-white rounded-lg p-4 shadow-md">
+                        <Star className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+                        <h3 className="font-semibold text-gray-900">
+                          Vice Captain
+                        </h3>
+                        <p className="text-lg font-bold text-orange-600">
+                          David Warner
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Expected: 55+ points
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-            ))}
-          </TabsContent>
+            )}
 
-          <TabsContent value="stadium" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5 text-green-600" />
-                  <span>Stadium: {matchData.matchInfo.venue}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <h3 className="font-semibold">
-                    Last 10 Matches at this Venue
-                  </h3>
-                  <div className="space-y-3">
-                    {matchData?.stadiumStats?.map((match, index) => (
-                      <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {match.matchTitle}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {match.date}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            <span>{match.inn1Score}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                            <span>{match.inn2Score}</span>
-                          </div>
-                        </div>
+            {/* Main Content Tabs */}
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="squads">Squads</TabsTrigger>
+                <TabsTrigger value="stadium">Stadium Stats</TabsTrigger>
+                <TabsTrigger value="weather">Weather</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview" className="space-y-6">
+                {/* Ground & Weather */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Sun className="h-5 w-5 text-yellow-500" />
+                      <span>Ground & Weather Conditions</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <Gauge className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">Pitch Type</p>
+                        <p className="text-xl font-bold text-gray-900">
+                          {matchData?.overview.groundAndWheather.pitchType}
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <BarChart3 className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">Average Score</p>
+                        <p className="text-xl font-bold text-gray-900">
+                          {matchData.overview.groundAndWheather.avgScore}
+                        </p>
+                      </div>
+                      <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <CloudRain className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">Weather</p>
+                        <p className="text-xl font-bold text-gray-900">
+                          {matchData.overview.groundAndWheather.wheatherType}
+                        </p>
+                      </div>
+                      <div className="text-center p-4 bg-orange-50 rounded-lg">
+                        <Thermometer className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">Temperature</p>
+                        <p className="text-xl font-bold text-gray-900">
+                          {matchData.overview.groundAndWheather.temprature}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-          <TabsContent value="weather" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Sun className="h-5 w-5 text-yellow-500" />
-                  <span>Weather Conditions</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <Thermometer className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Temperature</p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {matchData.GroundWheather.temperature}
-                    </p>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <Droplets className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Humidity</p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {matchData.GroundWheather.humidity}
-                    </p>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <Wind className="h-8 w-8 text-gray-500 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Wind Speed</p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {matchData.GroundWheather.windSpeed}
-                    </p>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <Sun className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Conditions</p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {matchData.GroundWheather.conditions}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-      {/* AI Prediction Modal */}
-      <AIPredictionModal
-        isOpen={isPredictionModalOpen}
-        onClose={() => setIsPredictionModalOpen(false)}
-        match={{ ...matchData, matchInfo: selectedMatch }}
-      />
-    </div>
+                {/* Recent Form */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                      <span>Recent Form (Last 5 Matches)</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {matchData.overview.stats.recentMatch.map((teamData) => (
+                        <div key={teamData.teamName} className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <img
+                                src={
+                                  matchData.matchInfo.teams.find(
+                                    (t) => t.teamShortName === teamData.teamName
+                                  )?.teamFlagUrl
+                                }
+                                alt={teamData.teamName}
+                                className="w-8 h-8 rounded-full"
+                              />
+                              <h3 className="font-semibold text-lg">
+                                {teamData.teamName}
+                              </h3>
+                            </div>
+                            <div className="flex space-x-1">
+                              {teamData.match
+                                .slice(0, 5)
+                                .map((match: any, index: number) => (
+                                  <div
+                                    key={index}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${getFormColor(
+                                      match.result,
+                                      teamData.teamName
+                                    )}`}
+                                  >
+                                    {match.winner === teamData.teamName
+                                      ? "W"
+                                      : "L"}
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {teamData.match
+                              .slice(0, 3)
+                              .map((match: any, index: any) => (
+                                <div
+                                  key={index}
+                                  className="p-3 bg-gray-50 rounded-lg"
+                                >
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center space-x-2">
+                                      {getFormIcon(match.result)}
+                                      <span className="font-medium text-sm">
+                                        {match.team1} vs {match.team2}
+                                      </span>
+                                    </div>
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {match.format}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-gray-600 mb-1">
+                                    {match.date} • {match.location}
+                                  </p>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {match.result}
+                                  </p>
+                                  <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                                    <div>
+                                      <span className="text-gray-600">
+                                        {match.team1}:{" "}
+                                      </span>
+                                      <span className="font-medium">
+                                        {formatScore(match.team1Score)}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-600">
+                                        {match.team2}:{" "}
+                                      </span>
+                                      <span className="font-medium">
+                                        {formatScore(match.team2Score)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Head to Head */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Trophy className="h-5 w-5 text-yellow-500" />
+                      <span>Head to Head Record</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-6">
+                      <div className="flex items-center justify-center space-x-8">
+                        {matchData.overview.stats.h2h.h2hStat.map((stat) => (
+                          <div key={stat.team1} className="text-center">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <img
+                                src={
+                                  matchData.matchInfo.teams.find(
+                                    (t) => t.teamShortName === stat.team1
+                                  )?.teamFlagUrl
+                                }
+                                alt={stat.team1}
+                                className="w-8 h-8 rounded-full"
+                              />
+                              <span className="font-semibold">
+                                {stat.team1}
+                              </span>
+                            </div>
+                            <div className="text-2xl font-bold text-blue-600">
+                              {stat.win}
+                            </div>
+                            <div className="text-sm text-gray-600">Wins</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="text-center mt-4">
+                        <p className="text-gray-600">
+                          Total Matches:{" "}
+                          {matchData.overview.stats.h2h.h2hStat[0]?.totalPlay ||
+                            0}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-gray-900 mb-3">
+                        Recent H2H Matches
+                      </h4>
+                      {matchData.overview.stats.h2h.recentH2HMatch[0]?.match
+                        .slice(0, 3)
+                        .map((match: any, index: any) => (
+                          <div
+                            key={index}
+                            className="p-4 bg-gray-50 rounded-lg"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center space-x-2">
+                                {getFormIcon(match.result)}
+                                <span className="font-medium">
+                                  {match.team1} vs {match.team2}
+                                </span>
+                              </div>
+                              <Badge variant="outline">{match.format}</Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">
+                              {match.date} • {match.location}
+                            </p>
+                            <p className="text-sm font-medium text-gray-900 mb-2">
+                              {match.result}
+                            </p>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div>
+                                <span className="text-gray-600">
+                                  {match.team1}:{" "}
+                                </span>
+                                <span className="font-medium">
+                                  {formatScore(match.team1Score)}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">
+                                  {match.team2}:{" "}
+                                </span>
+                                <span className="font-medium">
+                                  {formatScore(match.team2Score)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Team Strengths */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Shield className="h-5 w-5 text-purple-600" />
+                      <span>Team Strengths</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {matchData.overview.stats.teamStrength.map((team) => (
+                        <div key={team.teamName} className="space-y-4">
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={
+                                matchData.matchInfo.teams.find(
+                                  (t) => t.teamShortName === team.teamName
+                                )?.teamFlagUrl
+                              }
+                              alt={team.teamName}
+                              className="w-8 h-8 rounded-full"
+                            />
+                            <h3 className="font-semibold text-lg">
+                              {team.teamName}
+                            </h3>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm text-gray-600">
+                                  Batting First Win %
+                                </span>
+                                <span className="font-semibold">
+                                  {team.battingFirstWin}
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full"
+                                  style={{ width: team.battingFirstWin }}
+                                ></div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm text-gray-600">
+                                  Bowling First Win %
+                                </span>
+                                <span className="font-semibold">
+                                  {team.bowlingFirstWin}
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-green-600 h-2 rounded-full"
+                                  style={{ width: team.bowlingFirstWin }}
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="squads" className="space-y-6">
+                {matchData?.squadList?.map((squad) => (
+                  <Card key={squad.shortName}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-3">
+                        <img
+                          src={squad.flag}
+                          alt={squad.shortName}
+                          className="w-8 h-8 rounded-full"
+                        />
+                        <span>{squad.shortName} Squad</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Tabs defaultValue="playing" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="playing">
+                            Playing XI ({squad.playingPlayer.length})
+                          </TabsTrigger>
+                          <TabsTrigger value="bench">
+                            Bench ({squad.benchPlayer.length})
+                          </TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="playing" className="mt-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <SquadDialoge data={squad?.playingPlayer} />
+                          </div>
+                        </TabsContent>
+
+                        <TabsContent value="bench" className="mt-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <SquadDialoge data={squad?.benchPlayer} />
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    </CardContent>
+                  </Card>
+                ))}
+              </TabsContent>
+
+              <TabsContent value="stadium" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <BarChart3 className="h-5 w-5 text-green-600" />
+                      <span>Stadium: {matchData.matchInfo.venue}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <h3 className="font-semibold">
+                        Last 10 Matches at this Venue
+                      </h3>
+                      <div className="space-y-3">
+                        {matchData?.stadiumStats?.map((match, index) => (
+                          <div
+                            key={index}
+                            className="p-4 bg-gray-50 rounded-lg"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <p className="font-medium text-gray-900">
+                                  {match.matchTitle}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  {match.date}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                              <div className="flex items-center space-x-2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <span>{match.inn1Score}</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <span>{match.inn2Score}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="weather" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Sun className="h-5 w-5 text-yellow-500" />
+                      <span>Weather Conditions</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <Thermometer className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">Temperature</p>
+                        <p className="text-xl font-bold text-gray-900">
+                          {matchData.GroundWheather.temperature}
+                        </p>
+                      </div>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <Droplets className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">Humidity</p>
+                        <p className="text-xl font-bold text-gray-900">
+                          {matchData.GroundWheather.humidity}
+                        </p>
+                      </div>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <Wind className="h-8 w-8 text-gray-500 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">Wind Speed</p>
+                        <p className="text-xl font-bold text-gray-900">
+                          {matchData.GroundWheather.windSpeed}
+                        </p>
+                      </div>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <Sun className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">Conditions</p>
+                        <p className="text-xl font-bold text-gray-900">
+                          {matchData.GroundWheather.conditions}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+          {/* AI Prediction Modal */}
+          <AIPredictionModal
+            isOpen={isPredictionModalOpen}
+            onClose={() => setIsPredictionModalOpen(false)}
+            match={{ ...matchData, matchInfo: selectedMatch }}
+          />
+        </div>
+      ) : (
+        <CustomLoader message="Loading match details" />
+      )}
+    </>
   );
 };
 

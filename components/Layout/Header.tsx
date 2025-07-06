@@ -37,13 +37,15 @@ import {
   HelpCircle,
   Calendar,
   LayoutDashboard,
+  SwitchCamera,
 } from "lucide-react";
 import MarqueeNotice from "../ui/marquee-notice";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
   const pathname = usePathname();
-
+  const router = useRouter();
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
@@ -53,6 +55,7 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    router.push("/");
   };
 
   const navItems = [
@@ -61,6 +64,29 @@ const Header = () => {
     { href: "/support", label: "Support", icon: HelpCircle },
     { href: "/matches", label: "Matches", icon: Calendar },
     { href: "/subscription", label: "Subscription", icon: CreditCard },
+  ];
+
+  const menuItems = [
+    {
+      label: "Profile",
+      href: "/dashboard/profile",
+      icon: <User className="mr-2 h-4 w-4" />,
+    },
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: <LayoutDashboard className="mr-2 h-4 w-4" />,
+    },
+    {
+      label: "Subscription",
+      href: "/dashboard/subscription",
+      icon: <Settings className="mr-2 h-4 w-4" />,
+    },
+    {
+      label: "Order History",
+      href: "/dashboard/orders",
+      icon: <History className="mr-2 h-4 w-4" />,
+    },
   ];
 
   return (
@@ -117,33 +143,30 @@ const Header = () => {
                 <DropdownMenuContent className="w-56" align="end">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/profile" className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/dashboard/subscription"
-                      className="cursor-pointer"
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Subscription
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/orders" className="cursor-pointer">
-                      <History className="mr-2 h-4 w-4" />
-                      Order History
-                    </Link>
-                  </DropdownMenuItem>
+                  {user.role === "admin" && (
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={"/admin"}
+                        className="cursor-pointer flex items-center"
+                      >
+                        <SwitchCamera className="mr-2 h-4 w-4" />
+                        Switch To Admin
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+
+                  {menuItems.map((item) => (
+                    <DropdownMenuItem asChild key={item.href}>
+                      <Link
+                        href={item.href}
+                        className="cursor-pointer flex items-center"
+                      >
+                        {item.icon}
+                        {item.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
