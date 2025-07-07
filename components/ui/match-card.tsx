@@ -5,7 +5,14 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Clock, Trophy, Target } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  Trophy,
+  Target,
+  CalendarCog,
+} from "lucide-react";
 
 interface CricketScore {
   runs: number;
@@ -117,21 +124,7 @@ const MatchCard = ({
         return `${runs}/${wickets} (${overs} ov)`;
       }
 
-      // For limited overs matches, show balls only when batting in second innings and match is live
-      if (
-        match.status === "LIVE" &&
-        isSecondInnings &&
-        score.status === "IN_PROGRESS"
-      ) {
-        const remainingBalls = getRemainingBalls(match.format, overs);
-        if (remainingBalls > 0) {
-          const remainingOvers = Math.floor(remainingBalls / 6);
-          const remainingBallsInOver = remainingBalls % 6;
-          return `${runs}/${wickets} (${overs} ov) - ${remainingOvers}.${remainingBallsInOver} ov left`;
-        }
-      }
-
-      return `${runs}/${wickets} (${overs} ov)`;
+      return `${runs}/${wickets} (${overs})`;
     });
 
     return scores.join(" & ");
@@ -277,9 +270,10 @@ const MatchCard = ({
     >
       <CardContent className="p-6">
         {/* Match Header */}
-        <div className="space-y-2 text-xs text-gray-500 mb-4">
+        <div className="space-y-2 text-sm text-gray-500 mb-4">
           <div className="flex items-center space-x-2">
-            <MapPin className="h-3 w-3" />
+            <CalendarCog className="h-3 w-3" />
+            {/* <MapPin className="h-3 w-3" /> */}
             <span className="truncate">{match.tour.name}</span>
           </div>
         </div>
