@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React from "react";
@@ -276,6 +277,12 @@ const MatchCard = ({
     >
       <CardContent className="p-6">
         {/* Match Header */}
+        <div className="space-y-2 text-xs text-gray-500 mb-4">
+          <div className="flex items-center space-x-2">
+            <MapPin className="h-3 w-3" />
+            <span className="truncate">{match.tour.name}</span>
+          </div>
+        </div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <Badge
@@ -291,6 +298,8 @@ const MatchCard = ({
                 ? "🔴 LIVE"
                 : match.status === "ABANDONED"
                 ? "⚠️ ABANDONED"
+                : match.status === "NOT_STARTED"
+                ? "UPCOMING"
                 : match.status}
             </Badge>
             <Badge variant="outline">{match.format}</Badge>
