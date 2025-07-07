@@ -261,7 +261,7 @@ const MatchCard = ({
 
   // Determine if team2 is in second innings
   const isTeam2SecondInnings =
-    team1.cricketScore.length > 0 && team2.cricketScore.length > 0;
+    team1?.cricketScore?.length > 0 && team2?.cricketScore?.length > 0;
 
   return (
     <Card

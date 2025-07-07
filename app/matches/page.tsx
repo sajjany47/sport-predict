@@ -8,11 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MatchCard from "@/components/ui/match-card";
-import { Search, Filter, Calendar, Trophy } from "lucide-react";
+import { Search, Filter, Calendar, Trophy, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import moment from "moment";
 import CustomLoader from "@/components/ui/CustomLoader";
+import { DatePicker } from "@/components/ui/date-picker";
+import { set } from "date-fns";
 
 const MatchesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,6 +23,7 @@ const MatchesPage = () => {
   const router = useRouter();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [matches, setMatches] = useState([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -28,8 +31,8 @@ const MatchesPage = () => {
         const response = await axios.post(
           "/api/schedule",
           {
-            fromDate: moment().format("YYYY-MM-DD"),
-            toDate: moment().add(1, "days").format("YYYY-MM-DD"),
+            fromDate: moment(selectedDate).format("YYYY-MM-DD"),
+            toDate: moment(selectedDate).add(1, "days").format("YYYY-MM-DD"),
           },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -40,7 +43,7 @@ const MatchesPage = () => {
     };
 
     fetchMatches();
-  }, []);
+  }, [selectedDate]);
 
   const handleMatchClick = (match: any) => {
     if (!isAuthenticated) {
@@ -124,13 +127,21 @@ const MatchesPage = () => {
                     className="pl-10"
                   />
                 </div>
-                <Button
-                  variant="outline"
-                  className="flex items-center space-x-2"
-                >
-                  <Filter className="h-4 w-4" />
-                  <span>Filters</span>
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <DatePicker
+                    date={selectedDate}
+                    onDateChange={setSelectedDate}
+                    placeholder="Select a date"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setSelectedDate(new Date())}
+                    // title="Reset to Today-Tomorrow"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
 
