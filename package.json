@@ -39,6 +39,8 @@
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@reduxjs/toolkit": "^2.0.1",
+    "@tanstack/react-query": "^5.81.5",
+    "@tanstack/react-query-devtools": "^5.81.5",
     "@types/react-dom": "^18.2.45",
     "autoprefixer": "10.4.15",
     "axios": "^1.6.2",

@@ -9,6 +9,7 @@ import { Toaster } from "react-hot-toast";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 import { PersistGate } from "redux-persist/integration/react";
+import ReactQueryProvider from "@/lib/ReactQueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,7 +25,9 @@ export default function RootLayout({
           <PersistGate loading={null} persistor={persistor}>
             <div className="min-h-screen flex flex-col">
               <Header />
-              <main className="flex-1">{children}</main>
+              <main className="flex-1">
+                <ReactQueryProvider>{children}</ReactQueryProvider>
+              </main>
               <Footer />
             </div>
             <Toaster position="top-right" />

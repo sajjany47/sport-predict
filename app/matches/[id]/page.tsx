@@ -38,6 +38,8 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import SquadDialoge from "./SquadDialoge";
 import CustomLoader from "@/components/ui/CustomLoader";
+import { useQuery } from "@tanstack/react-query";
+import { FetchMatchDetails } from "../MatchService";
 
 interface Player {
   id: number;
@@ -183,6 +185,11 @@ const MatchDetailsPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
 
+  // const { data } = useQuery({
+  //   queryKey: ["match-details"],
+  //   queryFn: () => FetchMatchDetails(params.id, selectedMatch?.venue),
+  // });
+  // console.log("data", data);
   useEffect(() => {
     const fetchDetails = async () => {
       if (params.id) {
