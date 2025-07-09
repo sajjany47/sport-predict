@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setSelectedMatch } from "@/store/slices/matchSlice";
+import { DummyData } from "@/lib/DummyData";
 
 const HomePage = () => {
   const router = useRouter();
@@ -30,6 +31,117 @@ const HomePage = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
+    //fantasy points calculation based on DummyData//////////////////////////////////
+    const fantasyPoints = 0.5;
+    const battingForm = 0.4;
+    const bowlingForm = 0.4;
+    const battingStats = 0.3;
+    const bowlingStats = 0.3;
+    const stadiumBattingStats = 0.2;
+    const stadiumBowlingStats = 0.2;
+    const againstTeamBattingStats = 0.1;
+    const againstTeamBowlingStats = 0.1;
+
+    const prepareSquad = DummyData.map((item: any) => {
+      const squad = item.squad.map((elm: any) => {
+        const totalPoint =
+          Number(elm.fantasyPoints) * fantasyPoints +
+          Number(elm.battingForm.totalRuns) * battingForm +
+          Number(elm.bowlingForm.totalWicket) * bowlingForm +
+          Number(elm.battingStats.totalRuns) * battingStats +
+          Number(elm.bowlingStats.totalWicket) * bowlingStats +
+          Number(elm.stadiumBattingStats.totalRuns) * stadiumBattingStats +
+          Number(elm.stadiumBowlingStats.totalWicket) * stadiumBowlingStats +
+          Number(elm.againstTeamBattingStats.totalRuns) *
+            againstTeamBattingStats +
+          Number(elm.againstTeamBowlingStats.totalWicket) *
+            againstTeamBowlingStats;
+        return {
+          name: elm.name,
+          shortName: elm.shortName,
+          batStyle: elm.batStyle,
+          bowlStyle: elm.bowlStyle,
+          imageUrl: elm.imageUrl,
+          type: elm.type,
+          totalPoint: totalPoint,
+        };
+      });
+      return {
+        flag: item.flag,
+        color: item.color,
+        teamShortName: item.shortName,
+        squad: squad,
+      };
+    });
+    const players = prepareSquad
+      .flatMap((team) =>
+        team.squad.map((player: any) => ({
+          ...player,
+          teamFlag: team.flag,
+          teamShortName: team.teamShortName,
+          teamColor: team.color,
+        }))
+      )
+      .sort((a, b) => b.totalPoint - a.totalPoint);
+    const wicketKeeper = players.find((player: any) => player.type === "WK");
+    const batsman = players.find((player: any) => player.type === "BAT");
+    const bowler = players.find((player: any) => player.type === "BOWL");
+    const allrounder = players.find((player: any) => player.type === "AR");
+    const filteredPlayers = players
+      .filter(
+        (player: any) =>
+          player.name !== wicketKeeper.name &&
+          player.name !== batsman.name &&
+          player.name !== bowler.name &&
+          player.name !== allrounder.name
+      )
+      .sort((a, b) => b.totalPoint - a.totalPoint);
+    const topplayer = filteredPlayers.slice(0, 7);
+    const mergePlayers = [
+      ...topplayer,
+      wicketKeeper,
+      batsman,
+      bowler,
+      allrounder,
+    ].sort((a, b) => b.totalPoint - a.totalPoint);
+
+    const result = {
+      dream11Team: {
+        captain: {
+          name: mergePlayers[0].name,
+          team: mergePlayers[0].teamShortName,
+          role: mergePlayers[0].type,
+          points: parseFloat(mergePlayers[0].totalPoint.toFixed(1)),
+          form: "Excellent",
+        },
+        viceCaptain: {
+          name: mergePlayers[1].name,
+          team: mergePlayers[1].teamShortName,
+          role: mergePlayers[1].type,
+          points: parseFloat(mergePlayers[1].totalPoint.toFixed(1)),
+          form: "Good",
+        },
+        players: mergePlayers
+          .filter(
+            (p) =>
+              p.name !== mergePlayers[0].name && p.name !== mergePlayers[1].name
+          )
+          .map((p, i) => ({
+            id: i + 1,
+            name: p.name,
+            team: p.teamShortName,
+            role: p.type,
+            points: parseFloat(p.totalPoint.toFixed(1)),
+          })),
+      },
+      // keyPlayers: {
+      //   team1: team1Data.keyPlayers,
+      //   team2: team2Data.keyPlayers,
+      // },
+    };
+
+    //fantasy points calculation based on DummyData//////////////////////////////////
+
     const fetchMatches = async () => {
       try {
         const response = await axios.post(
