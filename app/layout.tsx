@@ -21,18 +21,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Provider store={store}>
-          <PersistGate loading={null} persistor={persistor}>
-            <div className="min-h-screen flex flex-col">
-              <Header />
-              <main className="flex-1">
-                <ReactQueryProvider>{children}</ReactQueryProvider>
-              </main>
-              <Footer />
-            </div>
-            <Toaster position="top-right" />
-          </PersistGate>
-        </Provider>
+        <ReactQueryProvider>
+          <Provider store={store}>
+            <PersistGate loading={null} persistor={persistor}>
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+              <Toaster position="top-right" />
+            </PersistGate>
+          </Provider>
+        </ReactQueryProvider>
       </body>
     </html>
   );
