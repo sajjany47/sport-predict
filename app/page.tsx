@@ -70,7 +70,7 @@ const HomePage = () => {
         flag: item.flag,
         color: item.color,
         teamShortName: item.shortName,
-        squad: squad,
+        squad: squad.sort((a: any, b: any) => b.totalPoint - a.totalPoint),
       };
     });
     const players = prepareSquad
@@ -105,6 +105,98 @@ const HomePage = () => {
       allrounder,
     ].sort((a, b) => b.totalPoint - a.totalPoint);
 
+    const topBatsman = (team: any) => {
+      const battingPreparedSquad = team.squad.map((elm: any) => {
+        const battingTotalPoint =
+          Number(elm.battingForm.totalRuns) * battingForm +
+          Number(elm.battingStats.totalRuns) * battingStats +
+          Number(elm.stadiumBattingStats.totalRuns) * stadiumBattingStats +
+          Number(elm.againstTeamBattingStats.totalRuns) *
+            againstTeamBattingStats;
+
+        const venueBattingPoint =
+          Number(elm.battingForm.totalRuns) * battingForm +
+          Number(elm.stadiumBattingStats.totalRuns) * stadiumBattingStats +
+          Number(elm.againstTeamBattingStats.totalRuns) *
+            againstTeamBattingStats;
+
+        return {
+          name: elm.name,
+          shortName: elm.shortName,
+          batStyle: elm.batStyle,
+          bowlStyle: elm.bowlStyle,
+          imageUrl: elm.imageUrl,
+          type: elm.type,
+          battingTotalPoint: battingTotalPoint,
+          venueBattingPoint: venueBattingPoint,
+        };
+      });
+
+      const sortSquad = battingPreparedSquad.sort(
+        (a: any, b: any) => b.battingTotalPoint - a.battingTotalPoint
+      );
+
+      const probability = Math.min(
+        100,
+        Math.round(((sortSquad[0].battingTotalPoint + 7) / 50) * 100)
+      );
+
+      return {
+        name: sortSquad[0].name,
+        predictedRuns: `${Math.round(
+          sortSquad[0].battingTotalPoint + 7 - 10
+        )}-${Math.round(sortSquad[0].battingTotalPoint + 7 + 10)}`,
+        probability: `${probability}%`,
+        recentAvg: parseFloat((sortSquad[0].battingTotalPoint + 7).toFixed(1)),
+        venueAvg: parseFloat((sortSquad[0].venueBattingPoint + 7).toFixed(1)),
+      };
+    };
+    const topBowler = (team: any) => {
+      const bowlingPreparedSquad = team.squad.map((elm: any) => {
+        const bowlingTotalPoint =
+          Number(elm.bowlingForm.totalWicket) * bowlingForm +
+          Number(elm.bowlingStats.totalWicket) * bowlingStats +
+          Number(elm.stadiumBowlingStats.totalWicket) * stadiumBowlingStats +
+          Number(elm.againstTeamBowlingStats.totalWicket) *
+            againstTeamBowlingStats;
+
+        const venueBowlingPoint =
+          Number(elm.bowlingForm.totalWicket) * bowlingForm +
+          Number(elm.stadiumBowlingStats.totalWicket) * stadiumBowlingStats +
+          Number(elm.againstTeamBowlingStats.totalWicket) *
+            againstTeamBowlingStats;
+
+        return {
+          name: elm.name,
+          shortName: elm.shortName,
+          batStyle: elm.batStyle,
+          bowlStyle: elm.bowlStyle,
+          imageUrl: elm.imageUrl,
+          type: elm.type,
+          bowlingTotalPoint: bowlingTotalPoint,
+          venueBowlingPoint: venueBowlingPoint,
+        };
+      });
+
+      const sortSquad = bowlingPreparedSquad.sort(
+        (a: any, b: any) => b.bowlingTotalPoint - a.bowlingTotalPoint
+      );
+
+      const probability = Math.min(
+        100,
+        Math.round(((sortSquad[0].bowlingTotalPoint + 1) / 3) * 100)
+      );
+
+      return {
+        name: sortSquad[0].name,
+        predictedWickets: `${Math.floor(
+          sortSquad[0].bowlingTotalPoint + 1
+        )}-${Math.ceil(sortSquad[0].bowlingTotalPoint + 1 + 1)}`,
+        probability: `${probability}%`,
+        recentAvg: parseFloat((sortSquad[0].bowlingTotalPoint + 1).toFixed(1)),
+        venueAvg: parseFloat((sortSquad[0].venueBowlingPoint + 1).toFixed(1)),
+      };
+    };
     const result = {
       dream11Team: {
         captain: {
@@ -134,11 +226,31 @@ const HomePage = () => {
             points: parseFloat(p.totalPoint.toFixed(1)),
           })),
       },
-      // keyPlayers: {
-      //   team1: team1Data.keyPlayers,
-      //   team2: team2Data.keyPlayers,
-      // },
+      keyPlayers: {
+        team1: prepareSquad[0].squad.slice(0, 5).map((item: any) => ({
+          name: item.name,
+          role: item.type,
+          impact: item.totalPoint > 40 ? "High" : "Medium",
+          recentForm: `${item.totalPoint.toFixed(0)}`,
+        })),
+        team2: prepareSquad[1].squad.slice(0, 5).map((item: any) => ({
+          name: item.name,
+          role: item.type,
+          impact: item.totalPoint > 40 ? "High" : "Medium",
+          recentForm: `${item.totalPoint.toFixed(0)}`,
+        })),
+      },
+      topBatsman: {
+        team1: topBatsman(DummyData[0]),
+        team2: topBatsman(DummyData[1]),
+      },
+      topBowler: {
+        team1: topBowler(DummyData[0]),
+        team2: topBowler(DummyData[1]),
+      },
     };
+
+    console.log(result);
 
     //fantasy points calculation based on DummyData//////////////////////////////////
 
