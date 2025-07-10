@@ -177,6 +177,35 @@ const HomePage = () => {
         venueAvg: parseFloat(sortSquad[0].venueBowlingPoint.toFixed(1)),
       };
     };
+
+    const teamAverageScore = (team: any) => {
+      const toatlBattingPoint = team.squad.reduce(
+        (acc: number, player: any) => acc + player.battingTotalPoint,
+        0
+      );
+      const totalStadiumBattingStats = team.squad.reduce(
+        (acc: number, player: any) => acc + player.venueBattingPoint,
+        0
+      );
+
+      return (toatlBattingPoint + totalStadiumBattingStats) * 0.4;
+    };
+
+    const teamAverageWicket = (team: any) => {
+      const toatlBowlingPoint = team.squad.reduce(
+        (acc: number, player: any) => acc + player.bowlingTotalPoint,
+        0
+      );
+      const totalStadiumBowlingStats = team.squad.reduce(
+        (acc: number, player: any) => acc + player.venueBowlingPoint,
+        0
+      );
+
+      return (toatlBowlingPoint + totalStadiumBowlingStats) * 0.2;
+    };
+
+    console.log(teamAverageWicket(prepareSquad[0]));
+
     const result = {
       dream11Team: {
         captain: {
@@ -229,8 +258,6 @@ const HomePage = () => {
         team2: topBowler(prepareSquad[1]),
       },
     };
-
-    console.log(result);
 
     //fantasy points calculation based on DummyData//////////////////////////////////
 
