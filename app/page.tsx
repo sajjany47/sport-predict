@@ -32,15 +32,15 @@ const HomePage = () => {
 
   useEffect(() => {
     //fantasy points calculation based on DummyData//////////////////////////////////
-    const fantasyPoints = 0.5;
+    const fantasyPoints = 0.2;
     const battingForm = 0.4;
-    const bowlingForm = 0.4;
+    const bowlingForm = 0.5;
     const battingStats = 0.3;
-    const bowlingStats = 0.3;
+    const bowlingStats = 0.4;
     const stadiumBattingStats = 0.2;
-    const stadiumBowlingStats = 0.2;
+    const stadiumBowlingStats = 0.3;
     const againstTeamBattingStats = 0.1;
-    const againstTeamBowlingStats = 0.1;
+    const againstTeamBowlingStats = 0.2;
 
     const prepareSquad = DummyData.map((item: any) => {
       const squad = item.squad.map((elm: any) => {
@@ -55,7 +55,35 @@ const HomePage = () => {
           Number(elm.againstTeamBattingStats.totalRuns) *
             againstTeamBattingStats +
           Number(elm.againstTeamBowlingStats.totalWicket) *
-            againstTeamBowlingStats;
+            againstTeamBowlingStats +
+          3;
+        const battingTotalPoint =
+          Number(elm.battingForm.totalRuns) * battingForm +
+          Number(elm.battingStats.totalRuns) * battingStats +
+          Number(elm.stadiumBattingStats.totalRuns) * stadiumBattingStats +
+          Number(elm.againstTeamBattingStats.totalRuns) *
+            againstTeamBattingStats +
+          7;
+        const bowlingTotalPoint =
+          Number(elm.bowlingForm.totalWicket) * bowlingForm +
+          Number(elm.bowlingStats.totalWicket) * bowlingStats +
+          Number(elm.stadiumBowlingStats.totalWicket) * stadiumBowlingStats +
+          Number(elm.againstTeamBowlingStats.totalWicket) *
+            againstTeamBowlingStats +
+          1;
+
+        const venueBowlingPoint =
+          Number(elm.bowlingForm.totalWicket) * bowlingForm +
+          Number(elm.stadiumBowlingStats.totalWicket) * stadiumBowlingStats +
+          Number(elm.againstTeamBowlingStats.totalWicket) *
+            againstTeamBowlingStats +
+          1;
+        const venueBattingPoint =
+          Number(elm.battingForm.totalRuns) * battingForm +
+          Number(elm.stadiumBattingStats.totalRuns) * stadiumBattingStats +
+          Number(elm.againstTeamBattingStats.totalRuns) *
+            againstTeamBattingStats +
+          7;
         return {
           name: elm.name,
           shortName: elm.shortName,
@@ -64,6 +92,10 @@ const HomePage = () => {
           imageUrl: elm.imageUrl,
           type: elm.type,
           totalPoint: totalPoint,
+          battingTotalPoint: battingTotalPoint,
+          bowlingTotalPoint: bowlingTotalPoint,
+          venueBowlingPoint: venueBowlingPoint,
+          venueBattingPoint: venueBattingPoint,
         };
       });
       return {
@@ -106,95 +138,43 @@ const HomePage = () => {
     ].sort((a, b) => b.totalPoint - a.totalPoint);
 
     const topBatsman = (team: any) => {
-      const battingPreparedSquad = team.squad.map((elm: any) => {
-        const battingTotalPoint =
-          Number(elm.battingForm.totalRuns) * battingForm +
-          Number(elm.battingStats.totalRuns) * battingStats +
-          Number(elm.stadiumBattingStats.totalRuns) * stadiumBattingStats +
-          Number(elm.againstTeamBattingStats.totalRuns) *
-            againstTeamBattingStats;
-
-        const venueBattingPoint =
-          Number(elm.battingForm.totalRuns) * battingForm +
-          Number(elm.stadiumBattingStats.totalRuns) * stadiumBattingStats +
-          Number(elm.againstTeamBattingStats.totalRuns) *
-            againstTeamBattingStats;
-
-        return {
-          name: elm.name,
-          shortName: elm.shortName,
-          batStyle: elm.batStyle,
-          bowlStyle: elm.bowlStyle,
-          imageUrl: elm.imageUrl,
-          type: elm.type,
-          battingTotalPoint: battingTotalPoint,
-          venueBattingPoint: venueBattingPoint,
-        };
-      });
-
-      const sortSquad = battingPreparedSquad.sort(
+      const sortSquad = team.squad.sort(
         (a: any, b: any) => b.battingTotalPoint - a.battingTotalPoint
       );
 
       const probability = Math.min(
         100,
-        Math.round(((sortSquad[0].battingTotalPoint + 7) / 50) * 100)
+        Math.round((sortSquad[0].battingTotalPoint / 50) * 100)
       );
 
       return {
         name: sortSquad[0].name,
         predictedRuns: `${Math.round(
-          sortSquad[0].battingTotalPoint + 7 - 10
-        )}-${Math.round(sortSquad[0].battingTotalPoint + 7 + 10)}`,
+          sortSquad[0].battingTotalPoint - 10
+        )}-${Math.round(sortSquad[0].battingTotalPoint + 10)}`,
         probability: `${probability}%`,
-        recentAvg: parseFloat((sortSquad[0].battingTotalPoint + 7).toFixed(1)),
-        venueAvg: parseFloat((sortSquad[0].venueBattingPoint + 7).toFixed(1)),
+        recentAvg: parseFloat(sortSquad[0].battingTotalPoint.toFixed(1)),
+        venueAvg: parseFloat(sortSquad[0].venueBattingPoint.toFixed(1)),
       };
     };
     const topBowler = (team: any) => {
-      const bowlingPreparedSquad = team.squad.map((elm: any) => {
-        const bowlingTotalPoint =
-          Number(elm.bowlingForm.totalWicket) * bowlingForm +
-          Number(elm.bowlingStats.totalWicket) * bowlingStats +
-          Number(elm.stadiumBowlingStats.totalWicket) * stadiumBowlingStats +
-          Number(elm.againstTeamBowlingStats.totalWicket) *
-            againstTeamBowlingStats;
-
-        const venueBowlingPoint =
-          Number(elm.bowlingForm.totalWicket) * bowlingForm +
-          Number(elm.stadiumBowlingStats.totalWicket) * stadiumBowlingStats +
-          Number(elm.againstTeamBowlingStats.totalWicket) *
-            againstTeamBowlingStats;
-
-        return {
-          name: elm.name,
-          shortName: elm.shortName,
-          batStyle: elm.batStyle,
-          bowlStyle: elm.bowlStyle,
-          imageUrl: elm.imageUrl,
-          type: elm.type,
-          bowlingTotalPoint: bowlingTotalPoint,
-          venueBowlingPoint: venueBowlingPoint,
-        };
-      });
-
-      const sortSquad = bowlingPreparedSquad.sort(
+      const sortSquad = team.squad.sort(
         (a: any, b: any) => b.bowlingTotalPoint - a.bowlingTotalPoint
       );
 
       const probability = Math.min(
         100,
-        Math.round(((sortSquad[0].bowlingTotalPoint + 1) / 3) * 100)
+        Math.round((sortSquad[0].bowlingTotalPoint / 3) * 100)
       );
 
       return {
         name: sortSquad[0].name,
         predictedWickets: `${Math.floor(
-          sortSquad[0].bowlingTotalPoint + 1
-        )}-${Math.ceil(sortSquad[0].bowlingTotalPoint + 1 + 1)}`,
+          sortSquad[0].bowlingTotalPoint
+        )}-${Math.ceil(sortSquad[0].bowlingTotalPoint + 1)}`,
         probability: `${probability}%`,
-        recentAvg: parseFloat((sortSquad[0].bowlingTotalPoint + 1).toFixed(1)),
-        venueAvg: parseFloat((sortSquad[0].venueBowlingPoint + 1).toFixed(1)),
+        recentAvg: parseFloat(sortSquad[0].bowlingTotalPoint.toFixed(1)),
+        venueAvg: parseFloat(sortSquad[0].venueBowlingPoint.toFixed(1)),
       };
     };
     const result = {
@@ -241,12 +221,12 @@ const HomePage = () => {
         })),
       },
       topBatsman: {
-        team1: topBatsman(DummyData[0]),
-        team2: topBatsman(DummyData[1]),
+        team1: topBatsman(prepareSquad[0]),
+        team2: topBatsman(prepareSquad[1]),
       },
       topBowler: {
-        team1: topBowler(DummyData[0]),
-        team2: topBowler(DummyData[1]),
+        team1: topBowler(prepareSquad[0]),
+        team2: topBowler(prepareSquad[1]),
       },
     };
 
