@@ -178,6 +178,20 @@ const HomePage = () => {
       };
     };
 
+    const CalculateWinnerPrediction = (team: any, opponent: any) => {
+      const scoreWeight = 0.4; // scoring power
+      const wicketWeight = 0.3; // wicket-taking
+
+      // Normalize by using both teams’ data
+      const maxScore = Math.max(team.avgScore, opponent.avgScore);
+      const maxWicket = Math.max(team.avgWicket, opponent.avgWicket);
+
+      const score = (team.avgScore / maxScore) * scoreWeight;
+      const wickets = (team.avgWicket / maxWicket) * wicketWeight;
+
+      return score + wickets;
+    };
+
     const teamAverageScore = (team: any) => {
       const toatlBattingPoint = team.squad.reduce(
         (acc: number, player: any) => acc + player.battingTotalPoint,
@@ -204,9 +218,56 @@ const HomePage = () => {
       return (toatlBowlingPoint + totalStadiumBowlingStats) * 0.2;
     };
 
-    console.log(teamAverageWicket(prepareSquad[0]));
+    const team1AvgScore = teamAverageScore(prepareSquad[0]);
+    const team2AvgScore = teamAverageScore(prepareSquad[1]);
+
+    const team1AvgWkt = teamAverageWicket(prepareSquad[0]);
+    const team2AvgWkt = teamAverageWicket(prepareSquad[1]);
+
+    const team1WinnerChance = CalculateWinnerPrediction(
+      {
+        avgScore: team1AvgScore,
+        avgWicket: team1AvgWkt,
+      },
+      { avgScore: team2AvgScore, avgWicket: team2AvgWkt }
+    );
+
+    const team2WinnerChance = CalculateWinnerPrediction(
+      {
+        avgScore: team2AvgScore,
+        avgWicket: team2AvgWkt,
+      },
+      { avgScore: team1AvgScore, avgWicket: team1AvgWkt }
+    );
+
+    // Convert to probabilities
+    const totalWinningChance = team1WinnerChance + team2WinnerChance;
+    const team1Prob = (team1WinnerChance / totalWinningChance) * 100;
+    const team2Prob = (team2WinnerChance / totalWinningChance) * 100;
 
     const result = {
+      firstInningScore: {
+        team1: {
+          min: team1AvgScore - 10,
+          max: team1AvgScore + 10,
+          predicted: team1AvgScore,
+        },
+        team2: {
+          min: team2AvgScore - 10,
+          max: team2AvgScore + 10,
+          predicted: team2AvgScore,
+        },
+      },
+      winnerPrediction: {
+        team1: {
+          probability: team1Prob.toFixed(2),
+          confidence: Number(team1Prob) > Number(team2Prob) ? "High" : "Medium",
+        },
+        team2: {
+          probability: team2Prob.toFixed(2),
+          confidence: Number(team2Prob) > Number(team1Prob) ? "High" : "Medium",
+        },
+      },
       dream11Team: {
         captain: {
           name: mergePlayers[0].name,
@@ -258,6 +319,8 @@ const HomePage = () => {
         team2: topBowler(prepareSquad[1]),
       },
     };
+
+    console.log(result);
 
     //fantasy points calculation based on DummyData//////////////////////////////////
 
