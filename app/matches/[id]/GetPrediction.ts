@@ -1,4 +1,4 @@
-export const GetMatchPrediction = (data: any) => {
+export const GetMatchPrediction = (data: any, format: any) => {
   //fantasy points calculation based on DummyData//////////////////////////////////
   const fantasyPoints = 0.2;
   const battingForm = 0.4;
@@ -121,8 +121,8 @@ export const GetMatchPrediction = (data: any) => {
         sortSquad[0].battingTotalPoint - 10
       )}-${Math.round(sortSquad[0].battingTotalPoint + 10)}`,
       probability: `${probability}%`,
-      recentAvg: parseFloat(sortSquad[0].battingTotalPoint.toFixed(1)),
-      venueAvg: parseFloat(sortSquad[0].venueBattingPoint.toFixed(1)),
+      recentAvg: parseFloat(sortSquad[0].battingTotalPoint.toFixed(0)),
+      venueAvg: parseFloat(sortSquad[0].venueBattingPoint.toFixed(0)),
     };
   };
   const topBowler = (team: any) => {
@@ -141,8 +141,8 @@ export const GetMatchPrediction = (data: any) => {
         sortSquad[0].bowlingTotalPoint
       )}-${Math.ceil(sortSquad[0].bowlingTotalPoint + 1)}`,
       probability: `${probability}%`,
-      recentAvg: parseFloat(sortSquad[0].bowlingTotalPoint.toFixed(1)),
-      venueAvg: parseFloat(sortSquad[0].venueBowlingPoint.toFixed(1)),
+      recentAvg: parseFloat(sortSquad[0].bowlingTotalPoint.toFixed(0)),
+      venueAvg: parseFloat(sortSquad[0].venueBowlingPoint.toFixed(0)),
     };
   };
 
@@ -170,7 +170,20 @@ export const GetMatchPrediction = (data: any) => {
       0
     );
 
-    return (toatlBattingPoint + totalStadiumBattingStats) * 0.4;
+    const type = [
+      { format: "test", value: 0.9 },
+      { format: "odi", value: 0.7 },
+      { format: "t20i", value: 0.4 },
+      { format: "t10", value: 0.3 },
+      // { format: "other", value: 0.39 },
+    ];
+
+    const multiplePoint: any = type.find((item: any) => item.format === format);
+
+    return Number(
+      (toatlBattingPoint + totalStadiumBattingStats) * multiplePoint?.value ||
+        0.39
+    ).toFixed(0);
   };
 
   const teamAverageWicket = (team: any) => {
@@ -183,11 +196,13 @@ export const GetMatchPrediction = (data: any) => {
       0
     );
 
-    return (toatlBowlingPoint + totalStadiumBowlingStats) * 0.2;
+    return Number((toatlBowlingPoint + totalStadiumBowlingStats) * 0.2).toFixed(
+      0
+    );
   };
 
-  const team1AvgScore = teamAverageScore(prepareSquad[0]);
-  const team2AvgScore = teamAverageScore(prepareSquad[1]);
+  const team1AvgScore: any = teamAverageScore(prepareSquad[0]);
+  const team2AvgScore: any = teamAverageScore(prepareSquad[1]);
 
   const team1AvgWkt = teamAverageWicket(prepareSquad[0]);
   const team2AvgWkt = teamAverageWicket(prepareSquad[1]);
@@ -216,14 +231,14 @@ export const GetMatchPrediction = (data: any) => {
   const result = {
     firstInningScore: {
       team1: {
-        min: team1AvgScore - 10,
-        max: team1AvgScore + 10,
-        predicted: team1AvgScore,
+        min: Number(team1AvgScore) - 10,
+        max: Number(team1AvgScore) + 10,
+        predicted: Number(team1AvgScore),
       },
       team2: {
-        min: team2AvgScore - 10,
-        max: team2AvgScore + 10,
-        predicted: team2AvgScore,
+        min: Number(team2AvgScore) - 10,
+        max: Number(team2AvgScore) + 10,
+        predicted: Number(team2AvgScore),
       },
     },
     winnerPrediction: {

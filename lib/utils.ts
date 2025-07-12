@@ -272,7 +272,7 @@ export const CalculatAIPrediction = (data: any) => {
       squad: squad,
     };
   });
-  console.log(stadiumAvg, "stadiumAvg");
+
   const avgPrepare = {
     stadiumAvg: {
       avgScore: stadiumAvg.avgScore || apiAvgScore,
@@ -281,7 +281,10 @@ export const CalculatAIPrediction = (data: any) => {
     accordingToPlayerStats: accordingToPlayerStats,
   };
 
-  const result = GetMatchPrediction(avgPrepare.accordingToPlayerStats);
+  const result = GetMatchPrediction(
+    avgPrepare.accordingToPlayerStats,
+    data.matchInfo.format.toLowerCase()
+  );
 
   return result;
 };

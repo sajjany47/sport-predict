@@ -383,64 +383,6 @@ const MatchDetailsPage = () => {
               </div>
             </div>
 
-            {/* AI Prediction Results */}
-            {showPrediction && (
-              <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Zap className="h-6 w-6 text-blue-600" />
-                    <span>AI Prediction Results</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center">
-                      <div className="bg-white rounded-lg p-4 shadow-md">
-                        <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                        <h3 className="font-semibold text-gray-900">
-                          Match Winner
-                        </h3>
-                        <p className="text-lg font-bold text-blue-600">
-                          West Indies
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          72% Win Probability
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="bg-white rounded-lg p-4 shadow-md">
-                        <Crown className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-                        <h3 className="font-semibold text-gray-900">
-                          Dream11 Captain
-                        </h3>
-                        <p className="text-lg font-bold text-purple-600">
-                          Brandon King
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Expected: 65+ points
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="bg-white rounded-lg p-4 shadow-md">
-                        <Star className="h-8 w-8 text-orange-500 mx-auto mb-2" />
-                        <h3 className="font-semibold text-gray-900">
-                          Vice Captain
-                        </h3>
-                        <p className="text-lg font-bold text-orange-600">
-                          David Warner
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Expected: 55+ points
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Main Content Tabs */}
             <Tabs
               value={activeTab}
