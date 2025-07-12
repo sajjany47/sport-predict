@@ -273,48 +273,6 @@ export const CalculateWinnerPrediction = (team: any, opponent: any) => {
 };
 
 export const AnalyzeFantasyData = (data: any) => {
-  // console.log("data", data);
-  // const fantasyPoints = 0.5;
-  // const battingForm = 0.4;
-  // const bowlingForm = 0.4;
-  // const battingStats = 0.3;
-  // const bowlingStats = 0.3;
-  // const stadiumBattingStats = 0.2;
-  // const stadiumBowlingStats = 0.2;
-  // const againstTeamBattingStats = 0.1;
-  // const againstTeamBowlingStats = 0.1;
-
-  // const prepareSquad = data.map((item: any) => {
-  //   const squad = item.squad.map((elm: any) => {
-  //     const totalPoint =
-  //       Number(elm.fantasyPoints) * fantasyPoints +
-  //       Number(elm.battingForm.totalRuns) * battingForm +
-  //       Number(elm.bowlingForm.totalWicket) * bowlingForm +
-  //       Number(elm.battingStats.totalRuns) * battingStats +
-  //       Number(elm.bowlingStats.totalWicket) * bowlingStats +
-  //       Number(elm.stadiumBattingStats.totalRuns) * stadiumBattingStats +
-  //       Number(elm.stadiumBowlingStats.totalWicket) * stadiumBowlingStats +
-  //       Number(elm.againstTeamBattingStats.totalRuns) *
-  //         againstTeamBattingStats +
-  //       Number(elm.againstTeamBowlingStats.totalWicket) *
-  //         againstTeamBowlingStats;
-  //     return {
-  //       name: elm.name,
-  //       shortName: elm.shortName,
-  //       batStyle: elm.batStyle,
-  //       bowlStyle: elm.bowlStyle,
-  //       imageUrl: elm.imageUrl,
-  //       type: elm.type,
-  //       totalPoint: totalPoint,
-  //     };
-  //   });
-  //   return {
-  //     flag: item.flag,
-  //     color: item.color,
-  //     shortName: item.shortName,
-  //     squad: squad,
-  //   };
-  // });
   const getTopPlayers = (squad: any) =>
     [...squad].sort((a, b) => b.fantasyPoints - a.fantasyPoints);
 
@@ -433,7 +391,7 @@ export const CalculatAIPrediction = (data: any) => {
   const apiAvgScore = Number(data.overview.groundAndWheather.avgScore) ?? null;
 
   const stadiumAvg = StadiumAvgScore(data);
-
+  console.log(stadiumAvg);
   const accordingToPlayerStats = data.squadList.map((item: any) => {
     const players =
       item.playingPlayer.length > 0 ? item.playingPlayer : item.benchPlayer;
