@@ -221,31 +221,6 @@ const MatchDetailsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
-  // const handleGetPrediction = async () => {
-  //   if (!isAuthenticated) {
-  //     router.push("/auth/login");
-  //     return;
-  //   }
-
-  //   if (!user || user.credits < 1) {
-  //     toast.error("Insufficient credits. Please purchase more credits.");
-  //     return;
-  //   }
-
-  //   setIsLoading(true);
-  //   try {
-  //     // Simulate API call
-  //     await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  //     dispatch(updateCredits(user.credits - 1));
-  //     setShowPrediction(true);
-  //     toast.success("AI Prediction generated successfully!");
-  //   } catch (error) {
-  //     toast.error("Failed to generate prediction. Please try again.");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
   const handleGetPrediction = () => {
     if (!isAuthenticated) {
       router.push("/auth/login");
