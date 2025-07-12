@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 import { load } from "cheerio";
 import axios from "axios";
 import moment from "moment";
+import { GetMatchPrediction } from "@/app/matches/[id]/GetPrediction";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -391,7 +392,7 @@ export const CalculatAIPrediction = (data: any) => {
   const apiAvgScore = Number(data.overview.groundAndWheather.avgScore) ?? null;
 
   const stadiumAvg = StadiumAvgScore(data);
-  console.log(stadiumAvg);
+
   const accordingToPlayerStats = data.squadList.map((item: any) => {
     const players =
       item.playingPlayer.length > 0 ? item.playingPlayer : item.benchPlayer;
@@ -404,7 +405,7 @@ export const CalculatAIPrediction = (data: any) => {
       squad: squad,
     };
   });
-
+  console.log(stadiumAvg, "stadiumAvg");
   const avgPrepare = {
     stadiumAvg: {
       avgScore: stadiumAvg.avgScore || apiAvgScore,
@@ -413,56 +414,7 @@ export const CalculatAIPrediction = (data: any) => {
     accordingToPlayerStats: accordingToPlayerStats,
   };
 
-  //Calculate average and winner prediction.................................................................
-  const team1AvgScore = AnanlysisAvgScore({
-    squad: avgPrepare.accordingToPlayerStats[0].squad,
-    stadiumAvg: avgPrepare.stadiumAvg,
-  });
-
-  const team2AvgScore = AnanlysisAvgScore({
-    squad: avgPrepare.accordingToPlayerStats[1].squad,
-    stadiumAvg: avgPrepare.stadiumAvg,
-  });
-
-  const team1Score = CalculateWinnerPrediction(team1AvgScore, team2AvgScore);
-  const team2Score = CalculateWinnerPrediction(team2AvgScore, team1AvgScore);
-
-  // Convert to probabilities
-  const totalScore = team1Score + team2Score;
-  const team1Prob = (team1Score / totalScore) * 100;
-  const team2Prob = (team2Score / totalScore) * 100;
-  // ..............................calculate average score and winner prediction........................................................
-
-  //Calculate Fantasy Team List and Key Player.................................................................................
-
-  const fantasyData = AnalyzeFantasyData(avgPrepare.accordingToPlayerStats);
-
-  //..........................Calculate Fantasy Team List and Key Player........................................................
-  const result = {
-    firstInningScore: {
-      team1: {
-        min: team1AvgScore.avgScore - 10,
-        max: team1AvgScore.avgScore + 10,
-        predicted: team1AvgScore.avgScore,
-      },
-      team2: {
-        min: team2AvgScore.avgScore - 10,
-        max: team2AvgScore.avgScore + 10,
-        predicted: team2AvgScore.avgScore,
-      },
-    },
-    winnerPrediction: {
-      team1: {
-        probability: team1Prob.toFixed(2),
-        confidence: Number(team1Prob) > Number(team2Prob) ? "High" : "Medium",
-      },
-      team2: {
-        probability: team2Prob.toFixed(2),
-        confidence: Number(team2Prob) > Number(team1Prob) ? "High" : "Medium",
-      },
-    },
-    ...fantasyData,
-  };
+  const result = GetMatchPrediction(avgPrepare.accordingToPlayerStats);
 
   return result;
 };
