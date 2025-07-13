@@ -18,7 +18,16 @@ export async function comparePassword(
 }
 
 export function generateToken(payload: any): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  let data = {
+    _id: payload._id,
+    name: payload.name,
+    email: payload.email,
+    mobileNumber: payload.mobileNumber,
+    subscriptionId: payload.subscriptionId,
+    username: payload.username,
+    role: payload.role,
+  };
+  return jwt.sign(data, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
 export function verifyToken(token: string): any {

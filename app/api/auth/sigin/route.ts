@@ -3,15 +3,16 @@ import { LoginRequest, ApiResponse } from "@/types/api";
 import { comparePassword, generateToken } from "../UtilAuth";
 import dbConnect from "../../db";
 import User from "../UserModel";
+import bcrypt from "bcrypt";
 
 export async function POST(request: NextRequest) {
   try {
     await dbConnect();
     const body: LoginRequest = await request.json();
-    const { email, password } = body;
+    const { userId, password } = body;
 
     // Validation
-    if (!email || !password) {
+    if (!userId || !password) {
       return NextResponse.json(
         {
           success: false,
@@ -22,40 +23,58 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user
-    const user = await User.findOne({ name });
+    // Match by username, email or mobileNumber
+    const user = await User.findOne({
+      $or: [
+        { email: userId },
+        { username: userId },
+        { mobileNumber: Number(userId) },
+      ],
+    });
+
     if (!user) {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid credentials.",
+          message: "User not found!",
         } as ApiResponse,
         { status: 401 }
       );
     }
 
     // Verify password
-    const isValidPassword = await comparePassword(password, user.password!);
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
     if (!isValidPassword) {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid credentials.",
+          message: "Invalid password.",
         } as ApiResponse,
         { status: 401 }
       );
     }
 
     // Generate token
-    const token = generateToken({ userId: user.id, email: user.email });
+    const prepareResponse = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      mobileNumber: user.mobileNumber,
+      subscriptionId: user.subscriptionId,
+      username: user.username,
+      role: user.role,
+    };
+
+    const token = generateToken({ ...prepareResponse });
 
     // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json({
       success: true,
       message: "Login successful.",
       data: {
-        user: userWithoutPassword,
+        user: prepareResponse,
         token,
       },
     } as ApiResponse);
