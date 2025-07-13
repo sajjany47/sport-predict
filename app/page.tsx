@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,37 +17,25 @@ import {
   Play,
 } from "lucide-react";
 import Link from "next/link";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setSelectedMatch } from "@/store/slices/matchSlice";
-import { DummyData } from "@/lib/DummyData";
+import { useQuery } from "@tanstack/react-query";
+import { FetchMatchList } from "./matches/MatchService";
 
 const HomePage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const [data, setData] = useState([]);
 
-  useEffect(() => {
-    //fantasy points calculation based on DummyData//////////////////////////////////
-
-    const fetchMatches = async () => {
-      try {
-        const response = await axios.post(
-          "/api/schedule",
-          {},
-          { headers: { "Content-Type": "application/json" } }
-        );
-        setData(response.data.data);
-      } catch (error) {
-        console.error("Error fetching matches:", error);
-      }
-    };
-
-    fetchMatches();
-  }, []);
+  const { data = [] } = useQuery({
+    queryKey: ["match-list"],
+    queryFn: async () => {
+      const response = await FetchMatchList(new Date());
+      return response.data; // extract only the array part
+    },
+  });
 
   const customerReviews = [
     {

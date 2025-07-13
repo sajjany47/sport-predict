@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setMatches, setSelectedMatch } from "@/store/slices/matchSlice";
@@ -8,13 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MatchCard from "@/components/ui/match-card";
-import { Search, Filter, Calendar, Trophy, RotateCcw } from "lucide-react";
+import { Search, Calendar, Trophy, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-import moment from "moment";
 import CustomLoader from "@/components/ui/CustomLoader";
 import { DatePicker } from "@/components/ui/date-picker";
-import { set } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { FetchMatchList } from "./MatchService";
 
 const MatchesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,28 +21,15 @@ const MatchesPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const [matches, setMatches] = useState([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-
-  useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        const response = await axios.post(
-          "/api/schedule",
-          {
-            fromDate: moment(selectedDate).format("YYYY-MM-DD"),
-            toDate: moment(selectedDate).add(1, "days").format("YYYY-MM-DD"),
-          },
-          { headers: { "Content-Type": "application/json" } }
-        );
-        setMatches(response.data.data);
-      } catch (error) {
-        console.error("Error fetching matches:", error);
-      }
-    };
-
-    fetchMatches();
-  }, [selectedDate]);
+  const { data: matches = [], isLoading } = useQuery({
+    queryKey: ["match-list", selectedDate],
+    queryFn: async () => {
+      const response = await FetchMatchList(selectedDate);
+      return response.data; // extract only the array part
+    },
+    enabled: !!selectedDate,
+  });
 
   const handleMatchClick = (match: any) => {
     if (!isAuthenticated) {
@@ -100,8 +86,8 @@ const MatchesPage = () => {
 
   return (
     <>
-      {matches.length === 0 ? (
-        <CustomLoader message="Loading match details" />
+      {isLoading ? (
+        <CustomLoader message="Loading match list" />
       ) : (
         <div className="min-h-screen bg-gray-50">
           <div className="container mx-auto px-4 py-8">

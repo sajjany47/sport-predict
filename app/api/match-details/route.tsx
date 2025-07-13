@@ -9,10 +9,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     let squadListData: any[] = [];
-    // let prepareStatsList: any[] = [];
-    // let transformedData: any = {};
-    // let stadiumDetails: any = {};
-    // let stadium: any = [];
 
     try {
       const payload = {
