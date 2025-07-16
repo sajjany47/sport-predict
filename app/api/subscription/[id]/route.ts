@@ -5,11 +5,12 @@ import Subscription from "../SubscriptionModel";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   await dbConnect();
 
-  const { id } = params;
+  const { id } = context.params;
+
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(
       { success: false, message: "Invalid ID" },
