@@ -4,14 +4,12 @@ import dbConnect from "../../db";
 import Subscription from "../SubscriptionModel";
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string | string[] } }
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   await dbConnect();
 
-  // Ensure id is a string (handle case where it might be an array)
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
-
+  const { id } = params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(
       { success: false, message: "Invalid ID" },
