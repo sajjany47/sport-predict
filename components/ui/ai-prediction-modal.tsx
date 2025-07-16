@@ -38,7 +38,7 @@ interface Team {
   squadId: number;
   teamName: string;
   teamShortName: string;
-  teamFlagUrl: string;
+  flag: string;
   color: string;
 }
 
@@ -50,12 +50,6 @@ interface Match {
   venue: string;
 }
 
-interface AIPredictionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  match: Match;
-}
-
 const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -65,8 +59,8 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [predictionData, setPredictionData] = useState<any>(null);
 
-  const team1 = match.matchInfo.teams[0];
-  const team2 = match.matchInfo.teams[1];
+  const team1 = match?.squadList[0];
+  const team2 = match?.squadList[1];
 
   const handleGetPrediction = async () => {
     setIsLoading(true);
@@ -82,6 +76,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
 
     try {
       const data = CalculatAIPrediction(match);
+
       await new Promise((resolve) => setTimeout(resolve, 2000));
       setPredictionData(data);
       setIsLoading(false);
@@ -144,7 +139,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
           <div className="flex items-center space-x-4 text-sm text-gray-600">
             <div className="flex items-center space-x-2">
               <img
-                src={team1.teamFlagUrl}
+                src={team1.flag}
                 alt={team1.teamName}
                 className="w-6 h-6 rounded"
               />
@@ -153,7 +148,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
             <span>vs</span>
             <div className="flex items-center space-x-2">
               <img
-                src={team2.teamFlagUrl}
+                src={team2.flag}
                 alt={team2.teamName}
                 className="w-6 h-6 rounded"
               />
@@ -218,7 +213,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-2 mb-3">
                         <img
-                          src={team1.teamFlagUrl}
+                          src={team1.flag}
                           alt={team1.teamName}
                           className="w-8 h-8 rounded"
                         />
@@ -245,7 +240,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-2 mb-3">
                         <img
-                          src={team2.teamFlagUrl}
+                          src={team2.flag}
                           alt={team2.teamName}
                           className="w-8 h-8 rounded"
                         />
@@ -286,7 +281,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                     <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
                       <div className="flex items-center justify-center space-x-2 mb-3">
                         <img
-                          src={team1.teamFlagUrl}
+                          src={team1.flag}
                           alt={team1.teamName}
                           className="w-6 h-6 rounded"
                         />
@@ -303,7 +298,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                     <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
                       <div className="flex items-center justify-center space-x-2 mb-3">
                         <img
-                          src={team2.teamFlagUrl}
+                          src={team2.flag}
                           alt={team2.teamName}
                           className="w-6 h-6 rounded"
                         />
@@ -425,7 +420,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <img
-                        src={team1.teamFlagUrl}
+                        src={team1.flag}
                         alt={team1.teamName}
                         className="w-6 h-6 rounded"
                       />
@@ -471,7 +466,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <img
-                        src={team2.teamFlagUrl}
+                        src={team2.flag}
                         alt={team2.teamName}
                         className="w-6 h-6 rounded"
                       />
@@ -525,7 +520,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                     <CardTitle className="flex items-center space-x-2">
                       <Target className="h-5 w-5 text-blue-600" />
                       <img
-                        src={team1.teamFlagUrl}
+                        src={team1.flag}
                         alt={team1.teamName}
                         className="w-6 h-6 rounded"
                       />
@@ -567,7 +562,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                     <CardTitle className="flex items-center space-x-2">
                       <Target className="h-5 w-5 text-purple-600" />
                       <img
-                        src={team2.teamFlagUrl}
+                        src={team2.flag}
                         alt={team2.teamName}
                         className="w-6 h-6 rounded"
                       />
@@ -613,7 +608,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                     <CardTitle className="flex items-center space-x-2">
                       <Zap className="h-5 w-5 text-blue-600" />
                       <img
-                        src={team1.teamFlagUrl}
+                        src={team1.flag}
                         alt={team1.teamName}
                         className="w-6 h-6 rounded"
                       />
@@ -655,7 +650,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                     <CardTitle className="flex items-center space-x-2">
                       <Zap className="h-5 w-5 text-purple-600" />
                       <img
-                        src={team2.teamFlagUrl}
+                        src={team2.flag}
                         alt={team2.teamName}
                         className="w-6 h-6 rounded"
                       />
