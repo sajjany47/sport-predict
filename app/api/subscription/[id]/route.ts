@@ -9,7 +9,8 @@ export async function GET(
 ) {
   await dbConnect();
 
-  const { id } = params;
+  const { id } = await params;
+
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(
       { success: false, message: "Invalid ID" },
