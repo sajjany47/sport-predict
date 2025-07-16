@@ -37,7 +37,7 @@ import { updateCredits } from "@/store/slices/authSlice";
 interface Team {
   squadId: number;
   teamName: string;
-  teamShortName: string;
+  shortName: string;
   flag: string;
   color: string;
 }
@@ -140,10 +140,10 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
             <div className="flex items-center space-x-2">
               <img
                 src={team1.flag}
-                alt={team1.teamName}
+                alt={team1.shortName}
                 className="w-6 h-6 rounded"
               />
-              <span>{team1.teamShortName}</span>
+              <span>{team1.shortName}</span>
             </div>
             <span>vs</span>
             <div className="flex items-center space-x-2">
@@ -152,7 +152,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                 alt={team2.teamName}
                 className="w-6 h-6 rounded"
               />
-              <span>{team2.teamShortName}</span>
+              <span>{team2.shortName}</span>
             </div>
             <Badge variant="outline">{match.format}</Badge>
           </div>
@@ -214,12 +214,10 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                       <div className="flex items-center justify-center space-x-2 mb-3">
                         <img
                           src={team1.flag}
-                          alt={team1.teamName}
+                          alt={team1.shortName}
                           className="w-8 h-8 rounded"
                         />
-                        <h3 className="text-xl font-bold">
-                          {team1.teamShortName}
-                        </h3>
+                        <h3 className="text-xl font-bold">{team1.shortName}</h3>
                       </div>
                       <div className="text-3xl font-bold text-green-600 mb-2">
                         {predictionData.winnerPrediction.team1.probability}%
@@ -244,9 +242,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                           alt={team2.teamName}
                           className="w-8 h-8 rounded"
                         />
-                        <h3 className="text-xl font-bold">
-                          {team2.teamShortName}
-                        </h3>
+                        <h3 className="text-xl font-bold">{team2.shortName}</h3>
                       </div>
                       <div className="text-3xl font-bold text-blue-600 mb-2">
                         {predictionData.winnerPrediction.team2.probability}%
@@ -282,10 +278,10 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                       <div className="flex items-center justify-center space-x-2 mb-3">
                         <img
                           src={team1.flag}
-                          alt={team1.teamName}
+                          alt={team1.shortName}
                           className="w-6 h-6 rounded"
                         />
-                        <h3 className="font-semibold">{team1.teamShortName}</h3>
+                        <h3 className="font-semibold">{team1.shortName}</h3>
                       </div>
                       <div className="text-2xl font-bold text-blue-600 mb-2">
                         {predictionData.firstInningScore.team1.predicted}
@@ -302,7 +298,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                           alt={team2.teamName}
                           className="w-6 h-6 rounded"
                         />
-                        <h3 className="font-semibold">{team2.teamShortName}</h3>
+                        <h3 className="font-semibold">{team2.shortName}</h3>
                       </div>
                       <div className="text-2xl font-bold text-purple-600 mb-2">
                         {predictionData.firstInningScore.team2.predicted}
@@ -421,10 +417,10 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                     <CardTitle className="flex items-center space-x-2">
                       <img
                         src={team1.flag}
-                        alt={team1.teamName}
+                        alt={team1.shortName}
                         className="w-6 h-6 rounded"
                       />
-                      <span>{team1.teamShortName} Key Players</span>
+                      <span>{team1.shortName} Key Players</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -470,7 +466,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                         alt={team2.teamName}
                         className="w-6 h-6 rounded"
                       />
-                      <span>{team2.teamShortName} Key Players</span>
+                      <span>{team2.shortName} Key Players</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -521,10 +517,10 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                       <Target className="h-5 w-5 text-blue-600" />
                       <img
                         src={team1.flag}
-                        alt={team1.teamName}
+                        alt={team1.shortName}
                         className="w-6 h-6 rounded"
                       />
-                      <span>{team1.teamShortName} Top Batsman</span>
+                      <span>{team1.shortName} Top Batsman</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -566,7 +562,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                         alt={team2.teamName}
                         className="w-6 h-6 rounded"
                       />
-                      <span>{team2.teamShortName} Top Batsman</span>
+                      <span>{team2.shortName} Top Batsman</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -609,10 +605,10 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                       <Zap className="h-5 w-5 text-blue-600" />
                       <img
                         src={team1.flag}
-                        alt={team1.teamName}
+                        alt={team1.shortName}
                         className="w-6 h-6 rounded"
                       />
-                      <span>{team1.teamShortName} Top Bowler</span>
+                      <span>{team1.shortName} Top Bowler</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -654,7 +650,7 @@ const AIPredictionModal: any = ({ isOpen, onClose, match }: any) => {
                         alt={team2.teamName}
                         className="w-6 h-6 rounded"
                       />
-                      <span>{team2.teamShortName} Top Bowler</span>
+                      <span>{team2.shortName} Top Bowler</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

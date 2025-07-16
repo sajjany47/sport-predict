@@ -1,6 +1,6 @@
 export const GetMatchPrediction = (data: any, format: any) => {
   //fantasy points calculation based on DummyData//////////////////////////////////
-  const fantasyPoints = 0.2;
+  // const fantasyPoints = 0.2;
   const battingForm = 0.4;
   const bowlingForm = 0.5;
   const battingStats = 0.3;
@@ -13,7 +13,7 @@ export const GetMatchPrediction = (data: any, format: any) => {
   const prepareSquad = data.map((item: any) => {
     const squad = item.squad.map((elm: any) => {
       const totalPoint =
-        Number(elm.fantasyPoints) * fantasyPoints +
+        // Number(elm.fantasyPoints) * fantasyPoints +
         Number(elm.battingForm.totalRuns) * battingForm +
         Number(elm.bowlingForm.totalWicket) * bowlingForm +
         Number(elm.battingStats.totalRuns) * battingStats +
