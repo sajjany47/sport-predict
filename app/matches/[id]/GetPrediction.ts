@@ -305,3 +305,182 @@ export const GetMatchPrediction = (data: any, format: any) => {
 
   return result;
 };
+
+export const CalculatePlayerScore = (player: any) => {
+  // Weightage for different factors (adjust these based on your analysis)
+  const weights = {
+    batting: {
+      recentForm: 0.25,
+      overallStat: 0.3,
+      stadiumStat: 0.2,
+      againstTeamStat: 0.25,
+    },
+    bowling: {
+      recentForm: 0.25,
+      overallStat: 0.3,
+      stadiumStat: 0.2,
+      againstTeamStat: 0.25,
+    },
+  };
+
+  // Calculate batting score
+  const battingScore =
+    player.battingForm.totalRuns * weights.batting.recentForm +
+    player.battingStats.totalRuns * weights.batting.overallStat +
+    player.stadiumBattingStats.totalRuns * weights.batting.stadiumStat +
+    player.againstTeamBattingStats.totalRuns * weights.batting.againstTeamStat;
+
+  // Calculate bowling score
+  const bowlingScore =
+    player.bowlingForm.totalWicket * weights.bowling.recentForm +
+    player.bowlingStats.totalWicket * weights.bowling.overallStat +
+    player.stadiumBowlingStats.totalWicket * weights.bowling.stadiumStat +
+    player.againstTeamBowlingStats.totalWicket *
+      weights.bowling.againstTeamStat;
+
+  // Calculate overall score based on player role
+  let overallScore;
+  if (player.type === "BAT" && player.type !== "BOWL") {
+    overallScore = battingScore * 0.9 + bowlingScore * 0.1;
+  } else if (player.type === "BOWL" && player.type !== "BAT") {
+    overallScore = bowlingScore * 0.9 + battingScore * 0.1;
+  } else if (player.type === "AR") {
+    overallScore = battingScore * 0.5 + bowlingScore * 0.5;
+  } else {
+    overallScore = battingScore * 0.7 + bowlingScore * 0.3;
+  }
+
+  return {
+    ...player,
+    battingScore,
+    bowlingScore,
+    overallScore,
+  };
+};
+
+export const CalculateTeamWinProbability = (teamA: any, teamB: any) => {
+  // Calculate average team scores
+  const teamAScore =
+    teamA.players.reduce(
+      (sum: any, player: any) => sum + player.overallScore,
+      0
+    ) / teamA.players.length;
+  const teamBScore =
+    teamB.players.reduce(
+      (sum: any, player: any) => sum + player.overallScore,
+      0
+    ) / teamB.players.length;
+
+  // Normalize to get probabilities
+  const total = teamAScore + teamBScore;
+  const teamAProbability = (teamAScore / total) * 100;
+  const teamBProbability = (teamBScore / total) * 100;
+
+  return {
+    teamA: teamAProbability,
+    teamB: teamBProbability,
+  };
+};
+
+export const SelectBest11 = (teamA: any, teamB: any, budget = 100) => {
+  // Combine all players and calculate scores
+  const allPlayers = [...teamA.squad, ...teamB.squad]
+    .map((player) => CalculatePlayerScore(player))
+    .sort((a, b) => b.overallScore - a.overallScore);
+
+  // Fantasy team constraints
+  const constraints = {
+    totalPlayers: 11,
+    maxPlayersFromOneTeam: 7,
+    minWicketKeepers: 1,
+    minBatsmen: 3,
+    minBowlers: 3,
+    maxAllRounders: 4,
+  };
+
+  let selectedPlayers: any = [];
+  let remainingBudget = budget;
+  let teamACount = 0;
+  let teamBCount = 0;
+
+  // Helper functions
+  const countByType = (type: any) =>
+    selectedPlayers.filter((p: any) => p[`is${type}`]).length;
+  const countByTeam = (teamName: any) =>
+    selectedPlayers.filter((p: any) => teamA.players.includes(p)).length;
+
+  for (const player of allPlayers) {
+    if (selectedPlayers.length >= constraints.totalPlayers) break;
+
+    // Check team constraints
+    const isFromTeamA = teamA.players.some((p: any) => p.id === player.id);
+    if (isFromTeamA && teamACount >= constraints.maxPlayersFromOneTeam)
+      continue;
+    if (!isFromTeamA && teamBCount >= constraints.maxPlayersFromOneTeam)
+      continue;
+
+    // Check budget
+    if (player.price > remainingBudget) continue;
+
+    // Check role constraints
+    const wkCount = countByType("WicketKeeper");
+    const batCount = countByType("Batsman");
+    const bowlCount = countByType("Bowler");
+    const arCount = countByType("AllRounder");
+
+    if (
+      player.isWicketKeeper &&
+      wkCount >= constraints.minWicketKeepers &&
+      countByType("WicketKeeper") >= constraints.minWicketKeepers
+    )
+      continue;
+
+    if (
+      player.isBatsman &&
+      !player.isBowler &&
+      !player.isAllRounder &&
+      batCount >= constraints.minBatsmen &&
+      selectedPlayers.length - batCount - bowlCount - arCount <
+        constraints.totalPlayers -
+          constraints.minBatsmen -
+          constraints.minBowlers
+    )
+      continue;
+
+    if (
+      player.isBowler &&
+      !player.isBatsman &&
+      !player.isAllRounder &&
+      bowlCount >= constraints.minBowlers &&
+      selectedPlayers.length - batCount - bowlCount - arCount <
+        constraints.totalPlayers -
+          constraints.minBatsmen -
+          constraints.minBowlers
+    )
+      continue;
+
+    if (player.isAllRounder && arCount >= constraints.maxAllRounders) continue;
+
+    // Add player to team
+    selectedPlayers.push(player);
+    remainingBudget -= player.price;
+    if (isFromTeamA) teamACount++;
+    else teamBCount++;
+  }
+
+  // Select captain and vice-captain (highest scored players)
+  selectedPlayers.sort((a: any, b: any) => b.overallScore - a.overallScore);
+  if (selectedPlayers.length > 0) selectedPlayers[0].isCaptain = true;
+  if (selectedPlayers.length > 1) selectedPlayers[1].isViceCaptain = true;
+
+  return {
+    players: selectedPlayers,
+    totalScore: selectedPlayers.reduce(
+      (sum: any, player: any) => sum + player.overallScore,
+      0
+    ),
+    remainingBudget,
+    teamAPlayers: teamACount,
+    teamBPlayers: teamBCount,
+  };
+};
