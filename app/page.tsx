@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,20 +36,6 @@ const HomePage = () => {
       return response.data; // extract only the array part
     },
   });
-
-  useEffect(() => {
-    // teams.teamA.players = teams.teamA.players.map(calculatePlayerScore);
-    // teams.teamB.players = teams.teamB.players.map(calculatePlayerScore);
-    // // Calculate win probabilities
-    // const winProbabilities = calculateTeamWinProbability(
-    //   teams.teamA,
-    //   teams.teamB
-    // );
-    // console.log("Win Probabilities:", winProbabilities);
-    // // Select best11 fantasy team
-    // const best11 = selectBest11(teams.teamA, teams.teamB);
-    // console.log("Best11 Team:", best11);
-  }, []);
 
   const customerReviews = [
     {

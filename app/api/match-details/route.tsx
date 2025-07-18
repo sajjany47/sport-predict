@@ -1,7 +1,7 @@
 import axios from "axios";
 import { NextRequest } from "next/server";
 import { NewPlayerDetails } from "./NewPlayerDetails";
-import { GetStadiumList, TransAdvanceStatData } from "@/lib/utils";
+import { CleanName, GetStadiumList, TransAdvanceStatData } from "@/lib/utils";
 import { StadiumStats } from "./PerformanceDetail";
 import cache from "@/lib/NodeCacheService";
 
@@ -184,8 +184,8 @@ export async function POST(request: NextRequest) {
             ? await Promise.all(
                 item.playingPlayers.map(async (elm: any) => {
                   const playerData = await playerDetails(
-                    elm.name,
-                    stadiumDetails.name || "",
+                    CleanName(elm?.name),
+                    stadiumDetails?.name || "",
                     squadListData[index === 0 ? 1 : 0].shortName
                   );
                   return {

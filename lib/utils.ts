@@ -488,3 +488,16 @@ export const ExtractPlayerData = (elm: any): any => {
     ),
   };
 };
+
+export const CleanName = (name: any) => {
+  return (
+    name
+      // Replace curly apostrophes (’‘) and normal apostrophes (') and capitalize next letter
+      .replace(/[’'‘]([a-z])/gi, (_: any, char: any) => char.toUpperCase())
+      // Replace hyphens and commas with space
+      .replace(/[-,]+/g, " ")
+      // Replace multiple spaces with a single space
+      .replace(/\s+/g, " ")
+      .trim()
+  );
+};
