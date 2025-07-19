@@ -16,7 +16,8 @@ export const NewPlayerDetails = async (
   teamName: string
 ) => {
   try {
-    const playerList: any = await GetPSearchList(name);
+    const playerData: any = await GetPSearchList(name);
+    const playerList: any = playerData[0];
     const getInfoUrl = await GetHtml(playerList.url);
     const requiredNames = [
       "Dream11 Points",

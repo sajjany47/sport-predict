@@ -46,7 +46,7 @@ export const GetPSearchList = async (searchTerm: string) => {
     if (playerList.length === 0) {
       throw new Error("No players found");
     }
-    return playerList[0]; // Return the first player found
+    return playerList; // Return the first player found
   } catch (error) {
     console.error(
       `Error fetching player search list for ${searchTerm}:`,
@@ -80,7 +80,7 @@ export const GetStadiumList = async (searchTerm: string) => {
     if (stadiums.length === 0) {
       throw new Error("No stadium found");
     }
-    return stadiums[0]; // Return the first player found
+    return stadiums; // Return the first player found
   } catch (error) {
     console.error(
       `Error fetching player search list for ${searchTerm}:`,

@@ -149,7 +149,8 @@ export async function POST(request: NextRequest) {
     if (!stadiumDetails) {
       try {
         const statdiumReqName = body.venue.split(",")[0].trim();
-        stadiumDetails = await GetStadiumList(statdiumReqName);
+        const stadiumData = await GetStadiumList(statdiumReqName);
+        stadiumDetails = stadiumData[0];
         stadium = await StadiumStats(stadiumDetails.url);
       } catch (err) {
         stadium = [];
