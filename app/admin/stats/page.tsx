@@ -50,18 +50,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
 import { StatsAutoSearch } from "../AdminService";
+import { Formik, Form, Field } from "formik";
+import { statsValidationSchema } from "@/app/api/stats/StatsSchema";
+import { FormikSelectField, FormikTextInput } from "@/components/CustomField";
 
 const AdminStatsPage = () => {
   const { players, stadiums } = useSelector((state: RootState) => state.admin);
   const dispatch = useDispatch();
 
-  const [activeTab, setActiveTab] = useState("players");
+  const [activeTab, setActiveTab] = useState("player");
   const [searchTerm, setSearchTerm] = useState("");
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
   const [isStadiumModalOpen, setIsStadiumModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<any>(null);
   const [editingStadium, setEditingStadium] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [actionType, setActionType] = useState("add");
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [playerForm, setPlayerForm] = useState({
     originalName: "",
@@ -312,6 +317,20 @@ const AdminStatsPage = () => {
       stadium.state.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const initialValues =
+    actionType === "add"
+      ? { originalName: "", publicName: "", type: activeTab }
+      : { originalName: "", publicName: "", type: activeTab };
+
+  const handelFormSubmit = (value: any) => {
+    console.log(value);
+  };
+
+  const handelModal = () => {
+    setActionType("add");
+    setModalOpen(true);
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-8">
@@ -417,10 +436,10 @@ const AdminStatsPage = () => {
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="players">
+                <TabsTrigger value="player">
                   Players ({players.length})
                 </TabsTrigger>
-                <TabsTrigger value="stadiums">
+                <TabsTrigger value="stadium">
                   Stadiums ({stadiums.length})
                 </TabsTrigger>
               </TabsList>
@@ -444,205 +463,17 @@ const AdminStatsPage = () => {
                     <Filter className="h-4 w-4" />
                     <span>Filter</span>
                   </Button>
-                  {activeTab === "players" ? (
-                    <Dialog
-                      open={isPlayerModalOpen}
-                      onOpenChange={setIsPlayerModalOpen}
-                    >
-                      <DialogTrigger asChild>
-                        <Button className="bg-blue-600 hover:bg-blue-700">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Player
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>
-                            {editingPlayer ? "Edit Player" : "Add New Player"}
-                          </DialogTitle>
-                        </DialogHeader>
-                        <form
-                          onSubmit={handlePlayerSubmit}
-                          className="space-y-4"
-                        >
-                          <div className="space-y-2">
-                            <Label htmlFor="originalName">
-                              Original Name *
-                            </Label>
-                            <Input
-                              id="originalName"
-                              value={playerForm.originalName}
-                              onChange={(e) =>
-                                setPlayerForm({
-                                  ...playerForm,
-                                  originalName: e.target.value,
-                                })
-                              }
-                              placeholder="Enter original name"
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="publicName">Public Name *</Label>
-                            <Input
-                              id="publicName"
-                              value={playerForm.publicName}
-                              onChange={(e) =>
-                                setPlayerForm({
-                                  ...playerForm,
-                                  publicName: e.target.value,
-                                })
-                              }
-                              placeholder="Enter public name"
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="team">Team *</Label>
-                            <Input
-                              id="team"
-                              value={playerForm.team}
-                              onChange={(e) =>
-                                setPlayerForm({
-                                  ...playerForm,
-                                  team: e.target.value,
-                                })
-                              }
-                              placeholder="Enter team name"
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="dob">Date of Birth *</Label>
-                            <Input
-                              id="dob"
-                              type="date"
-                              value={playerForm.dob}
-                              onChange={(e) =>
-                                setPlayerForm({
-                                  ...playerForm,
-                                  dob: e.target.value,
-                                })
-                              }
-                              required
-                            />
-                          </div>
-                          <Button
-                            type="submit"
-                            className="w-full"
-                            disabled={isLoading}
-                          >
-                            {isLoading
-                              ? "Saving..."
-                              : editingPlayer
-                              ? "Update Player"
-                              : "Add Player"}
-                          </Button>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                  ) : (
-                    <Dialog
-                      open={isStadiumModalOpen}
-                      onOpenChange={setIsStadiumModalOpen}
-                    >
-                      <DialogTrigger asChild>
-                        <Button className="bg-blue-600 hover:bg-blue-700">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Stadium
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>
-                            {editingStadium
-                              ? "Edit Stadium"
-                              : "Add New Stadium"}
-                          </DialogTitle>
-                        </DialogHeader>
-                        <form
-                          onSubmit={handleStadiumSubmit}
-                          className="space-y-4"
-                        >
-                          <div className="space-y-2">
-                            <Label htmlFor="name">Name *</Label>
-                            <Input
-                              id="name"
-                              value={stadiumForm.name}
-                              onChange={(e) =>
-                                setStadiumForm({
-                                  ...stadiumForm,
-                                  name: e.target.value,
-                                })
-                              }
-                              placeholder="Enter stadium name"
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="publicName">Public Name *</Label>
-                            <Input
-                              id="publicName"
-                              value={stadiumForm.publicName}
-                              onChange={(e) =>
-                                setStadiumForm({
-                                  ...stadiumForm,
-                                  publicName: e.target.value,
-                                })
-                              }
-                              placeholder="Enter public name"
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="country">Country *</Label>
-                            <Input
-                              id="country"
-                              value={stadiumForm.country}
-                              onChange={(e) =>
-                                setStadiumForm({
-                                  ...stadiumForm,
-                                  country: e.target.value,
-                                })
-                              }
-                              placeholder="Enter country"
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="state">State *</Label>
-                            <Input
-                              id="state"
-                              value={stadiumForm.state}
-                              onChange={(e) =>
-                                setStadiumForm({
-                                  ...stadiumForm,
-                                  state: e.target.value,
-                                })
-                              }
-                              placeholder="Enter state"
-                              required
-                            />
-                          </div>
-                          <Button
-                            type="submit"
-                            className="w-full"
-                            disabled={isLoading}
-                          >
-                            {isLoading
-                              ? "Saving..."
-                              : editingStadium
-                              ? "Update Stadium"
-                              : "Add Stadium"}
-                          </Button>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                  )}
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={handelModal}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {`Add ${activeTab === "player" ? "Player" : "Stadium"}`}
+                  </Button>
                 </div>
               </div>
 
-              <TabsContent value="players" className="space-y-4">
+              <TabsContent value="player" className="space-y-4">
                 {filteredPlayers.length > 0 ? (
                   <div className="space-y-4">
                     {filteredPlayers.map((player) => (
@@ -730,7 +561,7 @@ const AdminStatsPage = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="stadiums" className="space-y-4">
+              <TabsContent value="stadium" className="space-y-4">
                 {filteredStadiums.length > 0 ? (
                   <div className="space-y-4">
                     {filteredStadiums.map((stadium) => (
@@ -821,6 +652,71 @@ const AdminStatsPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog
+        open={modalOpen}
+        onOpenChange={() => {
+          setModalOpen(false);
+          setActionType("add");
+        }}
+      >
+        <DialogContent className="max-w">
+          <DialogHeader>
+            <DialogTitle>
+              {actionType === "add"
+                ? `Add ${activeTab === "player" ? "Player" : "Stadium"}`
+                : `Edit ${activeTab === "player" ? "Player" : "Stadium"}`}
+            </DialogTitle>
+          </DialogHeader>
+          <Formik
+            initialValues={initialValues}
+            validationSchema={statsValidationSchema}
+            onSubmit={handelFormSubmit}
+          >
+            {({ handleSubmit }) => (
+              <Form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1">
+                  <div className="space-y-2">
+                    <Field
+                      label="Original Name"
+                      component={FormikTextInput}
+                      name="originalName"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Field
+                      label="Public Name"
+                      component={FormikTextInput}
+                      name="publicName"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Field
+                      label="Type"
+                      name="type"
+                      component={FormikSelectField}
+                      options={[
+                        { label: "Player", value: "player" },
+                        { label: "Stadium", value: "stadium" },
+                      ]}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2 mt-2">
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {actionType === "add"
+                      ? `Add ${activeTab === "player" ? "Player" : "Stadium"}`
+                      : `Update ${
+                          activeTab === "player" ? "Player" : "Stadium"
+                        }`}
+                  </Button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };
