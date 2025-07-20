@@ -49,6 +49,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
+import { StatsAutoSearch } from "../AdminService";
 
 const AdminStatsPage = () => {
   const { players, stadiums } = useSelector((state: RootState) => state.admin);
@@ -177,6 +178,16 @@ const AdminStatsPage = () => {
     dispatch(setPlayers(mockPlayers));
     dispatch(setStadiums(mockStadiums));
   }, [dispatch]);
+
+  const fetchAutoSearch = (query: any) => {
+    StatsAutoSearch(query).then((res) => {
+      return res.data.map((item: any) => ({
+        ...item,
+        lable: item.name,
+        value: item.name,
+      }));
+    });
+  };
 
   const handlePlayerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
