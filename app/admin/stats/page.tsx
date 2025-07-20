@@ -60,27 +60,9 @@ const AdminStatsPage = () => {
 
   const [activeTab, setActiveTab] = useState("player");
   const [searchTerm, setSearchTerm] = useState("");
-  const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
-  const [isStadiumModalOpen, setIsStadiumModalOpen] = useState(false);
-  const [editingPlayer, setEditingPlayer] = useState<any>(null);
-  const [editingStadium, setEditingStadium] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [actionType, setActionType] = useState("add");
   const [modalOpen, setModalOpen] = useState(false);
-
-  const [playerForm, setPlayerForm] = useState({
-    originalName: "",
-    publicName: "",
-    team: "",
-    dob: "",
-  });
-
-  const [stadiumForm, setStadiumForm] = useState({
-    name: "",
-    publicName: "",
-    country: "",
-    state: "",
-  });
 
   // Mock data initialization
   useEffect(() => {
@@ -194,100 +176,6 @@ const AdminStatsPage = () => {
     });
   };
 
-  const handlePlayerSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      if (editingPlayer) {
-        const updatedPlayer = {
-          ...editingPlayer,
-          ...playerForm,
-          updatedAt: new Date().toISOString(),
-        };
-        dispatch(updatePlayer(updatedPlayer));
-        toast.success("Player updated successfully!");
-      } else {
-        const newPlayer = {
-          id: Date.now().toString(),
-          ...playerForm,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        dispatch(addPlayer(newPlayer));
-        toast.success("Player added successfully!");
-      }
-
-      setPlayerForm({ originalName: "", publicName: "", team: "", dob: "" });
-      setEditingPlayer(null);
-      setIsPlayerModalOpen(false);
-    } catch (error) {
-      toast.error("Failed to save player. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleStadiumSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      if (editingStadium) {
-        const updatedStadium = {
-          ...editingStadium,
-          ...stadiumForm,
-          updatedAt: new Date().toISOString(),
-        };
-        dispatch(updateStadium(updatedStadium));
-        toast.success("Stadium updated successfully!");
-      } else {
-        const newStadium = {
-          id: Date.now().toString(),
-          ...stadiumForm,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        dispatch(addStadium(newStadium));
-        toast.success("Stadium added successfully!");
-      }
-
-      setStadiumForm({ name: "", publicName: "", country: "", state: "" });
-      setEditingStadium(null);
-      setIsStadiumModalOpen(false);
-    } catch (error) {
-      toast.error("Failed to save stadium. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEditPlayer = (player: any) => {
-    setEditingPlayer(player);
-    setPlayerForm({
-      originalName: player.originalName,
-      publicName: player.publicName,
-      team: player.team,
-      dob: player.dob,
-    });
-    setIsPlayerModalOpen(true);
-  };
-
-  const handleEditStadium = (stadium: any) => {
-    setEditingStadium(stadium);
-    setStadiumForm({
-      name: stadium.name,
-      publicName: stadium.publicName,
-      country: stadium.country,
-      state: stadium.state,
-    });
-    setIsStadiumModalOpen(true);
-  };
-
   const handleDeletePlayer = (playerId: string) => {
     if (confirm("Are you sure you want to delete this player?")) {
       dispatch(deletePlayer(playerId));
@@ -323,12 +211,47 @@ const AdminStatsPage = () => {
       : { originalName: "", publicName: "", type: activeTab };
 
   const handelFormSubmit = (value: any) => {
-    console.log(value);
+    //  try {
+    //    await new Promise((resolve) => setTimeout(resolve, 1000));
+    //    if (editingPlayer) {
+    //      const updatedPlayer = {
+    //        ...editingPlayer,
+    //        ...playerForm,
+    //        updatedAt: new Date().toISOString(),
+    //      };
+    //      dispatch(updatePlayer(updatedPlayer));
+    //      toast.success("Player updated successfully!");
+    //    } else {
+    //      const newPlayer = {
+    //        id: Date.now().toString(),
+    //        ...playerForm,
+    //        createdAt: new Date().toISOString(),
+    //        updatedAt: new Date().toISOString(),
+    //      };
+    //      dispatch(addPlayer(newPlayer));
+    //      toast.success("Player added successfully!");
+    //    }
+    //    setPlayerForm({ originalName: "", publicName: "", team: "", dob: "" });
+    //    setEditingPlayer(null);
+    //    setIsPlayerModalOpen(false);
+    //  } catch (error) {
+    //    toast.error("Failed to save player. Please try again.");
+    //  } finally {
+    //    setIsLoading(false);
+    //  }
   };
 
   const handelModal = () => {
     setActionType("add");
     setModalOpen(true);
+  };
+
+  const handleEdit = (item: any) => {
+    console.log(item);
+  };
+
+  const handleDelete = (item: any) => {
+    console.log(item);
   };
 
   return (
@@ -527,13 +450,13 @@ const AdminStatsPage = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
-                                  onClick={() => handleEditPlayer(player)}
+                                  onClick={() => handleEdit(player)}
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit Player
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() => handleDeletePlayer(player.id)}
+                                  onClick={() => handleDelete(player.id)}
                                   className="text-red-600"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
@@ -613,15 +536,13 @@ const AdminStatsPage = () => {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
-                                  onClick={() => handleEditStadium(stadium)}
+                                  onClick={() => handleEdit(stadium)}
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit Stadium
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() =>
-                                    handleDeleteStadium(stadium.id)
-                                  }
+                                  onClick={() => handleDelete(stadium.id)}
                                   className="text-red-600"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
