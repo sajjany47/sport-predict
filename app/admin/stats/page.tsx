@@ -52,7 +52,11 @@ import toast from "react-hot-toast";
 import { StatsAutoSearch } from "../AdminService";
 import { Formik, Form, Field } from "formik";
 import { statsValidationSchema } from "@/app/api/stats/StatsSchema";
-import { FormikSelectField, FormikTextInput } from "@/components/CustomField";
+import {
+  FormikAutoSelectField,
+  FormikSelectField,
+  FormikTextInput,
+} from "@/components/CustomField";
 
 const AdminStatsPage = () => {
   const { players, stadiums } = useSelector((state: RootState) => state.admin);
@@ -167,13 +171,15 @@ const AdminStatsPage = () => {
   }, [dispatch]);
 
   const fetchAutoSearch = (query: any) => {
-    StatsAutoSearch(query).then((res) => {
-      return res.data.map((item: any) => ({
-        ...item,
-        lable: item.name,
-        value: item.name,
-      }));
-    });
+    return StatsAutoSearch({ srchValue: query, type: activeTab }).then(
+      (res) => {
+        return res.data.map((item: any) => ({
+          ...item,
+          label: item.name,
+          value: item.name,
+        }));
+      }
+    );
   };
 
   const handleDeletePlayer = (playerId: string) => {
@@ -594,14 +600,16 @@ const AdminStatsPage = () => {
             validationSchema={statsValidationSchema}
             onSubmit={handelFormSubmit}
           >
-            {({ handleSubmit }) => (
+            {({ handleSubmit, setFieldValue }) => (
               <Form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1">
                   <div className="space-y-2">
                     <Field
                       label="Original Name"
-                      component={FormikTextInput}
+                      component={FormikAutoSelectField}
                       name="originalName"
+                      loadOptions={fetchAutoSearch}
+                      onChange={(e: any) => setFieldValue("originalName", e)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -615,6 +623,7 @@ const AdminStatsPage = () => {
                     <Field
                       label="Type"
                       name="type"
+                      disabled
                       component={FormikSelectField}
                       options={[
                         { label: "Player", value: "player" },
