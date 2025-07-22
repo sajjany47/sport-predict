@@ -1,23 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store";
-import {
-  setPlayers,
-  setStadiums,
-  addPlayer,
-  updatePlayer,
-  deletePlayer,
-  addStadium,
-  updateStadium,
-  deleteStadium,
-} from "@/store/slices/adminSlice";
+import { useDispatch } from "react-redux";
+
+import { deletePlayer, deleteStadium } from "@/store/slices/adminSlice";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -25,7 +15,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Database,
@@ -35,11 +24,9 @@ import {
   Edit,
   Trash2,
   Users,
-  MapPin,
   Calendar,
   User,
   Building,
-  Globe,
   MoreHorizontal,
 } from "lucide-react";
 import {
@@ -56,18 +43,15 @@ import {
   StatsUpdate,
 } from "../AdminService";
 import { Formik, Form, Field } from "formik";
-import {
-  statsValidationFrontend,
-  statsValidationSchema,
-} from "@/app/api/stats/StatsSchema";
+import { statsValidationFrontend } from "@/app/api/stats/StatsSchema";
 import {
   FormikAutoSelectField,
   FormikSelectField,
   FormikTextInput,
 } from "@/components/CustomField";
+import CustomLoader from "@/components/ui/CustomLoader";
 
 const AdminStatsPage = () => {
-  const { players, stadiums } = useSelector((state: RootState) => state.admin);
   const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState("player");
@@ -75,109 +59,8 @@ const AdminStatsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [actionType, setActionType] = useState("add");
   const [modalOpen, setModalOpen] = useState(false);
-  const [data, setData] = useState([]);
-
-  // Mock data initialization
-  useEffect(() => {
-    const mockPlayers = [
-      {
-        id: "1",
-        originalName: "Virat Kohli",
-        publicName: "V Kohli",
-        team: "Royal Challengers Bangalore",
-        dob: "1988-11-05",
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-15T10:30:00Z",
-      },
-      {
-        id: "2",
-        originalName: "Rohit Sharma",
-        publicName: "R Sharma",
-        team: "Mumbai Indians",
-        dob: "1987-04-30",
-        createdAt: "2024-01-14T15:20:00Z",
-        updatedAt: "2024-01-14T15:20:00Z",
-      },
-      {
-        id: "3",
-        originalName: "MS Dhoni",
-        publicName: "MS Dhoni",
-        team: "Chennai Super Kings",
-        dob: "1981-07-07",
-        createdAt: "2024-01-13T09:15:00Z",
-        updatedAt: "2024-01-13T09:15:00Z",
-      },
-      {
-        id: "4",
-        originalName: "KL Rahul",
-        publicName: "KL Rahul",
-        team: "Lucknow Super Giants",
-        dob: "1992-04-18",
-        createdAt: "2024-01-12T14:45:00Z",
-        updatedAt: "2024-01-12T14:45:00Z",
-      },
-      {
-        id: "5",
-        originalName: "Hardik Pandya",
-        publicName: "H Pandya",
-        team: "Mumbai Indians",
-        dob: "1993-10-11",
-        createdAt: "2024-01-11T11:30:00Z",
-        updatedAt: "2024-01-11T11:30:00Z",
-      },
-    ];
-
-    const mockStadiums = [
-      {
-        id: "1",
-        name: "Wankhede Stadium",
-        publicName: "Wankhede",
-        country: "India",
-        state: "Maharashtra",
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-15T10:30:00Z",
-      },
-      {
-        id: "2",
-        name: "M. Chinnaswamy Stadium",
-        publicName: "Chinnaswamy",
-        country: "India",
-        state: "Karnataka",
-        createdAt: "2024-01-14T15:20:00Z",
-        updatedAt: "2024-01-14T15:20:00Z",
-      },
-      {
-        id: "3",
-        name: "Eden Gardens",
-        publicName: "Eden Gardens",
-        country: "India",
-        state: "West Bengal",
-        createdAt: "2024-01-13T09:15:00Z",
-        updatedAt: "2024-01-13T09:15:00Z",
-      },
-      {
-        id: "4",
-        name: "Narendra Modi Stadium",
-        publicName: "Motera",
-        country: "India",
-        state: "Gujarat",
-        createdAt: "2024-01-12T14:45:00Z",
-        updatedAt: "2024-01-12T14:45:00Z",
-      },
-      {
-        id: "5",
-        name: "Lord's Cricket Ground",
-        publicName: "Lord's",
-        country: "England",
-        state: "London",
-        createdAt: "2024-01-11T11:30:00Z",
-        updatedAt: "2024-01-11T11:30:00Z",
-      },
-    ];
-
-    dispatch(setPlayers(mockPlayers));
-    dispatch(setStadiums(mockStadiums));
-  }, [dispatch]);
+  const [players, setPlayers] = useState<any[]>([]);
+  const [stadiums, setStadiums] = useState<any[]>([]);
 
   useEffect(() => {
     GetList();
@@ -187,7 +70,8 @@ const AdminStatsPage = () => {
     setIsLoading(true);
     StatsList()
       .then((res) => {
-        setData(res.data);
+        setPlayers(res.data.filter((item: any) => item.type === "player"));
+        setStadiums(res.data.filter((item: any) => item.type === "stadium"));
         setIsLoading(false);
       })
       .catch((err) => {
@@ -225,16 +109,13 @@ const AdminStatsPage = () => {
   const filteredPlayers = players.filter(
     (player) =>
       player.originalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      player.publicName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      player.team.toLowerCase().includes(searchTerm.toLowerCase())
+      player.publicName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredStadiums = stadiums.filter(
     (stadium) =>
-      stadium.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      stadium.publicName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      stadium.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      stadium.state.toLowerCase().includes(searchTerm.toLowerCase())
+      stadium.originalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      stadium.publicName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const initialValues =
@@ -297,6 +178,7 @@ const AdminStatsPage = () => {
 
   return (
     <AdminLayout>
+      {isLoading && <CustomLoader message="Loading" />}
       <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -343,42 +225,6 @@ const AdminStatsPage = () => {
                 </div>
                 <div className="p-3 rounded-full bg-green-100">
                   <Building className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
-                    Countries
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {new Set(stadiums.map((s) => s.country)).size}
-                  </p>
-                </div>
-                <div className="p-3 rounded-full bg-purple-100">
-                  <Globe className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
-                    Teams
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {new Set(players.map((p) => p.team)).size}
-                  </p>
-                </div>
-                <div className="p-3 rounded-full bg-orange-100">
-                  <Users className="h-6 w-6 text-orange-600" />
                 </div>
               </div>
             </CardContent>
@@ -442,7 +288,7 @@ const AdminStatsPage = () => {
                   <div className="space-y-4">
                     {filteredPlayers.map((player) => (
                       <div
-                        key={player.id}
+                        key={player._id}
                         className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                       >
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -460,16 +306,6 @@ const AdminStatsPage = () => {
                                 </Badge>
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                                <div className="flex items-center space-x-2">
-                                  <Users className="h-4 w-4" />
-                                  <span>{player.team}</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>
-                                    {new Date(player.dob).toLocaleDateString()}
-                                  </span>
-                                </div>
                                 <div className="flex items-center space-x-2">
                                   <Calendar className="h-4 w-4" />
                                   <span>
@@ -530,7 +366,7 @@ const AdminStatsPage = () => {
                   <div className="space-y-4">
                     {filteredStadiums.map((stadium) => (
                       <div
-                        key={stadium.id}
+                        key={stadium._id}
                         className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                       >
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -541,21 +377,13 @@ const AdminStatsPage = () => {
                             <div className="flex-1">
                               <div className="flex items-center space-x-3 mb-2">
                                 <h3 className="font-semibold text-gray-900 text-lg">
-                                  {stadium.name}
+                                  {stadium.originalName}
                                 </h3>
                                 <Badge variant="secondary">
                                   {stadium.publicName}
                                 </Badge>
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                                <div className="flex items-center space-x-2">
-                                  <Globe className="h-4 w-4" />
-                                  <span>{stadium.country}</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <MapPin className="h-4 w-4" />
-                                  <span>{stadium.state}</span>
-                                </div>
                                 <div className="flex items-center space-x-2">
                                   <Calendar className="h-4 w-4" />
                                   <span>
