@@ -49,7 +49,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
-import { StatsAutoSearch, StatsCreate, StatsUpdate } from "../AdminService";
+import {
+  StatsAutoSearch,
+  StatsCreate,
+  StatsList,
+  StatsUpdate,
+} from "../AdminService";
 import { Formik, Form, Field } from "formik";
 import {
   statsValidationFrontend,
@@ -70,6 +75,7 @@ const AdminStatsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [actionType, setActionType] = useState("add");
   const [modalOpen, setModalOpen] = useState(false);
+  const [data, setData] = useState([]);
 
   // Mock data initialization
   useEffect(() => {
@@ -173,6 +179,23 @@ const AdminStatsPage = () => {
     dispatch(setStadiums(mockStadiums));
   }, [dispatch]);
 
+  useEffect(() => {
+    GetList();
+  }, []);
+
+  const GetList = () => {
+    setIsLoading(true);
+    StatsList()
+      .then((res) => {
+        setData(res.data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.error(err.message || "Failed to get details. Please try again.");
+      });
+  };
+
   const fetchAutoSearch = (query: any) => {
     return StatsAutoSearch({ srchValue: query, type: activeTab }).then(
       (res) => {
@@ -255,6 +278,7 @@ const AdminStatsPage = () => {
 
     setModalOpen(false);
     setActionType("add");
+    GetList();
   };
 
   const handelModal = () => {
@@ -263,7 +287,8 @@ const AdminStatsPage = () => {
   };
 
   const handleEdit = (item: any) => {
-    console.log(item);
+    setActionType("edit");
+    setModalOpen(true);
   };
 
   const handleDelete = (item: any) => {
