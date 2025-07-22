@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const StatsSchema = new Schema(
+const StatsSchema = new mongoose.Schema(
   {
     originalName: String,
     publicName: String,
@@ -13,6 +13,6 @@ const StatsSchema = new Schema(
   { timestamps: true }
 );
 
-const Stats = mongoose.models.Stats || mongoose.model("Stats", StatsSchema);
+const Stats = mongoose.models?.Stats || mongoose.model("Stats", StatsSchema);
 
 export default Stats;
