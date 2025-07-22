@@ -49,9 +49,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
-import { StatsAutoSearch } from "../AdminService";
+import { StatsAutoSearch, StatsCreate, StatsUpdate } from "../AdminService";
 import { Formik, Form, Field } from "formik";
-import { statsValidationSchema } from "@/app/api/stats/StatsSchema";
+import {
+  statsValidationFrontend,
+  statsValidationSchema,
+} from "@/app/api/stats/StatsSchema";
 import {
   FormikAutoSelectField,
   FormikSelectField,
@@ -217,34 +220,41 @@ const AdminStatsPage = () => {
       : { originalName: "", publicName: "", type: activeTab };
 
   const handelFormSubmit = (value: any) => {
-    //  try {
-    //    await new Promise((resolve) => setTimeout(resolve, 1000));
-    //    if (editingPlayer) {
-    //      const updatedPlayer = {
-    //        ...editingPlayer,
-    //        ...playerForm,
-    //        updatedAt: new Date().toISOString(),
-    //      };
-    //      dispatch(updatePlayer(updatedPlayer));
-    //      toast.success("Player updated successfully!");
-    //    } else {
-    //      const newPlayer = {
-    //        id: Date.now().toString(),
-    //        ...playerForm,
-    //        createdAt: new Date().toISOString(),
-    //        updatedAt: new Date().toISOString(),
-    //      };
-    //      dispatch(addPlayer(newPlayer));
-    //      toast.success("Player added successfully!");
-    //    }
-    //    setPlayerForm({ originalName: "", publicName: "", team: "", dob: "" });
-    //    setEditingPlayer(null);
-    //    setIsPlayerModalOpen(false);
-    //  } catch (error) {
-    //    toast.error("Failed to save player. Please try again.");
-    //  } finally {
-    //    setIsLoading(false);
-    //  }
+    setIsLoading(true);
+    const reqData = {
+      originalName: value.originalName.value,
+      publicName: value.publicName,
+      type: value.type,
+    };
+    if (actionType === "add") {
+      StatsCreate(reqData)
+        .then((res) => {
+          setIsLoading(false);
+          toast.success(res.message);
+        })
+        .catch((err) => {
+          setIsLoading(false);
+          toast.error(
+            err.message || "Failed to save details. Please try again."
+          );
+        });
+    }
+    if (actionType === "edit") {
+      StatsUpdate(reqData)
+        .then((res) => {
+          setIsLoading(false);
+          toast.success(res.message);
+        })
+        .catch((err) => {
+          setIsLoading(false);
+          toast.error(
+            err.message || "Failed to save details. Please try again."
+          );
+        });
+    }
+
+    setModalOpen(false);
+    setActionType("add");
   };
 
   const handelModal = () => {
@@ -597,7 +607,7 @@ const AdminStatsPage = () => {
           </DialogHeader>
           <Formik
             initialValues={initialValues}
-            validationSchema={statsValidationSchema}
+            validationSchema={statsValidationFrontend}
             onSubmit={handelFormSubmit}
           >
             {({ handleSubmit, setFieldValue }) => (
