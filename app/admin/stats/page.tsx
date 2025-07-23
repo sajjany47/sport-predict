@@ -25,6 +25,8 @@ import {
   User,
   Building,
   MoreHorizontal,
+  UserRound,
+  Landmark,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -47,6 +49,8 @@ import {
   FormikTextInput,
 } from "@/components/CustomField";
 import CustomLoader from "@/components/ui/CustomLoader";
+import CustomDataTable from "./CustomDatatable";
+import moment from "moment";
 
 const AdminStatsPage = () => {
   const [activeTab, setActiveTab] = useState("player");
@@ -166,6 +170,37 @@ const AdminStatsPage = () => {
     console.log(item);
   };
 
+  const columns: any[] = [
+    { name: "Sl No.", selector: (row: any) => row.slNo, sortable: true },
+    {
+      name: "Original Name",
+      selector: (row: any) => row.originalName,
+      sortable: true,
+    },
+    { name: "Public Name", selector: (row: any) => row.publicName },
+    {
+      name: "Type",
+      selector: (row: any) => row.type,
+      cell: (row: any) =>
+        row.type === "player" ? (
+          <div className="flex items-center gap-2 text-blue-600">
+            <UserRound className="w-4 h-4" />
+            <span className="text-sm">Player</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-green-600">
+            <Landmark className="w-4 h-4" />
+            <span className="text-sm">Stadium</span>
+          </div>
+        ),
+    },
+    {
+      name: "Created At",
+      selector: (row: any) => row.createdAt,
+      cell: (row: any) => moment(row.createdAt).format("Do MMM,YYYY HH:mm"),
+    },
+  ];
+
   return (
     <AdminLayout>
       {isLoading && <CustomLoader message="Loading" />}
@@ -244,189 +279,30 @@ const AdminStatsPage = () => {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Search and Actions */}
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder={`Search ${activeTab}...`}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    className="flex items-center space-x-2"
-                  >
-                    <Filter className="h-4 w-4" />
-                    <span>Filter</span>
-                  </Button>
-                  <Button
-                    className="bg-blue-600 hover:bg-blue-700"
-                    onClick={handelModal}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {`Add ${activeTab === "player" ? "Player" : "Stadium"}`}
-                  </Button>
-                </div>
-              </div>
-
               <TabsContent value="player" className="space-y-4">
-                {filteredPlayers.length > 0 ? (
-                  <div className="space-y-4">
-                    {filteredPlayers.map((player) => (
-                      <div
-                        key={player._id}
-                        className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                          <div className="flex items-start space-x-4">
-                            <div className="p-3 bg-white rounded-lg shadow-sm">
-                              <User className="h-6 w-6 text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-3 mb-2">
-                                <h3 className="font-semibold text-gray-900 text-lg">
-                                  {player.originalName}
-                                </h3>
-                                <Badge variant="secondary">
-                                  {player.publicName}
-                                </Badge>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                                <div className="flex items-center space-x-2">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>
-                                    Added:{" "}
-                                    {new Date(
-                                      player.createdAt
-                                    ).toLocaleDateString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => handleEdit(player)}
-                                >
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit Player
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleDelete(player.id)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete Player
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      No players found
-                    </h3>
-                    <p className="text-gray-600">
-                      {searchTerm
-                        ? "Try adjusting your search criteria"
-                        : "Add your first player to get started"}
-                    </p>
-                  </div>
-                )}
+                <CustomDataTable
+                  title="Player Stats"
+                  data={filteredPlayers}
+                  columns={columns}
+                  onAdd={handelModal}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  searchable
+                  searchPlaceholder="Search Players..."
+                />
               </TabsContent>
 
               <TabsContent value="stadium" className="space-y-4">
-                {filteredStadiums.length > 0 ? (
-                  <div className="space-y-4">
-                    {filteredStadiums.map((stadium) => (
-                      <div
-                        key={stadium._id}
-                        className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                          <div className="flex items-start space-x-4">
-                            <div className="p-3 bg-white rounded-lg shadow-sm">
-                              <Building className="h-6 w-6 text-green-600" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-3 mb-2">
-                                <h3 className="font-semibold text-gray-900 text-lg">
-                                  {stadium.originalName}
-                                </h3>
-                                <Badge variant="secondary">
-                                  {stadium.publicName}
-                                </Badge>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                                <div className="flex items-center space-x-2">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>
-                                    Added:{" "}
-                                    {new Date(
-                                      stadium.createdAt
-                                    ).toLocaleDateString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => handleEdit(stadium)}
-                                >
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit Stadium
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleDelete(stadium.id)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete Stadium
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Building className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      No stadiums found
-                    </h3>
-                    <p className="text-gray-600">
-                      {searchTerm
-                        ? "Try adjusting your search criteria"
-                        : "Add your first stadium to get started"}
-                    </p>
-                  </div>
-                )}
+                <CustomDataTable
+                  title="Stadium Stats"
+                  data={filteredStadiums}
+                  columns={columns}
+                  onAdd={handelModal}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  searchable
+                  searchPlaceholder="Search Stadium..."
+                />
               </TabsContent>
             </Tabs>
           </CardContent>
