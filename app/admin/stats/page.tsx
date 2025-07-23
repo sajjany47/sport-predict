@@ -4,8 +4,6 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -15,25 +13,13 @@ import {
 } from "@/components/ui/dialog";
 import {
   Database,
-  Search,
-  Filter,
-  Plus,
-  Edit,
   Trash2,
   Users,
-  Calendar,
-  User,
   Building,
-  MoreHorizontal,
   UserRound,
   Landmark,
+  Pencil,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
 import {
   StatsAutoSearch,
@@ -128,6 +114,7 @@ const AdminStatsPage = () => {
         .then((res) => {
           setIsLoading(false);
           toast.success(res.message);
+          modelClose();
         })
         .catch((err) => {
           setIsLoading(false);
@@ -141,6 +128,7 @@ const AdminStatsPage = () => {
         .then((res) => {
           setIsLoading(false);
           toast.success(res.message);
+          modelClose();
         })
         .catch((err) => {
           setIsLoading(false);
@@ -149,12 +137,12 @@ const AdminStatsPage = () => {
           );
         });
     }
-
+  };
+  const modelClose = () => {
     setModalOpen(false);
     setActionType("add");
     GetList();
   };
-
   const handelModal = () => {
     setActionType("add");
     setModalOpen(true);
@@ -198,6 +186,26 @@ const AdminStatsPage = () => {
       name: "Created At",
       selector: (row: any) => row.createdAt,
       cell: (row: any) => moment(row.createdAt).format("Do MMM,YYYY HH:mm"),
+    },
+    {
+      name: "Actions",
+      cell: (row: any) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleEdit(row)}
+            className="text-blue-600 hover:text-blue-800"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => handleDelete(row)}
+            className="text-red-600 hover:text-red-800"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      ),
     },
   ];
 
@@ -285,8 +293,6 @@ const AdminStatsPage = () => {
                   data={filteredPlayers}
                   columns={columns}
                   onAdd={handelModal}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
                   searchable
                   searchPlaceholder="Search Players..."
                 />
