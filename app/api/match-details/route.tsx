@@ -169,12 +169,14 @@ export async function POST(request: NextRequest) {
       const playerDetails = async (
         name: string,
         stadiumName?: string,
-        teamName?: string
+        teamName?: string,
+        originalName?: string
       ) => {
         const playerData = await NewPlayerDetails(
           name,
           stadiumName || "",
-          teamName || ""
+          teamName || "",
+          originalName || ""
         );
         return playerData;
       };
@@ -187,7 +189,8 @@ export async function POST(request: NextRequest) {
                   const playerData = await playerDetails(
                     CleanName(elm?.name),
                     stadiumDetails?.name || "",
-                    squadListData[index === 0 ? 1 : 0].shortName
+                    squadListData[index === 0 ? 1 : 0].shortName,
+                    elm?.name
                   );
                   return {
                     ...elm,
@@ -203,7 +206,8 @@ export async function POST(request: NextRequest) {
                   const playerData = await playerDetails(
                     elm.name,
                     stadiumDetails.name || "",
-                    item.shortName
+                    item.shortName,
+                    elm.name
                   );
                   return {
                     ...elm,
