@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,8 @@ import { RootState } from "@/store";
 import { setSelectedMatch } from "@/store/slices/matchSlice";
 import { useQuery } from "@tanstack/react-query";
 import { FetchMatchList } from "./matches/MatchService";
+import { DummyData } from "@/lib/DummyData";
+import { GetAIPrediction } from "./matches/[id]/GetAIPrediction";
 
 const HomePage = () => {
   const router = useRouter();
@@ -36,6 +38,10 @@ const HomePage = () => {
       return response.data; // extract only the array part
     },
   });
+
+  useEffect(() => {
+    GetAIPrediction(DummyData);
+  }, []);
 
   const customerReviews = [
     {
