@@ -124,7 +124,7 @@ const AdminStatsPage = () => {
         });
     }
     if (actionType === "edit") {
-      StatsUpdate(reqData)
+      StatsUpdate({ ...reqData, statsId: selectedData._id })
         .then((res) => {
           setIsLoading(false);
           toast.success(res.message);
