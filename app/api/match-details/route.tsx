@@ -4,8 +4,11 @@ import { NewPlayerDetails } from "./NewPlayerDetails";
 import { CleanName, GetStadiumList, TransAdvanceStatData } from "@/lib/utils";
 import { StadiumStats } from "./PerformanceDetail";
 import cache from "@/lib/NodeCacheService";
+import dbConnect from "../db";
+import Stats from "../stats/StatsModel";
 
 export async function POST(request: NextRequest) {
+  await dbConnect();
   try {
     const body = await request.json();
     let squadListData: any[] = [];
@@ -150,7 +153,19 @@ export async function POST(request: NextRequest) {
       try {
         const statdiumReqName = body.venue.split(",")[0].trim();
         const stadiumData = await GetStadiumList(statdiumReqName);
-        stadiumDetails = stadiumData[0];
+        if (stadiumData.length === 0) {
+          const findStadium = await Stats.findOne({
+            publicName: statdiumReqName,
+          });
+          if (findStadium) {
+            stadiumDetails = await GetStadiumList(findStadium.originalName);
+          } else {
+            stadiumDetails = [];
+          }
+        } else {
+          stadiumDetails = stadiumData[0];
+        }
+
         stadium = await StadiumStats(stadiumDetails.url);
       } catch (err) {
         stadium = [];
