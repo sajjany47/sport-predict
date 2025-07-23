@@ -35,8 +35,8 @@ import {
   FormikTextInput,
 } from "@/components/CustomField";
 import CustomLoader from "@/components/ui/CustomLoader";
-import CustomDataTable from "./CustomDatatable";
 import moment from "moment";
+import CustomDataTable from "@/components/ui/CustomDatatable";
 
 const AdminStatsPage = () => {
   const [activeTab, setActiveTab] = useState("player");
