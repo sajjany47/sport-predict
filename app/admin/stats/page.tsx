@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-
-import { deletePlayer, deleteStadium } from "@/store/slices/adminSlice";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,8 +49,6 @@ import {
 import CustomLoader from "@/components/ui/CustomLoader";
 
 const AdminStatsPage = () => {
-  const dispatch = useDispatch();
-
   const [activeTab, setActiveTab] = useState("player");
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +56,7 @@ const AdminStatsPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [players, setPlayers] = useState<any[]>([]);
   const [stadiums, setStadiums] = useState<any[]>([]);
+  const [selectedData, setSelectedData] = useState<any>({});
 
   useEffect(() => {
     GetList();
@@ -92,20 +88,6 @@ const AdminStatsPage = () => {
     );
   };
 
-  const handleDeletePlayer = (playerId: string) => {
-    if (confirm("Are you sure you want to delete this player?")) {
-      dispatch(deletePlayer(playerId));
-      toast.success("Player deleted successfully!");
-    }
-  };
-
-  const handleDeleteStadium = (stadiumId: string) => {
-    if (confirm("Are you sure you want to delete this stadium?")) {
-      dispatch(deleteStadium(stadiumId));
-      toast.success("Stadium deleted successfully!");
-    }
-  };
-
   const filteredPlayers = players.filter(
     (player) =>
       player.originalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,7 +103,14 @@ const AdminStatsPage = () => {
   const initialValues =
     actionType === "add"
       ? { originalName: "", publicName: "", type: activeTab }
-      : { originalName: "", publicName: "", type: activeTab };
+      : {
+          originalName: {
+            label: selectedData.originalName,
+            value: selectedData.originalName,
+          },
+          publicName: selectedData.publicName,
+          type: activeTab,
+        };
 
   const handelFormSubmit = (value: any) => {
     setIsLoading(true);
@@ -170,6 +159,7 @@ const AdminStatsPage = () => {
   const handleEdit = (item: any) => {
     setActionType("edit");
     setModalOpen(true);
+    setSelectedData(item);
   };
 
   const handleDelete = (item: any) => {
