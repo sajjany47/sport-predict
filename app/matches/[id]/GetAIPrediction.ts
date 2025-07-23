@@ -10,8 +10,8 @@ export const CalculateBattingAverages = (data: any) => {
       const balls = parseInt(runMatch[2], 10);
       totalRuns += runs;
       totalBalls += balls;
+      totalSR += parseFloat(item.sr) || 0;
     }
-    totalSR += parseFloat(item.sr);
   });
 
   const count = data.length;
