@@ -3,9 +3,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { updateCredits } from "@/store/slices/authSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,13 +15,10 @@ import {
   Trophy,
   Calendar,
   MapPin,
-  Users,
-  Star,
   TrendingUp,
   BarChart3,
   Clock,
   Zap,
-  Crown,
   ArrowLeft,
   Thermometer,
   Wind,
@@ -34,12 +30,9 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-import toast from "react-hot-toast";
 import axios from "axios";
 import SquadDialoge from "./SquadDialoge";
 import CustomLoader from "@/components/ui/CustomLoader";
-import { useQuery } from "@tanstack/react-query";
-import { FetchMatchDetails } from "../MatchService";
 
 interface Player {
   id: number;
@@ -174,22 +167,15 @@ interface MatchData {
 const MatchDetailsPage = () => {
   const params = useParams();
   const router = useRouter();
-  const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
   const { selectedMatch } = useSelector((state: RootState) => state.matches);
   const [matchData, setMatchData] = useState<MatchData | null>(null);
-  const [showPrediction, setShowPrediction] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
 
-  // const { data } = useQuery({
-  //   queryKey: ["match-details"],
-  //   queryFn: () => FetchMatchDetails(params.id, selectedMatch?.venue),
-  // });
-  // console.log("data", data);
   useEffect(() => {
     const fetchDetails = async () => {
       if (params.id) {
