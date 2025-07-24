@@ -147,6 +147,24 @@ const CalculateMatchPoint = (matchFormat: any) => {
   }
 };
 
+const CalculateWinnerTeam = (team: any) => {
+  const playerSquad =
+    team.playingPlayer.length > 0 ? team.playingPlayer : team.benchPlayer;
+  let batScore = 0;
+  let bowlScore = 0;
+
+  playerSquad.forEach((element: any) => {
+    if (element.battingAvg) {
+      batScore += Number(element.battingAvg.averageRuns) || 0;
+    }
+    if (element.bowlingAvg) {
+      bowlScore += Number(element.bowlingAvg.averageWickets) || 0;
+    }
+  });
+
+  return batScore * 0.6 + bowlScore * 0.5;
+};
+
 export const GetAIPrediction = (data: any) => {
   const squadList = data.squadList.map((item: any) => {
     const playingPlayer = item.playingPlayer.map((playing: any) => {
@@ -216,6 +234,9 @@ export const GetAIPrediction = (data: any) => {
     stadiumAvg
   );
 
-  console.log("team1AvgScore======>", team1AvgScore);
-  console.log("team2AvgScore======>", team2AvgScore);
+  const team1WinnerCalculation = CalculateWinnerTeam(squadList[0]);
+  const team2WinnerCalculation = CalculateWinnerTeam(squadList[1]);
+
+  console.log("team1WinnerCalculation======>", team1WinnerCalculation);
+  console.log("team2WinnerCalculation======>", team2WinnerCalculation);
 };
