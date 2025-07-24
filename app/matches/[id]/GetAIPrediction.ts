@@ -114,6 +114,17 @@ const AccordingPlayerTeamAvg = (squad: any, format: any, stadiumAvg: any) => {
     (Number(stadiumAvg.innings1RunRate) + Number(stadiumAvg.innings2RunRate)) /
     2;
 
+  const bothIningsAvgScore =
+    (Number(stadiumAvg.averageInnings1Score) +
+      Number(stadiumAvg.averageInnings2Score)) /
+    2;
+
+  const teamAvgScore =
+    ((totalScore + bothIningsAvgScore) / 2 +
+      format.over * bothIningAvgRunRate) /
+    2;
+
+  return teamAvgScore;
   // totalScore=======> 197.64999999999998
 
   // format=======> 0.5
@@ -130,7 +141,7 @@ const CalculateMatchPoint = (matchFormat: any) => {
     case "ODI":
       return { point: 0.5, over: 50 };
     case "TEST":
-      return { point: 0.4, over: 110 };
+      return { point: 0.4, over: 70 };
     default:
       return { point: 0.7, over: 16.4 };
   }
@@ -199,4 +210,12 @@ export const GetAIPrediction = (data: any) => {
     CalculateMatchPoint(data.matchInfo.format),
     stadiumAvg
   );
+  const team2AvgScore = AccordingPlayerTeamAvg(
+    squadList[1],
+    CalculateMatchPoint(data.matchInfo.format),
+    stadiumAvg
+  );
+
+  console.log("team1AvgScore======>", team1AvgScore);
+  console.log("team2AvgScore======>", team2AvgScore);
 };
