@@ -237,6 +237,43 @@ export const GetAIPrediction = (data: any) => {
   const team1WinnerCalculation = CalculateWinnerTeam(squadList[0]);
   const team2WinnerCalculation = CalculateWinnerTeam(squadList[1]);
 
-  console.log("team1WinnerCalculation======>", team1WinnerCalculation);
-  console.log("team2WinnerCalculation======>", team2WinnerCalculation);
+  const total = Number(team1WinnerCalculation) + Number(team2WinnerCalculation);
+
+  const team1Chance =
+    total > 0
+      ? Number((team1WinnerCalculation / total) * 100).toFixed(2)
+      : Number("50.00");
+  const team2Chance =
+    total > 0
+      ? Number((team2WinnerCalculation / total) * 100).toFixed(2)
+      : Number("50.00");
+
+  const response = {
+    firstInningScore: {
+      team1: {
+        min: Number(team1AvgScore) - 10,
+        max: Number(team1AvgScore) + 10,
+        predicted: Number(team1AvgScore),
+      },
+      team2: {
+        min: Number(team2AvgScore) - 10,
+        max: Number(team2AvgScore) + 10,
+        predicted: Number(team2AvgScore),
+      },
+    },
+    winnerPrediction: {
+      team1: {
+        probability: Number(team1Chance).toFixed(2),
+        confidence:
+          Number(team1Chance) > Number(team2Chance) ? "High" : "Medium",
+      },
+      team2: {
+        probability: Number(team2Chance).toFixed(2),
+        confidence:
+          Number(team2Chance) > Number(team1Chance) ? "High" : "Medium",
+      },
+    },
+  };
+
+  console.log("response======>", response);
 };
