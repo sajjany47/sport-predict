@@ -165,6 +165,8 @@ const CalculateWinnerTeam = (team: any) => {
   return batScore * 0.6 + bowlScore * 0.5;
 };
 
+const FantasyAnalysis = (squad: any) => {};
+
 export const GetAIPrediction = (data: any) => {
   const squadList = data.squadList.map((item: any) => {
     const playingPlayer = item.playingPlayer.map((playing: any) => {
@@ -248,6 +250,7 @@ export const GetAIPrediction = (data: any) => {
       ? Number((team2WinnerCalculation / total) * 100).toFixed(2)
       : Number("50.00");
 
+  const fantasyReport = FantasyAnalysis(squadList);
   const response = {
     firstInningScore: {
       team1: {
