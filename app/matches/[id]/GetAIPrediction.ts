@@ -1,4 +1,4 @@
-export const CalculateBattingAverages = (data: any) => {
+const CalculateBattingAverages = (data: any) => {
   let totalRuns = 0;
   let totalBalls = 0;
   let totalSR = 0;
@@ -23,7 +23,7 @@ export const CalculateBattingAverages = (data: any) => {
   };
 };
 
-export const CalculateBowlingAverages = (data: any) => {
+const CalculateBowlingAverages = (data: any) => {
   let totalRuns = 0;
   let totalWickets = 0;
   let totalOvers = 0;
@@ -50,7 +50,7 @@ export const CalculateBowlingAverages = (data: any) => {
   };
 };
 
-export const CalculateFantasyAverages = (data: any) => {
+const CalculateFantasyAverages = (data: any) => {
   let totalBat = 0;
   let totalBowl = 0;
   let totalField = 0;
@@ -67,6 +67,73 @@ export const CalculateFantasyAverages = (data: any) => {
     averageBowling: (totalBowl / count).toFixed(2),
     averageFielding: (totalField / count).toFixed(2),
   };
+};
+
+const ParseScore = (score: any) => {
+  const match = score.match(/(\d+)-\d+\s*\(([\d.]+)\)/);
+  if (!match) return { runs: 0, overs: 0 };
+  return {
+    runs: parseInt(match[1], 10),
+    overs: parseFloat(match[2]),
+  };
+};
+const CalculateStadiumAverage = (matches: any) => {
+  let totalInn1Runs = 0;
+  let totalInn2Runs = 0;
+  let totalInn1Overs = 0;
+  let totalInn2Overs = 0;
+  let count = matches.length;
+
+  matches.forEach((match: any) => {
+    const inn1 = ParseScore(match.inn1Score) || 0;
+    const inn2 = ParseScore(match.inn2Score) || 0;
+
+    totalInn1Runs += inn1.runs || 0;
+    totalInn2Runs += inn2.runs || 0;
+    totalInn1Overs += inn1.overs || 0;
+    totalInn2Overs += inn2.overs || 0;
+  });
+
+  return {
+    averageInnings1Score: (totalInn1Runs / count).toFixed(2),
+    averageInnings2Score: (totalInn2Runs / count).toFixed(2),
+    innings1RunRate: (totalInn1Runs / totalInn1Overs).toFixed(2),
+    innings2RunRate: (totalInn2Runs / totalInn2Overs).toFixed(2),
+  };
+};
+
+const AccordingPlayerTeamAvg = (squad: any, format: any, stadiumAvg: any) => {
+  const playerSquad =
+    squad.playingPlayer.length > 0 ? squad.playingPlayer : squad.benchPlayer;
+  let totalScore = 0;
+  playerSquad.forEach((element: any) => {
+    totalScore += Number(element.battingAvg.averageRuns) || 0;
+  });
+
+  const bothIningAvgRunRate =
+    (Number(stadiumAvg.innings1RunRate) + Number(stadiumAvg.innings2RunRate)) /
+    2;
+
+  // totalScore=======> 197.64999999999998
+
+  // format=======> 0.5
+
+  // stadiumAvg====> {averageInnings1Score: '181.00', averageInnings2Score: '172.90', innings1RunRate: '7.87', innings2RunRate: '8.24'}
+};
+
+const CalculateMatchPoint = (matchFormat: any) => {
+  switch (matchFormat) {
+    case "T20I":
+      return { point: 0.6, over: 20 };
+    case "T10":
+      return { point: 0.8, over: 10 };
+    case "ODI":
+      return { point: 0.5, over: 50 };
+    case "TEST":
+      return { point: 0.4, over: 110 };
+    default:
+      return { point: 0.7, over: 16.4 };
+  }
 };
 
 export const GetAIPrediction = (data: any) => {
@@ -126,5 +193,10 @@ export const GetAIPrediction = (data: any) => {
       benchPlayer: benchPlayer,
     };
   });
-  console.log(squadList);
+  const stadiumAvg = CalculateStadiumAverage(data.stadiumStats);
+  const team1AvgScore = AccordingPlayerTeamAvg(
+    squadList[0],
+    CalculateMatchPoint(data.matchInfo.format),
+    stadiumAvg
+  );
 };
