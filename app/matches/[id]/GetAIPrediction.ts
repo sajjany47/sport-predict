@@ -165,7 +165,54 @@ const CalculateWinnerTeam = (team: any) => {
   return batScore * 0.6 + bowlScore * 0.5;
 };
 
-const FantasyAnalysis = (squad: any) => {};
+const FantasyAnalysis = (squad: any) => {
+  const prepareSquad = squad.map((item: any) => {
+    const currentSquad = (
+      item.playingPlayer.length > 0 ? item.playingPlayer : item.benchPlayer
+    ).map((elm: any) => {
+      let batScore = 0;
+      let bowlScore = 0;
+
+      if (elm.battingAvg) {
+        batScore = elm.battingAvg.averageRuns;
+      }
+      if (elm.bowlingAvg) {
+        batScore = elm.bowlingAvg.averageWickets * 10;
+      }
+      let fantasyScore = 0;
+
+      if (elm.fantasyAvg) {
+        fantasyScore =
+          Number(elm.fantasyAvg.averageBatting || 0) +
+          Number(elm.fantasyAvg.averageBowling || 0) +
+          Number(elm.fantasyAvg.averageFielding || 0);
+      }
+
+      return {
+        id: elm.id,
+        name: elm.name,
+        shortName: elm.shortName,
+        batStyle: elm.batStyle,
+        bowlStyle: elm.bowlStyle,
+        imageUrl: elm.imageUrl,
+        type: elm.type,
+        avgScore: {
+          total: batScore + bowlScore,
+          batScore,
+          bowlScore,
+          fantasyScore,
+        },
+      };
+    });
+    return {
+      flag: item.flag,
+      color: item.color,
+      shortName: item.shortName,
+      squad: currentSquad,
+    };
+  });
+  console.log(prepareSquad);
+};
 
 export const GetAIPrediction = (data: any) => {
   const squadList = data.squadList.map((item: any) => {
