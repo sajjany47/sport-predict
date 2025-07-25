@@ -417,62 +417,81 @@ const AIPredictionModal: React.FC<{
               <CardContent>
                 {/* Captain & Vice Captain */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  {/* Captain Section */}
                   <div className="text-center p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border-2 border-yellow-300">
                     <Crown className="h-8 w-8 text-yellow-600 mx-auto mb-3" />
                     <h3 className="font-bold text-lg mb-2">Captain</h3>
-                    <div className="text-xl font-bold">
-                      {predictionData.dream11Team.captain.name}
-                    </div>
-                    <div className="text-sm text-gray-600 mb-2">
-                      {predictionData.dream11Team.captain.teamShortName}
-                    </div>
-                    <Badge
-                      className={getRoleColor(
-                        predictionData.dream11Team.captain.type
-                      )}
-                    >
-                      {getRoleIcon(predictionData.dream11Team.captain.type)}
-                      <span className="ml-1">
-                        {predictionData.dream11Team.captain.type}
-                      </span>
-                    </Badge>
-                    <div className="mt-2 text-sm">
-                      <span className="font-medium">Points: </span>
-                      <span className="text-green-600 font-bold">
-                        {predictionData.dream11Team.captain.points ||
-                          predictionData.dream11Team.captain.totalPoint?.toFixed(
-                            1
-                          )}
-                      </span>
+                    <div className="flex flex-col items-center">
+                      <img
+                        src={predictionData.dream11Team.captain.imageUrl}
+                        alt={predictionData.dream11Team.captain.shortName}
+                        className="w-16 h-16 rounded-full mb-2 border-2 border-yellow-400"
+                      />
+                      <div className="text-xl font-bold">
+                        {predictionData.dream11Team.captain.name}
+                      </div>
+                      <div className="text-sm text-gray-600 mb-2">
+                        {predictionData.dream11Team.captain.teamShortName}
+                      </div>
+                      <Badge
+                        className={getRoleColor(
+                          predictionData.dream11Team.captain.type
+                        )}
+                      >
+                        {getRoleIcon(predictionData.dream11Team.captain.type)}
+                        <span className="ml-1">
+                          {predictionData.dream11Team.captain.type}
+                        </span>
+                      </Badge>
+                      <div className="mt-2 text-sm">
+                        <span className="font-medium">Points: </span>
+                        <span className="text-green-600 font-bold">
+                          {predictionData.dream11Team.captain.points ||
+                            predictionData.dream11Team.captain.totalPoint?.toFixed(
+                              1
+                            )}
+                        </span>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Vice Captain Section */}
                   <div className="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-gray-300">
                     <Star className="h-8 w-8 text-gray-600 mx-auto mb-3" />
                     <h3 className="font-bold text-lg mb-2">Vice Captain</h3>
-                    <div className="text-xl font-bold">
-                      {predictionData.dream11Team.viceCaptain.name}
-                    </div>
-                    <div className="text-sm text-gray-600 mb-2">
-                      {predictionData.dream11Team.viceCaptain.teamShortName}
-                    </div>
-                    <Badge
-                      className={getRoleColor(
-                        predictionData.dream11Team.viceCaptain.type
-                      )}
-                    >
-                      {getRoleIcon(predictionData.dream11Team.viceCaptain.type)}
-                      <span className="ml-1">
-                        {predictionData.dream11Team.viceCaptain.type}
-                      </span>
-                    </Badge>
-                    <div className="mt-2 text-sm">
-                      <span className="font-medium">Points: </span>
-                      <span className="text-green-600 font-bold">
-                        {predictionData.dream11Team.viceCaptain.points ||
-                          predictionData.dream11Team.viceCaptain.totalPoint?.toFixed(
-                            1
-                          )}
-                      </span>
+                    <div className="flex flex-col items-center">
+                      <img
+                        src={predictionData.dream11Team.viceCaptain.imageUrl}
+                        alt={predictionData.dream11Team.viceCaptain.shortName}
+                        className="w-16 h-16 rounded-full mb-2 border-2 border-gray-400"
+                      />
+                      <div className="text-xl font-bold">
+                        {predictionData.dream11Team.viceCaptain.name}
+                      </div>
+                      <div className="text-sm text-gray-600 mb-2">
+                        {predictionData.dream11Team.viceCaptain.teamShortName}
+                      </div>
+                      <Badge
+                        className={getRoleColor(
+                          predictionData.dream11Team.viceCaptain.type
+                        )}
+                      >
+                        {getRoleIcon(
+                          predictionData.dream11Team.viceCaptain.type
+                        )}
+                        <span className="ml-1">
+                          {predictionData.dream11Team.viceCaptain.type}
+                        </span>
+                      </Badge>
+                      <div className="mt-2 text-sm">
+                        <span className="font-medium">Points: </span>
+                        <span className="text-green-600 font-bold">
+                          {predictionData.dream11Team.viceCaptain.points ||
+                            predictionData.dream11Team.viceCaptain.totalPoint?.toFixed(
+                              1
+                            )}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
