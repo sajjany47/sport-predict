@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import { RootState } from "@/store";
 import { setSelectedMatch } from "@/store/slices/matchSlice";
 import { useQuery } from "@tanstack/react-query";
 import { FetchMatchList } from "./matches/MatchService";
+import { SubscriptionList } from "./MainService";
 
 const HomePage = () => {
   const router = useRouter();
@@ -33,6 +34,14 @@ const HomePage = () => {
     queryKey: ["match-list"],
     queryFn: async () => {
       const response = await FetchMatchList(new Date());
+      return response.data; // extract only the array part
+    },
+  });
+
+  const { data: subscriptionPlans = [] } = useQuery({
+    queryKey: ["subscription-list"],
+    queryFn: async () => {
+      const response = await SubscriptionList();
       return response.data; // extract only the array part
     },
   });
@@ -85,44 +94,6 @@ const HomePage = () => {
       title: "Secure & Reliable",
       description:
         "99.9% uptime with bank-grade security. Your data and payments are completely secure with us.",
-    },
-  ];
-
-  const subscriptionPlans = [
-    {
-      name: "Free",
-      price: 0,
-      credits: 2,
-      features: [
-        "2 Daily Credits",
-        "Basic Predictions",
-        "Limited Player Stats",
-      ],
-      popular: false,
-    },
-    {
-      name: "Pro",
-      price: 299,
-      credits: 50,
-      features: [
-        "50 Monthly Credits",
-        "Advanced AI Predictions",
-        "Detailed Analytics",
-        "Priority Support",
-      ],
-      popular: true,
-    },
-    {
-      name: "Elite",
-      price: 599,
-      credits: 150,
-      features: [
-        "150 Monthly Credits",
-        "Premium AI Insights",
-        "Complete Database",
-        "VIP Support",
-      ],
-      popular: false,
     },
   ];
 
@@ -337,7 +308,7 @@ const HomePage = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {subscriptionPlans.map((plan, index) => (
+            {subscriptionPlans.map((plan: any, index: any) => (
               <Card
                 key={index}
                 className={`relative ${
@@ -374,7 +345,7 @@ const HomePage = () => {
                     </div>
                   </div>
                   <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, featureIndex) => (
+                    {plan.features.map((feature: any, featureIndex: any) => (
                       <li
                         key={featureIndex}
                         className="flex items-center justify-center text-gray-600"

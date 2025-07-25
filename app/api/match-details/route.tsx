@@ -1,11 +1,14 @@
 import axios from "axios";
 import { NextRequest } from "next/server";
 import { NewPlayerDetails } from "./NewPlayerDetails";
-import { GetStadiumList, TransAdvanceStatData } from "@/lib/utils";
+import { CleanName, GetStadiumList, TransAdvanceStatData } from "@/lib/utils";
 import { StadiumStats } from "./PerformanceDetail";
 import cache from "@/lib/NodeCacheService";
+import dbConnect from "../db";
+import Stats from "../stats/StatsModel";
 
 export async function POST(request: NextRequest) {
+  await dbConnect();
   try {
     const body = await request.json();
     let squadListData: any[] = [];
@@ -149,7 +152,20 @@ export async function POST(request: NextRequest) {
     if (!stadiumDetails) {
       try {
         const statdiumReqName = body.venue.split(",")[0].trim();
-        stadiumDetails = await GetStadiumList(statdiumReqName);
+        const stadiumData = await GetStadiumList(statdiumReqName);
+        if (stadiumData.length === 0) {
+          const findStadium = await Stats.findOne({
+            publicName: statdiumReqName,
+          });
+          if (findStadium) {
+            stadiumDetails = await GetStadiumList(findStadium.originalName);
+          } else {
+            stadiumDetails = [];
+          }
+        } else {
+          stadiumDetails = stadiumData[0];
+        }
+
         stadium = await StadiumStats(stadiumDetails.url);
       } catch (err) {
         stadium = [];
@@ -168,12 +184,14 @@ export async function POST(request: NextRequest) {
       const playerDetails = async (
         name: string,
         stadiumName?: string,
-        teamName?: string
+        teamName?: string,
+        originalName?: string
       ) => {
         const playerData = await NewPlayerDetails(
           name,
           stadiumName || "",
-          teamName || ""
+          teamName || "",
+          originalName || ""
         );
         return playerData;
       };
@@ -184,9 +202,10 @@ export async function POST(request: NextRequest) {
             ? await Promise.all(
                 item.playingPlayers.map(async (elm: any) => {
                   const playerData = await playerDetails(
-                    elm.name,
-                    stadiumDetails.name || "",
-                    squadListData[index === 0 ? 1 : 0].shortName
+                    CleanName(elm?.name),
+                    stadiumDetails?.name || "",
+                    squadListData[index === 0 ? 1 : 0].shortName,
+                    elm?.name
                   );
                   return {
                     ...elm,
@@ -202,7 +221,8 @@ export async function POST(request: NextRequest) {
                   const playerData = await playerDetails(
                     elm.name,
                     stadiumDetails.name || "",
-                    item.shortName
+                    item.shortName,
+                    elm.name
                   );
                   return {
                     ...elm,

@@ -9,14 +9,28 @@ import {
   FantasyStats,
   OverallStats,
 } from "./PerformanceDetail";
+import Stats from "../stats/StatsModel";
+import dbConnect from "../db";
 
 export const NewPlayerDetails = async (
   name: string,
   stadiumName: string,
-  teamName: string
+  teamName: string,
+  originalName: string
 ) => {
+  await dbConnect();
   try {
-    const playerList: any = await GetPSearchList(name);
+    let playerData: any = await GetPSearchList(name);
+    if (playerData.length === 0) {
+      const playerDetails = await Stats.findOne({ publicName: originalName });
+      if (!playerDetails) {
+        playerData = [];
+      } else {
+        playerData = await GetPSearchList(playerDetails.originalName);
+      }
+    }
+
+    const playerList: any = playerData[0];
     const getInfoUrl = await GetHtml(playerList.url);
     const requiredNames = [
       "Dream11 Points",
