@@ -400,5 +400,5 @@ export const GetAIPrediction = (data: any) => {
     ...fantasyReport,
   };
 
-  console.log("response======>", response);
+  return response;
 };
