@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AIPredictionModal from "@/components/ui/ai-prediction-modal";
 
 import {
   Trophy,
@@ -33,6 +32,7 @@ import {
 import axios from "axios";
 import SquadDialoge from "./SquadDialoge";
 import CustomLoader from "@/components/ui/CustomLoader";
+import AIPredictionModal from "./ai-prediction-modal";
 
 interface Player {
   id: number;
