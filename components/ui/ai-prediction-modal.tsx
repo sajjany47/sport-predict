@@ -417,10 +417,12 @@ const AIPredictionModal: React.FC<{
               <CardContent>
                 {/* Captain & Vice Captain */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  {/* Captain Section */}
+                  {/* Captain */}
                   <div className="text-center p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border-2 border-yellow-300">
                     <Crown className="h-8 w-8 text-yellow-600 mx-auto mb-3" />
-                    <h3 className="font-bold text-lg mb-2">Captain</h3>
+                    <h3 className="font-bold text-lg mb-2">
+                      Captain (2x Points)
+                    </h3>
                     <div className="flex flex-col items-center">
                       <img
                         src={predictionData.dream11Team.captain.imageUrl}
@@ -443,22 +445,50 @@ const AIPredictionModal: React.FC<{
                           {predictionData.dream11Team.captain.type}
                         </span>
                       </Badge>
-                      <div className="mt-2 text-sm">
-                        <span className="font-medium">Points: </span>
-                        <span className="text-green-600 font-bold">
-                          {predictionData.dream11Team.captain.points ||
-                            predictionData.dream11Team.captain.totalPoint?.toFixed(
-                              1
-                            )}
-                        </span>
+                      <div className="mt-4 grid grid-cols-2 gap-2 w-full">
+                        <div className="bg-white p-2 rounded">
+                          <div className="text-xs text-gray-500">
+                            Total Points
+                          </div>
+                          <div className="font-bold text-green-600">
+                            {(
+                              predictionData.dream11Team.captain.points ||
+                              predictionData.dream11Team.captain.totalPoint
+                            )?.toFixed(1)}
+                          </div>
+                        </div>
+                        <div className="bg-white p-2 rounded">
+                          <div className="text-xs text-gray-500">Avg Runs</div>
+                          <div className="font-bold">
+                            {
+                              predictionData.dream11Team.captain.battingAvg
+                                .averageRuns
+                            }
+                          </div>
+                        </div>
+                        {predictionData.dream11Team.captain.bowlingAvg && (
+                          <div className="bg-white p-2 rounded col-span-2">
+                            <div className="text-xs text-gray-500">
+                              Avg Wickets
+                            </div>
+                            <div className="font-bold">
+                              {
+                                predictionData.dream11Team.captain.bowlingAvg
+                                  .averageWickets
+                              }
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Vice Captain Section */}
+                  {/* Vice Captain */}
                   <div className="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-gray-300">
                     <Star className="h-8 w-8 text-gray-600 mx-auto mb-3" />
-                    <h3 className="font-bold text-lg mb-2">Vice Captain</h3>
+                    <h3 className="font-bold text-lg mb-2">
+                      Vice Captain (1.5x Points)
+                    </h3>
                     <div className="flex flex-col items-center">
                       <img
                         src={predictionData.dream11Team.viceCaptain.imageUrl}
@@ -483,14 +513,40 @@ const AIPredictionModal: React.FC<{
                           {predictionData.dream11Team.viceCaptain.type}
                         </span>
                       </Badge>
-                      <div className="mt-2 text-sm">
-                        <span className="font-medium">Points: </span>
-                        <span className="text-green-600 font-bold">
-                          {predictionData.dream11Team.viceCaptain.points ||
-                            predictionData.dream11Team.viceCaptain.totalPoint?.toFixed(
-                              1
-                            )}
-                        </span>
+                      <div className="mt-4 grid grid-cols-2 gap-2 w-full">
+                        <div className="bg-white p-2 rounded">
+                          <div className="text-xs text-gray-500">
+                            Total Points
+                          </div>
+                          <div className="font-bold text-green-600">
+                            {(
+                              predictionData.dream11Team.viceCaptain.points ||
+                              predictionData.dream11Team.viceCaptain.totalPoint
+                            )?.toFixed(1)}
+                          </div>
+                        </div>
+                        <div className="bg-white p-2 rounded">
+                          <div className="text-xs text-gray-500">Avg Runs</div>
+                          <div className="font-bold">
+                            {
+                              predictionData.dream11Team.viceCaptain.battingAvg
+                                .averageRuns
+                            }
+                          </div>
+                        </div>
+                        {predictionData.dream11Team.viceCaptain.bowlingAvg && (
+                          <div className="bg-white p-2 rounded col-span-2">
+                            <div className="text-xs text-gray-500">
+                              Avg Wickets
+                            </div>
+                            <div className="font-bold">
+                              {
+                                predictionData.dream11Team.viceCaptain
+                                  .bowlingAvg.averageWickets
+                              }
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -509,7 +565,7 @@ const AIPredictionModal: React.FC<{
                           <img
                             src={player.imageUrl}
                             alt={player.shortName}
-                            className="w-10 h-10 rounded"
+                            className="w-12 h-12 rounded-full border-2 border-gray-300"
                           />
                           <div>
                             <div className="font-semibold">{player.name}</div>
@@ -518,14 +574,42 @@ const AIPredictionModal: React.FC<{
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mb-3">
                           <Badge className={getRoleColor(player.type)}>
                             {getRoleIcon(player.type)}
                             <span className="ml-1">{player.type}</span>
                           </Badge>
                           <span className="text-sm font-medium text-green-600">
-                            {player.points || player.totalPoint?.toFixed(1)} pts
+                            {(player.points || player.totalPoint)?.toFixed(1)}{" "}
+                            pts
                           </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="bg-white p-2 rounded">
+                            <div className="text-xs text-gray-500">
+                              Avg Runs
+                            </div>
+                            <div className="font-bold">
+                              {player.battingAvg.averageRuns}
+                            </div>
+                          </div>
+                          {player.bowlingAvg ? (
+                            <div className="bg-white p-2 rounded">
+                              <div className="text-xs text-gray-500">
+                                Avg Wkts
+                              </div>
+                              <div className="font-bold">
+                                {player.bowlingAvg.averageWickets}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-white p-2 rounded">
+                              <div className="text-xs text-gray-500">SR</div>
+                              <div className="font-bold">
+                                {player.battingAvg.averageSR}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
