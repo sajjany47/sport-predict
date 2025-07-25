@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const SubscriptionCreate = async (payload: any) => {
   try {
-    const response = await axios.post("/subscription/create", payload, {
+    const response = await axios.post("/api/subscription/create", payload, {
       headers: { "Content-Type": "application/json" },
     });
     return response.data;
@@ -12,7 +12,7 @@ export const SubscriptionCreate = async (payload: any) => {
 };
 export const SubscriptionUpdate = async (payload: any) => {
   try {
-    const response = await axios.post("/subscription/update", payload, {
+    const response = await axios.post("/api/subscription/update", payload, {
       headers: { "Content-Type": "application/json" },
     });
     return response.data;
@@ -23,7 +23,7 @@ export const SubscriptionUpdate = async (payload: any) => {
 
 export const SubscriptionList = async () => {
   try {
-    const response = await axios.get("/subscription/list", {
+    const response = await axios.get("/api/subscription/list", {
       headers: { "Content-Type": "application/json" },
     });
     return response.data;
