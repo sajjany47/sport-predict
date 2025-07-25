@@ -167,43 +167,8 @@ const CalculateWinnerTeam = (team: any) => {
 
 const FantasyAnalysis = (squad: any) => {
   const prepareSquad = squad.map((item: any) => {
-    const currentSquad = (
-      item.playingPlayer.length > 0 ? item.playingPlayer : item.benchPlayer
-    ).map((elm: any) => {
-      let batScore = 0;
-      let bowlScore = 0;
-
-      if (elm.battingAvg) {
-        batScore = elm.battingAvg.averageRuns;
-      }
-      if (elm.bowlingAvg) {
-        batScore = elm.bowlingAvg.averageWickets * 10;
-      }
-      let fantasyScore = 0;
-
-      if (elm.fantasyAvg) {
-        fantasyScore =
-          Number(elm.fantasyAvg.averageBatting || 0) +
-          Number(elm.fantasyAvg.averageBowling || 0) +
-          Number(elm.fantasyAvg.averageFielding || 0);
-      }
-
-      return {
-        id: elm.id,
-        name: elm.name,
-        shortName: elm.shortName,
-        batStyle: elm.batStyle,
-        bowlStyle: elm.bowlStyle,
-        imageUrl: elm.imageUrl,
-        type: elm.type,
-        avgScore: {
-          total: batScore + bowlScore,
-          batScore,
-          bowlScore,
-          fantasyScore,
-        },
-      };
-    });
+    const currentSquad =
+      item.playingPlayer.length > 0 ? item.playingPlayer : item.benchPlayer;
     return {
       flag: item.flag,
       color: item.color,
@@ -211,7 +176,105 @@ const FantasyAnalysis = (squad: any) => {
       squad: currentSquad,
     };
   });
-  console.log(prepareSquad);
+
+  const mergePlayers = prepareSquad
+    .flatMap((team: any) =>
+      team.squad.map((player: any) => ({
+        ...player,
+        teamFlag: team.flag,
+        teamShortName: team.shortName,
+        teamColor: team.color,
+        totalPoint:
+          Number(player.fantasyAvg.averageBatting || 0) +
+          Number(player.fantasyAvg.averageBowling || 0) +
+          Number(player.fantasyAvg.averageFielding || 0),
+      }))
+    )
+    .sort((a: any, b: any) => b.totalPoint - a.totalPoint);
+
+  const filterWK = mergePlayers.find((item: any) => item.type === "WK");
+  const filterAR = mergePlayers.find((item: any) => item.type === "AR");
+  const filterBat = mergePlayers
+    .filter((item: any) => item.type === "BAT")
+    .slice(0, 2);
+  const filterBowl = mergePlayers
+    .filter((item: any) => item.type === "BOWL")
+    .slice(0, 2);
+
+  const requiredArray = [
+    { ...filterWK },
+    { ...filterAR },
+    ...filterBat,
+    ...filterBowl,
+  ];
+
+  const uniqueInArr1 = mergePlayers
+    .filter((a: any) => !requiredArray.some((b: any) => b.id === a.id))
+    .sort((a: any, b: any) => b.totalPoint - a.totalPoint);
+
+  const playingPlayer = [...requiredArray, ...uniqueInArr1.slice(0, 5)].sort(
+    (a: any, b: any) => b.totalPoint - a.totalPoint
+  );
+
+  // Step 4: Build dream11Team
+  const dream11Team = {
+    captain: {
+      ...playingPlayer[0],
+      points: parseFloat(playingPlayer[0].totalPoint.toFixed(1)),
+      form: "Excellent",
+    },
+    viceCaptain: {
+      ...playingPlayer[1],
+      points: parseFloat(playingPlayer[1].totalPoint.toFixed(1)),
+      form: "Good",
+    },
+    players: playingPlayer.filter(
+      (p: any) => p.id !== mergePlayers[0].id && p.id !== mergePlayers[1].id
+    ),
+  };
+
+  // Step 5: Key players per team
+  const keyPlayers = {
+    team1: prepareSquad[0].squad.slice(0, 5).map((item: any) => ({
+      ...item,
+      impact: item.totalPoint > 40 ? "High" : "Medium",
+    })),
+    team2: prepareSquad[1].squad.slice(0, 5).map((item: any) => ({
+      ...item,
+      impact: item.totalPoint > 40 ? "High" : "Medium",
+    })),
+  };
+
+  // Step 6: Top batsman per team
+  const topBatsman = (team: any) =>
+    team.squad.reduce((best: any, p: any) =>
+      parseFloat(p.battingAvg?.averageRuns || 0) >
+      parseFloat(best.battingAvg?.averageRuns || 0)
+        ? p
+        : best
+    );
+
+  // Step 7: Top bowler per team
+  const topBowler = (team: any) =>
+    team.squad.reduce((best: any, p: any) =>
+      parseFloat(p.bowlingAvg?.averageWickets || 0) >
+      parseFloat(best.bowlingAvg?.averageWickets || 0)
+        ? p
+        : best
+    );
+
+  return {
+    dream11Team,
+    keyPlayers,
+    topBatsman: {
+      team1: topBatsman(prepareSquad[0]),
+      team2: topBatsman(prepareSquad[1]),
+    },
+    topBowler: {
+      team1: topBowler(prepareSquad[0]),
+      team2: topBowler(prepareSquad[1]),
+    },
+  };
 };
 
 export const GetAIPrediction = (data: any) => {
@@ -298,7 +361,18 @@ export const GetAIPrediction = (data: any) => {
       : Number("50.00");
 
   const fantasyReport = FantasyAnalysis(squadList);
+
   const response = {
+    team1: {
+      flag: squadList[0].flag,
+      color: squadList[0].color,
+      shortName: squadList[0].shortName,
+    },
+    team2: {
+      flag: squadList[1].flag,
+      color: squadList[1].color,
+      shortName: squadList[1].shortName,
+    },
     firstInningScore: {
       team1: {
         min: Number(team1AvgScore) - 10,
@@ -323,6 +397,7 @@ export const GetAIPrediction = (data: any) => {
           Number(team2Chance) > Number(team1Chance) ? "High" : "Medium",
       },
     },
+    ...fantasyReport,
   };
 
   console.log("response======>", response);
