@@ -1,8 +1,9 @@
 "use client";
+import React, { useState } from "react";
 import { subscriptionValidationSchema } from "@/app/api/subscription/AubscriptionSchema";
 import { SubscriptionList } from "@/app/MainService";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { FormikTextInput } from "@/components/CustomField";
+import { FormikRadioGroup, FormikTextInput } from "@/components/CustomField";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -12,12 +13,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { Field, Form, Formik } from "formik";
 import { Plus, Search, Star, Check, X } from "lucide-react";
-import React, { useState } from "react";
 
 const AdminSubscription = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,9 +58,9 @@ const AdminSubscription = () => {
     name: selectedPlan?.name || "",
     price: selectedPlan?.price || 0,
     credits: selectedPlan?.credits || 1,
-    features: selectedPlan?.features || [""],
-    popular: selectedPlan?.popular || false,
-    isActive: selectedPlan?.isActive ?? true,
+    features: selectedPlan?.features || ["yes"],
+    popular: selectedPlan?.popular || "false",
+    isActive: selectedPlan?.isActive ?? "true",
   };
 
   const handelFormSubmit = (values: any) => {
@@ -274,6 +273,7 @@ const AdminSubscription = () => {
                       name="name"
                     />
                   </div>
+
                   <div className="space-y-2">
                     <Field
                       label="Price"
@@ -298,15 +298,26 @@ const AdminSubscription = () => {
                   <div className="space-y-2">
                     <Field
                       label="Popular"
-                      component={FormikTextInput}
+                      component={FormikRadioGroup}
                       name="popular"
+                      options={[
+                        { label: "Yes", value: "true" },
+                        { label: "No", value: "false" },
+                      ]}
+                      onValueChange={(e: any) => setFieldValue("popular", e)}
                     />
                   </div>
+
                   <div className="space-y-2">
                     <Field
                       label="Active"
-                      component={FormikTextInput}
+                      component={FormikRadioGroup}
                       name="isActive"
+                      options={[
+                        { label: "Yes", value: "true" },
+                        { label: "No", value: "false" },
+                      ]}
+                      onValueChange={(e: any) => setFieldValue("isActive", e)}
                     />
                   </div>
                 </div>
@@ -314,10 +325,8 @@ const AdminSubscription = () => {
                 <div className="space-y-2 mt-2">
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {actionType === "add"
-                      ? `Add ${activeTab === "player" ? "Player" : "Stadium"}`
-                      : `Update ${
-                          activeTab === "player" ? "Player" : "Stadium"
-                        }`}
+                      ? "Add Subscription"
+                      : "Update Subscription"}
                   </Button>
                 </div>
               </Form>

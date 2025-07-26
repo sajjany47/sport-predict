@@ -5,6 +5,14 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useState } from "react";
 import Select from "react-select";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+
+interface FormikRadioGroupProps {
+  name: string;
+  label: string;
+  options: { label: string; value: string }[];
+  className?: string;
+}
 
 export const FormikTextInput = ({
   field,
@@ -123,6 +131,51 @@ export const FormikAutoSelectField = ({
       />
 
       {hasError && (
+        <small className="text-red-600 mt-1 block">
+          {getIn(errors, field.name)}
+        </small>
+      )}
+    </div>
+  );
+};
+
+export const FormikRadioGroup = ({
+  field,
+  form: { touched, errors },
+  ...props
+}: any) => {
+  const hasError =
+    Boolean(getIn(errors, field.name)) && getIn(touched, field.name);
+
+  return (
+    <div className="mb-4">
+      <Label className="block mb-1 text-sm font-medium" htmlFor={field.name}>
+        {props.label}
+      </Label>
+
+      <RadioGroup
+        id={field.name}
+        {...field}
+        {...props}
+        value={field.value || ""}
+        className={`flex gap-4 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          hasError
+            ? "border-red-500 ring-red-200"
+            : "border-gray-300 focus:ring-blue-300"
+        } ${props?.className}`}
+      >
+        {props.options.map((option: any, index: any) => (
+          <div key={index} className="flex items-center space-x-2">
+            <RadioGroupItem
+              id={`${field.name}-${index}`}
+              value={option.value}
+            />
+            <Label htmlFor={`${field.name}-${index}`}>{option.label}</Label>
+          </div>
+        ))}
+      </RadioGroup>
+
+      {Boolean(getIn(errors, field.name)) && getIn(touched, field.name) && (
         <small className="text-red-600 mt-1 block">
           {getIn(errors, field.name)}
         </small>
