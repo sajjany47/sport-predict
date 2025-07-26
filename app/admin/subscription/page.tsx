@@ -15,8 +15,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
-import { Field, Form, Formik } from "formik";
-import { Plus, Search, Star, Check, X } from "lucide-react";
+import { Field, FieldArray, Form, Formik } from "formik";
+import { Plus, Search, Star, Check, X, Trash2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 const AdminSubscription = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,7 +59,7 @@ const AdminSubscription = () => {
     name: selectedPlan?.name || "",
     price: selectedPlan?.price || 0,
     credits: selectedPlan?.credits || 1,
-    features: selectedPlan?.features || ["yes"],
+    features: selectedPlan?.features || [{ name: "", age: "", class: "" }],
     popular: selectedPlan?.popular || "false",
     isActive: selectedPlan?.isActive ?? "true",
   };
@@ -263,7 +264,7 @@ const AdminSubscription = () => {
             validationSchema={subscriptionValidationSchema}
             onSubmit={handelFormSubmit}
           >
-            {({ handleSubmit, setFieldValue }) => (
+            {({ handleSubmit, setFieldValue, values }) => (
               <Form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
                   <div className="md:col-span-4">
@@ -289,12 +290,70 @@ const AdminSubscription = () => {
                     />
                   </div>
                   <div className="md:col-span-12">
-                    <Field
-                      label="Features"
-                      component={FormikTextInput}
+                    <Label className="block mb-2 text-base font-medium">
+                      Features
+                    </Label>
+                    <FieldArray
                       name="features"
+                      render={(arrayHelpers) => (
+                        <div className="space-y-4 border border-gray-300 p-4 rounded-md">
+                          {values?.features?.map((item: any, index: any) => (
+                            <div
+                              key={index}
+                              className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end"
+                            >
+                              <div className="md:col-span-3">
+                                <Field
+                                  label="Name"
+                                  component={FormikTextInput}
+                                  name={`features[${index}].name`}
+                                  placeholder="Name"
+                                />
+                              </div>
+                              <div className="md:col-span-3">
+                                <Field
+                                  label="Age"
+                                  component={FormikTextInput}
+                                  name={`features[${index}].age`}
+                                  placeholder="Age"
+                                />
+                              </div>
+                              <div className="md:col-span-3">
+                                <Field
+                                  label="Class"
+                                  component={FormikTextInput}
+                                  name={`features[${index}].class`}
+                                  placeholder="Class"
+                                />
+                              </div>
+                              <div className="md:col-span-3">
+                                <Trash2
+                                  className="h-4 w-4 text-red-500 cursor-pointer"
+                                  onClick={() => arrayHelpers.remove(index)}
+                                />
+                              </div>
+                            </div>
+                          ))}
+
+                          <Button
+                            type="button"
+                            className="bg-blue-600 hover:bg-blue-700"
+                            onClick={() =>
+                              arrayHelpers.push({
+                                name: "",
+                                class: "",
+                                age: "",
+                              })
+                            }
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add More Feature
+                          </Button>
+                        </div>
+                      )}
                     />
                   </div>
+
                   <div className="md:col-span-4">
                     <Field
                       label="Popular"

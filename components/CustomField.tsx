@@ -30,7 +30,9 @@ export const FormikTextInput = ({
         {...props}
         id={field.name}
         value={field.value || ""}
-        placeholder={`Enter ${field.name}`}
+        placeholder={`Enter ${
+          props.placeholder ? props.placeholder : field.name
+        }`}
         className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
           hasError
             ? "border-red-500 ring-red-200"
