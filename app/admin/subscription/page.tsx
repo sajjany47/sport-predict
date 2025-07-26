@@ -250,7 +250,7 @@ const AdminSubscription = () => {
           setActionType("add");
         }}
       >
-        <DialogContent className="max-w">
+        <DialogContent className="max-w-4xl w-full">
           <DialogHeader>
             <DialogTitle>
               {actionType === "add"
@@ -265,8 +265,8 @@ const AdminSubscription = () => {
           >
             {({ handleSubmit, setFieldValue }) => (
               <Form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+                  <div className="md:col-span-4">
                     <Field
                       label="Name"
                       component={FormikTextInput}
@@ -274,28 +274,28 @@ const AdminSubscription = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="md:col-span-4">
                     <Field
                       label="Price"
                       component={FormikTextInput}
                       name="price"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="md:col-span-4">
                     <Field
                       label="Credits"
                       component={FormikTextInput}
                       name="credits"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="md:col-span-12">
                     <Field
                       label="Features"
                       component={FormikTextInput}
                       name="features"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="md:col-span-4">
                     <Field
                       label="Popular"
                       component={FormikRadioGroup}
@@ -308,7 +308,7 @@ const AdminSubscription = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="md:col-span-4">
                     <Field
                       label="Active"
                       component={FormikRadioGroup}
@@ -322,8 +322,11 @@ const AdminSubscription = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2 mt-2">
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                <div className="mt-4 flex justify-end gap-2">
+                  <Button type="button" variant="outline">
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isLoading}>
                     {actionType === "add"
                       ? "Add Subscription"
                       : "Update Subscription"}
