@@ -326,9 +326,9 @@ const AdminSubscription = () => {
                                   placeholder="Class"
                                 />
                               </div>
-                              <div className="md:col-span-3">
+                              <div className="md:col-span-3 flex items-center justify-start h-full mt-[30px]">
                                 <Trash2
-                                  className="h-4 w-4 text-red-500 cursor-pointer"
+                                  className="h-5 w-5 text-red-500 cursor-pointer mt-2"
                                   onClick={() => arrayHelpers.remove(index)}
                                 />
                               </div>
