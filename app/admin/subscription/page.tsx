@@ -63,9 +63,11 @@ const AdminSubscription = () => {
     name: selectedPlan?.name || "",
     price: selectedPlan?.price || 0,
     credits: selectedPlan?.credits || 1,
-    features: selectedPlan?.features || [{ name: "", age: "", class: "" }],
-    popular: selectedPlan?.popular || "false",
-    isActive: selectedPlan?.isActive ?? "true",
+    features: selectedPlan?.features?.map((item: any) => ({
+      name: item,
+    })) || [{ name: "" }],
+    popular: `${selectedPlan?.popular}` || "false",
+    isActive: `${selectedPlan?.isActive}` || "true",
   };
 
   const handelFormSubmit = (values: any) => {
@@ -216,7 +218,16 @@ const AdminSubscription = () => {
                                 </span>
 
                                 <div className="flex space-x-2">
-                                  <Button variant="outline" size="sm">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    type="button"
+                                    onClick={() => {
+                                      setActionType("edit");
+                                      setModalOpen(true);
+                                      setSelectedPlan(plan);
+                                    }}
+                                  >
                                     Edit
                                   </Button>
                                 </div>
@@ -301,8 +312,6 @@ const AdminSubscription = () => {
                         name: "features",
                         initialObject: {
                           name: "",
-                          class: "",
-                          age: "",
                         },
                         keyArray: [
                           {
@@ -312,89 +321,11 @@ const AdminSubscription = () => {
                             placeholder: "Name",
                             className: "md:col-span-3",
                           },
-                          {
-                            label: "Class",
-                            component: FormikTextInput,
-                            name: "class",
-                            placeholder: "Class",
-                            className: "md:col-span-3",
-                          },
-                          {
-                            label: "Age",
-                            component: FormikTextInput,
-                            name: "age",
-                            placeholder: "Age",
-                            className: "md:col-span-3",
-                          },
                         ],
                         buttonClass: "md:col-span-3",
                       }}
                     />
                   </div>
-                  {/* <div className="md:col-span-12">
-                    <Label className="block mb-2 text-base font-medium">
-                      Features
-                    </Label>
-                    <FieldArray
-                      name="features"
-                      render={(arrayHelpers) => (
-                        <div className="space-y-4 border border-gray-300 p-4 rounded-md">
-                          {values?.features?.map((item: any, index: any) => (
-                            <div
-                              key={index}
-                              className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end"
-                            >
-                              <div className="md:col-span-3">
-                                <Field
-                                  label="Name"
-                                  component={FormikTextInput}
-                                  name={`features[${index}].name`}
-                                  placeholder="Name"
-                                />
-                              </div>
-                              <div className="md:col-span-3">
-                                <Field
-                                  label="Age"
-                                  component={FormikTextInput}
-                                  name={`features[${index}].age`}
-                                  placeholder="Age"
-                                />
-                              </div>
-                              <div className="md:col-span-3">
-                                <Field
-                                  label="Class"
-                                  component={FormikTextInput}
-                                  name={`features[${index}].class`}
-                                  placeholder="Class"
-                                />
-                              </div>
-                              <div className="md:col-span-3 flex items-center justify-start h-full mt-[30px]">
-                                <Trash2
-                                  className="h-5 w-5 text-red-500 cursor-pointer mt-2"
-                                  onClick={() => arrayHelpers.remove(index)}
-                                />
-                              </div>
-                            </div>
-                          ))}
-
-                          <Button
-                            type="button"
-                            className="bg-blue-600 hover:bg-blue-700"
-                            onClick={() =>
-                              arrayHelpers.push({
-                                name: "",
-                                class: "",
-                                age: "",
-                              })
-                            }
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add More Feature
-                          </Button>
-                        </div>
-                      )}
-                    />
-                  </div> */}
 
                   <div className="md:col-span-4">
                     <Field
@@ -424,7 +355,14 @@ const AdminSubscription = () => {
                 </div>
 
                 <div className="mt-4 flex justify-end gap-2">
-                  <Button type="button" variant="outline">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setModalOpen(false);
+                      setActionType("add");
+                    }}
+                  >
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isLoading}>

@@ -235,3 +235,68 @@ export const FormikFieldArray = ({ data }: any) => {
     </>
   );
 };
+
+{
+  /* <div className="md:col-span-12">
+  <Label className="block mb-2 text-base font-medium">Features</Label>
+  <FieldArray
+    name="features"
+    render={(arrayHelpers) => (
+      <div className="space-y-4 border border-gray-300 p-4 rounded-md">
+        {values?.features?.map((item: any, index: any) => (
+          <div
+            key={index}
+            className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end"
+          >
+            <div className="md:col-span-3">
+              <Field
+                label="Name"
+                component={FormikTextInput}
+                name={`features[${index}].name`}
+                placeholder="Name"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <Field
+                label="Age"
+                component={FormikTextInput}
+                name={`features[${index}].age`}
+                placeholder="Age"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <Field
+                label="Class"
+                component={FormikTextInput}
+                name={`features[${index}].class`}
+                placeholder="Class"
+              />
+            </div>
+            <div className="md:col-span-3 flex items-center justify-start h-full mt-[30px]">
+              <Trash2
+                className="h-5 w-5 text-red-500 cursor-pointer mt-2"
+                onClick={() => arrayHelpers.remove(index)}
+              />
+            </div>
+          </div>
+        ))}
+
+        <Button
+          type="button"
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={() =>
+            arrayHelpers.push({
+              name: "",
+              class: "",
+              age: "",
+            })
+          }
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add More Feature
+        </Button>
+      </div>
+    )}
+  />
+</div>; */
+}
