@@ -3,7 +3,11 @@ import React, { useState } from "react";
 import { subscriptionValidationSchema } from "@/app/api/subscription/AubscriptionSchema";
 import { SubscriptionList } from "@/app/MainService";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { FormikRadioGroup, FormikTextInput } from "@/components/CustomField";
+import {
+  FormikFieldArray,
+  FormikRadioGroup,
+  FormikTextInput,
+} from "@/components/CustomField";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -290,6 +294,44 @@ const AdminSubscription = () => {
                     />
                   </div>
                   <div className="md:col-span-12">
+                    <FormikFieldArray
+                      data={{
+                        label: "Features",
+                        values: values.features,
+                        name: "features",
+                        initialObject: {
+                          name: "",
+                          class: "",
+                          age: "",
+                        },
+                        keyArray: [
+                          {
+                            label: "Name",
+                            component: FormikTextInput,
+                            name: "name",
+                            placeholder: "Name",
+                            className: "md:col-span-3",
+                          },
+                          {
+                            label: "Class",
+                            component: FormikTextInput,
+                            name: "class",
+                            placeholder: "Class",
+                            className: "md:col-span-3",
+                          },
+                          {
+                            label: "Age",
+                            component: FormikTextInput,
+                            name: "age",
+                            placeholder: "Age",
+                            className: "md:col-span-3",
+                          },
+                        ],
+                        buttonClass: "md:col-span-3",
+                      }}
+                    />
+                  </div>
+                  {/* <div className="md:col-span-12">
                     <Label className="block mb-2 text-base font-medium">
                       Features
                     </Label>
@@ -352,7 +394,7 @@ const AdminSubscription = () => {
                         </div>
                       )}
                     />
-                  </div>
+                  </div> */}
 
                   <div className="md:col-span-4">
                     <Field

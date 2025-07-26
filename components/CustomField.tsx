@@ -1,11 +1,13 @@
 // components/FormikTextInput.tsx
 
-import { getIn } from "formik";
+import { Field, FieldArray, getIn } from "formik";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useState } from "react";
 import Select from "react-select";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Plus, Trash2 } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface FormikRadioGroupProps {
   name: string;
@@ -183,5 +185,53 @@ export const FormikRadioGroup = ({
         </small>
       )}
     </div>
+  );
+};
+
+export const FormikFieldArray = ({ data }: any) => {
+  return (
+    <>
+      <Label className="block mb-2 text-base font-medium">{data.label}</Label>
+      <FieldArray
+        name={data.name}
+        render={(arrayHelpers) => (
+          <div className="space-y-4 border border-gray-300 p-4 rounded-md">
+            {data.values?.map((_: any, index: number) => (
+              <div
+                key={index}
+                className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end"
+              >
+                {data.keyArray.map((elm: any, ind: number) => (
+                  <div className={elm.className} key={ind}>
+                    <Field
+                      {...elm}
+                      name={`${data.name}[${index}].${elm.name}`}
+                    />
+                  </div>
+                ))}
+
+                <div
+                  className={`${data.buttonClass} flex items-center justify-start h-full mt-[30px]`}
+                >
+                  <Trash2
+                    className="h-5 w-5 text-red-500 cursor-pointer mt-2"
+                    onClick={() => arrayHelpers.remove(index)}
+                  />
+                </div>
+              </div>
+            ))}
+
+            <Button
+              type="button"
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => arrayHelpers.push({ ...data.initialObject })}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add More
+            </Button>
+          </div>
+        )}
+      />
+    </>
   );
 };
