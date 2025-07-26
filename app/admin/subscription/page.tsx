@@ -1,7 +1,14 @@
 "use client";
 import React, { useState } from "react";
-import { subscriptionValidationSchema } from "@/app/api/subscription/AubscriptionSchema";
-import { SubscriptionList } from "@/app/MainService";
+import {
+  subscriptionFrontendSchema,
+  subscriptionValidationSchema,
+} from "@/app/api/subscription/AubscriptionSchema";
+import {
+  SubscriptionCreate,
+  SubscriptionList,
+  SubscriptionUpdate,
+} from "@/app/MainService";
 import AdminLayout from "@/components/admin/AdminLayout";
 import {
   FormikFieldArray,
@@ -19,9 +26,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
-import { Field, FieldArray, Form, Formik } from "formik";
-import { Plus, Search, Star, Check, X, Trash2 } from "lucide-react";
-import { Label } from "@/components/ui/label";
+import { Field, Form, Formik } from "formik";
+import { Plus, Search, Star, Check, X } from "lucide-react";
+import toast from "react-hot-toast";
+import CustomLoader from "@/components/ui/CustomLoader";
+import { queryClient } from "@/lib/react-query-client";
 
 const AdminSubscription = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,8 +38,9 @@ const AdminSubscription = () => {
   const [actionType, setActionType] = useState("add");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { data: subscriptionPlans = [], isLoading } = useQuery({
+  const { data: subscriptionPlans = [], isLoading: loading } = useQuery({
     queryKey: ["subscription-list"],
     queryFn: async () => {
       const response = await SubscriptionList();
@@ -62,7 +72,7 @@ const AdminSubscription = () => {
   const initialValues = {
     name: selectedPlan?.name || "",
     price: selectedPlan?.price || 0,
-    credits: selectedPlan?.credits || 1,
+    credits: selectedPlan?.credits || 0,
     features: selectedPlan?.features?.map((item: any) => ({
       name: item,
     })) || [{ name: "" }],
@@ -70,12 +80,55 @@ const AdminSubscription = () => {
     isActive: `${selectedPlan?.isActive}` || "true",
   };
 
+  const modelClose = () => {
+    setModalOpen(false);
+    setActionType("add");
+  };
+
   const handelFormSubmit = (values: any) => {
-    console.log(values);
+    setIsLoading(true);
+    const reqData = {
+      name: values.name,
+      price: Number(values.price),
+      credits: values.credits,
+      features: values.features.map((item: any) => item.name),
+      popular: JSON.parse(values.popular),
+      isActive: JSON.parse(values.isActive),
+    };
+    if (actionType === "add") {
+      SubscriptionCreate(reqData)
+        .then((res) => {
+          setIsLoading(false);
+          toast.success(res.message);
+          modelClose();
+        })
+        .catch((err) => {
+          setIsLoading(false);
+          toast.error(
+            err.message || "Failed to save details. Please try again."
+          );
+        });
+    }
+    if (actionType === "edit") {
+      SubscriptionUpdate({ ...reqData, subscriptionId: selectedPlan._id })
+        .then((res) => {
+          setIsLoading(false);
+          toast.success(res.message);
+          modelClose();
+        })
+        .catch((err) => {
+          setIsLoading(false);
+          toast.error(
+            err.message || "Failed to save details. Please try again."
+          );
+        });
+    }
+    queryClient.invalidateQueries({ queryKey: ["subscription-list"] });
   };
 
   return (
     <AdminLayout>
+      {(loading || isLoading) && <CustomLoader />}
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
@@ -161,7 +214,7 @@ const AdminSubscription = () => {
                             {/* Price */}
                             <div className="mb-6">
                               <span className="text-3xl font-bold text-gray-900">
-                                ${plan.price}
+                                ₹{plan.price}
                               </span>
                               <span className="text-gray-500">/month</span>
                             </div>
@@ -276,10 +329,10 @@ const AdminSubscription = () => {
           </DialogHeader>
           <Formik
             initialValues={initialValues}
-            validationSchema={subscriptionValidationSchema}
+            validationSchema={subscriptionFrontendSchema}
             onSubmit={handelFormSubmit}
           >
-            {({ handleSubmit, setFieldValue, values }) => (
+            {({ handleSubmit, setFieldValue, values, errors }) => (
               <Form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
                   <div className="md:col-span-4">
@@ -319,7 +372,7 @@ const AdminSubscription = () => {
                             component: FormikTextInput,
                             name: "name",
                             placeholder: "Name",
-                            className: "md:col-span-3",
+                            className: "md:col-span-9",
                           },
                         ],
                         buttonClass: "md:col-span-3",
@@ -358,10 +411,7 @@ const AdminSubscription = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => {
-                      setModalOpen(false);
-                      setActionType("add");
-                    }}
+                    onClick={() => modelClose()}
                   >
                     Cancel
                   </Button>
