@@ -38,10 +38,12 @@ import {
   Calendar,
   LayoutDashboard,
   SwitchCamera,
+  HandCoins,
 } from "lucide-react";
 import MarqueeNotice from "../ui/marquee-notice";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { DailyCreditAd } from "../GetDailyCredit";
 
 const Header = () => {
   const pathname = usePathname();
@@ -52,6 +54,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotice, setShowNotice] = useState(true);
+  const [dailyCredit, setDailyCredit] = useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -88,6 +91,11 @@ const Header = () => {
       icon: <History className="mr-2 h-4 w-4" />,
     },
   ];
+
+  const handleCreditAdd = () => {
+    // Call your API or update state here
+    console.log("Credits were added to wallet");
+  };
 
   return (
     <>
@@ -143,6 +151,13 @@ const Header = () => {
                 <DropdownMenuContent className="w-56" align="end">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="cursor-pointer flex items-center"
+                    onClick={() => setDailyCredit(true)}
+                  >
+                    <HandCoins className="mr-2 h-4 w-4" />
+                    Get Daily Credits
+                  </DropdownMenuItem>
                   {user.role === "admin" && (
                     <DropdownMenuItem asChild>
                       <Link
@@ -223,6 +238,15 @@ const Header = () => {
           </div>
         </div>
       </header>
+      {dailyCredit && (
+        <DailyCreditAd
+          isOpen={dailyCredit}
+          onClose={() => setDailyCredit(false)}
+          onCreditAdd={handleCreditAdd}
+        />
+      )}
+
+      {/* {dailyCredit && <DailyCreditAd />} */}
     </>
   );
 };
