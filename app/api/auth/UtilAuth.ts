@@ -26,6 +26,8 @@ export function generateToken(payload: any): string {
     subscriptionId: payload.subscriptionId,
     username: payload.username,
     role: payload.role,
+    isActive: payload.isActive,
+    credits: Number(payload.credits ?? 0),
   };
   return jwt.sign(data, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }

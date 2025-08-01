@@ -12,6 +12,8 @@ const UserSchema = new Schema(
     subscriptionId: { type: Schema.Types.ObjectId },
     password: { type: String },
     username: { type: String },
+    isActive: { type: Boolean, default: true },
+    credits: { type: Number, default: 0 },
     role: {
       type: String,
       enum: ["admin", "user", "employee"], // 👈 Allowed roles
