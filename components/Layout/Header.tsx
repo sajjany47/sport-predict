@@ -153,7 +153,10 @@ const Header = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="cursor-pointer flex items-center"
-                    onClick={() => setDailyCredit(true)}
+                    onClick={() => {
+                      // Delay opening the dialog so dropdown can close
+                      setTimeout(() => setDailyCredit(true), 50);
+                    }}
                   >
                     <HandCoins className="mr-2 h-4 w-4" />
                     Get Daily Credits
