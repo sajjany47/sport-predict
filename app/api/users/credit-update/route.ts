@@ -9,7 +9,7 @@ export const POST = async (request: NextRequest) => {
   await dbConnect();
   try {
     const body = await request.json();
-    const userData = UserData(body);
+    const userData = { credits: body.credits }; // Assuming credits is the only field to update
     const update = await User.updateOne(
       {
         _id: new mongoose.Types.ObjectId(body.userId),
@@ -18,12 +18,12 @@ export const POST = async (request: NextRequest) => {
     );
 
     return NextResponse.json(
-      { success: true, message: "User updated successfully", data: update },
+      { success: true, message: "Credits updated successfully", data: update },
       { status: 200 }
     );
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: error.message || "Error updating user" },
+      { success: false, message: error.message || "Error updating credits" },
       { status: 500 }
     );
   }
