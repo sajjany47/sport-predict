@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RegisterRequest, ApiResponse } from "@/types/api";
 import User from "../UserModel";
-import { generateToken, hashPassword } from "../UtilAuth";
+import { generateToken } from "../UtilAuth";
 import dbConnect from "../../db";
 import { userValidationSchema } from "../UserValidation";
 import mongoose from "mongoose";

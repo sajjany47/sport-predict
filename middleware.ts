@@ -1,53 +1,49 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
-import { verifyToken } from "./app/api/users/UtilAuth";
+import { jwtVerify } from "jose";
+import { SECRET_KEY } from "./app/api/users/UtilAuth";
 
-const protectedPaths = [
-  "/api/orders",
-  "/api/subscriptions",
-  "/api/user/profile",
-];
+const protectedPaths = ["/api/subscription/list"];
 
-export function middleware(request: NextRequest) {
-  const isProtectedPath = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
-  if (!isProtectedPath) {
-    return NextResponse.next();
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Check if path is protected
+  const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
+  if (!isProtected) {
+    return NextResponse.next(); // Public API → no token check
   }
-  const token = request.headers.get("authorization")?.replace("Bearer ", "");
-  if (!token) {
+
+  // Get token from header or cookie
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader) {
     return NextResponse.json(
-      { success: false, message: "Access denied. No token provided." },
+      { message: "Unauthorized - No token provided" },
       { status: 401 }
     );
   }
 
   try {
-    const decoded = verifyToken(token);
+    // ✅ Verify token using jose (Edge-compatible)
+    const token = authHeader.split(" ")[1];
+    const { payload } = await jwtVerify(token, SECRET_KEY);
 
-    // Add user info to request headers for use in API routes
+    // Pass user data to API route via custom header
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set("x-user", JSON.stringify(decoded));
+    requestHeaders.set("x-user", JSON.stringify(payload));
 
     return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
+      request: { headers: requestHeaders },
     });
-  } catch (error) {
+  } catch {
+    // Invalid token
     return NextResponse.json(
-      { success: false, message: "Invalid token." },
+      { success: false, message: "Invalid or expired token." },
       { status: 401 }
     );
   }
 }
 
 export const config = {
-  matcher: [
-    "/api/orders/:path*",
-    "/api/subscriptions/:path*",
-    "/api/user/:path*",
-  ],
+  matcher: ["/api/:path*"],
 };

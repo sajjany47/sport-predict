@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LoginRequest, ApiResponse } from "@/types/api";
-import { comparePassword, generateToken } from "../UtilAuth";
+import { generateToken } from "../UtilAuth";
 import dbConnect from "../../db";
 import User from "../UserModel";
 import bcrypt from "bcrypt";
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     // Generate token
     const prepareResponse = UserData(user);
 
-    const token = generateToken({ ...prepareResponse, _id: user._id });
+    const token = await generateToken({ ...prepareResponse, _id: user._id });
 
     // Remove password from response
 
