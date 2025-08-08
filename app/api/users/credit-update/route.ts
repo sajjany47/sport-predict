@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import mongoose from "mongoose";
 import dbConnect from "../../db";
-import { UserData } from "../UserData";
 import User from "../UserModel";
 
 export const POST = async (request: NextRequest) => {
