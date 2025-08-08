@@ -13,12 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import {
   Database,
-  Trash2,
   Users,
   Building,
   UserRound,
   Landmark,
   Pencil,
+  Trash,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
@@ -159,7 +159,12 @@ const AdminStatsPage = () => {
   };
 
   const columns: any[] = [
-    { name: "Sl No.", selector: (row: any) => row.slNo, sortable: true },
+    {
+      name: "#",
+      selector: (row: any, index: number) => index + 1,
+      sortable: true,
+      width: "60px",
+    },
     {
       name: "Original Name",
       selector: (row: any) => row.originalName,
@@ -190,19 +195,18 @@ const AdminStatsPage = () => {
     {
       name: "Actions",
       cell: (row: any) => (
-        <div className="flex gap-2">
+        <div className="flex space-x-2">
           <button
             onClick={() => handleEdit(row)}
             className="text-blue-600 hover:text-blue-800"
           >
             <Pencil className="w-4 h-4" />
           </button>
-
           <button
             onClick={() => handleDelete(row)}
             className="text-red-600 hover:text-red-800"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash className="w-4 h-4" />
           </button>
         </div>
       ),

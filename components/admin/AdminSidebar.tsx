@@ -11,22 +11,13 @@ import {
   DollarSign,
   BarChart3,
   Settings,
-  Home,
-  LogOut,
   Trophy,
   Database,
+  Star,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useDispatch } from "react-redux";
-import { logout } from "@/store/slices/authSlice";
 
 const AdminSidebar = () => {
   const pathname = usePathname();
-  const dispatch = useDispatch();
-
-  const handleLogout = () => {
-    dispatch(logout());
-  };
 
   const menuItems = [
     {
@@ -38,6 +29,11 @@ const AdminSidebar = () => {
       title: "Users",
       href: "/admin/users",
       icon: Users,
+    },
+    {
+      title: "Subscription",
+      href: "/admin/subscription",
+      icon: Star,
     },
     {
       title: "Orders",
@@ -106,28 +102,6 @@ const AdminSidebar = () => {
           })}
         </ul>
       </nav>
-
-      {/* Footer */}
-      <div className="p-4 border-t border-gray-700 flex-shrink-0">
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800 mb-2"
-          asChild
-        >
-          <Link href="/">
-            <Home className="h-4 w-4 mr-2" />
-            Back to Site
-          </Link>
-        </Button>
-        <Button
-          variant="ghost"
-          onClick={handleLogout}
-          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Logout
-        </Button>
-      </div>
     </div>
   );
 };

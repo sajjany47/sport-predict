@@ -4,6 +4,7 @@ import { comparePassword, generateToken } from "../UtilAuth";
 import dbConnect from "../../db";
 import User from "../UserModel";
 import bcrypt from "bcrypt";
+import { UserData } from "../UserData";
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,17 +57,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate token
-    const prepareResponse = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      mobileNumber: user.mobileNumber,
-      subscriptionId: user.subscriptionId,
-      username: user.username,
-      role: user.role,
-    };
+    const prepareResponse = UserData(user);
 
-    const token = generateToken({ ...prepareResponse });
+    const token = generateToken({ ...prepareResponse, _id: user._id });
 
     // Remove password from response
 

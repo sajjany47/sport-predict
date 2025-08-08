@@ -1,10 +1,20 @@
 // components/FormikTextInput.tsx
 
-import { getIn } from "formik";
+import { Field, FieldArray, getIn } from "formik";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useState } from "react";
 import Select from "react-select";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Plus, Trash2 } from "lucide-react";
+import { Button } from "./ui/button";
+
+interface FormikRadioGroupProps {
+  name: string;
+  label: string;
+  options: { label: string; value: string }[];
+  className?: string;
+}
 
 export const FormikTextInput = ({
   field,
@@ -22,7 +32,9 @@ export const FormikTextInput = ({
         {...props}
         id={field.name}
         value={field.value || ""}
-        placeholder={`Enter ${field.name}`}
+        placeholder={`Enter ${
+          props.placeholder ? props.placeholder : field.name
+        }`}
         className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
           hasError
             ? "border-red-500 ring-red-200"
@@ -130,3 +142,161 @@ export const FormikAutoSelectField = ({
     </div>
   );
 };
+
+export const FormikRadioGroup = ({
+  field,
+  form: { touched, errors },
+  ...props
+}: any) => {
+  const hasError =
+    Boolean(getIn(errors, field.name)) && getIn(touched, field.name);
+
+  return (
+    <div className="mb-4">
+      <Label className="block mb-1 text-sm font-medium" htmlFor={field.name}>
+        {props.label}
+      </Label>
+
+      <RadioGroup
+        id={field.name}
+        {...field}
+        {...props}
+        value={field.value || ""}
+        className={`flex gap-4 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          hasError
+            ? "border-red-500 ring-red-200"
+            : "border-gray-300 focus:ring-blue-300"
+        } ${props?.className}`}
+      >
+        {props.options.map((option: any, index: any) => (
+          <div key={index} className="flex items-center space-x-2">
+            <RadioGroupItem
+              id={`${field.name}-${index}`}
+              value={option.value}
+            />
+            <Label htmlFor={`${field.name}-${index}`}>{option.label}</Label>
+          </div>
+        ))}
+      </RadioGroup>
+
+      {Boolean(getIn(errors, field.name)) && getIn(touched, field.name) && (
+        <small className="text-red-600 mt-1 block">
+          {getIn(errors, field.name)}
+        </small>
+      )}
+    </div>
+  );
+};
+
+export const FormikFieldArray = ({ data }: any) => {
+  return (
+    <>
+      <Label className="block mb-2 text-base font-medium">{data.label}</Label>
+      <FieldArray
+        name={data.name}
+        render={(arrayHelpers) => (
+          <div className="space-y-4 border border-gray-300 p-4 rounded-md">
+            {data.values?.map((_: any, index: number) => (
+              <div
+                key={index}
+                className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end"
+              >
+                {data.keyArray.map((elm: any, ind: number) => (
+                  <div className={elm.className} key={ind}>
+                    <Field
+                      {...elm}
+                      name={`${data.name}[${index}].${elm.name}`}
+                    />
+                  </div>
+                ))}
+
+                <div
+                  className={`${data.buttonClass} flex items-center justify-start h-full mt-[30px]`}
+                >
+                  <Trash2
+                    className="h-5 w-5 text-red-500 cursor-pointer mt-2"
+                    onClick={() => arrayHelpers.remove(index)}
+                  />
+                </div>
+              </div>
+            ))}
+
+            <Button
+              type="button"
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => arrayHelpers.push({ ...data.initialObject })}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add More
+            </Button>
+          </div>
+        )}
+      />
+    </>
+  );
+};
+
+{
+  /* <div className="md:col-span-12">
+  <Label className="block mb-2 text-base font-medium">Features</Label>
+  <FieldArray
+    name="features"
+    render={(arrayHelpers) => (
+      <div className="space-y-4 border border-gray-300 p-4 rounded-md">
+        {values?.features?.map((item: any, index: any) => (
+          <div
+            key={index}
+            className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end"
+          >
+            <div className="md:col-span-3">
+              <Field
+                label="Name"
+                component={FormikTextInput}
+                name={`features[${index}].name`}
+                placeholder="Name"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <Field
+                label="Age"
+                component={FormikTextInput}
+                name={`features[${index}].age`}
+                placeholder="Age"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <Field
+                label="Class"
+                component={FormikTextInput}
+                name={`features[${index}].class`}
+                placeholder="Class"
+              />
+            </div>
+            <div className="md:col-span-3 flex items-center justify-start h-full mt-[30px]">
+              <Trash2
+                className="h-5 w-5 text-red-500 cursor-pointer mt-2"
+                onClick={() => arrayHelpers.remove(index)}
+              />
+            </div>
+          </div>
+        ))}
+
+        <Button
+          type="button"
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={() =>
+            arrayHelpers.push({
+              name: "",
+              class: "",
+              age: "",
+            })
+          }
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add More Feature
+        </Button>
+      </div>
+    )}
+  />
+</div>; */
+}

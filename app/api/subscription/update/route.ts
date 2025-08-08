@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
   await dbConnect();
   try {
     const data = await req.json();
+
     await subscriptionValidationSchema.validate(data, { abortEarly: false });
     const prepareData = SubscriptionData(data);
     const updatedSub = await Subscription.findByIdAndUpdate(

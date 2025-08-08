@@ -6,11 +6,12 @@ import dbConnect from "../../db";
 import { userValidationSchema } from "../UserValidation";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import { UserData } from "../UserData";
 
 export async function POST(request: NextRequest) {
   try {
     await dbConnect();
-    const body: RegisterRequest = await request.json();
+    const body = await request.json();
 
     await userValidationSchema.validate(body, { abortEarly: false });
     const {
@@ -21,6 +22,8 @@ export async function POST(request: NextRequest) {
       mobileNumber,
       role,
       username,
+      isActive,
+      credits,
     } = body;
 
     // ✅ Check if email or mobile number already exists
@@ -55,13 +58,8 @@ export async function POST(request: NextRequest) {
 
     let userData: any = {
       _id: new mongoose.Types.ObjectId(),
-      name,
-      email,
+      ...UserData(body),
       password: await bcrypt.hash(password, 10),
-      mobileNumber,
-      role: role,
-      username,
-      subscriptionId: new mongoose.Types.ObjectId(subscriptionId),
     };
     const newUser = new User(userData);
 
