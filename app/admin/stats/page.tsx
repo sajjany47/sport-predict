@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   Database,
-  Trash2,
   Users,
   Building,
   UserRound,
@@ -211,9 +210,6 @@ const AdminStatsPage = () => {
           </button>
         </div>
       ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
     },
   ];
 
