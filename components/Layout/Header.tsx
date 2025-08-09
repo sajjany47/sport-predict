@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
-import { logout } from "@/store/slices/authSlice";
+import { loginSuccess, logout } from "@/store/slices/authSlice";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -44,6 +44,8 @@ import MarqueeNotice from "../ui/marquee-notice";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { DailyCreditAd } from "../GetDailyCredit";
+import { UserCreditUpdate } from "@/app/MainService";
+import toast from "react-hot-toast";
 
 const Header = () => {
   const pathname = usePathname();
@@ -93,8 +95,15 @@ const Header = () => {
   ];
 
   const handleCreditAdd = () => {
-    // Call your API or update state here
-    console.log("Credits were added to wallet");
+    UserCreditUpdate({ type: "daily" })
+      .then((res) => {
+        dispatch(loginSuccess({ ...user, credits: res.data.credits }));
+      })
+      .catch((error) => {
+        toast.error(
+          error.message || "Failed to get free credits. Please try again."
+        );
+      });
   };
 
   return (

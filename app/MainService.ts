@@ -1,3 +1,4 @@
+import { getHeadersWithToken } from "@/lib/utils";
 import axios from "axios";
 
 export const SubscriptionCreate = async (payload: any) => {
@@ -47,6 +48,17 @@ export const UserRegister = async (payload: any) => {
   try {
     const response = await axios.post("/api/users/signup", payload, {
       headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
+
+export const UserCreditUpdate = async (payload: any) => {
+  try {
+    const response = await axios.post("/api/users/credit-update", payload, {
+      headers: getHeadersWithToken(),
     });
     return response.data;
   } catch (error: any) {

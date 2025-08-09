@@ -22,6 +22,10 @@ const UserSchema = new Schema(
     isActive: { type: Boolean, default: true },
     agreeToTerms: { type: Boolean, default: false },
     credits: { type: Number, default: 0 },
+    lastAdCreditDate: {
+      type: Date,
+      default: null,
+    },
     role: {
       type: String,
       enum: ["admin", "user", "employee"], // 👈 Allowed roles

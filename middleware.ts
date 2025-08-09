@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 import { SECRET_KEY } from "./app/api/users/UtilAuth";
 
-const protectedPaths: any = [];
+const protectedPaths: any = ["/api/users/credit-update"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

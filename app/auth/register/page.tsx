@@ -89,6 +89,7 @@ const RegisterPage = () => {
           token: res.data.token,
           subscription: res.data.user.subscription ?? [],
         };
+        localStorage.setItem("token", res.data.token);
         dispatch(loginSuccess(userData));
         setIsLoading(false);
         toast.success("Account created successfully!");

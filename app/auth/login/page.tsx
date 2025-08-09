@@ -42,7 +42,7 @@ const LoginPage = () => {
     UserLogin({ ...e })
       .then((res) => {
         const findSubscription = (res.data.user.subscription ?? []).find(
-          (sub: any) => sub.isActive === true && sub.expiryDate > new Date()
+          (sub: any) => sub.isActive === true
         );
         const userData = {
           id: res.data.user._id,
@@ -57,6 +57,7 @@ const LoginPage = () => {
           token: res.data.token,
           subscription: res.data.user.subscription ?? [],
         };
+        localStorage.setItem("token", res.data.token);
         dispatch(loginSuccess(userData));
         setIsLoading(false);
         toast.success(" login successful!");
