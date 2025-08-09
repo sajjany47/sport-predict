@@ -7,7 +7,7 @@ export const StatsList = async () => {
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.response?.data?.message);
   }
 };
 
@@ -18,7 +18,7 @@ export const StatsCreate = async (payload: any) => {
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.response?.data?.message);
   }
 };
 export const StatsUpdate = async (payload: any) => {
@@ -28,7 +28,7 @@ export const StatsUpdate = async (payload: any) => {
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.response?.data?.message);
   }
 };
 
@@ -39,6 +39,6 @@ export const StatsAutoSearch = async (payload: any) => {
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.response?.data?.message);
   }
 };

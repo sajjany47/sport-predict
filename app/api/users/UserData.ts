@@ -1,5 +1,3 @@
-import mongoose from "mongoose";
-
 export const UserData = (data: any) => {
   const a = {
     name: data.name,

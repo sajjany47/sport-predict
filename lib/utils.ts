@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { load } from "cheerio";
 import axios from "axios";
+import { error } from "console";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -191,4 +192,14 @@ export const CleanName = (name: any) => {
       .replace(/\s+/g, " ")
       .trim()
   );
+};
+
+export const FormatErrorMessage = (error: any) => {
+  if (error.errors) {
+    return error.errors.join(", ") || "Validation error occurred";
+  } else if (error.message) {
+    return error.message;
+  } else {
+    return "An unknown error occurred";
+  }
 };

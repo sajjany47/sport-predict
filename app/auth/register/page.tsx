@@ -74,7 +74,7 @@ const RegisterPage = () => {
     UserRegister(formData)
       .then((res) => {
         const findSubscription = (res.data.user.subscription ?? []).find(
-          (sub: any) => sub.isActive === true && sub.expiryDate > new Date()
+          (sub: any) => sub.isActive === true
         );
         const userData = {
           id: res.data.user._id,

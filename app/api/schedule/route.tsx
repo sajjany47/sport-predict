@@ -1,3 +1,4 @@
+import { FormatErrorMessage } from "@/lib/utils";
 import axios from "axios";
 import moment from "moment";
 
@@ -73,6 +74,9 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (error: any) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json(
+      { success: false, error: FormatErrorMessage(error) },
+      { status: 500 }
+    );
   }
 }

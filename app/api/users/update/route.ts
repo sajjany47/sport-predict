@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import dbConnect from "../../db";
 import { UserData } from "../UserData";
 import User from "../UserModel";
+import { FormatErrorMessage } from "@/lib/utils";
 
 export const POST = async (request: NextRequest) => {
   await dbConnect();
@@ -23,7 +24,7 @@ export const POST = async (request: NextRequest) => {
     );
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: error.message || "Error updating user" },
+      { success: false, message: FormatErrorMessage(error) },
       { status: 500 }
     );
   }

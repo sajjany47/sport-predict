@@ -7,7 +7,7 @@ export const SubscriptionCreate = async (payload: any) => {
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.response?.data?.message);
   }
 };
 export const SubscriptionUpdate = async (payload: any) => {
@@ -17,7 +17,7 @@ export const SubscriptionUpdate = async (payload: any) => {
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.response?.data?.message);
   }
 };
 
@@ -28,7 +28,7 @@ export const SubscriptionList = async () => {
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.response?.data?.message);
   }
 };
 
@@ -39,7 +39,7 @@ export const UserLogin = async (payload: any) => {
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.response?.data?.message);
   }
 };
 
@@ -50,6 +50,6 @@ export const UserRegister = async (payload: any) => {
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error.response?.data?.message);
   }
 };

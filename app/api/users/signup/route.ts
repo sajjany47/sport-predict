@@ -7,6 +7,7 @@ import { userValidationSchema } from "../UserValidation";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { UserData } from "../UserData";
+import { FormatErrorMessage } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: message,
-        } as ApiResponse,
+        },
         { status: 409 }
       );
     } else {
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
         delete userData.password;
 
         // Generate token
-        const token = generateToken({ ...userData });
+        const token = await generateToken({ ...userData });
 
         return NextResponse.json(
           {
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
               user: userData,
               token,
             },
-          } as ApiResponse,
+          },
           { status: 200 }
         );
       }
@@ -95,8 +96,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: error || "Internal server error.",
-      } as ApiResponse,
+        message: FormatErrorMessage(error),
+      },
       { status: 500 }
     );
   }

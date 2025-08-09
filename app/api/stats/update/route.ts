@@ -3,6 +3,7 @@ import dbConnect from "../../db";
 import { statsValidationSchema } from "../StatsSchema";
 import Stats from "../StatsModel";
 import { PreparedStatsData } from "../StatsData";
+import { FormatErrorMessage } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   await dbConnect();
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message: FormatErrorMessage(error) },
       { status: 500 }
     );
   }

@@ -5,6 +5,7 @@ import dbConnect from "../../db";
 import User from "../UserModel";
 import bcrypt from "bcrypt";
 import { UserData } from "../UserData";
+import { FormatErrorMessage } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,11 +73,10 @@ export async function POST(request: NextRequest) {
       },
     } as ApiResponse);
   } catch (error) {
-    console.error("Login error:", error);
     return NextResponse.json(
       {
         success: false,
-        message: "Internal server error.",
+        message: FormatErrorMessage(error),
       } as ApiResponse,
       { status: 500 }
     );
