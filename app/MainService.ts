@@ -34,7 +34,7 @@ export const SubscriptionList = async () => {
 
 export const UserLogin = async (payload: any) => {
   try {
-    const response = await axios.post("/api/users/sign", payload, {
+    const response = await axios.post("/api/users/sigin", payload, {
       headers: { "Content-Type": "application/json" },
     });
     return response.data;
