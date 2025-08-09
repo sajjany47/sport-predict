@@ -9,13 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import { loginSuccess } from "@/store/slices/authSlice";
 import toast from "react-hot-toast";
+import * as Yup from "yup";
+import { Field, Form, Formik } from "formik";
+import { FormikTextInput, FormikTextPassword } from "@/components/CustomField";
+
+// ✅ Validation Schema
+const loginValidationSchema = Yup.object({
+  userId: Yup.string().required("User Id is required"),
+  password: Yup.string().required("Password is required"),
+});
 
 const LoginPage = () => {
-  const [activeTab, setActiveTab] = useState("email");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -24,7 +31,6 @@ const LoginPage = () => {
     otp: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -36,7 +42,13 @@ const LoginPage = () => {
     });
   };
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  // ✅ Initial Values
+  const initialValues = {
+    userId: "",
+    password: "",
+  };
+
+  const handleEmailLogin = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -87,51 +99,6 @@ const LoginPage = () => {
     }
   };
 
-  const handleSendOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setOtpSent(true);
-      toast.success("OTP sent successfully!");
-    } catch (error) {
-      toast.error("Failed to send OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleOTPLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock successful login
-      const mockUser = {
-        id: "1",
-        username: "cricket_fan",
-        email: "user@example.com",
-        mobile: formData.mobile,
-        credits: 2,
-        subscriptionPlan: "Free",
-        subscriptionExpiry: "2025-02-15",
-      };
-
-      dispatch(loginSuccess(mockUser));
-      toast.success("Login successful!");
-      router.push("/dashboard");
-    } catch (error) {
-      toast.error("Invalid OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -160,150 +127,55 @@ const LoginPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
+            <Formik
+              initialValues={initialValues}
+              validationSchema={loginValidationSchema}
+              onSubmit={handleEmailLogin}
             >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger
-                  value="email"
-                  className="flex items-center space-x-2"
-                >
-                  <Mail className="h-4 w-4" />
-                  <span>Email</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="mobile"
-                  className="flex items-center space-x-2"
-                >
-                  <Phone className="h-4 w-4" />
-                  <span>Mobile</span>
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="email" className="space-y-4 mt-6">
-                <form onSubmit={handleEmailLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="pl-10"
-                        required
+              {({ handleSubmit }) => (
+                <Form onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-12 md:col-span-12 lg:col-span-12">
+                      <Field
+                        label="UserName/Email/Mobile"
+                        component={FormikTextInput}
+                        name="userId"
+                        icon={
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        }
                       />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="password"
+                    <div className="col-span-12 md:col-span-12 lg:col-span-12">
+                      <Field
+                        label="Password"
+                        component={FormikTextPassword}
                         name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className="pl-10 pr-10"
-                        required
+                        icon={
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        }
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <Link
-                      href="/auth/forgot-password"
-                      className="text-sm text-blue-600 hover:underline"
-                    >
-                      Forgot Password?
-                    </Link>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing In..." : "Sign In"}
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="mobile" className="space-y-4 mt-6">
-                {!otpSent ? (
-                  <form onSubmit={handleSendOTP} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="mobile">Mobile Number</Label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          id="mobile"
-                          name="mobile"
-                          type="tel"
-                          placeholder="Enter your mobile number"
-                          value={formData.mobile}
-                          onChange={handleInputChange}
-                          className="pl-10"
-                          required
-                        />
+                      <div className="text-right">
+                        <Link
+                          href="/auth/forgot-password"
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          Forgot Password?
+                        </Link>
                       </div>
                     </div>
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Sending OTP..." : "Send OTP"}
-                    </Button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleOTPLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="otp">Enter OTP</Label>
-                      <Input
-                        id="otp"
-                        name="otp"
-                        type="text"
-                        placeholder="Enter 6-digit OTP"
-                        value={formData.otp}
-                        onChange={handleInputChange}
-                        maxLength={6}
-                        required
-                      />
-                    </div>
-                    <div className="text-sm text-gray-600 text-center">
-                      OTP sent to {formData.mobile}
-                      <button
-                        type="button"
-                        onClick={() => setOtpSent(false)}
-                        className="text-blue-600 hover:underline ml-2"
+                    <div className="col-span-12 md:col-span-12 lg:col-span-12 mt-2">
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={isLoading}
                       >
-                        Change Number
-                      </button>
+                        Sign In
+                      </Button>
                     </div>
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Verifying..." : "Verify OTP"}
-                    </Button>
-                  </form>
-                )}
-              </TabsContent>
-            </Tabs>
+                  </div>
+                </Form>
+              )}
+            </Formik>
 
             <div className="text-center mt-6">
               <p className="text-gray-600">

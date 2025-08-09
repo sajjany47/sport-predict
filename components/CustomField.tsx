@@ -6,15 +6,8 @@ import { Input } from "./ui/input";
 import { useState } from "react";
 import Select from "react-select";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { Plus, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
-
-interface FormikRadioGroupProps {
-  name: string;
-  label: string;
-  options: { label: string; value: string }[];
-  className?: string;
-}
 
 export const FormikTextInput = ({
   field,
@@ -25,29 +18,83 @@ export const FormikTextInput = ({
     Boolean(getIn(errors, field.name)) && getIn(touched, field.name);
 
   return (
-    <div className="mb-2">
+    <>
       <Label htmlFor={field.name}>{props.label}</Label>
-      <Input
-        {...field}
-        {...props}
-        id={field.name}
-        value={field.value || ""}
-        placeholder={`Enter ${
-          props.placeholder ? props.placeholder : field.name
-        }`}
-        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
-          hasError
-            ? "border-red-500 ring-red-200"
-            : "border-gray-300 focus:ring-blue-300"
-        }`}
-      />
+      <div className="relative">
+        {props.icon && props.icon}
+        <Input
+          {...field}
+          {...props}
+          id={field.name}
+          value={field.value || ""}
+          placeholder={`Enter ${
+            props.placeholder ? props.placeholder : props.label
+          }`}
+          className={`w-full ${props.icon && "pl-10"} ${
+            hasError
+              ? "border-red-500 ring-red-200"
+              : "border-gray-300 focus:ring-blue-300"
+          }`}
+        />
+      </div>
 
       {Boolean(getIn(errors, field.name)) && getIn(touched, field.name) && (
         <small className="text-red-600 mt-1 block">
           {getIn(errors, field.name)}
         </small>
       )}
-    </div>
+    </>
+  );
+};
+
+export const FormikTextPassword = ({
+  field,
+  form: { touched, errors },
+  ...props
+}: any) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const hasError =
+    Boolean(getIn(errors, field.name)) && getIn(touched, field.name);
+
+  return (
+    <>
+      <Label htmlFor={field.name}>{props.label}</Label>
+      <div className="relative">
+        {props.icon && props.icon}
+        <Input
+          {...field}
+          {...props}
+          id={field.name}
+          type={showPassword ? "text" : "password"}
+          value={field.value || ""}
+          placeholder={`Enter ${
+            props.placeholder ? props.placeholder : props.label
+          }`}
+          className={`w-full ${props.icon && "pl-10"} ${
+            hasError
+              ? "border-red-500 ring-red-200"
+              : "border-gray-300 focus:ring-blue-300"
+          }`}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+        >
+          {showPassword ? (
+            <EyeOff className="h-4 w-4" />
+          ) : (
+            <Eye className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+
+      {Boolean(getIn(errors, field.name)) && getIn(touched, field.name) && (
+        <small className="text-red-600 mt-1 block">
+          {getIn(errors, field.name)}
+        </small>
+      )}
+    </>
   );
 };
 
@@ -60,33 +107,36 @@ export const FormikSelectField = ({
     Boolean(getIn(errors, field.name)) && getIn(touched, field.name);
 
   return (
-    <div className="mb-2">
+    <>
       <Label htmlFor={field.name}>{props.label}</Label>
-      <select
-        id={field.name}
-        {...field}
-        {...props}
-        value={field.value || ""}
-        // placeholder={`Select ${field.name}`}
-        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-          hasError
-            ? "border-red-500 ring-red-200"
-            : "border-gray-300 focus:ring-blue-300"
-        }`}
-      >
-        {props.options.map((item: any, index: number) => (
-          <option value={item.value} key={index}>
-            {item.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        {props.icon && props.icon}
+        <select
+          id={field.name}
+          {...field}
+          {...props}
+          value={field.value || ""}
+          // placeholder={`Select ${field.name}`}
+          className={`w-full ${props.icon && "pl-10"} ${
+            hasError
+              ? "border-red-500 ring-red-200"
+              : "border-gray-300 focus:ring-blue-300"
+          }`}
+        >
+          {props.options.map((item: any, index: number) => (
+            <option value={item.value} key={index}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {Boolean(getIn(errors, field.name)) && getIn(touched, field.name) && (
         <small className="text-red-600 mt-1 block">
           {getIn(errors, field.name)}
         </small>
       )}
-    </div>
+    </>
   );
 };
 
@@ -112,7 +162,7 @@ export const FormikAutoSelectField = ({
   };
 
   return (
-    <div className="mb-4">
+    <>
       {props.label && (
         <label
           htmlFor={field.name}
@@ -122,24 +172,27 @@ export const FormikAutoSelectField = ({
         </label>
       )}
 
-      <Select
-        id={field.name}
-        options={options}
-        {...field}
-        {...props}
-        onInputChange={handleInputChange}
-        placeholder={`Search...`}
-        isClearable
-        isSearchable
-        classNamePrefix="react-select"
-      />
+      <div className="relative">
+        {props.icon && props.icon}
+        <Select
+          id={field.name}
+          options={options}
+          {...field}
+          {...props}
+          onInputChange={handleInputChange}
+          placeholder={`Search...`}
+          isClearable
+          isSearchable
+          classNamePrefix="react-select"
+        />
+      </div>
 
       {hasError && (
         <small className="text-red-600 mt-1 block">
           {getIn(errors, field.name)}
         </small>
       )}
-    </div>
+    </>
   );
 };
 
@@ -152,7 +205,7 @@ export const FormikRadioGroup = ({
     Boolean(getIn(errors, field.name)) && getIn(touched, field.name);
 
   return (
-    <div className="mb-4">
+    <>
       <Label className="block mb-1 text-sm font-medium" htmlFor={field.name}>
         {props.label}
       </Label>
@@ -184,7 +237,7 @@ export const FormikRadioGroup = ({
           {getIn(errors, field.name)}
         </small>
       )}
-    </div>
+    </>
   );
 };
 
@@ -235,68 +288,3 @@ export const FormikFieldArray = ({ data }: any) => {
     </>
   );
 };
-
-{
-  /* <div className="md:col-span-12">
-  <Label className="block mb-2 text-base font-medium">Features</Label>
-  <FieldArray
-    name="features"
-    render={(arrayHelpers) => (
-      <div className="space-y-4 border border-gray-300 p-4 rounded-md">
-        {values?.features?.map((item: any, index: any) => (
-          <div
-            key={index}
-            className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end"
-          >
-            <div className="md:col-span-3">
-              <Field
-                label="Name"
-                component={FormikTextInput}
-                name={`features[${index}].name`}
-                placeholder="Name"
-              />
-            </div>
-            <div className="md:col-span-3">
-              <Field
-                label="Age"
-                component={FormikTextInput}
-                name={`features[${index}].age`}
-                placeholder="Age"
-              />
-            </div>
-            <div className="md:col-span-3">
-              <Field
-                label="Class"
-                component={FormikTextInput}
-                name={`features[${index}].class`}
-                placeholder="Class"
-              />
-            </div>
-            <div className="md:col-span-3 flex items-center justify-start h-full mt-[30px]">
-              <Trash2
-                className="h-5 w-5 text-red-500 cursor-pointer mt-2"
-                onClick={() => arrayHelpers.remove(index)}
-              />
-            </div>
-          </div>
-        ))}
-
-        <Button
-          type="button"
-          className="bg-blue-600 hover:bg-blue-700"
-          onClick={() =>
-            arrayHelpers.push({
-              name: "",
-              class: "",
-              age: "",
-            })
-          }
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add More Feature
-        </Button>
-      </div>
-    )}
-  />
-</div>; */
-}
