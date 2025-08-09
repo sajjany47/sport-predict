@@ -17,16 +17,11 @@ export const userValidationSchema = yup.object().shape({
     .string()
     .matches(/^\d{10}$/, "Mobile number must be exactly 10 digits")
     .required("Mobile number is required"),
-  subscriptionId: yup.string().required("Subscription ID is required"),
   password: yup
     .string()
     .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
-  role: yup
-    .string()
-    .oneOf(
-      ["admin", "user", "employee"],
-      "Role must be admin, user, or employee"
-    )
-    .required(),
+  agreeToTerms: yup
+    .boolean()
+    .oneOf([true], "You must accept the terms and conditions"),
 });

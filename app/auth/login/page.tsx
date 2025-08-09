@@ -41,18 +41,21 @@ const LoginPage = () => {
     setIsLoading(true);
     UserLogin({ ...e })
       .then((res) => {
+        const findSubscription = (res.data.user.subscription ?? []).find(
+          (sub: any) => sub.isActive === true && sub.expiryDate > new Date()
+        );
         const userData = {
           id: res.data.user._id,
           username: res.data.user.username,
           email: res.data.user.email,
           mobile: res.data.user.mobileNumber,
           credits: res.data.user.role === "admin" ? 999 : res.data.user.credits,
-          subscriptionPlan: res.data.user.subscriptionId || null,
-          subscriptionExpiry:
-            res.data.user.subscriptionExpiry || moment().format("YYYY-MM-DD"),
+          subscriptionPlan: findSubscription.subscriptionId || null,
+          subscriptionExpiry: findSubscription.expiryDate || null,
           role: res.data.user.role,
           isActive: res.data.user.isActive,
           token: res.data.token,
+          subscription: res.data.user.subscription ?? [],
         };
         dispatch(loginSuccess(userData));
         setIsLoading(false);

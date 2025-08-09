@@ -9,10 +9,18 @@ const UserSchema = new Schema(
       lowercase: true,
     },
     mobileNumber: { type: String, trim: true },
-    subscriptionId: { type: Schema.Types.ObjectId },
+    subscription: [
+      {
+        subscriptionId: Schema.Types.ObjectId,
+        isActive: Boolean,
+        expiryDate: Date,
+        purchaseDate: Date,
+      },
+    ],
     password: { type: String },
     username: { type: String },
     isActive: { type: Boolean, default: true },
+    agreeToTerms: { type: Boolean, default: false },
     credits: { type: Number, default: 0 },
     role: {
       type: String,

@@ -8,6 +8,8 @@ import Select from "react-select";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
+import { set } from "mongoose";
 
 export const FormikTextInput = ({
   field,
@@ -285,6 +287,40 @@ export const FormikFieldArray = ({ data }: any) => {
           </div>
         )}
       />
+    </>
+  );
+};
+
+export const FormikCheckBox = ({
+  field,
+  form: { touched, errors, setFieldValue },
+  ...props
+}: any) => {
+  const hasError =
+    Boolean(getIn(errors, field.name)) && getIn(touched, field.name);
+
+  return (
+    <>
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          {...field}
+          {...props}
+          id={field.name}
+          checked={field.value || ""}
+          onCheckedChange={(checked) => setFieldValue(field.name, checked)}
+          className={`w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 ${
+            hasError ? "border-red-500 ring-red-200" : "border-gray-300"
+          }`}
+        />
+        <Label htmlFor={field.name} className="text-sm text-gray-600">
+          {props.label}
+        </Label>
+      </div>
+      {Boolean(getIn(errors, field.name)) && getIn(touched, field.name) && (
+        <small className="text-red-600 mt-1 block">
+          {getIn(errors, field.name)}
+        </small>
+      )}
     </>
   );
 };

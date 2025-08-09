@@ -14,33 +14,26 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     await userValidationSchema.validate(body, { abortEarly: false });
-    const {
-      name,
-      email,
-      password,
-      subscriptionId,
-      mobileNumber,
-      role,
-      username,
-      isActive,
-      credits,
-    } = body;
 
     // ✅ Check if email or mobile number already exists
     const existingUser = await User.findOne({
-      $or: [{ email }, { mobileNumber }, { username }],
+      $or: [
+        { email: body.email },
+        { mobileNumber: body.mobileNumber },
+        { username: body.username },
+      ],
     });
     if (existingUser) {
       let message = "User already exists with the same ";
       if (
-        existingUser.email === email &&
-        existingUser.mobileNumber === mobileNumber &&
-        existingUser.username === username
+        existingUser.email === body.email &&
+        existingUser.mobileNumber === body.mobileNumber &&
+        existingUser.username === body.username
       ) {
         message += "email and mobile number and username";
-      } else if (existingUser.email === email) {
+      } else if (existingUser.email === body.email) {
         message += "email.";
-      } else if (existingUser.username === username) {
+      } else if (existingUser.username === body.username) {
         message += "username";
       } else {
         message += "mobile number.";
@@ -52,42 +45,57 @@ export async function POST(request: NextRequest) {
         } as ApiResponse,
         { status: 409 }
       );
-    }
-
-    // ✅ Create new user
-
-    let userData: any = {
-      _id: new mongoose.Types.ObjectId(),
-      ...UserData(body),
-      password: await bcrypt.hash(password, 10),
-    };
-    const newUser = new User(userData);
-
-    const saveUser = await newUser.save();
-    if (saveUser) {
-      delete userData.password;
-
-      // Generate token
-      const token = generateToken({ ...userData });
-
-      return NextResponse.json(
+    } else {
+      // ✅ Create new user
+      const modifySubscription = [
         {
-          success: true,
-          message: "User registered successfully.",
-          data: {
-            user: userData,
-            token,
-          },
-        } as ApiResponse,
-        { status: 200 }
-      );
+          _id: new mongoose.Types.ObjectId(),
+          subscriptionId: new mongoose.Types.ObjectId(
+            "6873c7502d01bea623cac559"
+          ),
+          isActive: true,
+          expiryDate: new Date(),
+          purchaseDate: new Date(),
+        },
+      ];
+      let userData: any = {
+        _id: new mongoose.Types.ObjectId(),
+        ...UserData({
+          ...body,
+          subscription: modifySubscription,
+          credits: 1,
+          role: "user",
+          isActive: true,
+        }),
+        password: await bcrypt.hash(body.password, 10),
+      };
+      const newUser = new User(userData);
+
+      const saveUser = await newUser.save();
+      if (saveUser) {
+        delete userData.password;
+
+        // Generate token
+        const token = generateToken({ ...userData });
+
+        return NextResponse.json(
+          {
+            success: true,
+            message: "User registered successfully.",
+            data: {
+              user: userData,
+              token,
+            },
+          } as ApiResponse,
+          { status: 200 }
+        );
+      }
     }
-  } catch (error) {
-    console.error("Registration error:", error);
+  } catch (error: any) {
     return NextResponse.json(
       {
         success: false,
-        message: "Internal server error.",
+        message: error || "Internal server error.",
       } as ApiResponse,
       { status: 500 }
     );

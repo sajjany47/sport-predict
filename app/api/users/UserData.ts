@@ -5,11 +5,12 @@ export const UserData = (data: any) => {
     name: data.name,
     email: data.email,
     mobileNumber: data.mobileNumber,
-    subscriptionId: new mongoose.Types.ObjectId(data.subscriptionId),
+    subscription: data.subscription,
     role: data.role,
     username: data.username,
     isActive: data.isActive,
     credits: Number(data.credits),
+    agreeToTerms: data.agreeToTerms,
   };
 
   return a;

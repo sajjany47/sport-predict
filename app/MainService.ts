@@ -42,3 +42,14 @@ export const UserLogin = async (payload: any) => {
     throw new Error(error.message);
   }
 };
+
+export const UserRegister = async (payload: any) => {
+  try {
+    const response = await axios.post("/api/users/signup", payload, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
