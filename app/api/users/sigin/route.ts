@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "Login successful.",
       data: {
-        user: prepareResponse,
+        user: { ...prepareResponse, _id: user._id },
         token,
       },
     } as ApiResponse);

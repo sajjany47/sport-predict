@@ -11,7 +11,6 @@ export const POST = async (request: NextRequest) => {
     const body = await request.json();
     const xUser = request.headers.get("x-user");
     const loggedInUser = xUser ? JSON.parse(xUser) : null;
-    console.log(loggedInUser);
     if (!loggedInUser?._id) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },

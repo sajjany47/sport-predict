@@ -57,6 +57,10 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotice, setShowNotice] = useState(true);
   const [dailyCredit, setDailyCredit] = useState(false);
+  const [dailyCreditRes, setDailyCreditRes] = useState<any>({
+    message: "",
+    isSuccess: null,
+  });
 
   const handleLogout = () => {
     dispatch(logout());
@@ -93,16 +97,22 @@ const Header = () => {
       icon: <History className="mr-2 h-4 w-4" />,
     },
   ];
-
+  console.log(user);
   const handleCreditAdd = () => {
     UserCreditUpdate({ type: "daily" })
       .then((res) => {
-        dispatch(loginSuccess({ ...user, credits: res.data.credits }));
+        const prepareUser: any = user
+          ? { ...user, credits: res.data.credits }
+          : null;
+
+        setDailyCreditRes({ message: res.message, isSuccess: true });
+        dispatch(loginSuccess({ ...prepareUser }));
       })
       .catch((error) => {
-        toast.error(
-          error.message || "Failed to get free credits. Please try again."
-        );
+        setDailyCreditRes({ message: error.message, isSuccess: false });
+        // toast.error(
+        //   error.message || "Failed to get free credits. Please try again."
+        // );
       });
   };
 
@@ -255,6 +265,7 @@ const Header = () => {
           isOpen={dailyCredit}
           onClose={() => setDailyCredit(false)}
           onCreditAdd={handleCreditAdd}
+          dailyCreditRes={dailyCreditRes}
         />
       )}
 
