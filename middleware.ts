@@ -16,6 +16,7 @@ export async function middleware(request: NextRequest) {
     // Get token from header or cookie
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
+      // return NextResponse.redirect(new URL("/auth/login", request.url));
       return NextResponse.json(
         { message: "Unauthorized - No token provided" },
         { status: 401 }
@@ -36,8 +37,12 @@ export async function middleware(request: NextRequest) {
       });
     } catch {
       // Invalid token
+      // return NextResponse.redirect(new URL("/auth/login", request.url));
       return NextResponse.json(
-        { success: false, message: "Invalid or expired token." },
+        {
+          success: false,
+          message: "Invalid or expired token. Please login first",
+        },
         { status: 401 }
       );
     }
