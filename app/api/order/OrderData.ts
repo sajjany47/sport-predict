@@ -34,9 +34,11 @@ export function PrepareOrderData(formData: any, isEdit = false) {
 
     paymentMode: formData.paymentMode || null,
 
-    senderId: formData.senderId || null,
+    paymentModeDetails: formData.paymentModeDetails || null,
 
-    receiverId: formData.receiverId || null,
+    // senderId: formData.senderId || null,
+
+    receiverId: new mongoose.Types.ObjectId(formData.receiverId) || null,
 
     paymentDate: formData.paymentDate ? new Date(formData.paymentDate) : null,
   };

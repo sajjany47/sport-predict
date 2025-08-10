@@ -65,3 +65,14 @@ export const UserCreditUpdate = async (payload: any) => {
     throw new Error(error.response?.data?.message);
   }
 };
+
+export const UserOrderCredit = async (payload: any) => {
+  try {
+    const response = await axios.post("/api/order/create", payload, {
+      headers: getHeadersWithToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};

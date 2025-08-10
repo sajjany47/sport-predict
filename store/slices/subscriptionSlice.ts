@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SubscriptionPlan {
-  id: string;
+  _id: string;
   name: string;
   price: number;
   credits: number;

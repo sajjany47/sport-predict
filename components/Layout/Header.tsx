@@ -97,7 +97,7 @@ const Header = () => {
       icon: <History className="mr-2 h-4 w-4" />,
     },
   ];
-  console.log(user);
+
   const handleCreditAdd = () => {
     UserCreditUpdate({ type: "daily" })
       .then((res) => {
