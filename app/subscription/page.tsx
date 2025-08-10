@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import { SubscriptionList } from "../MainService";
 import CustomLoader from "@/components/ui/CustomLoader";
+import { setPlans } from "@/store/slices/subscriptionSlice";
 
 const SubscriptionPage = () => {
   const { isAuthenticated, user } = useSelector(
@@ -41,7 +42,7 @@ const SubscriptionPage = () => {
       toast.success("You are already on the Free plan!");
       return;
     }
-
+    dispatch(setPlans(plan));
     // Navigate to payment page with plan ID
     router.push(`/payment?plan=${planId}`);
   };

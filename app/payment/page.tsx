@@ -30,7 +30,7 @@ import toast from "react-hot-toast";
 
 const PaymentPage = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
@@ -43,8 +43,8 @@ const PaymentPage = () => {
   const [copied, setCopied] = useState("");
 
   // Get plan details from URL params
-  const planId = searchParams.get("plan");
-  const selectedPlan = plans.find((p) => p.id === planId);
+  // const planId = searchParams.get("plan");
+  const selectedPlan = plans;
 
   useEffect(() => {
     if (!isAuthenticated) {
