@@ -16,8 +16,6 @@ export const orderValidationSchema = yup.object().shape({
 
   credits: yup.number().nullable().min(0, "Credits cannot be negative"),
 
-  paymentStatus: yup.boolean().required("Payment status is required"),
-
   status: yup
     .string()
     .oneOf(["pending", "refunded", "completed", "failed"])

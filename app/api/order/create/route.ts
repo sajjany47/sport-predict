@@ -7,6 +7,7 @@ import Order from "../OrderModel";
 import mongoose from "mongoose";
 
 export const POST = async (req: NextRequest) => {
+  console.log("gdshjfgdhsjfgdnhbv");
   await dbConnect();
   try {
     const data = await req.json();
