@@ -41,5 +41,11 @@ export function PrepareOrderData(formData: any, isEdit = false) {
     receiverId: new mongoose.Types.ObjectId(formData.receiverId) || null,
 
     paymentDate: formData.paymentDate ? new Date(formData.paymentDate) : null,
+
+    matchId: formData.matchId ? Number(formData.matchId) : null,
+    matchName: formData.matchName ?? null,
+    matchType: formData.matchType ?? null,
+    predictionTeam: formData.predictionTeam ?? null,
+    winnerTeam: formData.winnerTeam ?? null,
   };
 }

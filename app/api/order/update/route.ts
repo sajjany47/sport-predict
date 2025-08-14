@@ -4,8 +4,8 @@ import Order from "../OrderModel";
 import { FormatErrorMessage } from "@/lib/utils";
 import mongoose from "mongoose";
 import moment from "moment";
-import { Sub } from "@radix-ui/react-dropdown-menu";
 import Subscription from "../../subscription/SubscriptionModel";
+import User from "../../users/UserModel";
 
 export const POST = async (req: NextRequest) => {
   await dbConnect();
@@ -54,13 +54,6 @@ export const POST = async (req: NextRequest) => {
       if (findOrder.ordertype === "credit") {
         credits = Number(data.credits);
       }
-      if (findOrder.ordertype === "prediction") {
-        updateData.matchId = Number(data.matchId);
-        updateData.matchName = data.matchName;
-        updateData.matchType = data.matchType;
-        updateData.predictionTeam = data.predictionTeam;
-        updateData.winnerTeam = data.winnerTeam;
-      }
     } else if (data.status === "refunded") {
       updateData.paymentStatus = true;
       updateData.remarks = data.remarks;
@@ -77,8 +70,26 @@ export const POST = async (req: NextRequest) => {
       { $set: updateData }
     );
 
+    if (updateOrder) {
+      if (credits > 0) {
+        const findUser = await User.findOne({
+          _id: new mongoose.Types.ObjectId(findOrder.userId),
+        });
+        if (!findUser) {
+          return NextResponse.json(
+            { success: false, message: "User not found" },
+            { status: 404 }
+          );
+        }
+        await User.updateOne(
+          { _id: new mongoose.Types.ObjectId(findOrder.userId) },
+          { $set: { credits: Number(findUser.credits) + Number(credits) } }
+        );
+      }
+    }
+
     return NextResponse.json(
-      { success: true, message: "Order updated successfully", data: [] },
+      { success: true, message: "Order updated successfully" },
       { status: 200 }
     );
   } catch (error: any) {
