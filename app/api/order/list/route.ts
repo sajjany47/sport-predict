@@ -50,6 +50,20 @@ export const POST = async (request: NextRequest) => {
           $and: query.length > 0 ? query : [{}],
         },
       },
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "subscriptionId",
+          foreignField: "_id",
+          as: "plan",
+        },
+      },
+      {
+        $unwind: {
+          path: "$plan",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
     ];
     const count = await Order.aggregate([...pipeline, { $count: "total" }]);
     const total = count.length > 0 ? count[0].total : 0;

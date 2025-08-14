@@ -34,6 +34,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
+import { OrderList } from "../AdminService";
 
 const AdminOrdersPage = () => {
   const { orders } = useSelector((state: RootState) => state.admin);
@@ -42,6 +44,14 @@ const AdminOrdersPage = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["order-list"],
+    queryFn: async () => {
+      const response = await OrderList({});
+      return response.data; // extract only the array part
+    },
+  });
 
   useEffect(() => {
     // Mock orders data
@@ -150,25 +160,29 @@ const AdminOrdersPage = () => {
     }
   };
 
-  const filteredOrders = orders.filter((order) => {
+  const filteredOrders = data.filter((order: any) => {
     const matchesSearch =
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.plan.toLowerCase().includes(searchTerm.toLowerCase());
+      order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order?.plan.name.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = activeTab === "all" || order.status === activeTab;
 
     return matchesSearch && matchesStatus;
   });
 
-  const completedOrders = orders.filter((o) => o.status === "completed").length;
-  const pendingOrders = orders.filter((o) => o.status === "pending").length;
-  const failedOrders = orders.filter((o) => o.status === "failed").length;
-  const refundedOrders = orders.filter((o) => o.status === "refunded").length;
+  const completedOrders = data.filter(
+    (o: any) => o.status === "completed"
+  ).length;
+  const pendingOrders = data.filter((o: any) => o.status === "pending").length;
+  const failedOrders = data.filter((o: any) => o.status === "failed").length;
+  const refundedOrders = data.filter(
+    (o: any) => o.status === "refunded"
+  ).length;
 
-  const totalRevenue = orders
-    .filter((o) => o.status === "completed")
-    .reduce((sum, order) => sum + order.amount, 0);
+  const totalRevenue = data
+    .filter((o: any) => o.status === "completed")
+    .reduce((sum: any, order: any) => sum + order.price, 0);
 
   return (
     <AdminLayout>
@@ -205,7 +219,7 @@ const AdminOrdersPage = () => {
                     Total Orders
                   </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {orders.length}
+                    {data.length}
                   </p>
                 </div>
                 <div className="p-3 rounded-full bg-blue-100">
@@ -324,10 +338,6 @@ const AdminOrdersPage = () => {
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-5 mb-6">
-                <TabsTrigger value="all">All ({orders.length})</TabsTrigger>
-                <TabsTrigger value="completed">
-                  Completed ({completedOrders})
-                </TabsTrigger>
                 <TabsTrigger value="pending">
                   Pending ({pendingOrders})
                 </TabsTrigger>
@@ -337,14 +347,18 @@ const AdminOrdersPage = () => {
                 <TabsTrigger value="refunded">
                   Refunded ({refundedOrders})
                 </TabsTrigger>
+                <TabsTrigger value="completed">
+                  Completed ({completedOrders})
+                </TabsTrigger>
+                <TabsTrigger value="all">All ({data.length})</TabsTrigger>
               </TabsList>
 
               <TabsContent value={activeTab} className="space-y-4">
                 {filteredOrders.length > 0 ? (
                   <div className="space-y-4">
-                    {filteredOrders.map((order) => (
+                    {filteredOrders.map((order: any) => (
                       <div
-                        key={order.id}
+                        key={order._id}
                         className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                       >
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -355,7 +369,7 @@ const AdminOrdersPage = () => {
                             <div className="flex-1">
                               <div className="flex items-center space-x-3 mb-2">
                                 <h3 className="font-semibold text-gray-900 text-lg">
-                                  {order.id}
+                                  {order.orderNumber}
                                 </h3>
                                 <Badge className={getStatusColor(order.status)}>
                                   <div className="flex items-center space-x-1">
@@ -369,20 +383,22 @@ const AdminOrdersPage = () => {
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
                                 <div className="flex items-center space-x-2">
                                   <User className="h-4 w-4" />
-                                  <span>{order.userName}</span>
+                                  <span>{order?.user?.username}</span>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <CreditCard className="h-4 w-4" />
-                                  <span>{order.plan} Plan</span>
+                                  <span>{order?.plan.name} Plan</span>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <DollarSign className="h-4 w-4" />
-                                  <span>₹{order.amount}</span>
+                                  <span>₹{order.price}</span>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <Calendar className="h-4 w-4" />
                                   <span>
-                                    {new Date(order.date).toLocaleDateString()}
+                                    {new Date(
+                                      order.paymentDate
+                                    ).toLocaleDateString()}
                                   </span>
                                 </div>
                               </div>
@@ -390,7 +406,7 @@ const AdminOrdersPage = () => {
                                 <span className="font-medium">
                                   Payment Method:
                                 </span>{" "}
-                                {order.paymentMethod}
+                                {order.paymentMode}
                               </div>
                             </div>
                           </div>
@@ -398,7 +414,7 @@ const AdminOrdersPage = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleViewOrder(order.id)}
+                              onClick={() => handleViewOrder(order._id)}
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
@@ -415,7 +431,7 @@ const AdminOrdersPage = () => {
                                     <DropdownMenuItem
                                       onClick={() =>
                                         handleStatusChange(
-                                          order.id,
+                                          order._id,
                                           "completed"
                                         )
                                       }
@@ -425,7 +441,7 @@ const AdminOrdersPage = () => {
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       onClick={() =>
-                                        handleStatusChange(order.id, "failed")
+                                        handleStatusChange(order._id, "failed")
                                       }
                                     >
                                       <XCircle className="h-4 w-4 mr-2" />

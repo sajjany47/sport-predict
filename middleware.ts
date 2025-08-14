@@ -6,7 +6,7 @@ import { SECRET_KEY } from "./app/api/users/UtilAuth";
 const protectedPaths: any = [
   "/api/users/credit-update",
   "/api/order/create",
-  "/api/order/list",
+  // "/api/order/list",
   "/api/order/update",
 ];
 
