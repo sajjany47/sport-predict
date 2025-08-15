@@ -8,7 +8,14 @@ export const POST = async (request: NextRequest) => {
   try {
     const reqData = await request.json();
 
-    let query = [];
+    let query: any = [
+      {
+        paymentDate: {
+          $gte: new Date(reqData.startDate),
+          $lte: new Date(reqData.endDate),
+        },
+      },
+    ];
     if (reqData.hasOwnProperty("search") && reqData.search) {
       query.push({
         $match: {
@@ -65,6 +72,7 @@ export const POST = async (request: NextRequest) => {
         },
       },
     ];
+
     const count = await Order.aggregate([...pipeline, { $count: "total" }]);
     const total = count.length > 0 ? count[0].total : 0;
 
