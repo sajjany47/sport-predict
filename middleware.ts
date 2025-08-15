@@ -4,10 +4,10 @@ import { jwtVerify } from "jose";
 import { SECRET_KEY } from "./app/api/users/UtilAuth";
 
 const protectedPaths: any = [
-  "/api/users/credit-update",
-  "/api/order/create",
+  // "/api/users/credit-update",
+  // "/api/order/create",
   // "/api/order/list",
-  "/api/order/update",
+  // "/api/order/update",
 ];
 
 export async function middleware(request: NextRequest) {
