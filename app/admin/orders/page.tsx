@@ -36,6 +36,8 @@ import {
 import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import { OrderList } from "../AdminService";
+import { DateRangePicker } from "@/components/DateRangePicker";
+import moment from "moment";
 
 const AdminOrdersPage = () => {
   const { orders } = useSelector((state: RootState) => state.admin);
@@ -44,82 +46,31 @@ const AdminOrdersPage = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-
-  const { data = [], isLoading } = useQuery({
-    queryKey: ["order-list"],
-    queryFn: async () => {
-      const response = await OrderList({});
-      return response.data; // extract only the array part
-    },
+  const [dateRange, setDateRange] = useState({
+    from: moment().subtract(30, "days").toDate(),
+    to: moment().toDate(),
   });
 
-  useEffect(() => {
-    // Mock orders data
-    const mockOrders = [
-      {
-        id: "ORD-001",
-        userId: "1",
-        userName: "cricket_fan",
-        plan: "Pro",
-        amount: 299,
-        date: "2025-01-15",
-        status: "completed" as const,
-        paymentMethod: "UPI",
-      },
-      {
-        id: "ORD-002",
-        userId: "3",
-        userName: "dream11_pro",
-        plan: "Elite",
-        amount: 599,
-        date: "2025-01-14",
-        status: "pending" as const,
-        paymentMethod: "Credit Card",
-      },
-      {
-        id: "ORD-003",
-        userId: "2",
-        userName: "sports_lover",
-        plan: "Pro",
-        amount: 299,
-        date: "2025-01-13",
-        status: "failed" as const,
-        paymentMethod: "Net Banking",
-      },
-      {
-        id: "ORD-004",
-        userId: "5",
-        userName: "cricket_master",
-        plan: "Pro",
-        amount: 299,
-        date: "2025-01-12",
-        status: "completed" as const,
-        paymentMethod: "UPI",
-      },
-      {
-        id: "ORD-005",
-        userId: "4",
-        userName: "fantasy_king",
-        plan: "Elite",
-        amount: 599,
-        date: "2025-01-11",
-        status: "refunded" as const,
-        paymentMethod: "Credit Card",
-      },
-      {
-        id: "ORD-006",
-        userId: "1",
-        userName: "cricket_fan",
-        plan: "Elite",
-        amount: 599,
-        date: "2025-01-10",
-        status: "completed" as const,
-        paymentMethod: "Debit Card",
-      },
-    ];
+  const {
+    data = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["order-list"],
+    queryFn: async () => {
+      const response = await OrderList({
+        startDate: dateRange.from,
+        endDate: dateRange.to,
+      });
+      return response.data; // extract only the array part
+    },
+    // enabled: false,
+  });
 
-    dispatch(setOrders(mockOrders));
-  }, [dispatch]);
+  const dateSelect = (e: any) => {
+    setDateRange(e);
+    refetch();
+  };
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
     dispatch(updateOrderStatus({ id: orderId, status: newStatus }));
@@ -305,7 +256,7 @@ const AdminOrdersPage = () => {
         {/* Search and Filters */}
         <Card className="border-0 shadow-lg">
           <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -315,10 +266,11 @@ const AdminOrdersPage = () => {
                   className="pl-10"
                 />
               </div>
-              <Button variant="outline" className="flex items-center space-x-2">
+              <DateRangePicker date={dateRange} onChange={dateSelect} />
+              {/* <Button variant="outline" className="flex items-center space-x-2">
                 <Filter className="h-4 w-4" />
                 <span>More Filters</span>
-              </Button>
+              </Button> */}
             </div>
           </CardContent>
         </Card>
