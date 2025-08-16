@@ -8,6 +8,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { UserData } from "../UserData";
 import { FormatErrorMessage } from "@/lib/utils";
+import { serialize } from "cookie";
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,7 +78,17 @@ export async function POST(request: NextRequest) {
         delete userData.password;
 
         // Generate token
-        const token = await generateToken({ ...userData });
+        // const token = await generateToken({ ...userData });
+        const accessToken = await generateToken({ ...userData }, "15m");
+
+        const refreshToken = await generateToken({ ...userData }, "1d");
+        const cookie = serialize("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          path: "/",
+          maxAge: 60 * 60 * 24, // 1 day
+        });
 
         return NextResponse.json(
           {
@@ -85,10 +96,16 @@ export async function POST(request: NextRequest) {
             message: "User registered successfully.",
             data: {
               user: userData,
-              token,
+              token: accessToken,
             },
           },
-          { status: 200 }
+          {
+            status: 200,
+            headers: {
+              "Set-Cookie": cookie,
+              "Content-Type": "application/json",
+            },
+          }
         );
       }
     }

@@ -6,6 +6,7 @@ import User from "../UserModel";
 import bcrypt from "bcrypt";
 import { UserData } from "../UserData";
 import { FormatErrorMessage } from "@/lib/utils";
+import { serialize } from "cookie";
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,18 +61,38 @@ export async function POST(request: NextRequest) {
     // Generate token
     const prepareResponse = UserData(user);
 
-    const token = await generateToken({ ...prepareResponse, _id: user._id });
+    const accessToken = await generateToken(
+      { ...prepareResponse, _id: user._id },
+      "15m"
+    );
 
-    // Remove password from response
+    const refreshToken = await generateToken(
+      { ...prepareResponse, _id: user._id },
+      "1d"
+    );
 
-    return NextResponse.json({
-      success: true,
-      message: "Login successful.",
-      data: {
-        user: { ...prepareResponse, _id: user._id },
-        token,
+    const cookie = serialize("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 60 * 60 * 24, // 1 day
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Login successful.",
+        data: {
+          user: { ...prepareResponse, _id: user._id },
+          token: accessToken,
+        },
       },
-    } as ApiResponse);
+      {
+        status: 200,
+        headers: { "Set-Cookie": cookie, "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
     return NextResponse.json(
       {

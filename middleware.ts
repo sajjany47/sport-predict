@@ -6,7 +6,7 @@ import { SECRET_KEY } from "./app/api/users/UtilAuth";
 const protectedPaths: any = [
   // "/api/users/credit-update",
   // "/api/order/create",
-  // "/api/order/list",
+  "/api/order/list",
   // "/api/order/update",
 ];
 
@@ -41,15 +41,37 @@ export async function middleware(request: NextRequest) {
         request: { headers: requestHeaders },
       });
     } catch {
-      // Invalid token
-      // return NextResponse.redirect(new URL("/auth/login", request.url));
-      return NextResponse.json(
+      const refreshRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/refresh-token-api`,
         {
-          success: false,
-          message: "Invalid or expired token. Please login first",
-        },
-        { status: 401 }
+          method: "POST",
+          headers: { cookie: request.headers.get("cookie") || "" },
+        }
       );
+      console.log(refreshRes.ok);
+      if (refreshRes.ok) {
+        const { accessToken } = await refreshRes.json();
+        const res = NextResponse.next();
+
+        // set new access token for this request
+        res.headers.set("authorization", `Bearer ${accessToken}`);
+
+        // forward any cookies (refresh token) set by API
+        const setCookie = refreshRes.headers.get("set-cookie");
+        if (setCookie) {
+          res.headers.set("set-cookie", setCookie);
+        }
+
+        return res;
+      } else {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Invalid or expired token. Please login first",
+          },
+          { status: 401 }
+        );
+      }
     }
   } else {
     return NextResponse.next(); // Public API → no token check

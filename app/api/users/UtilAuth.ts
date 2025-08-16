@@ -3,7 +3,7 @@ import { SignJWT } from "jose";
 export const SECRET_KEY = new TextEncoder().encode(
   process.env.JWT_SECRET || "6bf6680598a374557023eabfc280e3e930bf080b"
 );
-export async function generateToken(payload: any, expiresIn = "15m") {
+export async function generateToken(payload: any, expiresIn: string) {
   const filterSubscription = payload.subscription.find(
     (item: any) => item.isActive
   );
