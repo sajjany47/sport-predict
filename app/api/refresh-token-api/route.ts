@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { generateToken, SECRET_KEY } from "../users/UtilAuth";
-import { serialize } from "cookie";
+import { parse, serialize } from "cookie";
 
 export const POST = async (request: NextRequest) => {
   try {
-    const cookieHeader = request.headers.get("cookie") || "";
-    const refreshToken = cookieHeader.split("refreshToken=")[1]?.split(";")[0];
+    const cookies = parse(request.headers.get("cookie") || "");
+    const refreshToken = cookies.refreshToken;
 
     if (!refreshToken) {
       return NextResponse.json(
@@ -24,8 +24,8 @@ export const POST = async (request: NextRequest) => {
     // set refresh token in secure cookie
     const cookie = serialize("refreshToken", newRefreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // still secure in prod
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production" ? true : false, // allow insecure on localhost
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // safe for local dev
       path: "/",
       maxAge: 60 * 60 * 24, // 1 day
     });
@@ -39,7 +39,7 @@ export const POST = async (request: NextRequest) => {
     );
     response.headers.set("Set-Cookie", cookie);
     return response;
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json(
       { status: false, message: "Invalid refresh token" },
       { status: 403 }

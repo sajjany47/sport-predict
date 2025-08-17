@@ -4,17 +4,12 @@ export const SECRET_KEY = new TextEncoder().encode(
   process.env.JWT_SECRET || "6bf6680598a374557023eabfc280e3e930bf080b"
 );
 export async function generateToken(payload: any, expiresIn: string) {
-  const filterSubscription = payload.subscription.find(
-    (item: any) => item.isActive
-  );
   let data = {
     _id: payload._id.toString(),
     name: payload.name,
     email: payload.email,
     mobileNumber: payload.mobileNumber,
-    subscription: filterSubscription
-      ? filterSubscription.subscriptionId.toString()
-      : null,
+    subscription: payload.subscription.toString(),
     username: payload.username,
     role: payload.role,
     isActive: payload.isActive,

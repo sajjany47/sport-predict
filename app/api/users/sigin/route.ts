@@ -60,21 +60,31 @@ export async function POST(request: NextRequest) {
 
     // Generate token
     const prepareResponse = UserData(user);
-
+    const filterSubscription = user.subscription.find(
+      (item: any) => item.isActive
+    );
     const accessToken = await generateToken(
-      { ...prepareResponse, _id: user._id },
+      {
+        ...prepareResponse,
+        subscription: filterSubscription._id,
+        _id: user._id,
+      },
       "15m"
     );
 
     const refreshToken = await generateToken(
-      { ...prepareResponse, _id: user._id },
+      {
+        ...prepareResponse,
+        subscription: filterSubscription._id,
+        _id: user._id,
+      },
       "1d"
     );
-
+    console.log(refreshToken);
     const cookie = serialize("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production" ? true : false, // allow insecure on localhost
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // safe for local dev
       path: "/",
       maxAge: 60 * 60 * 24, // 1 day
     });

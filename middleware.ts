@@ -45,18 +45,22 @@ export async function middleware(request: NextRequest) {
         `${process.env.NEXT_PUBLIC_API_URL}/api/refresh-token-api`,
         {
           method: "POST",
-          headers: { cookie: request.headers.get("cookie") || "" },
+          headers: {
+            cookie: request.headers.get("cookie") || "",
+          },
         }
       );
-      console.log(refreshRes.ok);
+
       if (refreshRes.ok) {
         const { accessToken } = await refreshRes.json();
-        const res = NextResponse.next();
 
-        // set new access token for this request
-        res.headers.set("authorization", `Bearer ${accessToken}`);
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set("authorization", `Bearer ${accessToken}`);
+        const { payload } = await jwtVerify(accessToken, SECRET_KEY);
+        requestHeaders.set("x-user", JSON.stringify(payload));
+        const res = NextResponse.next({ request: { headers: requestHeaders } });
 
-        // forward any cookies (refresh token) set by API
+        // forward refreshToken cookie if backend set it
         const setCookie = refreshRes.headers.get("set-cookie");
         if (setCookie) {
           res.headers.set("set-cookie", setCookie);
