@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       },
       "1d"
     );
-    console.log(refreshToken);
+
     const cookie = serialize("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production" ? true : false, // allow insecure on localhost
