@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { generateToken, SECRET_KEY } from "../users/UtilAuth";
 import { parse, serialize } from "cookie";
+import { FormatErrorMessage } from "@/lib/utils";
 
 export const POST = async (request: NextRequest) => {
   try {
@@ -41,7 +42,7 @@ export const POST = async (request: NextRequest) => {
     return response;
   } catch (error: any) {
     return NextResponse.json(
-      { status: false, message: "Invalid refresh token" },
+      { status: false, message: FormatErrorMessage(error) },
       { status: 403 }
     );
   }

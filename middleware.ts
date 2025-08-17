@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 import { SECRET_KEY } from "./app/api/users/UtilAuth";
+import { FormatErrorMessage } from "./lib/utils";
 
 const protectedPaths: any = [
   // "/api/users/credit-update",
@@ -33,49 +34,56 @@ export async function middleware(request: NextRequest) {
       const token = authHeader.split(" ")[1];
       const { payload } = await jwtVerify(token, SECRET_KEY);
 
-      // Pass user data to API route via custom header
       const requestHeaders = new Headers(request.headers);
       requestHeaders.set("x-user", JSON.stringify(payload));
 
       return NextResponse.next({
         request: { headers: requestHeaders },
       });
-    } catch {
-      const refreshRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/refresh-token-api`,
+    } catch (error) {
+      // const refreshRes = await fetch(
+      //   `${process.env.NEXT_PUBLIC_API_URL}/api/refresh-token-api`,
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       cookie: request.headers.get("cookie") || "",
+      //     },
+      //   }
+      // );
+
+      // if (refreshRes.ok) {
+      //   console.log("first");
+      //   const { accessToken } = await refreshRes.json();
+
+      //   const requestHeaders = new Headers(request.headers);
+      //   requestHeaders.set("authorization", `Bearer ${accessToken}`);
+      //   const { payload } = await jwtVerify(accessToken, SECRET_KEY);
+      //   requestHeaders.set("x-user", JSON.stringify(payload));
+      //   const res = NextResponse.next({ request: { headers: requestHeaders } });
+
+      //   const setCookie = refreshRes.headers.get("set-cookie");
+      //   if (setCookie) {
+      //     res.headers.set("set-cookie", setCookie);
+      //   }
+
+      //   return res;
+      // } else {
+      //   return NextResponse.json(
+      //     {
+      //       success: false,
+      //       message: "Invalid or expired token. Please login first",
+      //     },
+      //     { status: 401 }
+      //   );
+      // }
+
+      return NextResponse.json(
         {
-          method: "POST",
-          headers: {
-            cookie: request.headers.get("cookie") || "",
-          },
-        }
+          success: false,
+          message: FormatErrorMessage(error),
+        },
+        { status: 401 }
       );
-
-      if (refreshRes.ok) {
-        const { accessToken } = await refreshRes.json();
-
-        const requestHeaders = new Headers(request.headers);
-        requestHeaders.set("authorization", `Bearer ${accessToken}`);
-        const { payload } = await jwtVerify(accessToken, SECRET_KEY);
-        requestHeaders.set("x-user", JSON.stringify(payload));
-        const res = NextResponse.next({ request: { headers: requestHeaders } });
-
-        // forward refreshToken cookie if backend set it
-        const setCookie = refreshRes.headers.get("set-cookie");
-        if (setCookie) {
-          res.headers.set("set-cookie", setCookie);
-        }
-
-        return res;
-      } else {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Invalid or expired token. Please login first",
-          },
-          { status: 401 }
-        );
-      }
     }
   } else {
     return NextResponse.next(); // Public API → no token check

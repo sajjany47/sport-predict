@@ -1,4 +1,4 @@
-import api from "@/lib/axiosClient";
+import privateApi from "@/lib/privateAxiosClient";
 import { getHeaders, getHeadersWithToken } from "@/lib/utils";
 import axios from "axios";
 
@@ -47,7 +47,7 @@ export const StatsAutoSearch = async (payload: any) => {
 
 export const OrderList = async (payload: any) => {
   try {
-    const response = await api.post("/api/order/list", payload, {
+    const response = await privateApi.post("/api/order/list", payload, {
       headers: getHeadersWithToken(),
     });
     return response.data;
