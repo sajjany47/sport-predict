@@ -5,10 +5,16 @@ import { SECRET_KEY } from "./app/api/users/UtilAuth";
 import { FormatErrorMessage } from "./lib/utils";
 
 const protectedPaths: any = [
-  // "/api/users/credit-update",
-  // "/api/order/create",
+  "/api/stats/list",
+  "/api/stats/create",
+  "/api/stats/update",
+  "/api/stats/search",
   "/api/order/list",
-  // "/api/order/update",
+  "/api/order/create",
+  "/api/order/update",
+  "/api/subscription/create",
+  "/api/subscription/update",
+  "/api/users/credit-update",
 ];
 
 export async function middleware(request: NextRequest) {

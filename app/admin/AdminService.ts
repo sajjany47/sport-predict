@@ -1,10 +1,9 @@
 import privateApi from "@/lib/privateAxiosClient";
 import { getHeaders, getHeadersWithToken } from "@/lib/utils";
-import axios from "axios";
 
 export const StatsList = async () => {
   try {
-    const response = await axios.get("/api/stats/list", {
+    const response = await privateApi.get("/api/stats/list", {
       headers: getHeadersWithToken(),
     });
     return response.data;
@@ -15,7 +14,7 @@ export const StatsList = async () => {
 
 export const StatsCreate = async (payload: any) => {
   try {
-    const response = await axios.post("/api/stats/create", payload, {
+    const response = await privateApi.post("/api/stats/create", payload, {
       headers: getHeadersWithToken(),
     });
     return response.data;
@@ -25,7 +24,7 @@ export const StatsCreate = async (payload: any) => {
 };
 export const StatsUpdate = async (payload: any) => {
   try {
-    const response = await axios.post("/api/stats/update", payload, {
+    const response = await privateApi.post("/api/stats/update", payload, {
       headers: getHeadersWithToken(),
     });
     return response.data;
@@ -36,7 +35,7 @@ export const StatsUpdate = async (payload: any) => {
 
 export const StatsAutoSearch = async (payload: any) => {
   try {
-    const response = await axios.post("/api/stats/search", payload, {
+    const response = await privateApi.post("/api/stats/search", payload, {
       headers: getHeadersWithToken(),
     });
     return response.data;
@@ -57,7 +56,7 @@ export const OrderList = async (payload: any) => {
 };
 export const OrderCreate = async (payload: any) => {
   try {
-    const response = await axios.post("/api/order/list", payload, {
+    const response = await privateApi.post("/api/order/create", payload, {
       headers: getHeaders(),
     });
     return response.data;
@@ -67,7 +66,7 @@ export const OrderCreate = async (payload: any) => {
 };
 export const OrderUpdate = async (payload: any) => {
   try {
-    const response = await axios.post("/api/order/update", payload, {
+    const response = await privateApi.post("/api/order/update", payload, {
       headers: getHeadersWithToken(),
     });
     return response.data;

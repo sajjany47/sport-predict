@@ -1,11 +1,17 @@
+import privateApi from "@/lib/privateAxiosClient";
+import publicApi from "@/lib/publicAxiosClient";
 import { getHeadersWithToken } from "@/lib/utils";
 import axios from "axios";
 
 export const SubscriptionCreate = async (payload: any) => {
   try {
-    const response = await axios.post("/api/subscription/create", payload, {
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await privateApi.post(
+      "/api/subscription/create",
+      payload,
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message);
@@ -13,9 +19,13 @@ export const SubscriptionCreate = async (payload: any) => {
 };
 export const SubscriptionUpdate = async (payload: any) => {
   try {
-    const response = await axios.post("/api/subscription/update", payload, {
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await privateApi.post(
+      "/api/subscription/update",
+      payload,
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message);
@@ -24,7 +34,7 @@ export const SubscriptionUpdate = async (payload: any) => {
 
 export const SubscriptionList = async () => {
   try {
-    const response = await axios.get("/api/subscription/list", {
+    const response = await publicApi.get("/api/subscription/list", {
       headers: { "Content-Type": "application/json" },
     });
     return response.data;
@@ -35,7 +45,7 @@ export const SubscriptionList = async () => {
 
 export const UserLogin = async (payload: any) => {
   try {
-    const response = await axios.post("/api/users/sigin", payload, {
+    const response = await publicApi.post("/api/users/sigin", payload, {
       headers: { "Content-Type": "application/json" },
     });
     return response.data;
@@ -46,7 +56,7 @@ export const UserLogin = async (payload: any) => {
 
 export const UserRegister = async (payload: any) => {
   try {
-    const response = await axios.post("/api/users/signup", payload, {
+    const response = await publicApi.post("/api/users/signup", payload, {
       headers: { "Content-Type": "application/json" },
     });
     return response.data;
@@ -57,9 +67,13 @@ export const UserRegister = async (payload: any) => {
 
 export const UserCreditUpdate = async (payload: any) => {
   try {
-    const response = await axios.post("/api/users/credit-update", payload, {
-      headers: getHeadersWithToken(),
-    });
+    const response = await privateApi.post(
+      "/api/users/credit-update",
+      payload,
+      {
+        headers: getHeadersWithToken(),
+      }
+    );
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message);
@@ -68,7 +82,7 @@ export const UserCreditUpdate = async (payload: any) => {
 
 export const UserOrderCredit = async (payload: any) => {
   try {
-    const response = await axios.post("/api/order/create", payload, {
+    const response = await privateApi.post("/api/order/create", payload, {
       headers: getHeadersWithToken(),
     });
     return response.data;
