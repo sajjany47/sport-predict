@@ -12,6 +12,7 @@ const protectedPaths: any = [
   "/api/order/list",
   "/api/order/create",
   "/api/order/update",
+  "api/order/:id",
   "/api/subscription/create",
   "/api/subscription/update",
   "/api/users/credit-update",

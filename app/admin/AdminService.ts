@@ -64,6 +64,16 @@ export const OrderCreate = async (payload: any) => {
     throw new Error(error.response?.data?.message);
   }
 };
+export const OrderDetails = async (payload: any) => {
+  try {
+    const response = await privateApi.get(`/api/order/${payload}`, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
 export const OrderUpdate = async (payload: any) => {
   try {
     const response = await privateApi.post("/api/order/update", payload, {
