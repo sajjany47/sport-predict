@@ -9,7 +9,6 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
-import { set } from "mongoose";
 
 export const FormikTextInput = ({
   field,
@@ -19,33 +18,56 @@ export const FormikTextInput = ({
   const hasError =
     Boolean(getIn(errors, field.name)) && getIn(touched, field.name);
 
+  // Extract custom className if provided
+  const customClass = props.className || "";
+
+  // Base classes that should always be applied
+  const baseClasses = `w-full ${props.icon ? "pl-10" : ""}`;
+
+  // Conditional classes based on validation state
+  const stateClasses = hasError
+    ? "border-red-500 ring-red-200 focus:ring-red-200 focus:border-red-500"
+    : "border-gray-300 focus:ring-blue-300 focus:border-blue-500";
+
+  // Combine all classes
+  const inputClasses = `mt-2 ${baseClasses} ${stateClasses} ${customClass}`;
+
   return (
-    <>
-      <Label htmlFor={field.name}>{props.label}</Label>
+    <div className={props.containerClass || ""}>
+      {props.label && (
+        <Label
+          htmlFor={field.name}
+          className={props.labelClass || "text-gray-700 font-medium mb-1 block"}
+        >
+          {props.label}
+        </Label>
+      )}
+
       <div className="relative">
-        {props.icon && props.icon}
+        {props.icon && (
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            {props.icon}
+          </div>
+        )}
+
         <Input
           {...field}
           {...props}
           id={field.name}
           value={field.value || ""}
-          placeholder={`Enter ${
-            props.placeholder ? props.placeholder : props.label
-          }`}
-          className={`w-full ${props.icon && "pl-10"} ${
-            hasError
-              ? "border-red-500 ring-red-200"
-              : "border-gray-300 focus:ring-blue-300"
-          }`}
+          placeholder={
+            props.placeholder || `Enter ${props.label || field.name}`
+          }
+          className={inputClasses}
         />
       </div>
 
-      {Boolean(getIn(errors, field.name)) && getIn(touched, field.name) && (
-        <small className="text-red-600 mt-1 block">
+      {hasError && (
+        <small className="text-red-600 mt-1 block text-sm">
           {getIn(errors, field.name)}
         </small>
       )}
-    </>
+    </div>
   );
 };
 

@@ -5,8 +5,25 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, Mail, Phone, Lock, Eye, EyeOff, User } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Trophy,
+  Mail,
+  Phone,
+  Lock,
+  Eye,
+  EyeOff,
+  User,
+  Sparkles,
+  ChevronRight,
+  Check,
+} from "lucide-react";
 import { loginSuccess } from "@/store/slices/authSlice";
 import toast from "react-hot-toast";
 import { Field, Form, Formik } from "formik";
@@ -54,6 +71,7 @@ const validationSchema = Yup.object({
     "You must accept the terms and conditions"
   ),
 });
+
 const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -104,31 +122,43 @@ const RegisterPage = () => {
   return (
     <>
       {isLoading && <CustomLoader message="Creating account..." />}
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/4 w-40 h-40 bg-blue-400 rounded-full filter blur-3xl opacity-10 animate-pulse delay-500"></div>
+        </div>
+
+        <div className="w-full max-w-md z-10">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center space-x-2 mb-4">
-              <div className="bg-blue-600 p-3 rounded-xl">
+            <div className="inline-flex items-center justify-center space-x-2 mb-4 relative">
+              <div className="absolute -inset-2 bg-blue-500/20 rounded-xl blur-sm"></div>
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl relative">
                 <Trophy className="h-8 w-8 text-white" />
+                <Sparkles className="h-4 w-4 text-yellow-300 absolute -top-1 -right-1" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-2xl font-bold text-white drop-shadow-md">
                 SportPredict
               </span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Create Account
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Join Winners Circle
             </h1>
-            <p className="text-gray-600">
-              Join thousands of cricket prediction winners
+            <p className="text-purple-200">
+              Create your account and start predicting like a pro
             </p>
           </div>
 
-          <Card className="shadow-xl border-0">
-            <CardHeader>
-              <CardTitle className="text-center text-xl">
-                Sign Up for SportPredict
+          <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+            <CardHeader className="text-center pb-4">
+              <CardTitle className="text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Create Your Account
               </CardTitle>
+              <CardDescription className="text-gray-500">
+                Join thousands of cricket prediction winners
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Formik
@@ -144,10 +174,10 @@ const RegisterPage = () => {
                 validationSchema={validationSchema}
                 onSubmit={handleRegister}
               >
-                {({ handleSubmit }) => (
+                {({ handleSubmit, isSubmitting }) => (
                   <Form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-12 gap-4">
-                      <div className="col-span-12 md:col-span-12 lg:col-span-12">
+                      <div className="col-span-12">
                         <Field
                           label="Username"
                           component={FormikTextInput}
@@ -157,9 +187,9 @@ const RegisterPage = () => {
                           }
                         />
                       </div>
-                      <div className="col-span-12 md:col-span-12 lg:col-span-12">
+                      <div className="col-span-12">
                         <Field
-                          label="Name"
+                          label="Full Name"
                           component={FormikTextInput}
                           name="name"
                           icon={
@@ -167,9 +197,9 @@ const RegisterPage = () => {
                           }
                         />
                       </div>
-                      <div className="col-span-12 md:col-span-12 lg:col-span-12">
+                      <div className="col-span-12">
                         <Field
-                          label="Email"
+                          label="Email Address"
                           component={FormikTextInput}
                           name="email"
                           icon={
@@ -177,9 +207,9 @@ const RegisterPage = () => {
                           }
                         />
                       </div>
-                      <div className="col-span-12 md:col-span-12 lg:col-span-12">
+                      <div className="col-span-12">
                         <Field
-                          label="Mobile"
+                          label="Mobile Number"
                           component={FormikTextInput}
                           name="mobileNumber"
                           icon={
@@ -187,7 +217,7 @@ const RegisterPage = () => {
                           }
                         />
                       </div>
-                      <div className="col-span-12 md:col-span-12 lg:col-span-12">
+                      <div className="col-span-12">
                         <Field
                           label="Password"
                           component={FormikTextPassword}
@@ -197,7 +227,7 @@ const RegisterPage = () => {
                           }
                         />
                       </div>
-                      <div className="col-span-12 md:col-span-12 lg:col-span-12">
+                      <div className="col-span-12">
                         <Field
                           label="Confirm Password"
                           component={FormikTextPassword}
@@ -207,41 +237,49 @@ const RegisterPage = () => {
                           }
                         />
                       </div>
-                      <div className="col-span-12 md:col-span-12 lg:col-span-12">
+                      <div className="col-span-12">
                         <Field
                           label={
-                            <>
-                              {" "}
-                              <>
-                                I agree to the{" "}
-                                <Link
-                                  href="/terms"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  Terms of Service
-                                </Link>{" "}
-                                and{" "}
-                                <Link
-                                  href="/privacy"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  Privacy Policy
-                                </Link>
-                              </>
-                            </>
+                            <span className="text-sm">
+                              I agree to the{" "}
+                              <Link
+                                href="/terms"
+                                className="text-blue-600 hover:underline font-medium"
+                              >
+                                Terms of Service
+                              </Link>{" "}
+                              and{" "}
+                              <Link
+                                href="/privacy"
+                                className="text-blue-600 hover:underline font-medium"
+                              >
+                                Privacy Policy
+                              </Link>
+                            </span>
                           }
                           component={FormikCheckBox}
                           name="agreeToTerms"
+                          containerClass="mb-6"
                         />
                       </div>
 
-                      <div className="col-span-12 md:col-span-12 lg:col-span-12 mt-2">
+                      <div className="col-span-12">
                         <Button
                           type="submit"
-                          className="w-full"
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-2 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
                           disabled={isLoading}
                         >
-                          Sign In
+                          {isLoading ? (
+                            <div className="flex items-center justify-center">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Creating Account...
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center">
+                              <Check className="h-5 w-5 mr-2" />
+                              Create Account
+                            </div>
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -249,19 +287,40 @@ const RegisterPage = () => {
                 )}
               </Formik>
 
-              <div className="text-center mt-6">
-                <p className="text-gray-600">
-                  Already have an account?{" "}
-                  <Link
-                    href="/auth/login"
-                    className="text-blue-600 hover:underline font-medium"
-                  >
-                    Sign In
-                  </Link>
-                </p>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-gray-500">
+                    Already a member?
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <Link
+                  href="/auth/login"
+                  className="inline-flex items-center justify-center w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Sign In to Your Account
+                </Link>
               </div>
             </CardContent>
           </Card>
+
+          <div className="text-center mt-6">
+            <p className="text-purple-200 text-sm">
+              By registering, you agree to our{" "}
+              <Link href="/terms" className="text-white hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-white hover:underline">
+                Privacy Policy
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </>
