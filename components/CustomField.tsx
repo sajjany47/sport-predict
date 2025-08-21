@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
+import { Textarea } from "./ui/textarea";
 
 export const FormikTextInput = ({
   field,
@@ -51,6 +52,67 @@ export const FormikTextInput = ({
         )}
 
         <Input
+          {...field}
+          {...props}
+          id={field.name}
+          value={field.value || ""}
+          placeholder={
+            props.placeholder || `Enter ${props.label || field.name}`
+          }
+          className={inputClasses}
+        />
+      </div>
+
+      {hasError && (
+        <small className="text-red-600 mt-1 block text-sm">
+          {getIn(errors, field.name)}
+        </small>
+      )}
+    </div>
+  );
+};
+
+export const FormikTextArea = ({
+  field,
+  form: { touched, errors },
+  ...props
+}: any) => {
+  const hasError =
+    Boolean(getIn(errors, field.name)) && getIn(touched, field.name);
+
+  // Extract custom className if provided
+  const customClass = props.className || "";
+
+  // Base classes that should always be applied
+  const baseClasses = `w-full resize-none ${props.icon ? "pl-10" : ""}`;
+
+  // Conditional classes based on validation state
+  const stateClasses = hasError
+    ? "border-red-500 ring-red-200 focus:ring-red-200 focus:border-red-500"
+    : "border-gray-300 focus:ring-blue-300 focus:border-blue-500";
+
+  // Combine all classes
+  const inputClasses = `mt-2 ${baseClasses} ${stateClasses} ${customClass}`;
+
+  return (
+    <div className={props.containerClass || ""}>
+      {props.label && (
+        <Label
+          htmlFor={field.name}
+          className={props.labelClass || "text-gray-700 font-medium mb-1 block"}
+        >
+          {props.label}
+        </Label>
+      )}
+
+      <div className="relative">
+        {props.icon && (
+          <div className="absolute top-3 left-0 flex items-start pl-3 pointer-events-none">
+            {props.icon}
+          </div>
+        )}
+
+        <Textarea
           {...field}
           {...props}
           id={field.name}
