@@ -40,6 +40,7 @@ import { OrderList } from "../AdminService";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import moment from "moment";
 import CustomLoader from "@/components/ui/CustomLoader";
+import StatusDialoge from "./StatusDialoge";
 
 const AdminOrdersPage = () => {
   const { orders } = useSelector((state: RootState) => state.admin);
@@ -53,12 +54,9 @@ const AdminOrdersPage = () => {
     to: moment().toDate(),
   });
   const [statusDialoge, setStatusDialoge] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>({});
 
-  const {
-    data = [],
-    isLoading,
-    refetch,
-  } = useQuery({
+  const { data = [], isLoading } = useQuery({
     queryKey: ["order-list", dateRange],
     queryFn: async () => {
       const response = await OrderList({
@@ -140,6 +138,10 @@ const AdminOrdersPage = () => {
   const totalRevenue = data
     .filter((o: any) => o.status === "completed")
     .reduce((sum: any, order: any) => sum + order.price, 0);
+
+  const handelClose = () => {
+    setStatusDialoge(false);
+  };
 
   return (
     <>
@@ -387,7 +389,13 @@ const AdminOrdersPage = () => {
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
+                                <DropdownMenuContent
+                                  align="end"
+                                  onClick={() => {
+                                    setStatusDialoge(true);
+                                    setSelectedOrder(order);
+                                  }}
+                                >
                                   <DropdownMenuItem>
                                     <Wallet className="h-4 w-4 mr-2" />
                                     Transaction Status
@@ -470,6 +478,15 @@ const AdminOrdersPage = () => {
           </Card>
         </div>
       </AdminLayout>
+      {statusDialoge && (
+        <StatusDialoge
+          isOpen={statusDialoge}
+          onClose={handelClose}
+          transactionStatus={selectedOrder.status}
+          remarks={selectedOrder.remarks ?? ""}
+          orderId={selectedOrder._id}
+        />
+      )}
     </>
   );
 };

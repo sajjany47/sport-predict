@@ -1,11 +1,11 @@
 import React from "react";
-import { DialogHeader } from "@/components/ui/dialog";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogHeader,
   DialogTitle,
-} from "@radix-ui/react-dialog";
+} from "@/components/ui/dialog";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
 import { FormikSelectField, FormikTextArea } from "@/components/CustomField";
@@ -15,12 +15,14 @@ interface StatusDialogeProps {
   onClose: () => void;
   transactionStatus: string;
   remarks?: string;
+  orderId?: string;
 }
 const StatusDialoge = ({
   isOpen,
   onClose,
   transactionStatus,
   remarks,
+  orderId,
 }: StatusDialogeProps) => {
   const StatusValidationSchema = yup.object({
     transactionStatus: yup.string().required("Transaction Status is required"),
@@ -67,6 +69,7 @@ const StatusDialoge = ({
                     label="Remarks"
                     component={FormikTextArea}
                     name="remarks"
+                    size="3"
                   />
                 </div>
               </div>
