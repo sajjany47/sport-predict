@@ -26,6 +26,7 @@ import {
   CreditCard,
   User,
   DollarSign,
+  Wallet,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -51,6 +52,7 @@ const AdminOrdersPage = () => {
     from: moment().subtract(30, "days").toDate(),
     to: moment().toDate(),
   });
+  const [statusDialoge, setStatusDialoge] = useState(false);
 
   const {
     data = [],
@@ -386,6 +388,12 @@ const AdminOrdersPage = () => {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                  <DropdownMenuItem>
+                                    <Wallet className="h-4 w-4 mr-2" />
+                                    Transaction Status
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                                {/* <DropdownMenuContent align="end">
                                   {order.status === "pending" && (
                                     <>
                                       <DropdownMenuItem
@@ -436,7 +444,7 @@ const AdminOrdersPage = () => {
                                     <Download className="h-4 w-4 mr-2" />
                                     Download Invoice
                                   </DropdownMenuItem>
-                                </DropdownMenuContent>
+                                </DropdownMenuContent> */}
                               </DropdownMenu>
                             </div>
                           </div>
