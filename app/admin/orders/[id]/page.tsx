@@ -14,8 +14,6 @@ import {
   ShoppingCart,
   User,
   CreditCard,
-  Calendar,
-  DollarSign,
   CheckCircle,
   XCircle,
   Clock,
@@ -25,15 +23,13 @@ import {
   Phone,
   MapPin,
   Package,
-  Truck,
   FileText,
   AlertCircle,
   Edit,
   MoreHorizontal,
-  CalendarDays,
   Receipt,
-  Crown,
   Sparkles,
+  Wallet,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -45,6 +41,7 @@ import toast from "react-hot-toast";
 import { OrderDetails } from "../../AdminService";
 import CustomLoader from "@/components/ui/CustomLoader";
 import moment from "moment";
+import StatusDialoge from "../StatusDialoge";
 
 const OrderDetailsPage = () => {
   const params = useParams();
@@ -52,6 +49,7 @@ const OrderDetailsPage = () => {
   const [activeTab, setActiveTab] = useState("details");
   const [order, setOrder] = useState<any>({});
   const [loading, setLoading] = useState(false);
+  const [statusDialoge, setStatusDialoge] = useState(false);
   const orderId = params.id as string;
 
   const GetDetails = () => {
@@ -72,11 +70,6 @@ const OrderDetailsPage = () => {
   useEffect(() => {
     GetDetails();
   }, []);
-
-  const handleStatusChange = (newStatus: string) => {
-    // In a real app, you would dispatch an action to update the status
-    toast.success(`Order status updated to ${newStatus}`);
-  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -154,6 +147,10 @@ const OrderDetailsPage = () => {
     },
   ];
 
+  const handelClose = () => {
+    setStatusDialoge(false);
+  };
+
   return (
     <>
       {loading && <CustomLoader />}
@@ -189,38 +186,15 @@ const OrderDetailsPage = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {order?.status === "pending" && (
-                        <>
-                          <DropdownMenuItem
-                            onClick={() => handleStatusChange("completed")}
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Mark as Completed
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleStatusChange("failed")}
-                          >
-                            <XCircle className="h-4 w-4 mr-2" />
-                            Mark as Failed
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      {order?.status === "completed" && (
-                        <DropdownMenuItem
-                          onClick={() => handleStatusChange("refunded")}
-                        >
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                          Process Refund
-                        </DropdownMenuItem>
-                      )}
-                      {order?.status === "failed" && (
-                        <DropdownMenuItem
-                          onClick={() => handleStatusChange("pending")}
-                        >
-                          <Clock className="h-4 w-4 mr-2" />
-                          Retry Payment
-                        </DropdownMenuItem>
-                      )}
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setTimeout(() => setStatusDialoge(true), 50);
+                        }}
+                      >
+                        <Wallet className="h-4 w-4 mr-2" />
+                        Transaction Status
+                      </DropdownMenuItem>
                       <DropdownMenuItem>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Order
@@ -676,6 +650,15 @@ const OrderDetailsPage = () => {
           </div>
         )}
       </AdminLayout>
+      {statusDialoge && (
+        <StatusDialoge
+          isOpen={statusDialoge}
+          onClose={handelClose}
+          transactionStatus={order.status}
+          remarks={order.remarks ?? ""}
+          orderId={order._id}
+        />
+      )}
     </>
   );
 };
