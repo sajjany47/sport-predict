@@ -15,6 +15,7 @@ const UserSchema = new Schema(
         isActive: Boolean,
         expiryDate: Date,
         purchaseDate: Date,
+        credits: Number,
       },
     ],
     password: { type: String },

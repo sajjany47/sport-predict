@@ -48,7 +48,7 @@ const AdminOrdersPage = () => {
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("pending");
   const [dateRange, setDateRange] = useState({
     from: moment().subtract(30, "days").toDate(),
     to: moment().toDate(),

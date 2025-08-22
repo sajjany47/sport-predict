@@ -29,12 +29,19 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
+    if (findOrder.status === "completed") {
+      return NextResponse.json(
+        { success: false, message: "Order already updated" },
+        { status: 409 }
+      );
+    }
+
     let updateData: any = {
       status: data.status,
-      paymentStatus: data.paymentStatus,
+      remarks: data.remarks,
     };
     let credits = 0;
-    if (data.paymentStatus && data.status === "completed") {
+    if (data.status === "completed") {
       if (findOrder.ordertype === "subscription") {
         updateData.subscriptionId = new mongoose.Types.ObjectId(
           findOrder.subscriptionId
@@ -49,10 +56,12 @@ export const POST = async (req: NextRequest) => {
             { status: 404 }
           );
         }
+        updateData.paymentStatus = true;
         credits = Number(findSubscription.credits);
       }
       if (findOrder.ordertype === "credit") {
         credits = Number(data.credits);
+        updateData.paymentStatus = true;
       }
     } else if (data.status === "refunded") {
       updateData.paymentStatus = true;
@@ -81,9 +90,31 @@ export const POST = async (req: NextRequest) => {
             { status: 404 }
           );
         }
+        let updateUser: any = {
+          credits: Number(findUser.credits) + Number(credits),
+        };
+        if (findOrder.ordertype === "subscription") {
+          const modifySubscription = findUser.subscription.map((item: any) => ({
+            ...item,
+            isActive: false,
+          }));
+          updateUser.subscription = [
+            ...modifySubscription,
+            {
+              _id: new mongoose.Types.ObjectId(),
+              subscriptionId: new mongoose.Types.ObjectId(
+                findOrder.subscriptionId
+              ),
+              isActive: true,
+              expiryDate: new Date(updateData.subscriptionExpired),
+              purchaseDate: new Date(findOrder.paymentDate),
+              credits: Number(credits),
+            },
+          ];
+        }
         await User.updateOne(
           { _id: new mongoose.Types.ObjectId(findOrder.userId) },
-          { $set: { credits: Number(findUser.credits) + Number(credits) } }
+          { $set: updateUser }
         );
       }
     }
