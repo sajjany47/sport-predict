@@ -389,70 +389,21 @@ const AdminOrdersPage = () => {
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                  align="end"
-                                  onClick={() => {
-                                    setStatusDialoge(true);
-                                    setSelectedOrder(order);
-                                  }}
-                                >
-                                  <DropdownMenuItem>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    className="cursor-pointer"
+                                    onClick={() => {
+                                      setTimeout(
+                                        () => setStatusDialoge(true),
+                                        50
+                                      );
+                                      setSelectedOrder(order);
+                                    }}
+                                  >
                                     <Wallet className="h-4 w-4 mr-2" />
                                     Transaction Status
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
-                                {/* <DropdownMenuContent align="end">
-                                  {order.status === "pending" && (
-                                    <>
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handleStatusChange(
-                                            order._id,
-                                            "completed"
-                                          )
-                                        }
-                                      >
-                                        <CheckCircle className="h-4 w-4 mr-2" />
-                                        Mark as Completed
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handleStatusChange(
-                                            order._id,
-                                            "failed"
-                                          )
-                                        }
-                                      >
-                                        <XCircle className="h-4 w-4 mr-2" />
-                                        Mark as Failed
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-                                  {order.status === "completed" && (
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleStatusChange(order.id, "refunded")
-                                      }
-                                    >
-                                      <RefreshCw className="h-4 w-4 mr-2" />
-                                      Process Refund
-                                    </DropdownMenuItem>
-                                  )}
-                                  {order.status === "failed" && (
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleStatusChange(order.id, "pending")
-                                      }
-                                    >
-                                      <Clock className="h-4 w-4 mr-2" />
-                                      Retry Payment
-                                    </DropdownMenuItem>
-                                  )}
-                                  <DropdownMenuItem>
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Download Invoice
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent> */}
                               </DropdownMenu>
                             </div>
                           </div>

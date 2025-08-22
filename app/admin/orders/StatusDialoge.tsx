@@ -9,6 +9,7 @@ import {
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
 import { FormikSelectField, FormikTextArea } from "@/components/CustomField";
+import { Button } from "@/components/ui/button";
 
 interface StatusDialogeProps {
   isOpen: boolean;
@@ -72,6 +73,16 @@ const StatusDialoge = ({
                     size="3"
                   />
                 </div>
+              </div>
+              <div className="mt-4 flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onClose()}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Update Status</Button>
               </div>
             </Form>
           )}
