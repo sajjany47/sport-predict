@@ -6,6 +6,7 @@ import { FormatErrorMessage } from "@/lib/utils";
 import Order from "../OrderModel";
 import mongoose from "mongoose";
 import User from "../../users/UserModel";
+import moment from "moment";
 
 export const POST = async (req: NextRequest) => {
   await dbConnect();
@@ -34,6 +35,23 @@ export const POST = async (req: NextRequest) => {
         );
       }
     }
+    if (data.ordertype === "credit") {
+      const startOfDay = moment().startOf("day").toDate();
+      const endOfDay = moment().endOf("day").toDate();
+      const checkDailyCredit = await Order.findOne({
+        userId: new mongoose.Types.ObjectId(data.userId),
+        ordertype: "credit",
+        status: "completed",
+        paymentMode: "PROMOTION",
+        paymentDate: { $gte: startOfDay, $lte: endOfDay },
+      });
+      if (checkDailyCredit) {
+        return NextResponse.json(
+          { success: false, message: "Already claimed today's free credit." },
+          { status: 400 }
+        );
+      }
+    }
 
     const prepareData = PrepareOrderData(data);
     const orderData = await Order.create({
@@ -46,11 +64,18 @@ export const POST = async (req: NextRequest) => {
         { $set: { credits: (findUser?.credits ?? 0) - (data?.credits ?? 0) } }
       );
     }
+    if (orderData && data.ordertype === "credit") {
+      await User.updateOne(
+        { _id: new mongoose.Types.ObjectId(data.userId) },
+        { $set: { credits: (findUser?.credits ?? 0) + (data?.credits ?? 0) } }
+      );
+    }
     return NextResponse.json(
       { success: true, message: "Order created successfully", data: orderData },
       { status: 200 }
     );
   } catch (error: any) {
+    console.log(error);
     return NextResponse.json(
       { success: false, message: FormatErrorMessage(error) },
       { status: 500 }

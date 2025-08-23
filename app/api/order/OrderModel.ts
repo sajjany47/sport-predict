@@ -28,7 +28,7 @@ const OrderSchema = new Schema(
     paymentMode: {
       type: String,
       default: null,
-      enum: ["UPI", "NETBANKING", "QRCODE"],
+      enum: ["UPI", "NETBANKING", "QRCODE", "PROMOTION"],
     },
     remarks: { type: String, default: null },
     paymentModeDetails: { type: Object, default: null },

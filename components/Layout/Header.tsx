@@ -44,7 +44,7 @@ import MarqueeNotice from "../ui/marquee-notice";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { DailyCreditAd } from "../GetDailyCredit";
-import { UserCreditUpdate } from "@/app/MainService";
+import { UserCreditUpdate, UserOrderCredit } from "@/app/MainService";
 import toast from "react-hot-toast";
 
 const Header = () => {
@@ -99,10 +99,19 @@ const Header = () => {
   ];
 
   const handleCreditAdd = () => {
-    UserCreditUpdate({ type: "daily" })
+    let payload = {
+      ordertype: "credit",
+      userId: user!.id,
+      credits: 1,
+      status: "completed",
+      paymentMode: "PROMOTION",
+      paymentDate: new Date(),
+    };
+
+    UserOrderCredit(payload)
       .then((res) => {
         const prepareUser: any = user
-          ? { ...user, credits: res.data.credits }
+          ? { ...user, credits: user.credits + 1 }
           : null;
 
         setDailyCreditRes({ message: res.message, isSuccess: true });

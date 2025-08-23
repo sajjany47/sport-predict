@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
 import { FormatErrorMessage } from "@/lib/utils";
 import Order from "../OrderModel";
+import mongoose from "mongoose";
 
 export const POST = async (request: NextRequest) => {
   await dbConnect();
@@ -29,6 +30,11 @@ export const POST = async (request: NextRequest) => {
     if (reqData.hasOwnProperty("status") && reqData.status) {
       query.push({
         status: reqData.status,
+      });
+    }
+    if (reqData.hasOwnProperty("ordertype") && reqData.ordertype) {
+      query.push({
+        ordertype: reqData.ordertype,
       });
     }
 
@@ -72,6 +78,12 @@ export const POST = async (request: NextRequest) => {
         },
       },
     ];
+
+    if (reqData.hasOwnProperty("userId") && reqData.userId) {
+      query.push({
+        userId: new mongoose.Types.ObjectId(reqData.userId),
+      });
+    }
 
     const count = await Order.aggregate([...pipeline, { $count: "total" }]);
     const total = count.length > 0 ? count[0].total : 0;
