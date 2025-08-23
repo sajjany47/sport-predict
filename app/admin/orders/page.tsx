@@ -56,8 +56,12 @@ const AdminOrdersPage = () => {
   const [statusDialoge, setStatusDialoge] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>({});
 
-  const { data = [], isLoading } = useQuery({
-    queryKey: ["order-list", dateRange],
+  const {
+    data = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["order-list", dateRange, statusDialoge],
     queryFn: async () => {
       const response = await OrderList({
         startDate: dateRange.from,
@@ -74,11 +78,6 @@ const AdminOrdersPage = () => {
       to: moment(e.to).toDate(),
     });
     // refetch();
-  };
-
-  const handleStatusChange = (orderId: string, newStatus: string) => {
-    dispatch(updateOrderStatus({ id: orderId, status: newStatus }));
-    toast.success(`Order status updated to ${newStatus}`);
   };
 
   const handleViewOrder = (orderId: string) => {
@@ -141,6 +140,7 @@ const AdminOrdersPage = () => {
 
   const handelClose = () => {
     setStatusDialoge(false);
+    refetch();
   };
 
   return (

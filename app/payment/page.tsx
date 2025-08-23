@@ -187,21 +187,21 @@ const PaymentPage = () => {
                     >
                       <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger
-                          value="upi"
+                          value="UPI"
                           className="flex items-center space-x-2"
                         >
                           <Smartphone className="h-4 w-4" />
                           <span>UPI</span>
                         </TabsTrigger>
                         <TabsTrigger
-                          value="bank"
+                          value="NETBANKING"
                           className="flex items-center space-x-2"
                         >
                           <Building className="h-4 w-4" />
                           <span>Bank Transfer</span>
                         </TabsTrigger>
                         <TabsTrigger
-                          value="qrCode"
+                          value="QRCODE"
                           className="flex items-center space-x-2"
                         >
                           <QrCode className="h-4 w-4" />
@@ -210,7 +210,7 @@ const PaymentPage = () => {
                       </TabsList>
 
                       {/* UPI Payment */}
-                      <TabsContent value="upi" className="space-y-6 mt-6">
+                      <TabsContent value="UPI" className="space-y-6 mt-6">
                         <div className="bg-blue-50 p-6 rounded-lg">
                           <h3 className="font-semibold text-lg mb-4 flex items-center">
                             <Smartphone className="h-5 w-5 mr-2 text-blue-600" />
@@ -278,7 +278,10 @@ const PaymentPage = () => {
                       </TabsContent>
 
                       {/* Bank Transfer */}
-                      <TabsContent value="bank" className="space-y-6 mt-6">
+                      <TabsContent
+                        value="NETBANKING"
+                        className="space-y-6 mt-6"
+                      >
                         <div className="bg-green-50 p-6 rounded-lg">
                           <h3 className="font-semibold text-lg mb-4 flex items-center">
                             <Building className="h-5 w-5 mr-2 text-green-600" />
@@ -384,7 +387,7 @@ const PaymentPage = () => {
                       </TabsContent>
 
                       {/* QR Code Payment */}
-                      <TabsContent value="qrCode" className="space-y-6 mt-6">
+                      <TabsContent value="QRCODE" className="space-y-6 mt-6">
                         <div className="bg-purple-50 p-6 rounded-lg">
                           <h3 className="font-semibold text-lg mb-4 flex items-center">
                             <QrCode className="h-5 w-5 mr-2 text-purple-600" />
