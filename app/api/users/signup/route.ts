@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
           credits: 1,
           role: "user",
           isActive: true,
+          status: "active",
         }),
         password: await bcrypt.hash(body.password, 10),
       };

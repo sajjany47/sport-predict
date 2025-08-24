@@ -25,6 +25,11 @@ import {
   Phone,
   Calendar,
   CreditCard,
+  ArrowLeft,
+  Crown,
+  Zap,
+  BarChart3,
+  Receipt,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -33,81 +38,35 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
+import { UserDetails } from "../AdminService";
+import UserDetailsPage from "./UserDetailsPage";
 
 const AdminUsersPage = () => {
   const { users } = useSelector((state: RootState) => state.admin);
   const dispatch = useDispatch();
-
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [loading, setLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [view, setView] = useState("list"); // 'list' or 'detail'
 
   useEffect(() => {
-    // Mock users data
-    const mockUsers = [
-      {
-        id: "1",
-        username: "cricket_fan",
-        email: "user1@example.com",
-        mobile: "+91 9876543210",
-        credits: 25,
-        subscriptionPlan: "Pro",
-        subscriptionExpiry: "2025-02-15",
-        status: "active" as const,
-        joinedDate: "2024-12-01",
-        lastLogin: "2025-01-15T10:30:00Z",
-      },
-      {
-        id: "2",
-        username: "sports_lover",
-        email: "user2@example.com",
-        mobile: "+91 9876543211",
-        credits: 5,
-        subscriptionPlan: "Free",
-        subscriptionExpiry: "2025-01-20",
-        status: "active" as const,
-        joinedDate: "2024-11-15",
-        lastLogin: "2025-01-14T15:20:00Z",
-      },
-      {
-        id: "3",
-        username: "dream11_pro",
-        email: "user3@example.com",
-        mobile: "+91 9876543212",
-        credits: 75,
-        subscriptionPlan: "Elite",
-        subscriptionExpiry: "2025-03-01",
-        status: "suspended" as const,
-        joinedDate: "2024-10-20",
-        lastLogin: "2025-01-10T09:15:00Z",
-      },
-      {
-        id: "4",
-        username: "fantasy_king",
-        email: "user4@example.com",
-        mobile: "+91 9876543213",
-        credits: 0,
-        subscriptionPlan: "Free",
-        subscriptionExpiry: "2025-01-18",
-        status: "banned" as const,
-        joinedDate: "2024-09-10",
-        lastLogin: "2025-01-05T12:45:00Z",
-      },
-      {
-        id: "5",
-        username: "cricket_master",
-        email: "user5@example.com",
-        mobile: "+91 9876543214",
-        credits: 45,
-        subscriptionPlan: "Pro",
-        subscriptionExpiry: "2025-02-28",
-        status: "active" as const,
-        joinedDate: "2024-08-15",
-        lastLogin: "2025-01-16T08:30:00Z",
-      },
-    ];
+    GetUserDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    dispatch(setUsers(mockUsers));
-  }, [dispatch]);
+  const GetUserDetails = () => {
+    setLoading(true);
+    UserDetails({})
+      .then((res) => {
+        setLoading(false);
+        dispatch(setUsers(res.data ?? []));
+      })
+      .catch((err) => {
+        setLoading(false);
+        toast.error(err.message || "Failed to fetch users. Please try again.");
+      });
+  };
 
   const handleStatusChange = (userId: string, newStatus: string) => {
     dispatch(updateUserStatus({ id: userId, status: newStatus }));
@@ -140,11 +99,11 @@ const AdminUsersPage = () => {
     }
   };
 
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = users.filter((user: any) => {
     const matchesSearch =
       user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.mobile.includes(searchTerm);
+      user.mobileNumber.includes(searchTerm);
 
     const matchesStatus = activeTab === "all" || user.status === activeTab;
 
@@ -154,6 +113,25 @@ const AdminUsersPage = () => {
   const activeUsers = users.filter((u) => u.status === "active").length;
   const suspendedUsers = users.filter((u) => u.status === "suspended").length;
   const bannedUsers = users.filter((u) => u.status === "banned").length;
+
+  const handleViewUser = (user: any) => {
+    setSelectedUser(user);
+    setView("detail");
+  };
+
+  const handleBackToList = () => {
+    setSelectedUser(null);
+    setView("list");
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <AdminLayout>
@@ -298,9 +276,9 @@ const AdminUsersPage = () => {
               <TabsContent value={activeTab} className="space-y-4">
                 {filteredUsers.length > 0 ? (
                   <div className="space-y-4">
-                    {filteredUsers.map((user) => (
+                    {filteredUsers.map((user: any) => (
                       <div
-                        key={user.id}
+                        key={user._id}
                         className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                       >
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -321,6 +299,15 @@ const AdminUsersPage = () => {
                                     </span>
                                   </div>
                                 </Badge>
+                                {user.role === "admin" && (
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-purple-100 text-purple-800"
+                                  >
+                                    <Crown className="h-3 w-3 mr-1" />
+                                    Admin
+                                  </Badge>
+                                )}
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
                                 <div className="flex items-center space-x-2">
@@ -329,7 +316,7 @@ const AdminUsersPage = () => {
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <Phone className="h-4 w-4" />
-                                  <span>{user.mobile}</span>
+                                  <span>{user.mobileNumber}</span>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <CreditCard className="h-4 w-4" />
@@ -338,26 +325,26 @@ const AdminUsersPage = () => {
                                 <div className="flex items-center space-x-2">
                                   <Calendar className="h-4 w-4" />
                                   <span>
-                                    Joined{" "}
-                                    {new Date(
-                                      user.joinedDate
-                                    ).toLocaleDateString()}
+                                    Joined {formatDate(user.createdAt)}
                                   </span>
                                 </div>
                               </div>
                               <div className="mt-2 text-sm text-gray-600">
                                 <span className="font-medium">Plan:</span>{" "}
-                                {user.subscriptionPlan} |
-                                <span className="font-medium">
-                                  {" "}
-                                  Last Login:
-                                </span>{" "}
-                                {new Date(user.lastLogin).toLocaleDateString()}
+                                {user.subscriptionDetails?.name || "No Plan"} |
+                                <span className="font-medium"> Expires:</span>{" "}
+                                {user.subscription?.expiryDate
+                                  ? formatDate(user.subscription.expiryDate)
+                                  : "N/A"}
                               </div>
                             </div>
                           </div>
                           <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewUser(user)}
+                            >
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </Button>
@@ -370,7 +357,7 @@ const AdminUsersPage = () => {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
                                   onClick={() =>
-                                    console.log("Edit user", user.id)
+                                    console.log("Edit user", user._id)
                                   }
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
@@ -379,7 +366,7 @@ const AdminUsersPage = () => {
                                 {user.status === "active" && (
                                   <DropdownMenuItem
                                     onClick={() =>
-                                      handleStatusChange(user.id, "suspended")
+                                      handleStatusChange(user._id, "suspended")
                                     }
                                   >
                                     <Clock className="h-4 w-4 mr-2" />
@@ -389,7 +376,7 @@ const AdminUsersPage = () => {
                                 {user.status === "suspended" && (
                                   <DropdownMenuItem
                                     onClick={() =>
-                                      handleStatusChange(user.id, "active")
+                                      handleStatusChange(user._id, "active")
                                     }
                                   >
                                     <CheckCircle className="h-4 w-4 mr-2" />
@@ -399,7 +386,7 @@ const AdminUsersPage = () => {
                                 {user.status !== "banned" && (
                                   <DropdownMenuItem
                                     onClick={() =>
-                                      handleStatusChange(user.id, "banned")
+                                      handleStatusChange(user._id, "banned")
                                     }
                                     className="text-red-600"
                                   >
@@ -432,6 +419,14 @@ const AdminUsersPage = () => {
           </CardContent>
         </Card>
       </div>
+      {view === "detail" && selectedUser && (
+        <UserDetailsPage
+          user={selectedUser}
+          onBack={handleBackToList}
+          showBackButton={true}
+          adminView={true}
+        />
+      )}
     </AdminLayout>
   );
 };

@@ -9,6 +9,7 @@ export const UserData = (data: any) => {
     isActive: data.isActive,
     credits: Number(data.credits),
     agreeToTerms: data.agreeToTerms,
+    status: data.status,
   };
 
   return a;

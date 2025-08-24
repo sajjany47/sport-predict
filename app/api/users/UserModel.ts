@@ -18,6 +18,11 @@ const UserSchema = new Schema(
         credits: Number,
       },
     ],
+    status: {
+      type: String,
+      enum: ["active", "suspended", "banned"], // 👈 Allowed roles
+      default: "active", // 👈 Optional: default role
+    },
     password: { type: String },
     username: { type: String },
     isActive: { type: Boolean, default: true },

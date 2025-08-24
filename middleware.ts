@@ -16,6 +16,7 @@ const protectedPaths: any = [
   "/api/subscription/create",
   "/api/subscription/update",
   "/api/users/credit-update",
+  "/api/users/list",
 ];
 
 export async function middleware(request: NextRequest) {
