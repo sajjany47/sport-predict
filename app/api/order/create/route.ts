@@ -26,13 +26,25 @@ export const POST = async (req: NextRequest) => {
     }
 
     if (data.ordertype === "prediction") {
-      const hasSufficientCredit =
-        (findUser?.credits ?? 0) >= (data?.credits ?? 0);
-      if (!hasSufficientCredit) {
+      const findMatchId = await Order.findOne({
+        userId: new mongoose.Types.ObjectId(data.userId),
+        paymentMode: "DEDUCTION",
+        matchId: Number(data.matchId),
+      });
+      if (findMatchId) {
         return NextResponse.json(
-          { success: false, message: "Not sufficient credits for purchase" },
-          { status: 402 } // Payment Required
+          { message: "Already sibscribe this match", credits: 0 },
+          { status: 200 }
         );
+      } else {
+        const hasSufficientCredit =
+          (findUser?.credits ?? 0) >= (data?.credits ?? 0);
+        if (!hasSufficientCredit) {
+          return NextResponse.json(
+            { success: false, message: "Not sufficient credits for purchase" },
+            { status: 402 } // Payment Required
+          );
+        }
       }
     }
     if (data.ordertype === "credit") {

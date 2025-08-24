@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { UserOrderCredit } from "@/app/MainService";
 
 interface Team {
   flag: string;
@@ -128,6 +129,7 @@ const AIPredictionModal: React.FC<{
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
+  const { selectedMatch } = useSelector((state: RootState) => state.matches);
   const [isLoading, setIsLoading] = useState(false);
   const [predictionData, setPredictionData] = useState<PredictionData | null>(
     null
@@ -145,21 +147,46 @@ const AIPredictionModal: React.FC<{
       return;
     }
 
-    try {
-      // Simulate API call with your actual response
-      const data: any = GetAIPrediction(match);
+    const data: any = GetAIPrediction(match);
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setPredictionData(data);
-      dispatch(updateCredits(user.credits - 1));
-      toast.success("AI Prediction generated successfully!");
-    } catch (error) {
-      toast.error("Failed to generate prediction. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    setPredictionData(data);
+
+    let payload = {
+      ordertype: "prediction",
+      userId: user!.id,
+      credits: 1,
+      status: "completed",
+      paymentMode: "DEDUCTION",
+      paymentDate: new Date(),
+      matchId: selectedMatch?.matchId,
+    };
+
+    await UserOrderCredit(payload)
+      .then((res) => {
+        dispatch(updateCredits(user.credits - (res.credits ?? 1)));
+        toast.success("AI Prediction generated successfully!");
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        toast.error("Failed to generate prediction. Please try again.");
+        setIsLoading(false);
+      });
+
+    // try {
+    //   // Simulate API call with your actual response
+    //   const data: any = GetAIPrediction(match);
+
+    //   await new Promise((resolve) => setTimeout(resolve, 2000));
+    //   setPredictionData(data);
+    //   dispatch(updateCredits(user.credits - 1));
+    //   toast.success("AI Prediction generated successfully!");
+    // } catch (error) {
+    //   toast.error("Failed to generate prediction. Please try again.");
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
-  console.log(predictionData);
+
   const getRoleIcon = (type: string) => {
     switch (type) {
       case "BAT":
