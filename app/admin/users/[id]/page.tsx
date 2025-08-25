@@ -486,7 +486,14 @@ const UserDetailsPage = () => {
                                   Order #{order.orderNumber}
                                 </p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-                                  {order.ordertype} •{" "}
+                                  <Badge
+                                    className={getOrderTypeColor(
+                                      order.ordertype
+                                    )}
+                                  >
+                                    {getOrderTypeText(order.ordertype)}
+                                  </Badge>{" "}
+                                  •{" "}
                                   {formatDate(
                                     order.paymentDate || order.createdAt
                                   )}
@@ -531,7 +538,13 @@ const UserDetailsPage = () => {
                                         Order #{order.orderNumber}
                                       </p>
                                       <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
-                                        {order.ordertype}
+                                        <Badge
+                                          className={getOrderTypeColor(
+                                            order.ordertype
+                                          )}
+                                        >
+                                          {getOrderTypeText(order.ordertype)}
+                                        </Badge>{" "}
                                       </p>
                                     </div>
                                   </div>
