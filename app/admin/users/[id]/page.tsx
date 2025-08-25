@@ -31,13 +31,13 @@ import {
   Shield,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
 import CustomLoader from "@/components/ui/CustomLoader";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 const UserDetailsPage = () => {
   const params = useParams();
@@ -60,6 +60,32 @@ const UserDetailsPage = () => {
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const getOrderTypeColor = (type: string) => {
+    switch (type) {
+      case "subscription":
+        return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700";
+      case "prediction":
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700";
+      case "credit":
+        return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/30 dark:text-gray-300 dark:border-gray-700";
+    }
+  };
+
+  const getOrderTypeText = (type: string) => {
+    switch (type) {
+      case "subscription":
+        return "Subscription";
+      case "prediction":
+        return "Prediction";
+      case "credit":
+        return "Credit Purchase";
+      default:
+        return type;
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -116,6 +142,23 @@ const UserDetailsPage = () => {
       : "bg-yellow-100 text-yellow-800 border-yellow-200";
   };
 
+  const getPaymentModeColor = (mode: string) => {
+    switch (mode) {
+      case "UPI":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "NETBANKING":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "QRCODE":
+        return "bg-amber-100 text-amber-800 border-amber-200";
+      case "PROMOTION":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "DEDUCTION":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
   const handleBackToList = () => {
     router.push("/admin/users");
   };
@@ -140,6 +183,9 @@ const UserDetailsPage = () => {
         {/* Back button and header */}
         {loading && <CustomLoader message="Details Loading" />}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            User Details
+          </h1>
           <Button
             variant="outline"
             onClick={handleBackToList}
@@ -148,9 +194,6 @@ const UserDetailsPage = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Users
           </Button>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            User Details
-          </h1>
         </div>
 
         {Object.keys(user).length > 0 && (
@@ -164,9 +207,9 @@ const UserDetailsPage = () => {
                 <div className="flex flex-col md:flex-row md:items-start space-y-6 md:space-y-0 md:space-x-6">
                   <div className="relative">
                     <Avatar className="w-24 h-24 border-4 border-white dark:border-gray-800 shadow-lg">
-                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarImage src="" alt={user.name} />
                       <AvatarFallback className="bg-blue-600 text-white text-2xl font-bold">
-                        {user.username.charAt(0).toUpperCase()}
+                        {user.name.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     {user.role === "admin" && (
@@ -346,7 +389,7 @@ const UserDetailsPage = () => {
                       className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
                     >
                       <Receipt className="h-4 w-4 mr-2" />
-                      Order History ({user.orderDetails.length})
+                      Order History ({user.orderDetails?.length || 0})
                     </TabsTrigger>
                     <TabsTrigger
                       value="activity"
@@ -368,7 +411,7 @@ const UserDetailsPage = () => {
                                 Total Orders
                               </p>
                               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                {user.orderDetails.length}
+                                {user.orderDetails?.length || 0}
                               </p>
                             </div>
                             <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/40">
@@ -385,11 +428,11 @@ const UserDetailsPage = () => {
                                 Credits Spent
                               </p>
                               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                {user.orderDetails.reduce(
+                                {user.orderDetails?.reduce(
                                   (total: any, order: any) =>
-                                    total + order.credits,
+                                    total + (order.credits || 0),
                                   0
-                                )}
+                                ) || 0}
                               </p>
                             </div>
                             <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900/40">
@@ -408,12 +451,12 @@ const UserDetailsPage = () => {
                               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                 ₹
                                 {user.orderDetails
-                                  .filter((order: any) => order.price)
+                                  ?.filter((order: any) => order.price)
                                   .reduce(
                                     (total: any, order: any) =>
                                       total + (order.price || 0),
                                     0
-                                  )}
+                                  ) || 0}
                               </p>
                             </div>
                             <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/40">
@@ -430,7 +473,7 @@ const UserDetailsPage = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
-                          {user.orderDetails.slice(0, 3).map((order: any) => (
+                          {user.orderDetails?.slice(0, 3).map((order: any) => (
                             <div
                               key={order._id}
                               className="flex items-center p-3 rounded-lg border"
@@ -444,7 +487,9 @@ const UserDetailsPage = () => {
                                 </p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
                                   {order.ordertype} •{" "}
-                                  {formatDate(order.paymentDate)}
+                                  {formatDate(
+                                    order.paymentDate || order.createdAt
+                                  )}
                                 </p>
                               </div>
                               <div className="flex flex-col items-end">
@@ -467,7 +512,7 @@ const UserDetailsPage = () => {
                   </TabsContent>
 
                   <TabsContent value="orders">
-                    {user.orderDetails.length > 0 ? (
+                    {user.orderDetails && user.orderDetails.length > 0 ? (
                       <div className="space-y-4">
                         {user.orderDetails.map((order: any) => (
                           <Card
@@ -491,11 +536,11 @@ const UserDetailsPage = () => {
                                     </div>
                                   </div>
                                   <Badge
-                                    className={getPaymentStatusColor(
-                                      order.paymentStatus
+                                    className={getPaymentModeColor(
+                                      order.paymentMode
                                     )}
                                   >
-                                    {order.paymentStatus ? "Paid" : "Pending"}
+                                    {order.paymentMode}
                                   </Badge>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
@@ -504,7 +549,9 @@ const UserDetailsPage = () => {
                                       Date
                                     </span>
                                     <span className="font-medium">
-                                      {formatDate(order.paymentDate)}
+                                      {formatDate(
+                                        order.paymentDate || order.createdAt
+                                      )}
                                     </span>
                                   </div>
                                   <div className="flex flex-col">
@@ -512,7 +559,7 @@ const UserDetailsPage = () => {
                                       Credits
                                     </span>
                                     <span className="font-medium">
-                                      {order.credits}
+                                      {order.credits || 0}
                                     </span>
                                   </div>
                                   <div className="flex flex-col">
@@ -534,6 +581,14 @@ const UserDetailsPage = () => {
                                     </p>
                                   </div>
                                 )}
+                                <div className="mt-3 pt-3 border-t">
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    Status:{" "}
+                                    <span className="font-medium capitalize">
+                                      {order.status}
+                                    </span>
+                                  </p>
+                                </div>
                               </div>
                             </CardContent>
                           </Card>
