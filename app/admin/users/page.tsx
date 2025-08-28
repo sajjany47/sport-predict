@@ -34,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
-import { UserDetails } from "../AdminService";
+import { fetchUserDetails } from "../AdminService";
 import { useRouter } from "next/navigation";
 import CustomLoader from "@/components/ui/CustomLoader";
 
@@ -53,7 +53,7 @@ const AdminUsersPage = () => {
 
   const GetUserDetails = () => {
     setLoading(true);
-    UserDetails({})
+    fetchUserDetails({})
       .then((res) => {
         setLoading(false);
         dispatch(setUsers(res.data ?? []));

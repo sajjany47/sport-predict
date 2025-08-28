@@ -27,6 +27,8 @@ import {
   Building,
   QrCode,
   User,
+  Download,
+  ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -200,8 +202,32 @@ export const UserDetails = ({ userData }: { userData: any }) => {
 
   return (
     <>
-      {Object.keys(userData).length > 0 ? (
-        <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50">
+        <div className="space-y-6 p-2">
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" onClick={() => router.back()}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to User
+            </Button>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">User Details</h1>
+            </div>
+            <div className="mt-4 md:mt-0 flex items-center space-x-2">
+              <Button variant="default">
+                <User className="h-4 w-4 mr-2" />
+                Edit Profile
+              </Button>
+              <Button variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+        {Object.keys(userData).length > 0 ? (
           <div className="container mx-auto px-4 py-8">
             {/* Welcome Header */}
             <div className="mb-8">
@@ -529,10 +555,10 @@ export const UserDetails = ({ userData }: { userData: any }) => {
               </div>
             </div>
           </div>
-        </div>
-      ) : (
-        ""
-      )}
+        ) : (
+          ""
+        )}
+      </div>
     </>
   );
 };

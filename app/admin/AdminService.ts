@@ -85,7 +85,7 @@ export const OrderUpdate = async (payload: any) => {
   }
 };
 
-export const UserDetails = async (payload: any) => {
+export const fetchUserDetails = async (payload: any) => {
   try {
     const response = await privateApi.post("/api/users/list", payload, {
       headers: getHeadersWithToken(),

@@ -64,7 +64,7 @@ const LoginPage = () => {
           username: res.data.user.username,
           email: res.data.user.email,
           mobile: res.data.user.mobileNumber,
-          credits: res.data.user.role === "admin" ? 999 : res.data.user.credits,
+          credits: res.data.user.credits,
           subscriptionPlan: findSubscription.subscriptionId || null,
           subscriptionExpiry: findSubscription.expiryDate || null,
           role: res.data.user.role,

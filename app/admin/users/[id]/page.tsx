@@ -2,13 +2,16 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { RootState } from "@/store";
 import CustomLoader from "@/components/ui/CustomLoader";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { UserDetails } from "@/components/UserDetails";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Download, User } from "lucide-react";
 
 const DashboardPage = () => {
+  const router = useRouter();
   const params = useParams();
   const [userData, setUserData] = useState<any>({});
   const [loading, setLoading] = useState(false);
