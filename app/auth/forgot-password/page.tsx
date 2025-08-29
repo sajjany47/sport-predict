@@ -1,0 +1,406 @@
+"use client";
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  ArrowLeft,
+  Mail,
+  LockKeyhole,
+  ShieldCheck,
+  Clock,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+
+const ForgotPasswordPage = () => {
+  const router = useRouter();
+  const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password, 4: Success
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  // Handle OTP input change
+  const handleOtpChange = (element: any, index: number) => {
+    if (isNaN(element.value)) return false;
+
+    setOtp([...otp.map((d, idx) => (idx === index ? element.value : d))]);
+
+    // Focus next input
+    if (element.nextSibling && element.value !== "") {
+      element.nextSibling.focus();
+    }
+  };
+
+  // Handle OTP key actions
+  const handleKeyDown = (e: any, index: number) => {
+    if (e.key === "Backspace" && !e.target.value && index > 0) {
+      // Focus previous input on backspace
+      const prevInput = e.target.previousSibling;
+      prevInput.focus();
+    }
+  };
+
+  // Handle back to login
+  const handleBackToLogin = () => {
+    router.push("/auth/login");
+  };
+
+  // Handle send OTP
+  const handleSendOtp = () => {
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      setStep(2);
+      setCountdown(30); // 30 seconds countdown
+      startCountdown();
+    }, 1500);
+  };
+
+  // Start countdown for resend OTP
+  const startCountdown = () => {
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Handle verify OTP
+  const handleVerifyOtp = () => {
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      setStep(3);
+    }, 1500);
+  };
+
+  // Handle resend OTP
+  const handleResendOtp = () => {
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      setCountdown(30);
+      startCountdown();
+    }, 1500);
+  };
+
+  // Handle password reset
+  const handleResetPassword = () => {
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      setStep(4);
+    }, 1500);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-bold text-gray-900">Account Recovery</h1>
+          <p className="text-gray-600 mt-2">
+            Follow the steps to reset your password
+          </p>
+        </div>
+
+        <Card className="shadow-lg border-0">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl">
+                {step === 1 && "Forgot Password"}
+                {step === 2 && "Verify OTP"}
+                {step === 3 && "Set New Password"}
+                {step === 4 && "Password Reset Successful"}
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBackToLogin}
+                className="h-8 w-8"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </div>
+            <CardDescription>
+              {step === 1 &&
+                "Enter your email address to receive a verification code"}
+              {step === 2 && "Enter the 6-digit code sent to your email"}
+              {step === 3 && "Create a new password for your account"}
+              {step === 4 && "Your password has been successfully reset"}
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            {/* Progress bar */}
+            <div className="space-y-2">
+              <Progress value={step * 25} className="h-2" />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Step {step} of 4</span>
+                <span>{step * 25}% Complete</span>
+              </div>
+            </div>
+
+            {/* Step 1: Email Input */}
+            {step === 1 && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      className="pl-10"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={handleSendOtp}
+                  disabled={!email || isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Clock className="mr-2 h-4 w-4 animate-spin" />
+                      Sending Code...
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Send Verification Code
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {/* Step 2: OTP Verification */}
+            {step === 2 && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label>Verification Code</Label>
+                  <div className="flex justify-between space-x-2">
+                    {otp.map((data, index) => (
+                      <Input
+                        key={index}
+                        type="text"
+                        maxLength={1}
+                        value={data}
+                        onChange={(e) => handleOtpChange(e.target, index)}
+                        onKeyDown={(e) => handleKeyDown(e, index)}
+                        onFocus={(e) => e.target.select()}
+                        className="text-center h-12 text-lg font-semibold"
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 text-center">
+                    Enter the 6-digit code sent to {email}
+                  </p>
+                </div>
+
+                <Button
+                  className="w-full"
+                  onClick={handleVerifyOtp}
+                  disabled={otp.some((digit) => digit === "") || isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Clock className="mr-2 h-4 w-4 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Verify Code
+                    </>
+                  )}
+                </Button>
+
+                <div className="text-center">
+                  {countdown > 0 ? (
+                    <p className="text-sm text-gray-500">
+                      Resend code in {countdown} seconds
+                    </p>
+                  ) : (
+                    <Button
+                      variant="link"
+                      onClick={handleResendOtp}
+                      disabled={isLoading}
+                      className="text-blue-600"
+                    >
+                      Resend Verification Code
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: New Password */}
+            {step === 3 && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">New Password</Label>
+                  <div className="relative">
+                    <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter new password"
+                      className="pl-10 pr-10"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <div className="relative">
+                    <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm new password"
+                      className="pl-10 pr-10"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full"
+                  onClick={handleResetPassword}
+                  disabled={
+                    !password ||
+                    !confirmPassword ||
+                    password !== confirmPassword ||
+                    isLoading
+                  }
+                >
+                  {isLoading ? (
+                    <>
+                      <Clock className="mr-2 h-4 w-4 animate-spin" />
+                      Resetting Password...
+                    </>
+                  ) : (
+                    <>
+                      <LockKeyhole className="mr-2 h-4 w-4" />
+                      Reset Password
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {/* Step 4: Success */}
+            {step === 4 && (
+              <div className="text-center py-6 space-y-4">
+                <div className="flex justify-center">
+                  <div className="rounded-full bg-green-100 p-4">
+                    <CheckCircle2 className="h-12 w-12 text-green-600" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold">
+                  Password Reset Successful
+                </h3>
+                <p className="text-gray-600">
+                  Your password has been successfully reset. You can now log in
+                  with your new password.
+                </p>
+                <Button className="w-full" onClick={handleBackToLogin}>
+                  Back to Login
+                </Button>
+              </div>
+            )}
+          </CardContent>
+
+          <CardFooter className="flex flex-col space-y-4">
+            {step !== 4 && (
+              <>
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-gray-500">
+                      Need help?
+                    </span>
+                  </div>
+                </div>
+                <p className="text-center text-sm text-gray-600">
+                  Contact support at{" "}
+                  <a
+                    href="mailto:support@example.com"
+                    className="text-blue-600 hover:underline"
+                  >
+                    support@example.com
+                  </a>
+                </p>
+              </>
+            )}
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default ForgotPasswordPage;
