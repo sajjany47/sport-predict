@@ -22,3 +22,12 @@ export async function generateToken(payload: any, expiresIn: string) {
     .setExpirationTime(expiresIn) // Expiration time
     .sign(SECRET_KEY);
 }
+
+export const GenerateOTP = (date: any) => {
+  const timestamp = date.getTime();
+
+  // Create a 6 digit OTP by taking modulo
+  const otp = String(timestamp % 1_000_000).padStart(6, "0");
+
+  return otp;
+};

@@ -2,7 +2,6 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { load } from "cheerio";
 import axios from "axios";
-import { error } from "console";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

@@ -89,3 +89,18 @@ export const UserOrderCredit = async (payload: any) => {
     throw new Error(error.response?.data?.message);
   }
 };
+
+export const UserResetPassword = async (payload: any) => {
+  try {
+    const response = await privateApi.post(
+      "/api/users/reset-password",
+      payload,
+      {
+        headers: getHeaders(),
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};

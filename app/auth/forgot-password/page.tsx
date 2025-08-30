@@ -16,27 +16,38 @@ import { Label } from "@/components/ui/label";
 import {
   ArrowLeft,
   Mail,
-  LockKeyhole,
   ShieldCheck,
   Clock,
   CheckCircle2,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { UserResetPassword } from "@/app/MainService";
+import toast from "react-hot-toast";
+import ForgetPassword from "@/components/ForgetPassword";
 
 const ForgotPasswordPage = () => {
   const router = useRouter();
   const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password, 4: Success
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [resData, setResData] = useState<any>(null);
 
+  const resetPassword = (payload: any) => {
+    setIsLoading(true);
+    return UserResetPassword(payload) // <-- return this
+      .then((res) => {
+        toast.success(res.message);
+        setIsLoading(false);
+        return res; // <-- return result here
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed update details. Please try again.");
+        setIsLoading(false);
+        throw err;
+      });
+  };
   // Handle OTP input change
   const handleOtpChange = (element: any, index: number) => {
     if (isNaN(element.value)) return false;
@@ -64,15 +75,18 @@ const ForgotPasswordPage = () => {
   };
 
   // Handle send OTP
-  const handleSendOtp = () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+  const handleSendOtp = async () => {
+    const result: any = await resetPassword({
+      userId: email,
+      type: "generate-otp",
+    });
+
+    if (result) {
+      setResData(result.createdAt);
       setStep(2);
       setCountdown(30); // 30 seconds countdown
       startCountdown();
-    }, 1500);
+    }
   };
 
   // Start countdown for resend OTP
@@ -89,34 +103,43 @@ const ForgotPasswordPage = () => {
   };
 
   // Handle verify OTP
-  const handleVerifyOtp = () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+  const handleVerifyOtp = async () => {
+    const result: any = await resetPassword({
+      userId: email,
+      type: "verify-otp",
+      createdAt: resData,
+      otp: otp.join(""),
+    });
+    if (result) {
+      setResData(result);
       setStep(3);
-    }, 1500);
+    }
   };
 
   // Handle resend OTP
-  const handleResendOtp = () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+  const handleResendOtp = async () => {
+    const result: any = await resetPassword({
+      userId: email,
+      type: "reset-password",
+    });
+    if (result) {
+      setResData(result.createdAt);
       setCountdown(30);
       startCountdown();
-    }, 1500);
+    }
   };
 
   // Handle password reset
-  const handleResetPassword = () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+  const handleResetPassword = async (values: any) => {
+    const result: any = await resetPassword({
+      userId: email,
+      type: "reset-password",
+      password: values.password,
+    });
+    if (result) {
+      setResData(result.createdAt);
       setStep(4);
-    }, 1500);
+    }
   };
 
   return (
@@ -267,86 +290,10 @@ const ForgotPasswordPage = () => {
             {/* Step 3: New Password */}
             {step === 3 && (
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">New Password</Label>
-                  <div className="relative">
-                    <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter new password"
-                      className="pl-10 pr-10"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-500" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-gray-500" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <div className="relative">
-                    <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm new password"
-                      className="pl-10 pr-10"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-500" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-gray-500" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <Button
-                  className="w-full"
-                  onClick={handleResetPassword}
-                  disabled={
-                    !password ||
-                    !confirmPassword ||
-                    password !== confirmPassword ||
-                    isLoading
-                  }
-                >
-                  {isLoading ? (
-                    <>
-                      <Clock className="mr-2 h-4 w-4 animate-spin" />
-                      Resetting Password...
-                    </>
-                  ) : (
-                    <>
-                      <LockKeyhole className="mr-2 h-4 w-4" />
-                      Reset Password
-                    </>
-                  )}
-                </Button>
+                <ForgetPassword
+                  loading={isLoading}
+                  onSubmit={handleResetPassword}
+                />
               </div>
             )}
 
