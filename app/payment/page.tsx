@@ -39,7 +39,7 @@ const PaymentPage = () => {
   );
   const { plans } = useSelector((state: RootState) => state.subscription);
 
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("upi");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("UPI");
   const [transactionId, setTransactionId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState("");
@@ -63,6 +63,7 @@ const PaymentPage = () => {
   const paymentDetails: any = {
     upi: {
       id: "8981374643@naviaxis",
+      upi: "8981374643@naviaxis",
       name: "SAJJAN KUMAR YADAV",
       note: "SportPredict Subscription Payment",
     },
@@ -73,8 +74,12 @@ const PaymentPage = () => {
       accountHolder: "SAJJAN KUMAR YADAV",
       branch: "Rashbehari Branch",
     },
-    qrCode:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", // Placeholder QR code
+    qrCode: {
+      url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+      name: "test",
+      upiId: "sajjany@ybl",
+    },
+    // Placeholder QR code
   };
 
   const handleCopy = async (text: string, type: string) => {
@@ -114,7 +119,14 @@ const PaymentPage = () => {
       paymentMode: selectedPaymentMethod.toUpperCase(),
       paymentDate: new Date(),
       paymentId: transactionId.trim(),
-      paymentModeDetails: paymentDetails[selectedPaymentMethod],
+      paymentModeDetails:
+        paymentDetails[
+          selectedPaymentMethod === "UPI"
+            ? "upi"
+            : selectedPaymentMethod === "NETBANKING"
+            ? "bank"
+            : "qrCode"
+        ],
     };
 
     UserOrderCredit(payload)

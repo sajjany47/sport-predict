@@ -7,6 +7,12 @@ import Order from "../OrderModel";
 import mongoose from "mongoose";
 import User from "../../users/UserModel";
 import moment from "moment";
+import { MailSend } from "@/lib/MailSend";
+import {
+  AdminPaymentConfirmationTemp,
+  UserPaymentConfirmationTemp,
+} from "@/components/template/subscription-temp";
+import Subscription from "../../subscription/SubscriptionModel";
 
 export const POST = async (req: NextRequest) => {
   await dbConnect();
@@ -81,6 +87,43 @@ export const POST = async (req: NextRequest) => {
         { _id: new mongoose.Types.ObjectId(data.userId) },
         { $set: { credits: (findUser?.credits ?? 0) + (data?.credits ?? 0) } }
       );
+    }
+    if (orderData && orderData.ordertype === "subscription") {
+      const findSUbscription = await Subscription.findOne({
+        _id: new mongoose.Types.ObjectId(prepareData.subscriptionId),
+      });
+      const findAdmin = await User.findOne({ role: "admin" });
+      await MailSend({
+        to: [findUser.email],
+        subject: "Payment Submitted - SportPredict",
+        html: UserPaymentConfirmationTemp({
+          subscriptionPlan: findSUbscription?.name || "",
+          paymentId: orderData.paymentId || "",
+          paymentMode: orderData.paymentMode || "",
+          paymentDate: moment(prepareData.paymentDate).format(
+            "MMMM DD, YYYY HH:mm"
+          ),
+          paymentModeDetails: orderData.paymentModeDetails || "",
+          price: prepareData.price || 0,
+          username: findUser.username,
+        }),
+      });
+      await MailSend({
+        to: [findUser.email],
+        subject: `Payment Submitted(${findUser.username}) - SportPredict`,
+        html: AdminPaymentConfirmationTemp({
+          subscriptionPlan: findSUbscription?.name || "",
+          paymentId: prepareData.paymentId || "",
+          paymentMode: prepareData.paymentMode || "",
+          paymentDate: moment(prepareData.paymentDate).format(
+            "MMMM DD, YYYY HH:mm"
+          ),
+          paymentModeDetails: prepareData.paymentModeDetails || "",
+          price: prepareData.price || 0,
+          username: findUser.username,
+          email: findUser.email,
+        }),
+      });
     }
     return NextResponse.json(
       { success: true, message: "Order created successfully", data: orderData },

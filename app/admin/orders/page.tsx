@@ -66,6 +66,7 @@ const AdminOrdersPage = () => {
       const response = await OrderList({
         startDate: dateRange.from,
         endDate: dateRange.to,
+        ordertype: "subscription",
       });
       return response.data; // extract only the array part
     },

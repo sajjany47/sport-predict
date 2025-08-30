@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
     }
     const prepareData = SubscriptionData(data);
     const newSub = await Subscription.create(prepareData);
+
     return NextResponse.json(
       { success: true, subscription: newSub },
       { status: 201 }
