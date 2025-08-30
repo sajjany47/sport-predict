@@ -36,11 +36,11 @@ const ForgotPasswordPage = () => {
 
   const resetPassword = (payload: any) => {
     setIsLoading(true);
-    return UserResetPassword(payload) // <-- return this
+    return UserResetPassword(payload)
       .then((res) => {
         toast.success(res.message);
         setIsLoading(false);
-        return res; // <-- return result here
+        return res;
       })
       .catch((err) => {
         toast.error(err.message || "Failed update details. Please try again.");
@@ -48,6 +48,7 @@ const ForgotPasswordPage = () => {
         throw err;
       });
   };
+
   // Handle OTP input change
   const handleOtpChange = (element: any, index: number) => {
     if (isNaN(element.value)) return false;
@@ -143,19 +144,19 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900 p-4">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Account Recovery</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-white">Account Recovery</h1>
+          <p className="text-indigo-200 mt-2">
             Follow the steps to reset your password
           </p>
         </div>
 
-        <Card className="shadow-lg border-0">
+        <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-2xl">
+              <CardTitle className="text-2xl text-gray-900">
                 {step === 1 && "Forgot Password"}
                 {step === 2 && "Verify OTP"}
                 {step === 3 && "Set New Password"}
@@ -165,12 +166,12 @@ const ForgotPasswordPage = () => {
                 variant="ghost"
                 size="icon"
                 onClick={handleBackToLogin}
-                className="h-8 w-8"
+                className="h-8 w-8 text-gray-700 hover:text-indigo-700"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </div>
-            <CardDescription>
+            <CardDescription className="text-gray-600">
               {step === 1 &&
                 "Enter your email address to receive a verification code"}
               {step === 2 && "Enter the 6-digit code sent to your email"}
@@ -182,7 +183,7 @@ const ForgotPasswordPage = () => {
           <CardContent className="space-y-4">
             {/* Progress bar */}
             <div className="space-y-2">
-              <Progress value={step * 25} className="h-2" />
+              <Progress value={step * 25} className="h-2 bg-gray-200" />
               <div className="flex justify-between text-xs text-gray-500">
                 <span>Step {step} of 4</span>
                 <span>{step * 25}% Complete</span>
@@ -193,21 +194,23 @@ const ForgotPasswordPage = () => {
             {step === 1 && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email" className="text-gray-700">
+                    Email Address
+                  </Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="Enter your email"
-                      className="pl-10"
+                      className="pl-10 bg-white"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
                 </div>
                 <Button
-                  className="w-full"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700"
                   onClick={handleSendOtp}
                   disabled={!email || isLoading}
                 >
@@ -230,7 +233,7 @@ const ForgotPasswordPage = () => {
             {step === 2 && (
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label>Verification Code</Label>
+                  <Label className="text-gray-700">Verification Code</Label>
                   <div className="flex justify-between space-x-2">
                     {otp.map((data, index) => (
                       <Input
@@ -241,7 +244,7 @@ const ForgotPasswordPage = () => {
                         onChange={(e) => handleOtpChange(e.target, index)}
                         onKeyDown={(e) => handleKeyDown(e, index)}
                         onFocus={(e) => e.target.select()}
-                        className="text-center h-12 text-lg font-semibold"
+                        className="text-center h-12 text-lg font-semibold bg-white"
                       />
                     ))}
                   </div>
@@ -251,7 +254,7 @@ const ForgotPasswordPage = () => {
                 </div>
 
                 <Button
-                  className="w-full"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700"
                   onClick={handleVerifyOtp}
                   disabled={otp.some((digit) => digit === "") || isLoading}
                 >
@@ -278,7 +281,7 @@ const ForgotPasswordPage = () => {
                       variant="link"
                       onClick={handleResendOtp}
                       disabled={isLoading}
-                      className="text-blue-600"
+                      className="text-indigo-600 hover:text-indigo-800"
                     >
                       Resend Verification Code
                     </Button>
@@ -305,14 +308,17 @@ const ForgotPasswordPage = () => {
                     <CheckCircle2 className="h-12 w-12 text-green-600" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold">
+                <h3 className="text-xl font-semibold text-gray-900">
                   Password Reset Successful
                 </h3>
                 <p className="text-gray-600">
                   Your password has been successfully reset. You can now log in
                   with your new password.
                 </p>
-                <Button className="w-full" onClick={handleBackToLogin}>
+                <Button
+                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                  onClick={handleBackToLogin}
+                >
                   Back to Login
                 </Button>
               </div>
@@ -336,9 +342,9 @@ const ForgotPasswordPage = () => {
                   Contact support at{" "}
                   <a
                     href="mailto:support@example.com"
-                    className="text-blue-600 hover:underline"
+                    className="text-indigo-600 hover:underline"
                   >
-                    support@example.com
+                    sportpredict247@gmail.com
                   </a>
                 </p>
               </>
