@@ -7,7 +7,10 @@ import moment from "moment";
 import Subscription from "../../subscription/SubscriptionModel";
 import User from "../../users/UserModel";
 import { MailSend } from "@/lib/MailSend";
-import { PaymentVerifiedTem } from "@/components/template/subscription-temp";
+import {
+  PaymentFailedTem,
+  PaymentVerifiedTem,
+} from "@/components/template/subscription-temp";
 
 export const POST = async (req: NextRequest) => {
   await dbConnect();
@@ -82,17 +85,16 @@ export const POST = async (req: NextRequest) => {
     );
 
     if (updateOrder) {
+      const findUser = await User.findOne({
+        _id: new mongoose.Types.ObjectId(findOrder.userId),
+      });
+      if (!findUser) {
+        return NextResponse.json(
+          { success: false, message: "User not found" },
+          { status: 404 }
+        );
+      }
       if (credits > 0 && updateData.status === "completed") {
-        const findUser = await User.findOne({
-          _id: new mongoose.Types.ObjectId(findOrder.userId),
-        });
-        if (!findUser) {
-          return NextResponse.json(
-            { success: false, message: "User not found" },
-            { status: 404 }
-          );
-        }
-
         if (findOrder.ordertype === "subscription") {
           await User.updateOne(
             { _id: new mongoose.Types.ObjectId(findOrder.userId) },
@@ -139,32 +141,40 @@ export const POST = async (req: NextRequest) => {
               }),
             });
           }
-          // Step 1: Deactivate all existing subscriptions
-          // const updatedSubscriptions = (findUser.subscription || []).map(
-          //   (item: any) => ({
-          //     ...item, // if Mongoose doc, convert to plain object
-          //     isActive: false,
-          //   })
-          // );
-
-          // // Step 2: Add the new subscription
-          // updatedSubscriptions.push({
-          //   _id: new mongoose.Types.ObjectId(),
-          //   subscriptionId: new mongoose.Types.ObjectId(
-          //     findOrder.subscriptionId
-          //   ),
-          //   isActive: true,
-          //   expiryDate: new Date(updateData.subscriptionExpired),
-          //   purchaseDate: new Date(findOrder.paymentDate),
-          //   credits: Number(credits),
-          // });
-          // updateUser.subscription = updatedSubscriptions;
         }
         if (findOrder.ordertype === "credit") {
           const updateUserData = await User.updateOne(
             { _id: new mongoose.Types.ObjectId(findOrder.userId) },
             { $set: { credits: Number(findUser.credits) + Number(credits) } }
           );
+        }
+      }
+      if (updateData.status === "failed") {
+        if (findOrder.ordertype === "subscription") {
+          const findSubscription = await Subscription.findOne({
+            _id: new mongoose.Types.ObjectId(findOrder.subscriptionId),
+          });
+          if (findSubscription) {
+            await MailSend({
+              to: [findUser.email],
+              subject: `Transaction Failed(${findUser.username}) - SportPredict`,
+              html: PaymentFailedTem({
+                subscriptionPlan: findSubscription?.name || "",
+                paymentId: findOrder.paymentId || "",
+                paymentMode: findOrder.paymentMode || "",
+                paymentDate: moment(findOrder.paymentDate).format(
+                  "MMMM DD, YYYY HH:mm"
+                ),
+                paymentModeDetails: findOrder.paymentModeDetails || {},
+                verificationDate: moment().format("MMMM DD, YYYY HH:mm"),
+                price: findOrder.price || 0,
+                username: findUser.username,
+                reason: updateData.remarks || "NA",
+              }),
+            });
+          } else {
+            return;
+          }
         }
       }
     }

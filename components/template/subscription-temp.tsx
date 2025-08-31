@@ -30,6 +30,83 @@ export const getPaymentDetails = (data: any, paymentMode: string) => {
 
   return details;
 };
+
+export const getPaymentFailedModeDetails = (data: any, paymentMode: string) => {
+  let details = "";
+
+  if (paymentMode === "UPI") {
+    details = `
+                <div class="detail-row">
+                    <div class="detail-label">Payment Method:</div>
+                    <div class="detail-value">${paymentMode}</div>
+                </div>
+                 <div class="detail-row">
+                    <div class="detail-label">UPI ID:</div>
+                    <div class="detail-value">${data.upi}</div>
+                </div>
+                 <div class="detail-row">
+                    <div class="detail-label">Name:</div>
+                    <div class="detail-value">${data.name}</div>
+                </div>
+                 <div class="detail-row">
+                    <div class="detail-label">Note:</div>
+                    <div class="detail-value">${data.note}</div>
+                </div>
+    `;
+  } else if (paymentMode === "NETBANKING") {
+    details = `
+                 <div class="detail-row">
+                    <div class="detail-label">Payment Method:</div>
+                    <div class="detail-value">${paymentMode}</div>
+                </div>
+                 <div class="detail-row">
+                    <div class="detail-label">Bank Name:</div>
+                    <div class="detail-value">${data.bankName}</div>
+                </div>
+                 <div class="detail-row">
+                    <div class="detail-label">Account Number:</div>
+                    <div class="detail-value">${data.accountNumber}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">IFSC Code:</div>
+                    <div class="detail-value">${data.ifscCode}</div>
+                </div>
+                 <div class="detail-row">
+                    <div class="detail-label">Account Holder:</div>
+                    <div class="detail-value">${data.accountHolder}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Branch:</div>
+                    <div class="detail-value">${data.Branch}</div>
+                </div>
+      
+    `;
+  } else if (paymentMode === "QRCODE") {
+    details = `
+                <div class="detail-row">
+                    <div class="detail-label">Payment Method:</div>
+                    <div class="detail-value">${paymentMode}</div>
+                </div>
+                 <div class="detail-row">
+                    <div class="detail-label">UPI ID:</div>
+                    <div class="detail-value">${data.upiId}</div>
+                </div>
+                 <div class="detail-row">
+                    <div class="detail-label">Name:</div>
+                    <div class="detail-value">${data.name}</div>
+                </div>
+                 <div class="detail-row">
+                    <div class="detail-label">QR Code:</div>
+                    <div class="detail-value"><img src="${data.url}" alt="QR Code" style="width:150px; margin-top:10px;" /></div>
+                </div>
+      
+    `;
+  } else {
+    details = `<p><strong>Method:</strong> Unknown</p>`;
+  }
+
+  return details;
+};
 export const UserPaymentConfirmationTemp = (data: any) => {
   let temp = `<!DOCTYPE html>
 <html lang="en">
@@ -611,6 +688,307 @@ export const PaymentVerifiedTem = (data: any) => {
                 <a href="#">Privacy Policy</a>
                 <a href="#">Terms of Service</a>
                 <a href="#">Contact Support</a>
+            </div>
+            <p class="copyright">© 2023 SportPredict. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+};
+
+export const PaymentFailedTem = (data: any) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Failed - SportPredict</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            padding: 20px;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 650px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .header {
+            background: linear-gradient(to right, #1a2a6c, #2c3e50);
+            padding: 30px;
+            color: white;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 span {
+            color: #fdbb2d;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .icon-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .icon-container img {
+            max-width: 180px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            background: #e53e3e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+        
+        .error-card {
+            background: #fff5f5;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 1px dashed #e53e3e;
+        }
+        
+        .error-card h3 {
+            color: #c53030;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #fed7d7;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 12px;
+        }
+        
+        .detail-label {
+            flex: 1;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .detail-value {
+            flex: 2;
+            color: #555;
+        }
+        
+        .reason-box {
+            background: white;
+            border-left: 4px solid #e53e3e;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .button {
+            display: block;
+            background: #1a2a6c;
+            color: white;
+            text-align: center;
+            padding: 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .button:hover {
+            background: #2c3e50;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .support-note {
+            background: #f0f4ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border-left: 4px solid #1a2a6c;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            margin: 0 12px;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #fdbb2d;
+        }
+        
+        .copyright {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .content {
+                padding: 25px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+                margin-bottom: 15px;
+            }
+            
+            .detail-label {
+                margin-bottom: 5px;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .footer-links a {
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span>Sport</span>Predict</h1>
+            <p>The future of sports predictions</p>
+        </div>
+        
+        <div class="content">
+            <div class="icon-container">
+                <img src="https://static.vecteezy.com/system/resources/previews/004/968/453/non_2x/failed-to-make-payment-by-credit-card-concept-illustration-flat-design-eps10-modern-graphic-element-for-landing-page-empty-state-ui-infographic-vector.jpg" alt="Transaction Failed">
+            </div>
+            
+            <h2 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">
+                Transaction Failed <span class="status-badge">DECLINED</span>
+            </h2>
+            
+            <p>Hello <strong>${data.username}</strong>,</p>
+            <p>We're sorry to inform you that your recent payment attempt was unsuccessful. Please review the details below.</p>
+            
+            <div class="error-card">
+                <h3>Transaction Details</h3>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Subscription Plan:</div>
+                    <div class="detail-value">${data.subscriptionPlan}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Amount:</div>
+                    <div class="detail-value">₹${data.price}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Payment Date:</div>
+                    <div class="detail-value">${data.paymentDate}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Transaction ID:</div>
+                    <div class="detail-value">${data.paymentId}</div>
+                </div>
+                ${getPaymentFailedModeDetails(
+                  data.paymentModeDetails,
+                  data.paymentMode
+                )}
+                
+                
+                <div class="detail-row">
+                    <div class="detail-label">Date & Time:</div>
+                    <div class="detail-value">${data.verificationDate}</div>
+                </div>
+            </div>
+            
+            <div class="reason-box">
+                <h3 style="color: #c53030; margin-top: 0;">Failure Reason</h3>
+                <p><strong>${data.reason}</strong> </p>
+            </div>
+            
+            <div class="support-note">
+                <h3 style="color: #1a2a6c; margin-top: 0;">Need Help?</h3>
+                <p>If you continue to experience issues with your payment, please contact our support team for assistance. Common solutions include:</p>
+                <ul style="margin: 10px 0 10px 20px;">
+                    <li>Verifying your payment details</li>
+                    <li>Ensuring sufficient funds are available</li>
+                    <li>Contacting your bank or payment provider</li>
+                    <li>Trying a different payment method</li>
+                </ul>
+            </div>
+            
+            <a href="${
+              process.env.NEXT_PUBLIC_APP_URL
+            }/payment-retry" class="button">Try Payment Again</a>
+            
+            <p>If you believe this is an error or need further assistance, please contact our support team.</p>
+            
+            <p>Best regards,<br><strong>The SportPredict Team</strong></p>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-links">
+                <a href="${process.env.NEXT_PUBLIC_APP_URL}">Home</a>
+                <a href="${process.env.NEXT_PUBLIC_APP_URL}/about">About Us</a>
+                <a href="${
+                  process.env.NEXT_PUBLIC_APP_URL
+                }/privacy">Privacy Policy</a>
+                <a href="${
+                  process.env.NEXT_PUBLIC_APP_URL
+                }/terms">Terms of Service</a>
+                <a href="${
+                  process.env.NEXT_PUBLIC_APP_URL
+                }/support">Contact Support</a>
             </div>
             <p class="copyright">© 2023 SportPredict. All rights reserved.</p>
         </div>
