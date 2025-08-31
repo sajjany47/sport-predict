@@ -149,6 +149,7 @@ const OrderDetailsPage = () => {
 
   const handelClose = () => {
     setStatusDialoge(false);
+    GetDetails();
   };
 
   return (
