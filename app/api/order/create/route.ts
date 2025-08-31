@@ -109,7 +109,7 @@ export const POST = async (req: NextRequest) => {
         }),
       });
       await MailSend({
-        to: [findUser.email],
+        to: [findAdmin.email],
         subject: `Payment Submitted(${findUser.username}) - SportPredict`,
         html: AdminPaymentConfirmationTemp({
           subscriptionPlan: findSUbscription?.name || "",
