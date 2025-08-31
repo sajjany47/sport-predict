@@ -25,6 +25,7 @@ const UserSchema = new Schema(
     },
     password: { type: String },
     username: { type: String },
+    remarks: { type: String, trim: true },
     isActive: { type: Boolean, default: true },
     agreeToTerms: { type: Boolean, default: false },
     credits: { type: Number, default: 0 },

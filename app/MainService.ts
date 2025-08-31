@@ -104,3 +104,14 @@ export const UserResetPassword = async (payload: any) => {
     throw new Error(error.response?.data?.message);
   }
 };
+
+export const UserUpdate = async (payload: any) => {
+  try {
+    const response = await publicApi.post("/api/users/update", payload, {
+      headers: getHeadersWithToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};

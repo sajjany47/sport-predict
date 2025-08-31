@@ -12,6 +12,8 @@ import { Button } from "./ui/button";
 import * as Yup from "yup";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
+import { UserUpdate } from "@/app/MainService";
+import toast from "react-hot-toast";
 
 const validationSchema = Yup.object().shape({
   username: Yup.string()
@@ -32,18 +34,11 @@ const validationSchema = Yup.object().shape({
     .matches(/^[0-9]{10}$/, "Mobile number must be 10 digits"),
 
   // Only validate when admin
-  isActive: Yup.string().when("$role", {
-    is: "admin",
-    then: () => Yup.string().required("Please select active status"),
-  }),
+  isActive: Yup.string().required("Please select active status"),
 
-  status: Yup.string().when("$role", {
-    is: "admin",
-    then: () =>
-      Yup.string()
-        .oneOf(["active", "suspended", "banned"], "Invalid status")
-        .required("Status is required"),
-  }),
+  status: Yup.string()
+    .oneOf(["active", "suspended", "banned"], "Invalid status")
+    .required("Status is required"),
 
   remarks: Yup.string().when(["isActive", "status"], {
     is: (isActive: string, status: string) =>
@@ -53,11 +48,43 @@ const validationSchema = Yup.object().shape({
   }),
 });
 
-const EditUser = ({ isOpen, onClose, onSubmit, data }: any) => {
+const EditUser = ({ isOpen, onClose, data }: any) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
+
   const handelSubmit = (values: any) => {
-    onSubmit(values);
+    setIsLoading(true);
+    let reqData: any = { userId: values._id };
+    if (data.name !== values.name) {
+      reqData.name = values.name;
+    }
+    if (data.email !== values.email) {
+      reqData.email = values.email;
+    }
+    if (data.mobileNumber !== values.mobileNumber) {
+      reqData.mobileNumber = values.mobileNumber;
+    }
+    if (user?.role === "admin") {
+      if (data.isActive !== JSON.parse(values.isActive)) {
+        reqData.isActive = JSON.parse(values.isActive);
+      }
+      if (data.status !== values.status) {
+        reqData.status = values.status;
+      }
+      if (reqData.isActive === false || reqData.status !== "active") {
+        reqData.remarks = values.remarks;
+      }
+    }
+    UserUpdate(reqData)
+      .then((res) => {
+        setIsLoading(false);
+        toast.success(res.message);
+        onClose();
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.error(err.message || "Failed to save details. Please try again.");
+      });
   };
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -72,8 +99,10 @@ const EditUser = ({ isOpen, onClose, onSubmit, data }: any) => {
             email: data.email || "",
             mobileNumber: data.mobileNumber || "",
             isActive: JSON.stringify(data.isActive) || "",
-            status: JSON.stringify(data.status) || "",
+            status: data.status || "",
             remarks: data.remarks || "",
+            role: data.role || "user",
+            _id: data._id || "",
           }}
           validationSchema={validationSchema}
           onSubmit={handelSubmit}
@@ -89,6 +118,7 @@ const EditUser = ({ isOpen, onClose, onSubmit, data }: any) => {
                     icon={
                       <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     }
+                    disabled={true}
                   />
                 </div>
                 <div className="md:col-span-4">
@@ -171,12 +201,12 @@ const EditUser = ({ isOpen, onClose, onSubmit, data }: any) => {
                     {isLoading ? (
                       <div className="flex items-center justify-center">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Creating Account...
+                        Updating Account...
                       </div>
                     ) : (
                       <div className="flex items-center justify-center">
                         <Check className="h-5 w-5 mr-2" />
-                        Create Account
+                        Update Account
                       </div>
                     )}
                   </Button>
