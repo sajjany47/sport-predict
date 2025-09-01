@@ -39,7 +39,6 @@ import {
   ArrowLeft,
   BarChart3,
   TrendingUp,
-  Calendar,
   Mail,
   Phone,
   User as UserIcon,
@@ -52,14 +51,18 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { set } from "mongoose";
 import EditUser from "./EditUser";
+import { fetchUserDetails } from "@/app/admin/AdminService";
+import toast from "react-hot-toast";
+import CustomLoader from "./ui/CustomLoader";
 
-export const UserDetails = ({ userData }: { userData: any }) => {
+export const UserDetails = ({ userId }: { userId: any }) => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [editOpen, setEditOpen] = useState(false);
+  const [userData, setUserData] = useState<any>({});
+  const [loading, setLoading] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -67,6 +70,25 @@ export const UserDetails = ({ userData }: { userData: any }) => {
       router.push("/auth/login");
     }
   }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    GetUserDetails();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editOpen]);
+
+  const GetUserDetails = () => {
+    setLoading(true);
+    fetchUserDetails({ userId: userId })
+      .then((res) => {
+        setLoading(false);
+        setUserData(res.data[0]);
+      })
+      .catch((err) => {
+        setLoading(false);
+        toast.error(err.message || "Failed to fetch users. Please try again.");
+      });
+  };
 
   // Helper functions
   const getOrderTypeIcon = (ordertype: string) => {
@@ -227,6 +249,7 @@ export const UserDetails = ({ userData }: { userData: any }) => {
 
   return (
     <>
+      {loading && <CustomLoader message="Details Loading" />}
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-8">
           {/* Header with back button */}
