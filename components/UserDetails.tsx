@@ -1042,7 +1042,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
             name: userData.name || "",
             email: userData.email || "",
             mobileNumber: userData.mobileNumber || "",
-            isActive: userData.isActive || "",
+            isActive: userData.isActive,
             status: userData.status || "",
             remarks: userData.remarks || "",
             role: userData.role || "",

@@ -98,7 +98,7 @@ const EditUser = ({ isOpen, onClose, data }: any) => {
             name: data.name || "",
             email: data.email || "",
             mobileNumber: data.mobileNumber || "",
-            isActive: JSON.stringify(data.isActive) || "",
+            isActive: JSON.stringify(data.isActive),
             status: data.status || "",
             remarks: data.remarks || "",
             role: data.role || "user",

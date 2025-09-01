@@ -15,6 +15,7 @@ export const POST = async (request: NextRequest) => {
     const body = await request.json();
     const xUser = request.headers.get("x-user");
     const loggedInUser = xUser ? JSON.parse(xUser) : null;
+
     let updateData = {};
     if (body.name) {
       updateData = { ...updateData, name: body.name };
@@ -50,7 +51,7 @@ export const POST = async (request: NextRequest) => {
     if (loggedInUser.role !== "admin") {
       return;
     } else {
-      if (body.isActive) {
+      if (body.hasOwnProperty("isActive")) {
         updateData = { ...updateData, isActive: body.isActive };
       }
       if (body.status) {
