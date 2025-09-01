@@ -38,46 +38,46 @@ export const getPaymentFailedModeDetails = (data: any, paymentMode: string) => {
     details = `
                 <div class="detail-row">
                     <div class="detail-label">Payment Method:</div>
-                    <div class="detail-value">${paymentMode}</div>
+                    <div class="detail-value"> ${paymentMode}</div>
                 </div>
                  <div class="detail-row">
                     <div class="detail-label">UPI ID:</div>
-                    <div class="detail-value">${data.upi}</div>
+                    <div class="detail-value"> ${data.upi}</div>
                 </div>
                  <div class="detail-row">
                     <div class="detail-label">Name:</div>
-                    <div class="detail-value">${data.name}</div>
+                    <div class="detail-value"> ${data.name}</div>
                 </div>
                  <div class="detail-row">
                     <div class="detail-label">Note:</div>
-                    <div class="detail-value">${data.note}</div>
+                    <div class="detail-value"> ${data.note}</div>
                 </div>
     `;
   } else if (paymentMode === "NETBANKING") {
     details = `
                  <div class="detail-row">
                     <div class="detail-label">Payment Method:</div>
-                    <div class="detail-value">${paymentMode}</div>
+                    <div class="detail-value"> ${paymentMode}</div>
                 </div>
                  <div class="detail-row">
                     <div class="detail-label">Bank Name:</div>
-                    <div class="detail-value">${data.bankName}</div>
+                    <div class="detail-value"> ${data.bankName}</div>
                 </div>
                  <div class="detail-row">
                     <div class="detail-label">Account Number:</div>
-                    <div class="detail-value">${data.accountNumber}</div>
+                    <div class="detail-value"> ${data.accountNumber}</div>
                 </div>
                 <div class="detail-row">
                     <div class="detail-label">IFSC Code:</div>
-                    <div class="detail-value">${data.ifscCode}</div>
+                    <div class="detail-value"> ${data.ifscCode}</div>
                 </div>
                  <div class="detail-row">
                     <div class="detail-label">Account Holder:</div>
-                    <div class="detail-value">${data.accountHolder}</div>
+                    <div class="detail-value"> ${data.accountHolder}</div>
                 </div>
                 <div class="detail-row">
                     <div class="detail-label">Branch:</div>
-                    <div class="detail-value">${data.Branch}</div>
+                    <div class="detail-value"> ${data.Branch}</div>
                 </div>
       
     `;
@@ -85,15 +85,15 @@ export const getPaymentFailedModeDetails = (data: any, paymentMode: string) => {
     details = `
                 <div class="detail-row">
                     <div class="detail-label">Payment Method:</div>
-                    <div class="detail-value">${paymentMode}</div>
+                    <div class="detail-value"> ${paymentMode}</div>
                 </div>
                  <div class="detail-row">
                     <div class="detail-label">UPI ID:</div>
-                    <div class="detail-value">${data.upiId}</div>
+                    <div class="detail-value"> ${data.upiId}</div>
                 </div>
                  <div class="detail-row">
                     <div class="detail-label">Name:</div>
-                    <div class="detail-value">${data.name}</div>
+                    <div class="detail-value"> ${data.name}</div>
                 </div>
                  <div class="detail-row">
                     <div class="detail-label">QR Code:</div>

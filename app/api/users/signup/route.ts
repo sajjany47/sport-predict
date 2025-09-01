@@ -9,6 +9,9 @@ import bcrypt from "bcrypt";
 import { UserData } from "../UserData";
 import { FormatErrorMessage } from "@/lib/utils";
 import { serialize } from "cookie";
+import { MailSend } from "@/lib/MailSend";
+import { UserWelcomeTemp } from "@/components/template/UserTemp";
+import moment from "moment";
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,6 +72,7 @@ export async function POST(request: NextRequest) {
           role: "user",
           isActive: true,
           status: "active",
+          createdAt: new Date(),
         }),
         password: await bcrypt.hash(body.password, 10),
       };
@@ -95,6 +99,17 @@ export async function POST(request: NextRequest) {
           sameSite: "strict",
           path: "/",
           maxAge: 60 * 60 * 24, // 1 day
+        });
+
+        await MailSend({
+          to: [userData.email],
+          subject: `Welcome to SportPredict (${userData.username}) - SportPredict`,
+          html: UserWelcomeTemp({
+            email: userData.email || "",
+            username: userData.username,
+            joinDate: moment(userData.createdAt).format("MMMM DD, YYYY HH:mm"),
+            mobileNumber: userData.mobileNumber || "NA",
+          }),
         });
 
         return NextResponse.json(

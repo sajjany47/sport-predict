@@ -48,9 +48,7 @@ export const POST = async (request: NextRequest) => {
         updateData = { ...updateData, mobileNumber: body.mobileNumber };
       }
     }
-    if (loggedInUser.role !== "admin") {
-      return;
-    } else {
+    if (loggedInUser.role === "admin") {
       if (body.hasOwnProperty("isActive")) {
         updateData = { ...updateData, isActive: body.isActive };
       }
