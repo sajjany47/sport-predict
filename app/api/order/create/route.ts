@@ -130,7 +130,6 @@ export const POST = async (req: NextRequest) => {
       { status: 200 }
     );
   } catch (error: any) {
-    console.log(error);
     return NextResponse.json(
       { success: false, message: FormatErrorMessage(error) },
       { status: 500 }

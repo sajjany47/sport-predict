@@ -546,28 +546,6 @@ const SupportPage = () => {
                 </CardContent>
               </Card>
             )}
-
-            {/* FAQ Section */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BookOpen className="h-5 w-5 text-green-600" />
-                  <span>Frequently Asked Questions</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {faqs.map((faq, index) => (
-                    <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                      <h3 className="font-semibold text-gray-900 mb-2">
-                        {faq.question}
-                      </h3>
-                      <p className="text-gray-700">{faq.answer}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Right Column - Contact Info */}

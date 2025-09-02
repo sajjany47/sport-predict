@@ -2,8 +2,10 @@ import mongoose, { Schema, Types } from "mongoose";
 const SupportSchema = new Schema(
   {
     userId: Schema.Types.ObjectId,
+    category: String,
     subject: String,
     description: String,
+    ticketNumber: String,
     status: {
       type: String,
       enum: ["in-progress", "resolved", "open"],
@@ -27,5 +29,6 @@ const SupportSchema = new Schema(
 );
 
 const SupportTicket =
-  mongoose.models.User || mongoose.model("SupportTicket", SupportSchema);
+  mongoose.models.SupportTicket ||
+  mongoose.model("SupportTicket", SupportSchema);
 export default SupportTicket;

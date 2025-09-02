@@ -231,3 +231,26 @@ export const getHeadersWithToken = () => {
     Authorization: `Bearer ${token}`,
   };
 };
+
+export const GenerateTicketNumber = (type: any) => {
+  // Mapping option to prefix
+  const prefixes: any = {
+    general: "GEN",
+    payment: "PAY",
+    prediction: "PRE",
+    technical: "TEC",
+    account: "ACC",
+  };
+
+  // Get prefix based on type
+  const prefix = prefixes[type] || "GEN";
+
+  // Current date (YYYYMMDD)
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+
+  // Random 4-digit number
+  const random = Math.floor(1000 + Math.random() * 9000);
+
+  // Final Ticket Number
+  return `${prefix}-${date}-${random}`;
+};

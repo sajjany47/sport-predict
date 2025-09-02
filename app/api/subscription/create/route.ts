@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { success: true, subscription: newSub },
-      { status: 201 }
+      { status: 200 }
     );
   } catch (error: any) {
     return NextResponse.json(
