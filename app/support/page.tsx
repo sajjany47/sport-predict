@@ -60,6 +60,9 @@ const SupportPage = () => {
 
   // Mock complaints data
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+    }
     const mockComplaints = [
       {
         id: "TKT-001",
@@ -108,11 +111,6 @@ const SupportPage = () => {
 
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
 
     if (!ticketForm.subject.trim() || !ticketForm.description.trim()) {
       toast.error("Please fill in all required fields");
