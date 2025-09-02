@@ -139,8 +139,8 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Contact Info</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li>support@sportpredict.com</li>
-              <li>+91 9876543210</li>
+              <li>sportpredict247@gmail.com</li>
+              <li>+91 8981374643</li>
               <li>Available 24/7</li>
             </ul>
           </div>
