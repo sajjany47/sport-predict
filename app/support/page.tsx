@@ -589,7 +589,9 @@ const SupportPage = () => {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Email Support</p>
-                    <p className="text-gray-600">sportpredict247@gmail.com</p>
+                    <p className="text-gray-600">
+                      {process.env.NEXT_PUBLIC_EMAIL}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -598,7 +600,9 @@ const SupportPage = () => {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Phone Support</p>
-                    <p className="text-gray-600">+91 8981374643</p>
+                    <p className="text-gray-600">
+                      {process.env.NEXT_PUBLIC_MOBILE}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
