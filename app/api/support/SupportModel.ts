@@ -11,7 +11,6 @@ const SupportSchema = new Schema(
       enum: ["in-progress", "resolved", "open"],
       default: "in-progress",
     },
-    responseBy: Schema.Types.ObjectId,
     message: [
       {
         text: String,

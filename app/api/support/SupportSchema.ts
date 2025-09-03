@@ -18,8 +18,6 @@ export const SupportTicketValidation = Yup.object().shape({
     .oneOf(["in-progress", "resolved", "open"], "Invalid status")
     .default("in-progress"),
 
-  responseBy: Yup.string().nullable().notRequired(),
-
   message: Yup.array().of(
     Yup.object().shape({
       text: Yup.string().required("Message text is required"),

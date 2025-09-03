@@ -19,7 +19,6 @@ export const POST = async (request: NextRequest) => {
       ticketNumber: GenerateTicketNumber(reqData.category),
       category: reqData.category,
       status: reqData.status || "in-progress",
-      responseBy: null,
       message: [
         {
           _id: new mongoose.Types.ObjectId(),
