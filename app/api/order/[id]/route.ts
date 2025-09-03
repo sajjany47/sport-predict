@@ -4,10 +4,14 @@ import { FormatErrorMessage } from "@/lib/utils";
 import Order from "../OrderModel";
 import mongoose from "mongoose";
 
-interface Params {
-  params: { id: string };
-}
-export const GET = async (request: NextRequest, { params }: Params) => {
+// interface Params {
+//   params: { id: string };
+// }
+// export const GET = async (request: NextRequest, { params }: Params) => {
+export const GET = async (
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) => {
   await dbConnect();
 
   try {
