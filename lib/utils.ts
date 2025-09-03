@@ -252,5 +252,5 @@ export const GenerateTicketNumber = (type: any) => {
   const random = Math.floor(1000 + Math.random() * 9000);
 
   // Final Ticket Number
-  return `${prefix}-${date}-${random}`;
+  return `${prefix}${date}${random}`;
 };
