@@ -12,8 +12,9 @@ export const POST = async (request: NextRequest) => {
     await SupportTicketValidation.validate(reqData, { abortEarly: false });
     const xUser = request.headers.get("x-user");
     const loggedInUser = xUser ? JSON.parse(xUser) : null;
+
     const ticketData = {
-      userId: new mongoose.Types.ObjectId(loggedInUser._id()),
+      userId: new mongoose.Types.ObjectId(loggedInUser._id),
       subject: reqData.subject,
       description: reqData.description,
       ticketNumber: GenerateTicketNumber(reqData.category),

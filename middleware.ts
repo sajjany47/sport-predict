@@ -18,6 +18,10 @@ const protectedPaths: any = [
   "/api/users/credit-update",
   "/api/users/list",
   "/api/users/update",
+  "/api/support/create",
+  "/api/support/update",
+  "/api/support/list",
+  "/api/support/:id",
 ];
 
 export async function middleware(request: NextRequest) {

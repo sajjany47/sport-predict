@@ -1,14 +1,13 @@
 import * as Yup from "yup";
 
 export const SupportTicketValidation = Yup.object().shape({
-  userId: Yup.string().required("User ID is required"),
-  category: Yup.string().required("Category is required"),
-  subject: Yup.string()
+  subject: Yup.string().required("Subject is required"),
+  category: Yup.string()
     .oneOf(
       ["general", "payment", "prediction", "technical", "account"],
-      "Invalid subject"
+      "Invalid category"
     )
-    .required("Subject is required"),
+    .required("Category is required"),
 
   description: Yup.string()
     .required("Description is required")

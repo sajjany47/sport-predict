@@ -115,3 +115,47 @@ export const UserUpdate = async (payload: any) => {
     throw new Error(error.response?.data?.message);
   }
 };
+
+export const TicketCreate = async (payload: any) => {
+  try {
+    const response = await publicApi.post("/api/support/create", payload, {
+      headers: getHeadersWithToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
+
+export const TicketUpdate = async (payload: any) => {
+  try {
+    const response = await publicApi.post("/api/support/update", payload, {
+      headers: getHeadersWithToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
+
+export const TicketList = async (payload: any) => {
+  try {
+    const response = await publicApi.post("/api/support/list", payload, {
+      headers: getHeadersWithToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
+
+export const TicketDetails = async (id: any) => {
+  try {
+    const response = await publicApi.get(`/api/support/${id}`, {
+      headers: getHeadersWithToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};

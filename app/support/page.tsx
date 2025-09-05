@@ -38,7 +38,30 @@ import {
   Zap,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { Field, Form, Formik } from "formik";
+import {
+  FormikSelectField,
+  FormikTextArea,
+  FormikTextInput,
+} from "@/components/CustomField";
+import * as Yup from "yup";
+import { TicketCreate } from "../MainService";
+import { set } from "mongoose";
+import { setLoading } from "@/store/slices/matchSlice";
+import { load } from "cheerio";
+import CustomLoader from "@/components/ui/CustomLoader";
 
+const validationSchema = Yup.object().shape({
+  subject: Yup.string()
+    .required("Title is required")
+    .min(3, "Title must be at least 3 characters"),
+
+  category: Yup.string().required("Category is required"),
+
+  description: Yup.string()
+    .required("Description is required")
+    .min(10, "Description must be at least 10 characters"),
+});
 const SupportPage = () => {
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
@@ -220,437 +243,456 @@ const SupportPage = () => {
     },
   ];
 
+  const handelFormSubmit = (values: any) => {
+    setIsLoading(true);
+    const payload = {
+      subject: values.subject,
+      description: values.description,
+      category: values.category,
+      status: "open",
+    };
+    TicketCreate(payload)
+      .then((res) => {
+        setIsLoading(false);
+        toast.success(res.message);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.error(err.message || "Failed to save details. Please try again.");
+      });
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                Support Center
-              </h1>
-              <p className="text-xl text-gray-600">
-                Get help with your SportPredict experience
-              </p>
-            </div>
-            <div className="mt-4 md:mt-0">
-              <Dialog
-                open={isCreateTicketOpen}
-                onOpenChange={setIsCreateTicketOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Ticket
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Create Support Ticket</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleCreateTicket} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="subject">Subject *</Label>
-                      <Input
-                        id="subject"
-                        name="subject"
-                        placeholder="Brief description of your issue"
-                        value={ticketForm.subject}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
-                      <select
-                        id="category"
-                        name="category"
-                        value={ticketForm.category}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="general">General</option>
-                        <option value="payment">Payment</option>
-                        <option value="prediction">Prediction</option>
-                        <option value="technical">Technical</option>
-                        <option value="account">Account</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="priority">Priority</Label>
-                      <select
-                        id="priority"
-                        name="priority"
-                        value={ticketForm.priority}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                        <option value="urgent">Urgent</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description *</Label>
-                      <Textarea
-                        id="description"
-                        name="description"
-                        placeholder="Please provide detailed information about your issue"
-                        value={ticketForm.description}
-                        onChange={handleInputChange}
-                        rows={4}
-                        required
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span>Creating...</span>
-                        </div>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" />
-                          Create Ticket
-                        </>
-                      )}
+    <>
+      {isLoading && <CustomLoader message="Loading" />}
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                  Support Center
+                </h1>
+                <p className="text-xl text-gray-600">
+                  Get help with your SportPredict experience
+                </p>
+              </div>
+              <div className="mt-4 md:mt-0">
+                <Dialog
+                  open={isCreateTicketOpen}
+                  onOpenChange={setIsCreateTicketOpen}
+                >
+                  <DialogTrigger asChild>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Ticket
                     </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Create Support Ticket</DialogTitle>
+                    </DialogHeader>
+                    <Formik
+                      initialValues={{
+                        subject: "",
+                        description: "",
+                        category: "",
+                      }}
+                      validationSchema={validationSchema}
+                      onSubmit={handelFormSubmit}
+                    >
+                      {({ handleSubmit }) => (
+                        <Form onSubmit={handleSubmit}>
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            {/* Title */}
+                            <div className="col-span-12">
+                              <Field
+                                label="Subject"
+                                component={FormikTextInput}
+                                name="subject"
+                              />
+                            </div>
+
+                            {/* Category */}
+                            <div className="col-span-12">
+                              <Field
+                                label="Category"
+                                name="category"
+                                component={FormikSelectField}
+                                options={[
+                                  { label: "General", value: "general" },
+                                  { label: "Payment", value: "payment" },
+                                  { label: "Prediction", value: "prediction" },
+                                  { label: "Technical", value: "technical" },
+                                  { label: "Account", value: "account" },
+                                ]}
+                              />
+                            </div>
+
+                            {/* Description */}
+                            <div className="col-span-12">
+                              <Field
+                                label="Description"
+                                component={FormikTextArea}
+                                name="description"
+                                rows={4}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="mt-4 flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setIsCreateTicketOpen(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button type="submit" disabled={isLoading}>
+                              Create
+                            </Button>
+                          </div>
+                        </Form>
+                      )}
+                    </Formik>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
-                    Open Tickets
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {openTickets}
-                  </p>
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">
+                      Open Tickets
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {openTickets}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-red-100">
+                    <AlertCircle className="h-6 w-6 text-red-600" />
+                  </div>
                 </div>
-                <div className="p-3 rounded-full bg-red-100">
-                  <AlertCircle className="h-6 w-6 text-red-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
-                    In Progress
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {inProgressTickets}
-                  </p>
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">
+                      In Progress
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {inProgressTickets}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-yellow-100">
+                    <Clock className="h-6 w-6 text-yellow-600" />
+                  </div>
                 </div>
-                <div className="p-3 rounded-full bg-yellow-100">
-                  <Clock className="h-6 w-6 text-yellow-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
-                    Resolved
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {resolvedTickets}
-                  </p>
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">
+                      Resolved
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {resolvedTickets}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-green-100">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  </div>
                 </div>
-                <div className="p-3 rounded-full bg-green-100">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
-                    Avg Response
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">2h</p>
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">
+                      Avg Response
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900">2h</p>
+                  </div>
+                  <div className="p-3 rounded-full bg-blue-100">
+                    <Zap className="h-6 w-6 text-blue-600" />
+                  </div>
                 </div>
-                <div className="p-3 rounded-full bg-blue-100">
-                  <Zap className="h-6 w-6 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Tickets */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* My Tickets */}
-            {isAuthenticated ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Tickets */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* My Tickets */}
+              {isAuthenticated ? (
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Ticket className="h-5 w-5 text-blue-600" />
+                      <span>My Support Tickets</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Search and Filters */}
+                    <div className="flex flex-col md:flex-row gap-4 mb-6">
+                      <div className="flex-1 relative">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Search tickets..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="flex items-center space-x-2"
+                      >
+                        <Filter className="h-4 w-4" />
+                        <span>Filter</span>
+                      </Button>
+                    </div>
+
+                    <Tabs
+                      value={activeTab}
+                      onValueChange={setActiveTab}
+                      className="w-full"
+                    >
+                      <TabsList className="grid w-full grid-cols-4 mb-6">
+                        <TabsTrigger value="all">
+                          All ({complaints.length})
+                        </TabsTrigger>
+                        <TabsTrigger value="open">
+                          Open ({openTickets})
+                        </TabsTrigger>
+                        <TabsTrigger value="in-progress">
+                          In Progress ({inProgressTickets})
+                        </TabsTrigger>
+                        <TabsTrigger value="resolved">
+                          Resolved ({resolvedTickets})
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value={activeTab} className="space-y-4">
+                        {filteredComplaints.length > 0 ? (
+                          <div className="space-y-4">
+                            {filteredComplaints.map((ticket) => (
+                              <div
+                                key={ticket.id}
+                                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                              >
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-white rounded-lg shadow-sm">
+                                      <MessageSquare className="h-5 w-5 text-blue-600" />
+                                    </div>
+                                    <div>
+                                      <h3 className="font-semibold text-gray-900">
+                                        {ticket.subject}
+                                      </h3>
+                                      <p className="text-sm text-gray-600">
+                                        Ticket #{ticket.id}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <Badge
+                                    className={getStatusColor(ticket.status)}
+                                  >
+                                    <div className="flex items-center space-x-1">
+                                      {getStatusIcon(ticket.status)}
+                                      <span className="capitalize">
+                                        {ticket.status.replace("-", " ")}
+                                      </span>
+                                    </div>
+                                  </Badge>
+                                </div>
+                                <p className="text-gray-700 mb-3 line-clamp-2">
+                                  {ticket.description}
+                                </p>
+                                <div className="flex items-center justify-between text-sm text-gray-500">
+                                  <span>
+                                    Created:{" "}
+                                    {new Date(
+                                      ticket.createdAt
+                                    ).toLocaleDateString()}
+                                  </span>
+                                  <span>
+                                    Updated:{" "}
+                                    {new Date(
+                                      ticket.updatedAt
+                                    ).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-12">
+                            <Ticket className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                              No tickets found
+                            </h3>
+                            <p className="text-gray-600 mb-6">
+                              {searchTerm
+                                ? "Try adjusting your search criteria"
+                                : "You haven't created any support tickets yet"}
+                            </p>
+                            {!searchTerm && (
+                              <Button
+                                onClick={() => setIsCreateTicketOpen(true)}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Create Your First Ticket
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border-0 shadow-lg">
+                  <CardContent className="p-8 text-center">
+                    <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Login Required
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      Please login to view and manage your support tickets
+                    </p>
+                    <Button asChild>
+                      <a href="/auth/login">Login to Continue</a>
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Right Column - Contact Info */}
+            <div className="space-y-6">
+              {/* Contact Information */}
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Ticket className="h-5 w-5 text-blue-600" />
-                    <span>My Support Tickets</span>
+                    <HelpCircle className="h-5 w-5 text-purple-600" />
+                    <span>Contact Information</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Mail className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Email Support</p>
+                      <p className="text-gray-600">
+                        {process.env.NEXT_PUBLIC_EMAIL}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <Phone className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Phone Support</p>
+                      <p className="text-gray-600">
+                        {process.env.NEXT_PUBLIC_MOBILE}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-orange-100 rounded-lg">
+                      <MapPin className="h-5 w-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        Office Address
+                      </p>
+                      <p className="text-gray-600">
+                        Kolkata, West Bengal, India
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Support Hours */}
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Clock className="h-5 w-5 text-blue-600" />
+                    <span>Support Hours</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* Search and Filters */}
-                  <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Search tickets..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Monday - Friday</span>
+                      <span className="font-medium">9:00 AM - 6:00 PM</span>
                     </div>
-                    <Button
-                      variant="outline"
-                      className="flex items-center space-x-2"
-                    >
-                      <Filter className="h-4 w-4" />
-                      <span>Filter</span>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Saturday</span>
+                      <span className="font-medium">10:00 AM - 4:00 PM</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Sunday</span>
+                      <span className="font-medium">Closed</span>
+                    </div>
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        <strong>Note:</strong> Urgent issues are handled 24/7
+                        for Pro and Elite users.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-purple-50">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-gray-900 mb-4">
+                    Need Immediate Help?
+                  </h3>
+                  <div className="space-y-3">
+                    <Button variant="outline" className="w-full justify-start">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Browse Help Articles
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Live Chat Support
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Phone className="h-4 w-4 mr-2" />
+                      Request Callback
                     </Button>
                   </div>
-
-                  <Tabs
-                    value={activeTab}
-                    onValueChange={setActiveTab}
-                    className="w-full"
-                  >
-                    <TabsList className="grid w-full grid-cols-4 mb-6">
-                      <TabsTrigger value="all">
-                        All ({complaints.length})
-                      </TabsTrigger>
-                      <TabsTrigger value="open">
-                        Open ({openTickets})
-                      </TabsTrigger>
-                      <TabsTrigger value="in-progress">
-                        In Progress ({inProgressTickets})
-                      </TabsTrigger>
-                      <TabsTrigger value="resolved">
-                        Resolved ({resolvedTickets})
-                      </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value={activeTab} className="space-y-4">
-                      {filteredComplaints.length > 0 ? (
-                        <div className="space-y-4">
-                          {filteredComplaints.map((ticket) => (
-                            <div
-                              key={ticket.id}
-                              className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                            >
-                              <div className="flex items-start justify-between mb-3">
-                                <div className="flex items-center space-x-3">
-                                  <div className="p-2 bg-white rounded-lg shadow-sm">
-                                    <MessageSquare className="h-5 w-5 text-blue-600" />
-                                  </div>
-                                  <div>
-                                    <h3 className="font-semibold text-gray-900">
-                                      {ticket.subject}
-                                    </h3>
-                                    <p className="text-sm text-gray-600">
-                                      Ticket #{ticket.id}
-                                    </p>
-                                  </div>
-                                </div>
-                                <Badge
-                                  className={getStatusColor(ticket.status)}
-                                >
-                                  <div className="flex items-center space-x-1">
-                                    {getStatusIcon(ticket.status)}
-                                    <span className="capitalize">
-                                      {ticket.status.replace("-", " ")}
-                                    </span>
-                                  </div>
-                                </Badge>
-                              </div>
-                              <p className="text-gray-700 mb-3 line-clamp-2">
-                                {ticket.description}
-                              </p>
-                              <div className="flex items-center justify-between text-sm text-gray-500">
-                                <span>
-                                  Created:{" "}
-                                  {new Date(
-                                    ticket.createdAt
-                                  ).toLocaleDateString()}
-                                </span>
-                                <span>
-                                  Updated:{" "}
-                                  {new Date(
-                                    ticket.updatedAt
-                                  ).toLocaleDateString()}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-12">
-                          <Ticket className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                            No tickets found
-                          </h3>
-                          <p className="text-gray-600 mb-6">
-                            {searchTerm
-                              ? "Try adjusting your search criteria"
-                              : "You haven't created any support tickets yet"}
-                          </p>
-                          {!searchTerm && (
-                            <Button onClick={() => setIsCreateTicketOpen(true)}>
-                              <Plus className="h-4 w-4 mr-2" />
-                              Create Your First Ticket
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </TabsContent>
-                  </Tabs>
                 </CardContent>
               </Card>
-            ) : (
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-8 text-center">
-                  <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    Login Required
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Please login to view and manage your support tickets
-                  </p>
-                  <Button asChild>
-                    <a href="/auth/login">Login to Continue</a>
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Right Column - Contact Info */}
-          <div className="space-y-6">
-            {/* Contact Information */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <HelpCircle className="h-5 w-5 text-purple-600" />
-                  <span>Contact Information</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Mail className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Email Support</p>
-                    <p className="text-gray-600">
-                      {process.env.NEXT_PUBLIC_EMAIL}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Phone className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Phone Support</p>
-                    <p className="text-gray-600">
-                      {process.env.NEXT_PUBLIC_MOBILE}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <MapPin className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Office Address</p>
-                    <p className="text-gray-600">Kolkata, West Bengal, India</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Support Hours */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5 text-blue-600" />
-                  <span>Support Hours</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Monday - Friday</span>
-                    <span className="font-medium">9:00 AM - 6:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Saturday</span>
-                    <span className="font-medium">10:00 AM - 4:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Sunday</span>
-                    <span className="font-medium">Closed</span>
-                  </div>
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <strong>Note:</strong> Urgent issues are handled 24/7 for
-                      Pro and Elite users.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-purple-50">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">
-                  Need Immediate Help?
-                </h3>
-                <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Browse Help Articles
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Live Chat Support
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Phone className="h-4 w-4 mr-2" />
-                    Request Callback
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
