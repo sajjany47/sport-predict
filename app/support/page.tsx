@@ -45,7 +45,7 @@ import {
   FormikTextInput,
 } from "@/components/CustomField";
 import * as Yup from "yup";
-import { TicketCreate } from "../MainService";
+import { TicketCreate, TicketList, TicketUpdate } from "../MainService";
 import { set } from "mongoose";
 import { setLoading } from "@/store/slices/matchSlice";
 import { load } from "cheerio";
@@ -80,6 +80,7 @@ const SupportPage = () => {
     category: "general",
     priority: "medium",
   });
+  const [supportListData, setSupportListData] = useState<any>([]);
 
   // Mock complaints data
   useEffect(() => {
@@ -120,6 +121,24 @@ const SupportPage = () => {
 
     dispatch(setComplaints(mockComplaints));
   }, [dispatch]);
+
+  useEffect(() => {
+    fetchTicketList();
+  }, []);
+
+  const fetchTicketList = () => {
+    setIsLoading(true);
+    TicketList({ userId: user?.id })
+      .then((res) => {
+        setSupportListData(res.data);
+        toast.success(res.message);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.error(err.message || "Failed to save details. Please try again.");
+      });
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -253,7 +272,6 @@ const SupportPage = () => {
     };
     TicketCreate(payload)
       .then((res) => {
-        setIsLoading(false);
         toast.success(res.message);
         setIsLoading(false);
       })
