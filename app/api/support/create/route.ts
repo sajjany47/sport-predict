@@ -14,12 +14,15 @@ export const POST = async (request: NextRequest) => {
     const loggedInUser = xUser ? JSON.parse(xUser) : null;
 
     const ticketData = {
-      userId: new mongoose.Types.ObjectId(loggedInUser._id),
+      userId: reqData.hasOwnProperty("userId")
+        ? new mongoose.Types.ObjectId(reqData.userId)
+        : new mongoose.Types.ObjectId(loggedInUser._id),
       subject: reqData.subject,
       description: reqData.description,
       ticketNumber: GenerateTicketNumber(reqData.category),
       category: reqData.category,
       status: reqData.status || "in-progress",
+      priority: reqData.priority || "medium",
       message: [
         {
           _id: new mongoose.Types.ObjectId(),
@@ -30,6 +33,7 @@ export const POST = async (request: NextRequest) => {
         },
       ],
     };
+
     const newTicket = await SupportTicket.create(ticketData);
     return NextResponse.json(
       {

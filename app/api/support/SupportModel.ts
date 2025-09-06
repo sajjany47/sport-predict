@@ -11,6 +11,11 @@ const SupportSchema = new Schema(
       enum: ["in-progress", "resolved", "open"],
       default: "in-progress",
     },
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high", "urgent"],
+      default: "low",
+    },
     message: [
       {
         text: String,
