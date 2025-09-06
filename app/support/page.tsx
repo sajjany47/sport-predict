@@ -131,7 +131,6 @@ const SupportPage = () => {
     TicketList({ userId: user?.id })
       .then((res) => {
         setSupportListData(res.data);
-        toast.success(res.message);
         setIsLoading(false);
       })
       .catch((err) => {

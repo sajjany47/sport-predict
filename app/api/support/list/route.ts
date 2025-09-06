@@ -32,6 +32,9 @@ export const POST = async (request: NextRequest) => {
     // 🔹 Base pipeline
     let pipeline: any[] = [
       {
+        $match: Object.keys(matchConditions).length > 0 ? matchConditions : {},
+      },
+      {
         $lookup: {
           from: "users",
           localField: "userId",
@@ -46,15 +49,79 @@ export const POST = async (request: NextRequest) => {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "message.replyBy",
+          foreignField: "_id",
+          as: "replyUsers",
+        },
+      },
+      {
+        $addFields: {
+          message: {
+            $map: {
+              input: "$message",
+              as: "msg",
+              in: {
+                _id: "$$msg._id",
+                text: "$$msg.text",
+                replyAt: "$$msg.replyAt",
+                ticketStatus: "$$msg.ticketStatus",
+                replyBy: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: "$replyUsers",
+                        as: "ru",
+                        cond: {
+                          $eq: ["$$ru._id", "$$msg.replyBy"],
+                        },
+                      },
+                    },
+                    0,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      {
         $project: {
-          "user.password": 0,
+          category: 1,
+          subject: 1,
+          description: 1,
+          ticketNumber: 1,
+          status: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          user: {
+            _id: 1,
+            name: 1,
+            username: 1,
+            email: 1,
+            mobile: 1,
+          },
+          message: {
+            _id: 1,
+            text: 1,
+            replyAt: 1,
+            ticketStatus: 1,
+            replyBy: {
+              _id: 1,
+              name: 1,
+              username: 1,
+              email: 1,
+              mobile: 1,
+            },
+          },
         },
       },
     ];
 
-    if (Object.keys(matchConditions).length > 0) {
-      pipeline.push({ $match: matchConditions });
-    }
+    // if (Object.keys(matchConditions).length > 0) {
+    //   pipeline.push({ $match: matchConditions });
+    // }
 
     // 🔹 Count total
     const count = await SupportTicket.aggregate([
