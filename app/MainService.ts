@@ -118,7 +118,7 @@ export const UserUpdate = async (payload: any) => {
 
 export const TicketCreate = async (payload: any) => {
   try {
-    const response = await publicApi.post("/api/support/create", payload, {
+    const response = await privateApi.post("/api/support/create", payload, {
       headers: getHeadersWithToken(),
     });
     return response.data;
@@ -129,7 +129,7 @@ export const TicketCreate = async (payload: any) => {
 
 export const TicketUpdate = async (payload: any) => {
   try {
-    const response = await publicApi.post("/api/support/update", payload, {
+    const response = await privateApi.post("/api/support/update", payload, {
       headers: getHeadersWithToken(),
     });
     return response.data;
@@ -140,7 +140,7 @@ export const TicketUpdate = async (payload: any) => {
 
 export const TicketList = async (payload: any) => {
   try {
-    const response = await publicApi.post("/api/support/list", payload, {
+    const response = await privateApi.post("/api/support/list", payload, {
       headers: getHeadersWithToken(),
     });
     return response.data;
@@ -151,7 +151,7 @@ export const TicketList = async (payload: any) => {
 
 export const TicketDetails = async (id: any) => {
   try {
-    const response = await publicApi.get(`/api/support/${id}`, {
+    const response = await privateApi.get(`/api/support/${id}`, {
       headers: getHeadersWithToken(),
     });
     return response.data;
