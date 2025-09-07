@@ -76,7 +76,6 @@ const SupportPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
-  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   const [supportListData, setSupportListData] = useState<any>([]);
 
@@ -92,15 +91,14 @@ const SupportPage = () => {
     setIsLoading(true);
     TicketList({ userId: user?.id })
       .then((res) => {
-        setSupportListData(res.data);
-        const unreadCount = res.data.reduce((count: number, ticket: any) => {
-          const ticketUnread = ticket.message.filter(
-            (item: any) =>
-              item.isRead === false && item.replyBy._id !== user?.id
-          ).length;
-          return count + ticketUnread;
-        }, 0);
-        setUnreadMessageCount(unreadCount);
+        const prepareData = res.data.map((item: any) => {
+          let ticketUnread = item.message.filter(
+            (elm: any) => elm.isRead === false && elm.replyBy._id !== user?.id
+          );
+          return { ...item, ticketUnread: ticketUnread.length ?? 0 };
+        });
+        setSupportListData(prepareData);
+
         setIsLoading(false);
       })
       .catch((err) => {
@@ -596,10 +594,10 @@ const SupportPage = () => {
                                         Updated: {formatDate(ticket.updatedAt)}
                                       </span>
                                     </div>
-                                    {unreadMessageCount !== 0 && (
+                                    {ticket.ticketUnread !== 0 && (
                                       <div className="flex items-center">
                                         <MessageCircle className="h-4 w-4 mr-1" />
-                                        {unreadMessageCount} messages
+                                        {ticket.ticketUnread} messages
                                       </div>
                                     )}
                                   </div>

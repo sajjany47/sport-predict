@@ -101,13 +101,19 @@ const TicketDetailsPage = () => {
 
   const handleStatusChange = (newStatus: string) => {
     if (ticket) {
+      let reqData: any = { ticketId: ticket._id, status: newStatus };
+      if (newStatus === "resolved") {
+        reqData.ticketStatus = newStatus;
+      }
+      if (newStatus === "open") {
+        reqData.status = "in-progress";
+        reqData.ticketStatus = "in-progress";
+        reqData.text = "Issue not resolved, ticket re-open";
+      }
       setIsLoading(true);
-      TicketUpdate({
-        ticketId: ticket._id,
-        status: newStatus,
-      })
+      TicketUpdate(reqData)
         .then((res) => {
-          setTicket({ ...ticket, status: newStatus });
+          setTicket(res.data);
           toast.success(`Ticket status updated to ${newStatus}`);
           setIsLoading(false);
         })
@@ -292,6 +298,7 @@ const TicketDetailsPage = () => {
                 {ticket.status === "open" && (
                   <DropdownMenuItem
                     onClick={() => handleStatusChange("in-progress")}
+                    className="cursor-pointer"
                   >
                     <Clock className="h-4 w-4 mr-2" />
                     In Progress
@@ -300,13 +307,17 @@ const TicketDetailsPage = () => {
                 {ticket.status === "in-progress" && (
                   <DropdownMenuItem
                     onClick={() => handleStatusChange("resolved")}
+                    className="cursor-pointer"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Mark as Resolved
                   </DropdownMenuItem>
                 )}
                 {ticket.status === "resolved" && (
-                  <DropdownMenuItem onClick={() => handleStatusChange("open")}>
+                  <DropdownMenuItem
+                    onClick={() => handleStatusChange("open")}
+                    className="cursor-pointer"
+                  >
                     <AlertCircle className="h-4 w-4 mr-2" />
                     Reopen Ticket
                   </DropdownMenuItem>

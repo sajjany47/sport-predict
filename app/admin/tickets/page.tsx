@@ -91,7 +91,14 @@ const AdminTicketsPage = () => {
     setIsLoading(true);
     TicketList({})
       .then((res) => {
-        setTickets(res.data);
+        const prepareData = res.data.map((item: any) => {
+          let ticketUnread = item.message.filter(
+            (elm: any) => elm.isRead === false && elm.replyBy._id !== user?.id
+          );
+          return { ...item, ticketUnread: ticketUnread.length ?? 0 };
+        });
+
+        setTickets(prepareData);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -568,11 +575,11 @@ const AdminTicketsPage = () => {
                                   </span>
                                 </div>
                               </div>
-                              {ticket.message && ticket.message.length > 0 && (
+                              {ticket.ticketUnread !== 0 && (
                                 <div className="mt-3 text-sm text-blue-600 flex items-center">
                                   <MessageSquare className="h-4 w-4 mr-1" />
-                                  {ticket.message.length} message
-                                  {ticket.message.length !== 1 ? "s" : ""}
+                                  {ticket.ticketUnread} message
+                                  {ticket.ticketUnread !== 1 ? "s" : ""}
                                 </div>
                               )}
                             </div>
