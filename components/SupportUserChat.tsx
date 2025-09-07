@@ -21,13 +21,7 @@ import {
   Download,
   Paperclip,
   ThumbsUp,
-  Bot,
-  Shield,
   Sparkles,
-  MoreVertical,
-  Smile,
-  Image,
-  Mic,
   X,
   ChevronDown,
   Star,
@@ -185,57 +179,56 @@ const SupportUserChat = ({ data }: any) => {
   const handleFormSubmit = (values: any, { resetForm }: any) => {
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      const newMessage = {
-        _id: Date.now().toString(),
-        text: values.message,
-        replyAt: new Date().toISOString(),
-        ticketStatus: ticket.status,
-        replyBy: {
-          _id: user?.id,
-          //   name: user?.name,
-          email: user?.email,
-          username: user?.username,
-          role: "user",
-        },
-      };
-
-      setMessages([...messages, newMessage]);
-      resetForm();
-      setIsSubmitting(false);
-
-      // Simulate support typing indicator
-      setIsTyping(true);
-
-      // Simulate support reply after a delay
-      setTimeout(() => {
-        setIsTyping(false);
-        const supportReply = {
-          _id: (Date.now() + 1).toString(),
-          text: "Thanks for your message. We're looking into this and will get back to you shortly.",
-          replyAt: new Date().toISOString(),
-          ticketStatus: "in-progress",
-          replyBy: {
+    TicketUpdate({
+      ticketId: ticket._id,
+      status: ticket.status,
+      ticketStatus: ticket.status,
+      text: values.message,
+    })
+      .then((res) => {
+        // let a = res.data[0];
+        setTicket({
+          ...res.data,
+          assignedTo: {
             _id: "6873af102d01bea623cac54e",
             name: "Sarah Johnson",
             email: "support@sportpredict.com",
             username: "sportpredict_support",
-            role: "support",
             avatar: "SJ",
           },
-        };
-
-        setMessages((prev) => [...prev, supportReply]);
-      }, 3000);
-    }, 1000);
+        });
+        setMessages(res.data.message ?? []);
+        setIsSubmitting(false);
+      })
+      .catch((err) => {
+        setIsSubmitting(false);
+        toast.error(
+          err.message || "Failed to update ticket. Please try again."
+        );
+      });
   };
 
   const markAsResolved = () => {
     setIsLoading(true);
-    TicketUpdate({ ticketId: ticket._id, status: "resolved" })
+    TicketUpdate({
+      ticketId: ticket._id,
+      status: "resolved",
+      ticketStatus: "resolved",
+    })
       .then((res) => {
-        setTicket({ ...ticket, status: "resolved" });
+        // let a = res.data[0];
+        setTicket({
+          ...res.data,
+          assignedTo: {
+            _id: "6873af102d01bea623cac54e",
+            name: "Sarah Johnson",
+            email: "support@sportpredict.com",
+            username: "sportpredict_support",
+            avatar: "SJ",
+          },
+        });
+        setMessages(res.data.message ?? []);
+
         toast.success("Ticket marked as resolved");
         setIsLoading(false);
       })
@@ -542,61 +535,71 @@ const SupportUserChat = ({ data }: any) => {
 
                 {/* Reply Form */}
                 <div className="p-3 md:p-4 border-t bg-white rounded-b-2xl">
-                  <Formik
-                    initialValues={{ message: "" }}
-                    validationSchema={validationSchema}
-                    onSubmit={handleFormSubmit}
-                  >
-                    {({ handleSubmit, values }) => (
-                      <Form onSubmit={handleSubmit}>
-                        <div className="mt-6 pt-6 border-t border-gray-200">
-                          <div className="space-y-4">
-                            <Field
-                              name="message"
-                              component={FormikTextArea}
-                              placeholder="Type your message here..."
-                              rows={2}
-                              className="resize-none rounded-2xl pr-12 bg-gray-50 border-gray-200"
-                            />
-                            <div className="flex items-center justify-between">
-                              {/* <Button variant="outline" size="sm" type="button">
-                                <Paperclip className="h-4 w-4 mr-2" />
-                                Attach File
-                              </Button> */}
-                              <p></p>
-                              <Button
-                                type="submit"
-                                disabled={
-                                  isSubmitting || !values.message.trim()
-                                }
-                                // className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 h-12 w-12 md:w-auto rounded-xl shadow-md"
-                              >
-                                {isSubmitting ? (
-                                  <Clock className="h-5 w-5" />
-                                ) : (
-                                  <>
-                                    <Send className="h-4 w-4 mr-2" />
-                                    Send Reply
-                                  </>
-                                )}
-                              </Button>
+                  {ticket.status === "resolved" ? (
+                    <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
+                      <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
+                      <h3 className="text-lg font-semibold text-green-800 mb-2">
+                        Ticket Resolved Successfully
+                      </h3>
+                      <p className="text-green-700">
+                        This chat will now be closed. If you have further
+                        issues, please create a new ticket.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <Formik
+                        initialValues={{ message: "" }}
+                        validationSchema={validationSchema}
+                        onSubmit={handleFormSubmit}
+                      >
+                        {({ handleSubmit, values }) => (
+                          <Form onSubmit={handleSubmit}>
+                            <div className="mt-6 pt-6 border-t border-gray-200">
+                              <div className="space-y-4">
+                                <Field
+                                  name="message"
+                                  component={FormikTextArea}
+                                  placeholder="Type your message here..."
+                                  rows={2}
+                                  className="resize-none rounded-2xl pr-12 bg-gray-50 border-gray-200"
+                                />
+                                <div className="flex items-center justify-between">
+                                  <p></p>
+                                  <Button
+                                    type="submit"
+                                    disabled={
+                                      isSubmitting || !values.message.trim()
+                                    }
+                                  >
+                                    {isSubmitting ? (
+                                      <Clock className="h-5 w-5" />
+                                    ) : (
+                                      <>
+                                        <Send className="h-4 w-4 mr-2" />
+                                        Send Reply
+                                      </>
+                                    )}
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      </Form>
-                    )}
-                  </Formik>
+                          </Form>
+                        )}
+                      </Formik>
 
-                  <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-                    <div className="flex items-center">
-                      <Sparkles className="h-3 w-3 mr-1 text-blue-500" />
-                      <span>Support typically replies within 2 hours</span>
-                    </div>
-                    <div className="flex items-center">
-                      <ThumbsUp className="h-3 w-3 mr-1" />
-                      <span>Please be respectful</span>
-                    </div>
-                  </div>
+                      <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+                        <div className="flex items-center">
+                          <Sparkles className="h-3 w-3 mr-1 text-blue-500" />
+                          <span>Support typically replies within 2 hours</span>
+                        </div>
+                        <div className="flex items-center">
+                          <ThumbsUp className="h-3 w-3 mr-1" />
+                          <span>Please be respectful</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </Card>

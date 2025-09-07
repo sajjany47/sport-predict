@@ -83,7 +83,6 @@ const TicketDetailsPage = () => {
       })
         .then((res) => {
           setTicket({ ...ticket, status: newStatus });
-          dispatch(updateTicketStatus({ id: ticket._id, status: newStatus }));
           toast.success(`Ticket status updated to ${newStatus}`);
           setIsLoading(false);
         })

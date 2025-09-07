@@ -63,10 +63,7 @@ const validationSchema = Yup.object().shape({
   description: Yup.string()
     .required("Description is required")
     .min(10, "Description must be at least 10 characters"),
-  userName: Yup.string().required("User name is required"),
-  userEmail: Yup.string()
-    .email("Invalid email address")
-    .required("User email is required"),
+  username: Yup.string().required("User name is required"),
 });
 
 const AdminTicketsPage = () => {
@@ -125,8 +122,7 @@ const AdminTicketsPage = () => {
       category: values.category,
       status: "open",
       priority: values.priority || "medium",
-      userName: values.userName,
-      userEmail: values.userEmail,
+      username: values.username,
     };
     TicketCreate(payload)
       .then((res) => {
@@ -139,36 +135,6 @@ const AdminTicketsPage = () => {
         setIsLoading(false);
         toast.error(err.message || "Failed to save details. Please try again.");
       });
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      const newTicket = {
-        _id: `mock-${Date.now()}`,
-        category: values.category,
-        subject: values.subject,
-        description: values.description,
-        ticketNumber: `TKT${Date.now().toString().slice(-6)}`,
-        status: "open",
-        priority: values.priority || "medium",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        user: {
-          _id: `user-${Date.now()}`,
-          name: values.userName,
-          email: values.userEmail,
-          username: values.userName.toLowerCase().replace(/\s+/g, "_"),
-        },
-        message: [],
-      };
-
-      // Add to Redux store
-      setTickets([...tickets, newTicket]);
-
-      setIsLoading(false);
-      setIsCreateTicketOpen(false);
-      toast.success("Ticket created successfully");
-    }, 1500);
   };
 
   const getStatusIcon = (status: string) => {
@@ -295,8 +261,7 @@ const AdminTicketsPage = () => {
                     description: "",
                     category: "",
                     priority: "medium",
-                    userName: "",
-                    userEmail: "",
+                    username: "",
                   }}
                   validationSchema={validationSchema}
                   onSubmit={handleFormSubmit}
@@ -305,23 +270,12 @@ const AdminTicketsPage = () => {
                     <Form onSubmit={handleSubmit}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         {/* User Name */}
-                        <div className="col-span-1">
+                        <div className="col-span-2">
                           <Field
                             label="User Name"
                             component={FormikTextInput}
-                            name="userName"
-                            placeholder="Enter user's full name"
-                          />
-                        </div>
-
-                        {/* User Email */}
-                        <div className="col-span-1">
-                          <Field
-                            label="User Email"
-                            component={FormikTextInput}
-                            name="userEmail"
-                            type="email"
-                            placeholder="Enter user's email address"
+                            name="username"
+                            placeholder="Enter username"
                           />
                         </div>
 

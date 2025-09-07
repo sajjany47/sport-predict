@@ -26,6 +26,7 @@ const SupportSchema = new Schema(
           enum: ["in-progress", "resolved", "open"],
           default: "in-progress",
         },
+        isRead: { type: Boolean, default: false },
       },
     ],
   },

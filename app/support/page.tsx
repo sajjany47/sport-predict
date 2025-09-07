@@ -76,6 +76,7 @@ const SupportPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   const [supportListData, setSupportListData] = useState<any>([]);
 
@@ -92,6 +93,14 @@ const SupportPage = () => {
     TicketList({ userId: user?.id })
       .then((res) => {
         setSupportListData(res.data);
+        const unreadCount = res.data.reduce((count: number, ticket: any) => {
+          const ticketUnread = ticket.message.filter(
+            (item: any) =>
+              item.isRead === false && item.replyBy._id !== user?.id
+          ).length;
+          return count + ticketUnread;
+        }, 0);
+        setUnreadMessageCount(unreadCount);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -586,13 +595,12 @@ const SupportPage = () => {
                                         Updated: {formatDate(ticket.updatedAt)}
                                       </span>
                                     </div>
-                                    <div className="flex items-center">
-                                      <MessageCircle className="h-4 w-4 mr-1" />
-                                      {ticket.message
-                                        ? ticket.message.length
-                                        : 1}{" "}
-                                      messages
-                                    </div>
+                                    {unreadMessageCount !== 0 && (
+                                      <div className="flex items-center">
+                                        <MessageCircle className="h-4 w-4 mr-1" />
+                                        {unreadMessageCount} messages
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               );

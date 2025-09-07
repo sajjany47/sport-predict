@@ -4,6 +4,7 @@ import { FormatErrorMessage, GenerateTicketNumber } from "@/lib/utils";
 import { SupportTicketValidation } from "../SupportSchema";
 import mongoose from "mongoose";
 import SupportTicket from "../SupportModel";
+import User from "../../users/UserModel";
 
 export const POST = async (request: NextRequest) => {
   await dbConnect();
@@ -13,10 +14,22 @@ export const POST = async (request: NextRequest) => {
     const xUser = request.headers.get("x-user");
     const loggedInUser = xUser ? JSON.parse(xUser) : null;
 
+    let userId: any = "";
+    if (reqData.username) {
+      const findUser = await User.findOne({ username: reqData.username });
+      if (!findUser) {
+        return NextResponse.json(
+          { success: false, message: "User not found" },
+          { status: 404 }
+        );
+      }
+      userId = new mongoose.Types.ObjectId(findUser._id);
+    } else {
+      userId = new mongoose.Types.ObjectId(loggedInUser._id);
+    }
+
     const ticketData = {
-      userId: reqData.hasOwnProperty("userId")
-        ? new mongoose.Types.ObjectId(reqData.userId)
-        : new mongoose.Types.ObjectId(loggedInUser._id),
+      userId: userId,
       subject: reqData.subject,
       description: reqData.description,
       ticketNumber: GenerateTicketNumber(reqData.category),
@@ -30,6 +43,7 @@ export const POST = async (request: NextRequest) => {
           replyAt: new Date(),
           replyBy: new mongoose.Types.ObjectId(loggedInUser._id),
           ticketStatus: reqData.status || "in-progress",
+          isRead: false,
         },
       ],
     };

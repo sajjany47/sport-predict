@@ -19,6 +19,7 @@ export const SupportTicketValidation = Yup.object().shape({
 
   message: Yup.array().of(
     Yup.object().shape({
+      isRead: Yup.boolean().notRequired(),
       text: Yup.string().required("Message text is required"),
       replyAt: Yup.date().default(() => new Date()),
       replyBy: Yup.string().required("ReplyBy is required"),
