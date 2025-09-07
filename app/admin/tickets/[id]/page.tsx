@@ -39,7 +39,30 @@ import {
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
 import { TicketList, TicketUpdate } from "@/app/MainService";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Field, Form, Formik } from "formik";
+import {
+  FormikSelectField,
+  FormikTextArea,
+  FormikTextInput,
+} from "@/components/CustomField";
+import * as Yup from "yup";
 
+const validationSchema = Yup.object().shape({
+  subject: Yup.string()
+    .required("Subject is required")
+    .min(3, "Subject must be at least 3 characters"),
+  category: Yup.string().required("Category is required"),
+  description: Yup.string()
+    .required("Description is required")
+    .min(10, "Description must be at least 10 characters"),
+  username: Yup.string().required("User name is required"),
+});
 const TicketDetailsPage = () => {
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
@@ -52,6 +75,7 @@ const TicketDetailsPage = () => {
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [ticket, setTicket] = useState<any>(null);
+  const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -150,11 +174,24 @@ const TicketDetailsPage = () => {
   };
 
   const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-
-    // Here you would typically send the message to your backend
-    toast.success("Message sent successfully");
-    setNewMessage("");
+    TicketUpdate({
+      ticketId: ticket._id,
+      status: ticket.status,
+      ticketStatus: ticket.status,
+      text: newMessage,
+    })
+      .then((res) => {
+        // let a = res.data[0];
+        setTicket({
+          ...res.data,
+        });
+        setNewMessage("");
+      })
+      .catch((err) => {
+        toast.error(
+          err.message || "Failed to update ticket. Please try again."
+        );
+      });
   };
 
   if (isLoading) {
@@ -196,6 +233,30 @@ const TicketDetailsPage = () => {
     );
   }
 
+  const handleFormSubmit = (values: any) => {
+    setIsLoading(true);
+    const payload = {
+      subject: values.subject,
+      description: values.description,
+      category: values.category,
+      status: "open",
+      priority: values.priority || "medium",
+      username: values.username,
+      ticketId: params.id,
+    };
+    TicketUpdate(payload)
+      .then((res) => {
+        toast.success(res.message);
+        setIsLoading(false);
+        setIsCreateTicketOpen(false);
+        fetchTicketDetails();
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.error(err.message || "Failed to save details. Please try again.");
+      });
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-8">
@@ -229,7 +290,7 @@ const TicketDetailsPage = () => {
                     onClick={() => handleStatusChange("in-progress")}
                   >
                     <Clock className="h-4 w-4 mr-2" />
-                    Start Working
+                    In Progress
                   </DropdownMenuItem>
                 )}
                 {ticket.status === "in-progress" && (
@@ -246,7 +307,13 @@ const TicketDetailsPage = () => {
                     Reopen Ticket
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    // Delay opening the dialog so dropdown can close
+                    setTimeout(() => setIsCreateTicketOpen(true), 50);
+                  }}
+                  className="cursor-pointer"
+                >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Ticket
                 </DropdownMenuItem>
@@ -404,11 +471,11 @@ const TicketDetailsPage = () => {
               <CardContent>
                 <div className="space-y-4 max-h-96 overflow-y-auto">
                   {ticket.message &&
-                    ticket.message.map((msg: any) => (
+                    (ticket.message ?? []).map((msg: any) => (
                       <div
                         key={msg._id}
                         className={`flex ${
-                          msg.replyBy._id !== ticket.user._id
+                          msg?.replyBy?._id !== ticket?.user?._id
                             ? "justify-end"
                             : "justify-start"
                         }`}
@@ -424,21 +491,21 @@ const TicketDetailsPage = () => {
                           <div className="flex items-center justify-between mt-2">
                             <p
                               className={`text-xs ${
-                                msg.replyBy._id !== ticket.user._id
+                                msg?.replyBy?._id !== ticket?.user?._id
                                   ? "text-blue-100"
                                   : "text-gray-500"
                               }`}
                             >
-                              {msg.replyBy.name}
+                              {msg?.replyBy?.name}
                             </p>
                             <p
                               className={`text-xs ${
-                                msg.replyBy._id !== ticket.user._id
+                                msg?.replyBy?._id !== ticket?.user?._id
                                   ? "text-blue-100"
                                   : "text-gray-500"
                               }`}
                             >
-                              {new Date(msg.replyAt).toLocaleString()}
+                              {new Date(msg?.replyAt).toLocaleString()}
                             </p>
                           </div>
                         </div>
@@ -538,6 +605,112 @@ const TicketDetailsPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+      <Dialog open={isCreateTicketOpen} onOpenChange={setIsCreateTicketOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+              Edit Support Ticket
+            </DialogTitle>
+          </DialogHeader>
+          <Formik
+            initialValues={{
+              subject: ticket.subject,
+              description: ticket.description,
+              category: ticket.category,
+              priority: ticket.priority,
+              username: ticket.user.username,
+            }}
+            validationSchema={validationSchema}
+            onSubmit={handleFormSubmit}
+          >
+            {({ handleSubmit }) => (
+              <Form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  {/* User Name */}
+                  <div className="col-span-2">
+                    <Field
+                      label="User Name"
+                      component={FormikTextInput}
+                      name="username"
+                      placeholder="Enter username"
+                      disabled
+                    />
+                  </div>
+
+                  {/* Subject */}
+                  <div className="col-span-2">
+                    <Field
+                      label="Subject"
+                      component={FormikTextInput}
+                      name="subject"
+                      placeholder="Brief description of the issue"
+                    />
+                  </div>
+
+                  {/* Category and Priority */}
+                  <div className="col-span-1">
+                    <Field
+                      label="Category"
+                      name="category"
+                      component={FormikSelectField}
+                      options={[
+                        { label: "General", value: "general" },
+                        { label: "Payment", value: "payment" },
+                        { label: "Prediction", value: "prediction" },
+                        { label: "Technical", value: "technical" },
+                        { label: "Account", value: "account" },
+                      ]}
+                    />
+                  </div>
+
+                  <div className="col-span-1">
+                    <Field
+                      label="Priority"
+                      name="priority"
+                      component={FormikSelectField}
+                      options={[
+                        { label: "Low", value: "low" },
+                        { label: "Medium", value: "medium" },
+                        { label: "High", value: "high" },
+                        { label: "Urgent", value: "urgent" },
+                      ]}
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div className="col-span-2">
+                    <Field
+                      label="Description"
+                      component={FormikTextArea}
+                      name="description"
+                      rows={4}
+                      placeholder="Please provide detailed information about the issue..."
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsCreateTicketOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isLoading ? "Updating..." : "Update Ticket"}
+                  </Button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };

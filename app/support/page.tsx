@@ -213,6 +213,7 @@ const SupportPage = () => {
       description: values.description,
       category: values.category,
       status: "open",
+      priority: "low",
     };
     TicketCreate(payload)
       .then((res) => {
