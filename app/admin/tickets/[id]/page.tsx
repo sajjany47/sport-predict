@@ -76,6 +76,7 @@ const TicketDetailsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [ticket, setTicket] = useState<any>(null);
   const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -174,6 +175,7 @@ const TicketDetailsPage = () => {
   };
 
   const handleSendMessage = () => {
+    setIsSubmitting(true);
     TicketUpdate({
       ticketId: ticket._id,
       status: ticket.status,
@@ -186,8 +188,10 @@ const TicketDetailsPage = () => {
           ...res.data,
         });
         setNewMessage("");
+        setIsSubmitting(false);
       })
       .catch((err) => {
+        setIsSubmitting(false);
         toast.error(
           err.message || "Failed to update ticket. Please try again."
         );
@@ -514,28 +518,48 @@ const TicketDetailsPage = () => {
                 </div>
 
                 {/* Reply Section */}
+
                 <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="space-y-4">
-                    <Textarea
-                      placeholder="Type your reply..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      rows={3}
-                    />
-                    <div className="flex items-center justify-between">
-                      <Button variant="outline" size="sm">
-                        <Paperclip className="h-4 w-4 mr-2" />
-                        Attach File
-                      </Button>
-                      <Button
-                        onClick={handleSendMessage}
-                        disabled={!newMessage.trim()}
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        Send Reply
-                      </Button>
+                  {ticket.status === "resolved" ? (
+                    <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
+                      <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
+                      <h3 className="text-lg font-semibold text-green-800 mb-2">
+                        Ticket Resolved Successfully
+                      </h3>
+                      <p className="text-green-700">
+                        This chat will now be closed. If you have further
+                        issues, please create a new ticket.
+                      </p>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Textarea
+                        placeholder="Type your reply..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        rows={3}
+                      />
+                      <div className="flex items-center justify-between">
+                        <Button variant="outline" size="sm">
+                          <Paperclip className="h-4 w-4 mr-2" />
+                          Attach File
+                        </Button>
+                        <Button
+                          onClick={handleSendMessage}
+                          disabled={isSubmitting || !newMessage.trim()}
+                        >
+                          {isSubmitting ? (
+                            <Clock className="h-5 w-5" />
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4 mr-2" />
+                              Send Reply
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

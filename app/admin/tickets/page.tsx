@@ -54,6 +54,7 @@ import {
 import * as Yup from "yup";
 import toast from "react-hot-toast";
 import { TicketCreate, TicketList } from "@/app/MainService";
+import CustomLoader from "@/components/ui/CustomLoader";
 
 const validationSchema = Yup.object().shape({
   subject: Yup.string()
@@ -226,6 +227,7 @@ const AdminTicketsPage = () => {
 
   return (
     <AdminLayout>
+      {isLoading && <CustomLoader message="Ticket Loading" />}
       <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
