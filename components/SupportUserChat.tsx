@@ -177,6 +177,7 @@ const SupportUserChat = ({ data }: any) => {
   };
 
   const handleFormSubmit = (values: any, { resetForm }: any) => {
+    setIsTyping(true);
     setIsSubmitting(true);
 
     TicketUpdate({
@@ -199,6 +200,8 @@ const SupportUserChat = ({ data }: any) => {
         });
         setMessages(res.data.message ?? []);
         setIsSubmitting(false);
+        setIsTyping(false);
+        resetForm();
       })
       .catch((err) => {
         setIsSubmitting(false);
