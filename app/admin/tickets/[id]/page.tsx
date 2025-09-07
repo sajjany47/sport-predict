@@ -63,7 +63,7 @@ const TicketDetailsPage = () => {
 
   const fetchTicketDetails = () => {
     setIsLoading(true);
-    TicketList({ userId: params.id })
+    TicketList({ ticketId: params.id })
       .then((res) => {
         setTicket(res.data[0]);
         setIsLoading(false);

@@ -70,7 +70,7 @@ const SupportUserChat = ({ data }: any) => {
 
   const fetchTicketDetails = () => {
     setIsLoading(true);
-    TicketList({ userId: data.userId })
+    TicketList({ ticketId: data.ticketId })
       .then((res) => {
         let a = res.data[0];
         setTicket({

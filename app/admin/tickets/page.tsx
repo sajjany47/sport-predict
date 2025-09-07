@@ -625,7 +625,7 @@ const AdminTicketsPage = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleViewTicket(ticket.user._id)}
+                              onClick={() => handleViewTicket(ticket._id)}
                               className="rounded-lg"
                             >
                               <Eye className="h-4 w-4 mr-2" />

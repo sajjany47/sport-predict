@@ -24,6 +24,9 @@ export const POST = async (request: NextRequest) => {
     if (reqData.userId) {
       matchConditions.userId = new mongoose.Types.ObjectId(reqData.userId);
     }
+    if (reqData.ticketId) {
+      matchConditions._id = new mongoose.Types.ObjectId(reqData.ticketId);
+    }
 
     if (reqData.status) {
       matchConditions.status = { $regex: reqData.status, $options: "i" };

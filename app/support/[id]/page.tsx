@@ -21,7 +21,7 @@ const SupportChatPage = () => {
 
   return (
     <>
-      <SupportUserChat data={{ userId: params.id }} />
+      <SupportUserChat data={{ ticketId: params.id }} />
     </>
   );
 };

@@ -494,7 +494,7 @@ const SupportPage = () => {
                                   key={ticket._id}
                                   className="cursor-pointer p-5 bg-white rounded-xl border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all duration-200"
                                   onClick={() =>
-                                    router.push(`/support/${ticket.user._id}`)
+                                    router.push(`/support/${ticket._id}`)
                                   }
                                 >
                                   <div className="flex items-start justify-between mb-3">
