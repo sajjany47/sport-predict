@@ -549,8 +549,8 @@ const SupportUserChat = ({ data }: any) => {
                   >
                     {({ handleSubmit, values }) => (
                       <Form onSubmit={handleSubmit}>
-                        <div className="flex items-end space-x-2">
-                          <div className="flex-1 relative">
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                          <div className="space-y-4">
                             <Field
                               name="message"
                               component={FormikTextArea}
@@ -558,39 +558,30 @@ const SupportUserChat = ({ data }: any) => {
                               rows={2}
                               className="resize-none rounded-2xl pr-12 bg-gray-50 border-gray-200"
                             />
-                            <div className="absolute right-3 bottom-3 flex space-x-1">
+                            <div className="flex items-center justify-between">
+                              {/* <Button variant="outline" size="sm" type="button">
+                                <Paperclip className="h-4 w-4 mr-2" />
+                                Attach File
+                              </Button> */}
+                              <p></p>
                               <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-gray-500"
+                                type="submit"
+                                disabled={
+                                  isSubmitting || !values.message.trim()
+                                }
+                                // className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 h-12 w-12 md:w-auto rounded-xl shadow-md"
                               >
-                                <Smile className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-gray-500"
-                              >
-                                <Image className="h-4 w-4" />
+                                {isSubmitting ? (
+                                  <Clock className="h-5 w-5" />
+                                ) : (
+                                  <>
+                                    <Send className="h-4 w-4 mr-2" />
+                                    Send Reply
+                                  </>
+                                )}
                               </Button>
                             </div>
                           </div>
-                          <Button
-                            type="submit"
-                            disabled={isSubmitting || !values.message.trim()}
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 h-12 w-12 md:w-auto rounded-xl shadow-md"
-                          >
-                            {isSubmitting ? (
-                              <Clock className="h-5 w-5" />
-                            ) : (
-                              <>
-                                <Send className="h-5 w-5 md:mr-2" />
-                                <span className="hidden md:inline">Send</span>
-                              </>
-                            )}
-                          </Button>
                         </div>
                       </Form>
                     )}
