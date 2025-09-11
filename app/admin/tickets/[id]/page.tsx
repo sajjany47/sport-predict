@@ -30,6 +30,8 @@ import {
   MoreHorizontal,
   FileText,
   Tag,
+  Shield,
+  UserCheck,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -267,6 +269,21 @@ const TicketDetailsPage = () => {
       });
   };
 
+  // Function to determine if message is from user or admin
+  const isUserMessage = (message: any) => {
+    return message.replyBy._id === ticket.user._id;
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-8">
@@ -484,93 +501,136 @@ const TicketDetailsPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {ticket.message &&
-                    (ticket.message ?? []).map((msg: any) => (
-                      <div
-                        key={msg._id}
-                        className={`flex ${
-                          msg?.replyBy?._id !== ticket?.user?._id
-                            ? "justify-end"
-                            : "justify-start"
-                        }`}
-                      >
-                        <div
-                          className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                            msg.replyBy._id !== ticket.user._id
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-100 text-gray-900"
-                          }`}
-                        >
-                          <p className="text-sm">{msg.text}</p>
-                          <div className="flex items-center justify-between mt-2">
-                            <p
-                              className={`text-xs ${
-                                msg?.replyBy?._id !== ticket?.user?._id
-                                  ? "text-blue-100"
-                                  : "text-gray-500"
+                <div className="lg:col-span-3">
+                  <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                    <div className="p-6 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                        <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+                        Conversation History
+                      </h3>
+                    </div>
+
+                    <div className="p-6 space-y-6 max-h-96 overflow-y-auto">
+                      {ticket.message.map((msg: any, index: number) => {
+                        const isUser = isUserMessage(msg);
+                        return (
+                          <div key={msg._id} className="space-y-2">
+                            {/* Date separator if needed */}
+                            {index === 0 ||
+                            formatDate(msg.replyAt) !==
+                              formatDate(ticket.message[index - 1].replyAt) ? (
+                              <div className="flex justify-center">
+                                <span className="px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
+                                  {formatDate(msg.replyAt)}
+                                </span>
+                              </div>
+                            ) : null}
+
+                            <div
+                              className={`flex ${
+                                isUser ? "justify-start" : "justify-end"
                               }`}
                             >
-                              {msg?.replyBy?.name}
-                            </p>
-                            <p
-                              className={`text-xs ${
-                                msg?.replyBy?._id !== ticket?.user?._id
-                                  ? "text-blue-100"
-                                  : "text-gray-500"
-                              }`}
+                              <div
+                                className={`flex ${
+                                  isUser ? "flex-row" : "flex-row-reverse"
+                                } items-start space-x-3 max-w-xs lg:max-w-md`}
+                              >
+                                {/* Avatar */}
+                                <div
+                                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                    isUser
+                                      ? "bg-gradient-to-r from-green-400 to-blue-500"
+                                      : "bg-gradient-to-r from-purple-500 to-pink-500"
+                                  }`}
+                                >
+                                  {isUser ? (
+                                    <User className="h-4 w-4 text-white" />
+                                  ) : (
+                                    <Shield className="h-4 w-4 text-white" />
+                                  )}
+                                </div>
+
+                                {/* Message Bubble */}
+                                <div className="space-y-1">
+                                  <div
+                                    className={`px-4 py-3 rounded-2xl ${
+                                      isUser
+                                        ? "bg-gray-100 text-gray-900 rounded-bl-sm"
+                                        : "bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-sm"
+                                    } shadow-sm`}
+                                  >
+                                    <p className="text-sm leading-relaxed">
+                                      {msg.text}
+                                    </p>
+                                  </div>
+
+                                  {/* Message Info */}
+                                  <div
+                                    className={`flex items-center space-x-2 text-xs ${
+                                      isUser ? "text-gray-500" : "text-gray-400"
+                                    } ${isUser ? "ml-0" : "mr-0 justify-end"}`}
+                                  >
+                                    <span className="flex items-center space-x-1">
+                                      {isUser ? (
+                                        <UserCheck className="h-3 w-3" />
+                                      ) : (
+                                        <Shield className="h-3 w-3" />
+                                      )}
+                                      <span>{msg.replyBy.name}</span>
+                                    </span>
+                                    <span>•</span>
+                                    <span>{formatTime(msg.replyAt)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Reply Section */}
+                    <div className="p-6 border-t border-gray-200 bg-gray-50">
+                      {ticket.status === "resolved" ? (
+                        <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
+                          <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
+                          <h3 className="text-lg font-semibold text-green-800 mb-2">
+                            Ticket Resolved Successfully
+                          </h3>
+                          <p className="text-green-700">
+                            This conversation has been marked as resolved.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="relative">
+                            <textarea
+                              placeholder="Type your reply as admin..."
+                              value={newMessage}
+                              onChange={(e) => setNewMessage(e.target.value)}
+                              rows={3}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <button className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                              <Paperclip className="h-4 w-4" />
+                              <span>Attach File</span>
+                            </button>
+                            <button
+                              onClick={handleSendMessage}
+                              disabled={isSubmitting || !newMessage.trim()}
+                              className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                             >
-                              {new Date(msg?.replyAt).toLocaleString()}
-                            </p>
+                              <Send className="h-4 w-4" />
+                              <span>Send Reply</span>
+                            </button>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                </div>
-
-                {/* Reply Section */}
-
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  {ticket.status === "resolved" ? (
-                    <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
-                      <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
-                      <h3 className="text-lg font-semibold text-green-800 mb-2">
-                        Ticket Resolved Successfully
-                      </h3>
-                      <p className="text-green-700">
-                        This chat will now be closed. If you have further
-                        issues, please create a new ticket.
-                      </p>
+                      )}
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <Textarea
-                        placeholder="Type your reply..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        rows={3}
-                      />
-                      <div className="flex items-center justify-between">
-                        <Button variant="outline" size="sm">
-                          <Paperclip className="h-4 w-4 mr-2" />
-                          Attach File
-                        </Button>
-                        <Button
-                          onClick={handleSendMessage}
-                          disabled={isSubmitting || !newMessage.trim()}
-                        >
-                          {isSubmitting ? (
-                            <Clock className="h-5 w-5" />
-                          ) : (
-                            <>
-                              <Send className="h-4 w-4 mr-2" />
-                              Send Reply
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               </CardContent>
             </Card>

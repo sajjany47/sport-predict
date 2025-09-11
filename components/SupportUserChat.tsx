@@ -26,6 +26,7 @@ import {
   ChevronDown,
   Star,
   Zap,
+  Headphones,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Field, Form, Formik } from "formik";
@@ -66,27 +67,20 @@ const SupportUserChat = ({ data }: any) => {
     setIsLoading(true);
     TicketList({ ticketId: data.ticketId })
       .then((res) => {
-        let a = res.data[0];
+        let ticketData = res.data[0];
         setTicket({
-          _id: a._id,
-          category: a.category,
-          subject: a.subject,
-          description: a.description,
-          ticketNumber: a.ticketNumber,
-          status: a.status,
-          priority: a.priority || "medium",
-          user: a.user,
-          createdAt: a.createdAt,
-          updatedAt: a.updatedAt,
-          assignedTo: {
-            _id: "6873af102d01bea623cac54e",
-            name: "Sarah Johnson",
-            email: "support@sportpredict.com",
-            username: "sportpredict_support",
-            avatar: "SJ",
-          },
+          _id: ticketData._id,
+          category: ticketData.category,
+          subject: ticketData.subject,
+          description: ticketData.description,
+          ticketNumber: ticketData.ticketNumber,
+          status: ticketData.status,
+          priority: ticketData.priority || "medium",
+          user: ticketData.user,
+          createdAt: ticketData.createdAt,
+          updatedAt: ticketData.updatedAt,
         });
-        setMessages(a.message ?? []);
+        setMessages(ticketData.message ?? []);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -101,6 +95,21 @@ const SupportUserChat = ({ data }: any) => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Determine if message is from user or support
+  const isUserMessage = (message: any) => {
+    return message.replyBy._id === ticket?.user._id;
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const getStatusIcon = (status: string) => {
@@ -170,13 +179,28 @@ const SupportUserChat = ({ data }: any) => {
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const now = new Date();
+    const diffInHours =
+      Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 24) {
+      return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else {
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
   };
 
   const handleFormSubmit = (values: any, { resetForm }: any) => {
+    if (!values.message.trim()) return;
+
     setIsTyping(true);
     setIsSubmitting(true);
 
@@ -184,30 +208,23 @@ const SupportUserChat = ({ data }: any) => {
       ticketId: ticket._id,
       status: ticket.status,
       ticketStatus: ticket.status,
-      text: values.message,
+      text: values.message.trim(),
     })
       .then((res) => {
-        // let a = res.data[0];
         setTicket({
           ...res.data,
-          assignedTo: {
-            _id: "6873af102d01bea623cac54e",
-            name: "Sarah Johnson",
-            email: "support@sportpredict.com",
-            username: "sportpredict_support",
-            avatar: "SJ",
-          },
+          user: ticket.user, // Preserve user data
         });
         setMessages(res.data.message ?? []);
         setIsSubmitting(false);
         setIsTyping(false);
         resetForm();
+        toast.success("Message sent successfully!");
       })
       .catch((err) => {
         setIsSubmitting(false);
-        toast.error(
-          err.message || "Failed to update ticket. Please try again."
-        );
+        setIsTyping(false);
+        toast.error(err.message || "Failed to send message. Please try again.");
       });
   };
 
@@ -219,19 +236,11 @@ const SupportUserChat = ({ data }: any) => {
       ticketStatus: "resolved",
     })
       .then((res) => {
-        // let a = res.data[0];
         setTicket({
           ...res.data,
-          assignedTo: {
-            _id: "6873af102d01bea623cac54e",
-            name: "Sarah Johnson",
-            email: "support@sportpredict.com",
-            username: "sportpredict_support",
-            avatar: "SJ",
-          },
+          user: ticket.user, // Preserve user data
         });
         setMessages(res.data.message ?? []);
-
         toast.success("Ticket marked as resolved");
         setIsLoading(false);
       })
@@ -248,7 +257,26 @@ const SupportUserChat = ({ data }: any) => {
   };
 
   if (isLoading) {
-    return <CustomLoader message="Loading conversation" />;
+    return <CustomLoader message="Loading conversation..." />;
+  }
+
+  if (!ticket) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Ticket not found
+          </h2>
+          <p className="text-gray-600">
+            The requested ticket could not be loaded.
+          </p>
+          <Button onClick={() => router.back()} className="mt-4">
+            Go Back
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -260,7 +288,7 @@ const SupportUserChat = ({ data }: any) => {
             <Button
               variant="ghost"
               onClick={() => router.back()}
-              className="mr-2 md:mr-4"
+              className="mr-2 md:mr-4 hover:bg-gray-100"
               size="sm"
             >
               <ArrowLeft className="h-4 w-4 md:mr-2" />
@@ -340,9 +368,28 @@ const SupportUserChat = ({ data }: any) => {
                     <p className="text-sm font-medium text-gray-500 mb-1">
                       Ticket Number
                     </p>
-                    <p className="text-gray-900 font-mono bg-gray-100 p-2 rounded-lg">
+                    <p className="text-gray-900 font-mono bg-gray-100 p-2 rounded-lg text-sm">
                       #{ticket.ticketNumber}
                     </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Created By
+                    </p>
+                    <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                        {getUserInitials(ticket.user.name)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {ticket.user.name}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {ticket.user.email}
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
                   <div>
@@ -364,27 +411,6 @@ const SupportUserChat = ({ data }: any) => {
                       {formatDate(ticket.updatedAt)}
                     </p>
                   </div>
-
-                  {ticket.assignedTo && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">
-                        Assigned To
-                      </p>
-                      <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-xl border border-blue-100">
-                        <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium">
-                          {ticket.assignedTo.avatar}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
-                            {ticket.assignedTo.name}
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            Support Specialist
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   {ticket.status !== "resolved" && (
                     <Button
@@ -408,21 +434,21 @@ const SupportUserChat = ({ data }: any) => {
                 <CardContent className="space-y-3">
                   <Button
                     variant="outline"
-                    className="w-full justify-start rounded-xl"
+                    className="w-full justify-start rounded-xl hover:bg-blue-50"
                   >
                     <FileText className="h-4 w-4 mr-2 text-blue-600" />
                     Request Callback
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full justify-start rounded-xl"
+                    className="w-full justify-start rounded-xl hover:bg-green-50"
                   >
                     <Download className="h-4 w-4 mr-2 text-green-600" />
                     Export Conversation
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full justify-start rounded-xl"
+                    className="w-full justify-start rounded-xl hover:bg-purple-50"
                   >
                     <Paperclip className="h-4 w-4 mr-2 text-purple-600" />
                     Attach Files
@@ -461,60 +487,80 @@ const SupportUserChat = ({ data }: any) => {
                 {/* Chat Messages */}
                 <div className="flex-1 p-3 md:p-4 overflow-y-auto max-h-96 md:max-h-[500px] bg-gray-50">
                   <div className="space-y-4">
-                    {messages.map((message) => (
-                      <div
-                        key={message._id}
-                        className={`flex ${
-                          message.replyBy.role === "user"
-                            ? "justify-end"
-                            : "justify-start"
-                        }`}
-                      >
-                        <div
-                          className={`max-w-xs md:max-w-md lg:max-w-lg rounded-2xl p-4 relative ${
-                            message.replyBy.role === "user"
-                              ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none shadow-md"
-                              : "bg-white text-gray-900 rounded-bl-none shadow-md border border-gray-100"
-                          }`}
-                        >
-                          <div className="flex items-center mb-2">
-                            {message.replyBy.role === "support" ? (
-                              <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                                {message.replyBy.avatar}
-                              </div>
-                            ) : (
-                              <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                                <User className="h-3 w-3" />
-                              </div>
-                            )}
-                            <span className="text-sm font-medium">
-                              {message.replyBy.role === "support"
-                                ? message.replyBy.name
-                                : "You"}
-                            </span>
-                            <span className="text-xs opacity-80 ml-2">
-                              {formatTime(message.replyAt)}
-                            </span>
-                          </div>
-                          <p className="text-sm">{message.text}</p>
-
-                          {/* Message status indicator for user messages */}
-                          {message.replyBy.role === "user" && (
-                            <div className="absolute bottom-1 right-2">
-                              <CheckCircle className="h-3 w-3 text-blue-200" />
-                            </div>
-                          )}
-                        </div>
+                    {messages.length === 0 ? (
+                      <div className="text-center py-8">
+                        <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">
+                          No messages yet. Start the conversation!
+                        </p>
                       </div>
-                    ))}
+                    ) : (
+                      messages.map((message) => {
+                        const isFromUser = isUserMessage(message);
+
+                        return (
+                          <div
+                            key={message._id}
+                            className={`flex ${
+                              isFromUser ? "justify-end" : "justify-start"
+                            }`}
+                          >
+                            <div
+                              className={`max-w-xs md:max-w-md lg:max-w-lg rounded-2xl p-4 relative ${
+                                isFromUser
+                                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none shadow-md"
+                                  : "bg-white text-gray-900 rounded-bl-none shadow-md border border-gray-100"
+                              }`}
+                            >
+                              <div className="flex items-center mb-2">
+                                {isFromUser ? (
+                                  <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
+                                    <User className="h-3 w-3" />
+                                  </div>
+                                ) : (
+                                  <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
+                                    <Headphones className="h-3 w-3" />
+                                  </div>
+                                )}
+                                <span className="text-sm font-medium">
+                                  {isFromUser ? "You" : message.replyBy.name}
+                                </span>
+                                <span className="text-xs opacity-80 ml-2">
+                                  {formatTime(message.replyAt)}
+                                </span>
+                              </div>
+
+                              {message.text.trim() ? (
+                                <p className="text-sm leading-relaxed">
+                                  {message.text}
+                                </p>
+                              ) : (
+                                <p className="text-sm italic opacity-70">
+                                  {isFromUser
+                                    ? "You sent an empty message"
+                                    : "Support is typing..."}
+                                </p>
+                              )}
+
+                              {/* Message status indicator for user messages */}
+                              {isFromUser && (
+                                <div className="absolute bottom-1 right-2">
+                                  <CheckCircle className="h-3 w-3 text-blue-200" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
 
                     {/* Typing indicator */}
                     {isTyping && (
                       <div className="flex justify-start">
                         <div className="bg-white rounded-2xl rounded-bl-none p-4 shadow-md border border-gray-100">
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                              {ticket.assignedTo.avatar}
+                            <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
+                              <Headphones className="h-3 w-3" />
                             </div>
                             <div className="flex space-x-1">
                               <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
@@ -544,9 +590,9 @@ const SupportUserChat = ({ data }: any) => {
                       <h3 className="text-lg font-semibold text-green-800 mb-2">
                         Ticket Resolved Successfully
                       </h3>
-                      <p className="text-green-700">
-                        This chat will now be closed. If you have further
-                        issues, please create a new ticket.
+                      <p className="text-green-700 text-sm">
+                        This conversation has been marked as resolved. If you
+                        have further issues, please create a new support ticket.
                       </p>
                     </div>
                   ) : (
@@ -556,50 +602,53 @@ const SupportUserChat = ({ data }: any) => {
                         validationSchema={validationSchema}
                         onSubmit={handleFormSubmit}
                       >
-                        {({ handleSubmit, values }) => (
+                        {({ handleSubmit, values, isValid }) => (
                           <Form onSubmit={handleSubmit}>
-                            <div className="mt-6 pt-6 border-t border-gray-200">
-                              <div className="space-y-4">
-                                <Field
-                                  name="message"
-                                  component={FormikTextArea}
-                                  placeholder="Type your message here..."
-                                  rows={2}
-                                  className="resize-none rounded-2xl pr-12 bg-gray-50 border-gray-200"
-                                />
-                                <div className="flex items-center justify-between">
-                                  <p></p>
-                                  <Button
-                                    type="submit"
-                                    disabled={
-                                      isSubmitting || !values.message.trim()
-                                    }
-                                  >
-                                    {isSubmitting ? (
-                                      <Clock className="h-5 w-5" />
-                                    ) : (
-                                      <>
-                                        <Send className="h-4 w-4 mr-2" />
-                                        Send Reply
-                                      </>
-                                    )}
-                                  </Button>
+                            <div className="space-y-4">
+                              <Field
+                                name="message"
+                                component={FormikTextArea}
+                                placeholder="Type your message here..."
+                                rows={3}
+                                className="resize-none rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+                              />
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center text-xs text-gray-500">
+                                  <Sparkles className="h-3 w-3 mr-1 text-blue-500" />
+                                  <span>
+                                    Support typically replies within 2 hours
+                                  </span>
                                 </div>
+                                <Button
+                                  type="submit"
+                                  disabled={
+                                    isSubmitting ||
+                                    !values.message.trim() ||
+                                    !isValid
+                                  }
+                                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md"
+                                >
+                                  {isSubmitting ? (
+                                    <>
+                                      <Clock className="h-4 w-4 mr-2 animate-spin" />
+                                      Sending...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Send className="h-4 w-4 mr-2" />
+                                      Send Reply
+                                    </>
+                                  )}
+                                </Button>
                               </div>
                             </div>
                           </Form>
                         )}
                       </Formik>
 
-                      <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-                        <div className="flex items-center">
-                          <Sparkles className="h-3 w-3 mr-1 text-blue-500" />
-                          <span>Support typically replies within 2 hours</span>
-                        </div>
-                        <div className="flex items-center">
-                          <ThumbsUp className="h-3 w-3 mr-1" />
-                          <span>Please be respectful</span>
-                        </div>
+                      <div className="flex items-center justify-center mt-3 text-xs text-gray-500">
+                        <ThumbsUp className="h-3 w-3 mr-1" />
+                        <span>Please be respectful in your communication</span>
                       </div>
                     </>
                   )}
@@ -621,7 +670,7 @@ const SupportUserChat = ({ data }: any) => {
                           How was your support experience?
                         </h3>
                         <p className="text-sm text-gray-600">
-                          Rate your interaction with our support team
+                          Please rate your interaction with our support team
                         </p>
                       </div>
                     </div>
@@ -631,7 +680,7 @@ const SupportUserChat = ({ data }: any) => {
                           key={star}
                           variant="outline"
                           size="icon"
-                          className="h-10 w-10 rounded-full bg-white border-gray-300 hover:bg-amber-100 hover:text-amber-500"
+                          className="h-10 w-10 rounded-full bg-white border-gray-300 hover:bg-amber-100 hover:text-amber-500 transition-colors"
                         >
                           <Star className="h-5 w-5" />
                         </Button>
