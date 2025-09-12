@@ -27,6 +27,8 @@ import {
   Star,
   Zap,
   Headphones,
+  Shield,
+  UserCheck,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Field, Form, Formik } from "formik";
@@ -495,59 +497,79 @@ const SupportUserChat = ({ data }: any) => {
                         </p>
                       </div>
                     ) : (
-                      messages.map((message) => {
-                        const isFromUser = isUserMessage(message);
-
+                      messages.map((msg: any, index: number) => {
+                        const isUser = isUserMessage(msg);
                         return (
-                          <div
-                            key={message._id}
-                            className={`flex ${
-                              isFromUser ? "justify-end" : "justify-start"
-                            }`}
-                          >
-                            <div
-                              className={`max-w-xs md:max-w-md lg:max-w-lg rounded-2xl p-4 relative ${
-                                isFromUser
-                                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none shadow-md"
-                                  : "bg-white text-gray-900 rounded-bl-none shadow-md border border-gray-100"
-                              }`}
-                            >
-                              <div className="flex items-center mb-2">
-                                {isFromUser ? (
-                                  <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                                    <User className="h-3 w-3" />
-                                  </div>
-                                ) : (
-                                  <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                                    <Headphones className="h-3 w-3" />
-                                  </div>
-                                )}
-                                <span className="text-sm font-medium">
-                                  {isFromUser ? "You" : message.replyBy.name}
-                                </span>
-                                <span className="text-xs opacity-80 ml-2">
-                                  {formatTime(message.replyAt)}
+                          <div key={msg._id} className="space-y-2">
+                            {/* Date separator if needed */}
+                            {index === 0 ||
+                            formatDate(msg.replyAt) !==
+                              formatDate(messages[index - 1].replyAt) ? (
+                              <div className="flex justify-center">
+                                <span className="px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
+                                  {formatDate(msg.replyAt)}
                                 </span>
                               </div>
+                            ) : null}
 
-                              {message.text.trim() ? (
-                                <p className="text-sm leading-relaxed">
-                                  {message.text}
-                                </p>
-                              ) : (
-                                <p className="text-sm italic opacity-70">
-                                  {isFromUser
-                                    ? "You sent an empty message"
-                                    : "Support is typing..."}
-                                </p>
-                              )}
-
-                              {/* Message status indicator for user messages */}
-                              {isFromUser && (
-                                <div className="absolute bottom-1 right-2">
-                                  <CheckCircle className="h-3 w-3 text-blue-200" />
+                            <div
+                              className={`flex ${
+                                isUser ? "justify-start" : "justify-end"
+                              }`}
+                            >
+                              <div
+                                className={`flex ${
+                                  isUser ? "flex-row" : "flex-row-reverse"
+                                } items-start space-x-3 max-w-xs lg:max-w-md`}
+                              >
+                                {/* Avatar */}
+                                <div
+                                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                    isUser
+                                      ? "bg-gradient-to-r from-green-400 to-blue-500"
+                                      : "bg-gradient-to-r from-purple-500 to-pink-500"
+                                  }`}
+                                >
+                                  {isUser ? (
+                                    <User className="h-4 w-4 text-white" />
+                                  ) : (
+                                    <Shield className="h-4 w-4 text-white" />
+                                  )}
                                 </div>
-                              )}
+
+                                {/* Message Bubble */}
+                                <div className="space-y-1">
+                                  <div
+                                    className={`px-4 py-3 rounded-2xl ${
+                                      isUser
+                                        ? "bg-gray-100 text-gray-900 rounded-bl-sm"
+                                        : "bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-sm"
+                                    } shadow-sm`}
+                                  >
+                                    <p className="text-sm leading-relaxed">
+                                      {msg.text}
+                                    </p>
+                                  </div>
+
+                                  {/* Message Info */}
+                                  <div
+                                    className={`flex items-center space-x-2 text-xs ${
+                                      isUser ? "text-gray-500" : "text-gray-400"
+                                    } ${isUser ? "ml-0" : "mr-0 justify-end"}`}
+                                  >
+                                    <span className="flex items-center space-x-1">
+                                      {isUser ? (
+                                        <UserCheck className="h-3 w-3" />
+                                      ) : (
+                                        <Shield className="h-3 w-3" />
+                                      )}
+                                      <span>{msg.replyBy.name}</span>
+                                    </span>
+                                    <span>•</span>
+                                    <span>{formatTime(msg.replyAt)}</span>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         );
