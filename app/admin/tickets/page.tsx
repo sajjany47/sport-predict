@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
@@ -11,6 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Ticket,
   Search,
@@ -25,6 +32,12 @@ import {
   User,
   Calendar,
   Flag,
+  Plus,
+  Mail,
+  Phone,
+  MapPin,
+  Tag,
+  Zap,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -32,99 +45,67 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Field, Form, Formik } from "formik";
+import {
+  FormikSelectField,
+  FormikTextArea,
+  FormikTextInput,
+} from "@/components/CustomField";
+import * as Yup from "yup";
 import toast from "react-hot-toast";
+import { TicketCreate, TicketList } from "@/app/MainService";
+import CustomLoader from "@/components/ui/CustomLoader";
+
+const validationSchema = Yup.object().shape({
+  subject: Yup.string()
+    .required("Subject is required")
+    .min(3, "Subject must be at least 3 characters"),
+  category: Yup.string().required("Category is required"),
+  description: Yup.string()
+    .required("Description is required")
+    .min(10, "Description must be at least 10 characters"),
+  username: Yup.string().required("User name is required"),
+});
 
 const AdminTicketsPage = () => {
-  const { tickets } = useSelector((state: RootState) => state.admin);
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
+  );
   const dispatch = useDispatch();
   const router = useRouter();
-
+  const [tickets, setTickets] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Mock tickets data
-    const mockTickets = [
-      {
-        id: "TKT-001",
-        userId: "1",
-        userName: "cricket_fan",
-        subject: "Payment not processed",
-        description:
-          "My payment for Pro plan was deducted but subscription not activated. Please help resolve this issue.",
-        status: "in-progress" as const,
-        priority: "high" as const,
-        createdAt: "2025-01-10T10:30:00Z",
-        updatedAt: "2025-01-11T14:20:00Z",
-        assignedTo: "Admin Support",
-      },
-      {
-        id: "TKT-002",
-        userId: "2",
-        userName: "sports_lover",
-        subject: "Prediction accuracy issue",
-        description:
-          "The AI prediction for match IND vs AUS was completely wrong. I lost my fantasy contest because of this.",
-        status: "open" as const,
-        priority: "medium" as const,
-        createdAt: "2025-01-12T08:20:00Z",
-        updatedAt: "2025-01-12T08:20:00Z",
-      },
-      {
-        id: "TKT-003",
-        userId: "3",
-        userName: "dream11_pro",
-        subject: "Credits not deducted properly",
-        description:
-          "Used prediction but credits were deducted twice from my account.",
-        status: "resolved" as const,
-        priority: "low" as const,
-        createdAt: "2025-01-08T16:45:00Z",
-        updatedAt: "2025-01-09T09:15:00Z",
-        assignedTo: "Technical Team",
-      },
-      {
-        id: "TKT-004",
-        userId: "4",
-        userName: "fantasy_king",
-        subject: "Account suspended without reason",
-        description:
-          "My account was suspended suddenly without any notification or reason. Please review and reactivate.",
-        status: "open" as const,
-        priority: "urgent" as const,
-        createdAt: "2025-01-13T12:15:00Z",
-        updatedAt: "2025-01-13T12:15:00Z",
-      },
-      {
-        id: "TKT-005",
-        userId: "5",
-        userName: "cricket_master",
-        subject: "Dream11 team suggestion not working",
-        description:
-          "The Dream11 team builder is showing error when I try to generate team for today's matches.",
-        status: "in-progress" as const,
-        priority: "medium" as const,
-        createdAt: "2025-01-14T09:30:00Z",
-        updatedAt: "2025-01-14T15:45:00Z",
-        assignedTo: "Development Team",
-      },
-      {
-        id: "TKT-006",
-        userId: "1",
-        userName: "cricket_fan",
-        subject: "Refund request",
-        description:
-          "I want to cancel my Elite subscription and get a refund as I am not satisfied with the service.",
-        status: "closed" as const,
-        priority: "low" as const,
-        createdAt: "2025-01-05T14:20:00Z",
-        updatedAt: "2025-01-07T11:30:00Z",
-        assignedTo: "Finance Team",
-      },
-    ];
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+    }
+    fetchTicketList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    dispatch(setTickets(mockTickets));
-  }, [dispatch]);
+  const fetchTicketList = () => {
+    setIsLoading(true);
+    TicketList({})
+      .then((res) => {
+        const prepareData = res.data.map((item: any) => {
+          let ticketUnread = item.message.filter(
+            (elm: any) => elm.isRead === false && elm.replyBy._id !== user?.id
+          );
+          return { ...item, ticketUnread: ticketUnread.length ?? 0 };
+        });
+
+        setTickets(prepareData);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.error(err.message || "Failed to get details. Please try again.");
+      });
+  };
 
   const handleStatusChange = (
     ticketId: string,
@@ -141,6 +122,29 @@ const AdminTicketsPage = () => {
     router.push(`/admin/tickets/${ticketId}`);
   };
 
+  const handleFormSubmit = (values: any) => {
+    setIsLoading(true);
+    const payload = {
+      subject: values.subject,
+      description: values.description,
+      category: values.category,
+      status: "open",
+      priority: values.priority || "medium",
+      username: values.username,
+    };
+    TicketCreate(payload)
+      .then((res) => {
+        toast.success(res.message);
+        setIsLoading(false);
+        setIsCreateTicketOpen(false);
+        fetchTicketList();
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.error(err.message || "Failed to save details. Please try again.");
+      });
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "open":
@@ -149,8 +153,6 @@ const AdminTicketsPage = () => {
         return <Clock className="h-4 w-4 text-yellow-600" />;
       case "resolved":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "closed":
-        return <XCircle className="h-4 w-4 text-gray-600" />;
       default:
         return <MessageSquare className="h-4 w-4 text-gray-600" />;
     }
@@ -159,37 +161,51 @@ const AdminTicketsPage = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-800 border-red-200";
       case "in-progress":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "resolved":
-        return "bg-green-100 text-green-800";
-      case "closed":
-        return "bg-gray-100 text-gray-800";
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "urgent":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-800 border-red-200";
       case "high":
-        return "bg-orange-100 text-orange-800";
+        return "bg-orange-100 text-orange-800 border-orange-200";
       case "medium":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "low":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
-  const filteredTickets = tickets.filter((ticket) => {
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "payment":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "technical":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "account":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+      case "prediction":
+        return "bg-amber-100 text-amber-800 border-amber-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const filteredTickets = tickets.filter((ticket: any) => {
     const matchesSearch =
-      ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.ticketNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.subject.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = activeTab === "all" || ticket.status === activeTab;
@@ -197,15 +213,28 @@ const AdminTicketsPage = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const openTickets = tickets.filter((t) => t.status === "open").length;
+  const openTickets = tickets.filter((t: any) => t.status === "open").length;
   const inProgressTickets = tickets.filter(
-    (t) => t.status === "in-progress"
+    (t: any) => t.status === "in-progress"
   ).length;
-  const resolvedTickets = tickets.filter((t) => t.status === "resolved").length;
-  const closedTickets = tickets.filter((t) => t.status === "closed").length;
+  const resolvedTickets = tickets.filter(
+    (t: any) => t.status === "resolved"
+  ).length;
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
     <AdminLayout>
+      {isLoading && <CustomLoader message="Ticket Loading" />}
       <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -218,16 +247,126 @@ const AdminTicketsPage = () => {
             </p>
           </div>
           <div className="mt-4 md:mt-0">
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Create Ticket
-            </Button>
+            <Dialog
+              open={isCreateTicketOpen}
+              onOpenChange={setIsCreateTicketOpen}
+            >
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Ticket
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center">
+                    <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+                    Create Support Ticket
+                  </DialogTitle>
+                </DialogHeader>
+                <Formik
+                  initialValues={{
+                    subject: "",
+                    description: "",
+                    category: "",
+                    priority: "medium",
+                    username: "",
+                  }}
+                  validationSchema={validationSchema}
+                  onSubmit={handleFormSubmit}
+                >
+                  {({ handleSubmit }) => (
+                    <Form onSubmit={handleSubmit}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        {/* User Name */}
+                        <div className="col-span-2">
+                          <Field
+                            label="User Name"
+                            component={FormikTextInput}
+                            name="username"
+                            placeholder="Enter username"
+                          />
+                        </div>
+
+                        {/* Subject */}
+                        <div className="col-span-2">
+                          <Field
+                            label="Subject"
+                            component={FormikTextInput}
+                            name="subject"
+                            placeholder="Brief description of the issue"
+                          />
+                        </div>
+
+                        {/* Category and Priority */}
+                        <div className="col-span-1">
+                          <Field
+                            label="Category"
+                            name="category"
+                            component={FormikSelectField}
+                            options={[
+                              { label: "General", value: "general" },
+                              { label: "Payment", value: "payment" },
+                              { label: "Prediction", value: "prediction" },
+                              { label: "Technical", value: "technical" },
+                              { label: "Account", value: "account" },
+                            ]}
+                          />
+                        </div>
+
+                        <div className="col-span-1">
+                          <Field
+                            label="Priority"
+                            name="priority"
+                            component={FormikSelectField}
+                            options={[
+                              { label: "Low", value: "low" },
+                              { label: "Medium", value: "medium" },
+                              { label: "High", value: "high" },
+                              { label: "Urgent", value: "urgent" },
+                            ]}
+                          />
+                        </div>
+
+                        {/* Description */}
+                        <div className="col-span-2">
+                          <Field
+                            label="Description"
+                            component={FormikTextArea}
+                            name="description"
+                            rows={4}
+                            placeholder="Please provide detailed information about the issue..."
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-6 flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsCreateTicketOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={isLoading}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          {isLoading ? "Creating..." : "Create Ticket"}
+                        </Button>
+                      </div>
+                    </Form>
+                  )}
+                </Formik>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-          <Card className="border-0 shadow-lg">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -245,7 +384,7 @@ const AdminTicketsPage = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-red-50 to-orange-50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -261,7 +400,7 @@ const AdminTicketsPage = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-50 to-yellow-50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -279,7 +418,7 @@ const AdminTicketsPage = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -292,24 +431,6 @@ const AdminTicketsPage = () => {
                 </div>
                 <div className="p-3 rounded-full bg-green-100">
                   <CheckCircle className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
-                    Closed
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {closedTickets}
-                  </p>
-                </div>
-                <div className="p-3 rounded-full bg-gray-100">
-                  <XCircle className="h-6 w-6 text-gray-600" />
                 </div>
               </div>
             </CardContent>
@@ -351,35 +472,48 @@ const AdminTicketsPage = () => {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-5 mb-6">
-                <TabsTrigger value="all">All ({tickets.length})</TabsTrigger>
-                <TabsTrigger value="open">Open ({openTickets})</TabsTrigger>
-                <TabsTrigger value="in-progress">
+              <TabsList className="grid w-full grid-cols-4 mb-6 bg-gray-100 p-1 rounded-lg">
+                <TabsTrigger
+                  value="all"
+                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
+                  All ({tickets.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="open"
+                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
+                  Open ({openTickets})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="in-progress"
+                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
                   In Progress ({inProgressTickets})
                 </TabsTrigger>
-                <TabsTrigger value="resolved">
+                <TabsTrigger
+                  value="resolved"
+                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
                   Resolved ({resolvedTickets})
-                </TabsTrigger>
-                <TabsTrigger value="closed">
-                  Closed ({closedTickets})
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value={activeTab} className="space-y-4">
                 {filteredTickets.length > 0 ? (
                   <div className="space-y-4">
-                    {filteredTickets.map((ticket) => (
+                    {filteredTickets.map((ticket: any) => (
                       <div
-                        key={ticket.id}
-                        className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        key={ticket._id}
+                        className="p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all duration-200"
                       >
                         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
                           <div className="flex items-start space-x-4 flex-1">
-                            <div className="p-3 bg-white rounded-lg shadow-sm">
+                            <div className="p-3 bg-blue-50 rounded-lg mt-1">
                               <MessageSquare className="h-6 w-6 text-blue-600" />
                             </div>
                             <div className="flex-1">
-                              <div className="flex items-center space-x-3 mb-2">
+                              <div className="flex flex-wrap items-center gap-2 mb-3">
                                 <h3 className="font-semibold text-gray-900 text-lg">
                                   {ticket.subject}
                                 </h3>
@@ -397,67 +531,93 @@ const AdminTicketsPage = () => {
                                   className={getPriorityColor(ticket.priority)}
                                 >
                                   <div className="flex items-center space-x-1">
-                                    <Flag className="h-3 w-3" />
+                                    <Zap className="h-3 w-3" />
                                     <span className="capitalize">
                                       {ticket.priority}
                                     </span>
                                   </div>
                                 </Badge>
+                                <Badge
+                                  className={getCategoryColor(ticket.category)}
+                                >
+                                  <div className="flex items-center space-x-1">
+                                    <Tag className="h-3 w-3" />
+                                    <span className="capitalize">
+                                      {ticket.category}
+                                    </span>
+                                  </div>
+                                </Badge>
                               </div>
-                              <p className="text-gray-700 mb-3 line-clamp-2">
+                              <p className="text-gray-700 mb-4 line-clamp-2">
                                 {ticket.description}
                               </p>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
                                 <div className="flex items-center space-x-2">
-                                  <Ticket className="h-4 w-4" />
-                                  <span>{ticket.id}</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <User className="h-4 w-4" />
-                                  <span>{ticket.userName}</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>
-                                    {new Date(
-                                      ticket.createdAt
-                                    ).toLocaleDateString()}
+                                  <Ticket className="h-4 w-4 text-blue-600" />
+                                  <span className="font-mono">
+                                    #{ticket.ticketNumber}
                                   </span>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                  <User className="h-4 w-4" />
+                                  <User className="h-4 w-4 text-blue-600" />
+                                  <span>
+                                    {ticket.user.name} (@{ticket.user.username})
+                                  </span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Calendar className="h-4 w-4 text-blue-600" />
+                                  <span>{formatDate(ticket.createdAt)}</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <User className="h-4 w-4 text-blue-600" />
                                   <span>
                                     {ticket.assignedTo || "Unassigned"}
                                   </span>
                                 </div>
                               </div>
+                              {ticket.ticketUnread !== 0 && (
+                                <div className="mt-3 text-sm text-blue-600 flex items-center">
+                                  <MessageSquare className="h-4 w-4 mr-1" />
+                                  {ticket.ticketUnread} message
+                                  {ticket.ticketUnread !== 1 ? "s" : ""}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div className="mt-4 lg:mt-0 flex items-center space-x-2">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleViewTicket(ticket.id)}
+                              onClick={() => handleViewTicket(ticket._id)}
+                              className="rounded-lg"
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="rounded-lg"
+                                >
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              <DropdownMenuContent
+                                align="end"
+                                className="rounded-xl"
+                              >
                                 {ticket.status === "open" && (
                                   <DropdownMenuItem
                                     onClick={() =>
                                       handleStatusChange(
-                                        ticket.id,
+                                        ticket._id,
                                         "in-progress",
                                         "Admin Support"
                                       )
                                     }
+                                    className="cursor-pointer"
                                   >
                                     <Clock className="h-4 w-4 mr-2" />
                                     Start Working
@@ -466,8 +626,9 @@ const AdminTicketsPage = () => {
                                 {ticket.status === "in-progress" && (
                                   <DropdownMenuItem
                                     onClick={() =>
-                                      handleStatusChange(ticket.id, "resolved")
+                                      handleStatusChange(ticket._id, "resolved")
                                     }
+                                    className="cursor-pointer"
                                   >
                                     <CheckCircle className="h-4 w-4 mr-2" />
                                     Mark as Resolved
@@ -476,24 +637,15 @@ const AdminTicketsPage = () => {
                                 {ticket.status === "resolved" && (
                                   <DropdownMenuItem
                                     onClick={() =>
-                                      handleStatusChange(ticket.id, "closed")
+                                      handleStatusChange(ticket._id, "open")
                                     }
-                                  >
-                                    <XCircle className="h-4 w-4 mr-2" />
-                                    Close Ticket
-                                  </DropdownMenuItem>
-                                )}
-                                {ticket.status !== "closed" && (
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleStatusChange(ticket.id, "open")
-                                    }
+                                    className="cursor-pointer"
                                   >
                                     <AlertCircle className="h-4 w-4 mr-2" />
                                     Reopen Ticket
                                   </DropdownMenuItem>
                                 )}
-                                <DropdownMenuItem>
+                                <DropdownMenuItem className="cursor-pointer">
                                   <MessageSquare className="h-4 w-4 mr-2" />
                                   Add Comment
                                 </DropdownMenuItem>
@@ -506,7 +658,9 @@ const AdminTicketsPage = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <Ticket className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Ticket className="h-8 w-8 text-gray-500" />
+                    </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       No tickets found
                     </h3>

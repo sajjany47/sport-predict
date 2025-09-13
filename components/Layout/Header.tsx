@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
-import { logout } from "@/store/slices/authSlice";
+import { loginSuccess, logout } from "@/store/slices/authSlice";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -44,6 +44,8 @@ import MarqueeNotice from "../ui/marquee-notice";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { DailyCreditAd } from "../GetDailyCredit";
+import { UserCreditUpdate, UserOrderCredit } from "@/app/MainService";
+import toast from "react-hot-toast";
 
 const Header = () => {
   const pathname = usePathname();
@@ -55,6 +57,10 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotice, setShowNotice] = useState(true);
   const [dailyCredit, setDailyCredit] = useState(false);
+  const [dailyCreditRes, setDailyCreditRes] = useState<any>({
+    message: "",
+    isSuccess: null,
+  });
 
   const handleLogout = () => {
     dispatch(logout());
@@ -93,8 +99,30 @@ const Header = () => {
   ];
 
   const handleCreditAdd = () => {
-    // Call your API or update state here
-    console.log("Credits were added to wallet");
+    let payload = {
+      ordertype: "credit",
+      userId: user!.id,
+      credits: 1,
+      status: "completed",
+      paymentMode: "PROMOTION",
+      paymentDate: new Date(),
+    };
+
+    UserOrderCredit(payload)
+      .then((res) => {
+        const prepareUser: any = user
+          ? { ...user, credits: user.credits + 1 }
+          : null;
+
+        setDailyCreditRes({ message: res.message, isSuccess: true });
+        dispatch(loginSuccess({ ...prepareUser }));
+      })
+      .catch((error) => {
+        setDailyCreditRes({ message: error.message, isSuccess: false });
+        // toast.error(
+        //   error.message || "Failed to get free credits. Please try again."
+        // );
+      });
   };
 
   return (
@@ -246,6 +274,7 @@ const Header = () => {
           isOpen={dailyCredit}
           onClose={() => setDailyCredit(false)}
           onCreditAdd={handleCreditAdd}
+          dailyCreditRes={dailyCreditRes}
         />
       )}
 

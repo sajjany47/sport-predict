@@ -9,11 +9,30 @@ const UserSchema = new Schema(
       lowercase: true,
     },
     mobileNumber: { type: String, trim: true },
-    subscriptionId: { type: Schema.Types.ObjectId },
+    subscription: [
+      {
+        subscriptionId: Schema.Types.ObjectId,
+        isActive: Boolean,
+        expiryDate: Date,
+        purchaseDate: Date,
+        credits: Number,
+      },
+    ],
+    status: {
+      type: String,
+      enum: ["active", "suspended", "banned"], // 👈 Allowed roles
+      default: "active", // 👈 Optional: default role
+    },
     password: { type: String },
     username: { type: String },
+    remarks: { type: String, trim: true },
     isActive: { type: Boolean, default: true },
+    agreeToTerms: { type: Boolean, default: false },
     credits: { type: Number, default: 0 },
+    lastAdCreditDate: {
+      type: Date,
+      default: null,
+    },
     role: {
       type: String,
       enum: ["admin", "user", "employee"], // 👈 Allowed roles

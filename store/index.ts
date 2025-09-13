@@ -4,7 +4,8 @@ import matchSlice from "./slices/matchSlice";
 import subscriptionSlice from "./slices/subscriptionSlice";
 import helpdeskSlice from "./slices/helpdeskSlice";
 import adminSlice from "./slices/adminSlice";
-import storage from "redux-persist/lib/storage";
+// import storage from "redux-persist/lib/storage";
+import storage from "redux-persist/lib/storage/session";
 import {
   FLUSH,
   REHYDRATE,

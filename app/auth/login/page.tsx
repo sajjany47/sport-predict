@@ -8,318 +8,217 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Trophy,
+  Mail,
+  Phone,
+  Lock,
+  Eye,
+  EyeOff,
+  Sparkles,
+  ChevronRight,
+} from "lucide-react";
 import { loginSuccess } from "@/store/slices/authSlice";
 import toast from "react-hot-toast";
+import * as Yup from "yup";
+import { Field, Form, Formik } from "formik";
+import { FormikTextInput, FormikTextPassword } from "@/components/CustomField";
+import { UserLogin } from "@/app/MainService";
+import moment from "moment";
+import CustomLoader from "@/components/ui/CustomLoader";
+
+// ✅ Validation Schema
+const loginValidationSchema = Yup.object({
+  userId: Yup.string().required("User Id is required"),
+  password: Yup.string().required("Password is required"),
+});
 
 const LoginPage = () => {
-  const [activeTab, setActiveTab] = useState("email");
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    mobile: "",
-    password: "",
-    otp: "",
-  });
   const [isLoading, setIsLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
 
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  // ✅ Initial Values
+  const initialValues = {
+    userId: "",
+    password: "",
   };
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEmailLogin = (e: any) => {
     setIsLoading(true);
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      if (
-        formData.email === "sajjany47@gmail.com" &&
-        formData.password === "123456"
-      ) {
-        const adminUser = {
-          id: "admin",
-          username: "Admin",
-          email: formData.email,
-          mobile: "+91 9999999999",
-          credits: 999,
-          subscriptionPlan: "Admin",
-          subscriptionExpiry: "2025-12-31",
-          role: "admin" as const,
+    UserLogin({ ...e })
+      .then((res) => {
+        const findSubscription = (res.data.user.subscription ?? []).find(
+          (sub: any) => sub.isActive === true
+        );
+        const userData = {
+          id: res.data.user._id,
+          username: res.data.user.username,
+          email: res.data.user.email,
+          mobile: res.data.user.mobileNumber,
+          credits: res.data.user.credits,
+          subscriptionPlan: findSubscription.subscriptionId || null,
+          subscriptionExpiry: findSubscription.expiryDate || null,
+          role: res.data.user.role,
+          isActive: res.data.user.isActive,
+          token: res.data.token,
+          subscription: res.data.user.subscription ?? [],
         };
-
-        dispatch(loginSuccess(adminUser));
-        toast.success("Admin login successful!");
-        // router.push("/admin");
-        // return;
-      } else {
-        const mockUser = {
-          id: "1",
-          username: "cricket_fan",
-          email: formData.email,
-          mobile: "+91 9876543210",
-          credits: 2,
-          subscriptionPlan: "Free",
-          subscriptionExpiry: "2025-02-15",
-          role: "user" as const,
-        };
-
-        dispatch(loginSuccess(mockUser));
+        localStorage.setItem("token", res.data.token);
+        dispatch(loginSuccess(userData));
+        setIsLoading(false);
         toast.success("Login successful!");
-      }
-
-      router.back();
-      // router.push('/dashboard');
-    } catch (error) {
-      toast.error("Login failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSendOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setOtpSent(true);
-      toast.success("OTP sent successfully!");
-    } catch (error) {
-      toast.error("Failed to send OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleOTPLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock successful login
-      const mockUser = {
-        id: "1",
-        username: "cricket_fan",
-        email: "user@example.com",
-        mobile: formData.mobile,
-        credits: 2,
-        subscriptionPlan: "Free",
-        subscriptionExpiry: "2025-02-15",
-      };
-
-      dispatch(loginSuccess(mockUser));
-      toast.success("Login successful!");
-      router.push("/dashboard");
-    } catch (error) {
-      toast.error("Invalid OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+        router.back();
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        toast.error(error.message || "Login failed. Please try again.");
+      });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-2 mb-4">
-            <div className="bg-blue-600 p-3 rounded-xl">
-              <Trophy className="h-8 w-8 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">
-              SportPredict
-            </span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome Back
-          </h1>
-          <p className="text-gray-600">
-            Sign in to access your cricket predictions
-          </p>
+    <>
+      {isLoading && <CustomLoader message="Logging in..." />}
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/4 w-40 h-40 bg-blue-400 rounded-full filter blur-3xl opacity-10 animate-pulse delay-500"></div>
         </div>
 
-        <Card className="shadow-xl border-0">
-          <CardHeader>
-            <CardTitle className="text-center text-xl">
-              Login to Your Account
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger
-                  value="email"
-                  className="flex items-center space-x-2"
-                >
-                  <Mail className="h-4 w-4" />
-                  <span>Email</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="mobile"
-                  className="flex items-center space-x-2"
-                >
-                  <Phone className="h-4 w-4" />
-                  <span>Mobile</span>
-                </TabsTrigger>
-              </TabsList>
+        <div className="w-full max-w-md z-10">
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center space-x-2 mb-4 relative">
+              <div className="absolute -inset-2 bg-blue-500/20 rounded-xl blur-sm"></div>
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl relative">
+                <Trophy className="h-8 w-8 text-white" />
+                <Sparkles className="h-4 w-4 text-yellow-300 absolute -top-1 -right-1" />
+              </div>
+              <span className="text-2xl font-bold text-white drop-shadow-md">
+                SportPredict
+              </span>
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
+            <p className="text-purple-200">
+              Sign in to access your cricket predictions
+            </p>
+          </div>
 
-              <TabsContent value="email" className="space-y-4 mt-6">
-                <form onSubmit={handleEmailLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className="pl-10 pr-10"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <Link
-                      href="/auth/forgot-password"
-                      className="text-sm text-blue-600 hover:underline"
-                    >
-                      Forgot Password?
-                    </Link>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing In..." : "Sign In"}
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="mobile" className="space-y-4 mt-6">
-                {!otpSent ? (
-                  <form onSubmit={handleSendOTP} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="mobile">Mobile Number</Label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          id="mobile"
-                          name="mobile"
-                          type="tel"
-                          placeholder="Enter your mobile number"
-                          value={formData.mobile}
-                          onChange={handleInputChange}
-                          className="pl-10"
-                          required
+          <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+            <CardHeader className="text-center pb-4">
+              <CardTitle className="text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Login to Your Account
+              </CardTitle>
+              <CardDescription className="text-gray-500">
+                Enter your credentials to continue
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Formik
+                initialValues={initialValues}
+                validationSchema={loginValidationSchema}
+                onSubmit={handleEmailLogin}
+              >
+                {({ handleSubmit }) => (
+                  <Form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-12 gap-4">
+                      <div className="col-span-12">
+                        <Field
+                          label="Username/Email/Mobile"
+                          component={FormikTextInput}
+                          name="userId"
+                          icon={
+                            <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          }
                         />
                       </div>
+                      <div className="col-span-12">
+                        <Field
+                          label="Password"
+                          component={FormikTextPassword}
+                          name="password"
+                          icon={
+                            <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          }
+                        />
+                        <div className="text-right mt-1">
+                          <Link
+                            href="/auth/forgot-password"
+                            className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors flex items-center justify-end"
+                          >
+                            Forgot Password?
+                            <ChevronRight className="h-3 w-3 ml-1" />
+                          </Link>
+                        </div>
+                      </div>
+                      <div className="col-span-12 mt-2">
+                        <Button
+                          type="submit"
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-2 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? (
+                            <div className="flex items-center">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Signing In...
+                            </div>
+                          ) : (
+                            "Sign In"
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Sending OTP..." : "Send OTP"}
-                    </Button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleOTPLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="otp">Enter OTP</Label>
-                      <Input
-                        id="otp"
-                        name="otp"
-                        type="text"
-                        placeholder="Enter 6-digit OTP"
-                        value={formData.otp}
-                        onChange={handleInputChange}
-                        maxLength={6}
-                        required
-                      />
-                    </div>
-                    <div className="text-sm text-gray-600 text-center">
-                      OTP sent to {formData.mobile}
-                      <button
-                        type="button"
-                        onClick={() => setOtpSent(false)}
-                        className="text-blue-600 hover:underline ml-2"
-                      >
-                        Change Number
-                      </button>
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Verifying..." : "Verify OTP"}
-                    </Button>
-                  </form>
+                  </Form>
                 )}
-              </TabsContent>
-            </Tabs>
+              </Formik>
 
-            <div className="text-center mt-6">
-              <p className="text-gray-600">
-                Don't have an account?{" "}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-gray-500">
+                    New to SportPredict?
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-center">
                 <Link
                   href="/auth/register"
-                  className="text-blue-600 hover:underline font-medium"
+                  className="inline-flex items-center justify-center w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                 >
-                  Sign Up
+                  Create New Account
                 </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="text-center mt-6">
+            <p className="text-purple-200 text-sm">
+              By continuing, you agree to our{" "}
+              <Link href="/terms" className="text-white hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-white hover:underline">
+                Privacy Policy
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,4 +1,8 @@
-import { GetPSearchList, GetStadiumList } from "@/lib/utils";
+import {
+  FormatErrorMessage,
+  GetPSearchList,
+  GetStadiumList,
+} from "@/lib/utils";
 import dbConnect from "../../db";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -20,7 +24,7 @@ export const POST = async (req: NextRequest) => {
     );
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message: FormatErrorMessage(error) },
       { status: 500 }
     );
   }

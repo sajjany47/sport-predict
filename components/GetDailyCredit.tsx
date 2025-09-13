@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,11 +14,16 @@ interface DailyCreditAdProps {
   isOpen: boolean;
   onClose: () => void;
   onCreditAdd?: () => void;
+  dailyCreditRes: {
+    message: string;
+    isSuccess: boolean;
+  };
 }
 export const DailyCreditAd = ({
   isOpen,
   onClose,
   onCreditAdd,
+  dailyCreditRes,
 }: DailyCreditAdProps) => {
   const [isWatching, setIsWatching] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -126,17 +131,47 @@ export const DailyCreditAd = ({
 
           {isCompleted && (
             <div className="w-full p-6 text-center">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Credits Added!</h3>
-              <p className="text-gray-600 mb-4">
-                1 credits have been added to your wallet
-              </p>
+              {dailyCreditRes.isSuccess ? (
+                // ✅ Success state
+                <>
+                  <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Credits Added!</h3>
+                  <p className="text-gray-600 mb-4">
+                    1 credit has been added to your wallet
+                  </p>
+                </>
+              ) : dailyCreditRes.isSuccess === false ? (
+                // ❌ Error state
+                <>
+                  <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">
+                    Error Adding Credits
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    {dailyCreditRes.message ||
+                      "Failed to add daily credits to your wallet"}
+                  </p>
+                </>
+              ) : (
+                // ⏳ Loading state (progress spinner)
+                <div className="flex flex-col items-center justify-center">
+                  <Loader2 className="h-12 w-12 animate-spin text-blue-500 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Adding your credits...
+                  </h3>
+                </div>
+              )}
+
               <Button
-                onClick={(open) => {
-                  !open && onClose();
+                onClick={() => {
+                  onClose();
                   resetState();
                 }}
-                className="bg-green-600 hover:bg-green-700"
+                className={`mt-6 ${
+                  dailyCreditRes.isSuccess
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-gray-500 hover:bg-gray-600"
+                } text-white px-4 py-2 rounded-md transition-colors`}
               >
                 Close
               </Button>
