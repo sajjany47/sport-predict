@@ -62,8 +62,8 @@ const PaymentPage = () => {
   // Payment details
   const paymentDetails: any = {
     upi: {
-      id: "8981374643@naviaxis",
-      upi: "8981374643@naviaxis",
+      id: "paytmqr28100505010111q7lvcklnvq@paytm",
+      upi: "paytmqr28100505010111q7lvcklnvq@paytm",
       name: "SAJJAN KUMAR YADAV",
       note: "SportPredict Subscription Payment",
     },
@@ -75,9 +75,9 @@ const PaymentPage = () => {
       branch: "Rashbehari Branch",
     },
     qrCode: {
-      url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
-      name: "test",
-      upiId: "sajjany@ybl",
+      url: "https://res.cloudinary.com/dzezstvvt/image/upload/v1757755207/1757754273909_lczcci.jpg",
+      name: "SAJJAN KUMAR YADAV",
+      upiId: "paytmqr28100505010111q7lvcklnvq@paytm",
     },
     // Placeholder QR code
   };
@@ -407,8 +407,44 @@ const PaymentPage = () => {
                           </h3>
                           <div className="text-center">
                             <div className="inline-block p-4 bg-white rounded-lg shadow-md mb-4">
-                              <div className="w-48 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                                <QrCode className="h-24 w-24 text-gray-400" />
+                              <div className="w-68 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <img
+                                  src={paymentDetails.qrCode.url}
+                                  alt="demo@ybl"
+                                  className="w-44 h-44 object-contain"
+                                />
+                              </div>
+                              {/* Name & UPI ID below QR */}
+                              <div className="mt-2">
+                                <p className="font-semibold text-gray-800">
+                                  {paymentDetails.qrCode.name}
+                                </p>
+                                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                  <p className="text-sm text-gray-600 mr-4">
+                                    UPI ID: {paymentDetails.qrCode.upiId}
+                                  </p>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleCopy(
+                                        paymentDetails.qrCode.upiId,
+                                        "qrCode"
+                                      )
+                                    }
+                                    className={
+                                      copied === "qrCode"
+                                        ? "bg-green-100 text-green-700"
+                                        : ""
+                                    }
+                                  >
+                                    {copied === "qrCode" ? (
+                                      <CheckCircle className="h-4 w-4" />
+                                    ) : (
+                                      <Copy className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                             <p className="text-gray-600 mb-2">
