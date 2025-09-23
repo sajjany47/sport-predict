@@ -1,6 +1,7 @@
 import { FormatErrorMessage } from "@/lib/utils";
 import axios from "axios";
 import moment from "moment";
+import { AdvanceCricketList } from "./AdvanceCricketList";
 
 export async function POST(request: Request) {
   try {
@@ -64,9 +65,40 @@ export async function POST(request: Request) {
       }))
     );
 
+    const advanceCricketList = await AdvanceCricketList();
+
+    const finalData = prepareData.map((apiMatch: any) => {
+      const scraped = advanceCricketList.find((scr) => {
+        // Match by "Match X" in description
+        const descMatch = scr.leageName.includes(apiMatch.matchDescription);
+
+        // Match by team names (short or full)
+        const teamsMatch =
+          (scr.team1.shortName === apiMatch.teams[0].teamShortName &&
+            scr.team2.shortName === apiMatch.teams[1].teamShortName) ||
+          (scr.team1.name === apiMatch.teams[0].teamName &&
+            scr.team2.name === apiMatch.teams[1].teamName);
+
+        // Also check reversed order
+        const teamsMatchReversed =
+          (scr.team1.shortName === apiMatch.teams[1].teamShortName &&
+            scr.team2.shortName === apiMatch.teams[0].teamShortName) ||
+          (scr.team1.name === apiMatch.teams[1].teamName &&
+            scr.team2.name === apiMatch.teams[0].teamName);
+
+        return descMatch && (teamsMatch || teamsMatchReversed);
+      });
+
+      return {
+        ...apiMatch,
+        simpleRecord: scraped?.simpleRecord || null,
+      };
+    });
+    //  return NextResponse.json({ success: true, data: data }, { status: 200 });
+
     return Response.json(
       {
-        data: prepareData,
+        data: finalData,
         fromDate: fromDate,
         toDate: toDate,
         message: "Schedule fetched successfully",
