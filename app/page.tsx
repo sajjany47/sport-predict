@@ -24,6 +24,8 @@ import { setSelectedMatch } from "@/store/slices/matchSlice";
 import { useQuery } from "@tanstack/react-query";
 import { FetchMatchList } from "./matches/MatchService";
 import { SubscriptionList } from "./MainService";
+import { V2Prediction } from "./matches/[id]/V2AiPrediction";
+import { DummyData } from "./matches/[id]/DummyData";
 
 const HomePage = () => {
   const router = useRouter();
@@ -45,6 +47,11 @@ const HomePage = () => {
       return response.data; // extract only the array part
     },
   });
+
+  useEffect(() => {
+    const a = V2Prediction(DummyData);
+    console.log(a);
+  }, []);
 
   const customerReviews = [
     {
