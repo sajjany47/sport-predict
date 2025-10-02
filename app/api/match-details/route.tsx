@@ -1,7 +1,12 @@
 import axios from "axios";
 import { NextRequest } from "next/server";
 import { NewPlayerDetails } from "./NewPlayerDetails";
-import { CleanName, GetStadiumList, TransAdvanceStatData } from "@/lib/utils";
+import {
+  CleanName,
+  FormatErrorMessage,
+  GetStadiumList,
+  TransAdvanceStatData,
+} from "@/lib/utils";
 import { StadiumStats } from "./PerformanceDetail";
 import cache from "@/lib/NodeCacheService";
 import dbConnect from "../db";
@@ -283,6 +288,9 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error: any) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json(
+      { success: false, error: FormatErrorMessage(error) },
+      { status: 500 }
+    );
   }
 }

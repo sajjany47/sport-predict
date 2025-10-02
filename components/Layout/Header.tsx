@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
-import { logout } from "@/store/slices/authSlice";
+import { loginSuccess, logout } from "@/store/slices/authSlice";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -38,10 +38,14 @@ import {
   Calendar,
   LayoutDashboard,
   SwitchCamera,
+  HandCoins,
 } from "lucide-react";
 import MarqueeNotice from "../ui/marquee-notice";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { DailyCreditAd } from "../GetDailyCredit";
+import { UserCreditUpdate, UserOrderCredit } from "@/app/MainService";
+import toast from "react-hot-toast";
 
 const Header = () => {
   const pathname = usePathname();
@@ -52,6 +56,11 @@ const Header = () => {
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotice, setShowNotice] = useState(true);
+  const [dailyCredit, setDailyCredit] = useState(false);
+  const [dailyCreditRes, setDailyCreditRes] = useState<any>({
+    message: "",
+    isSuccess: null,
+  });
 
   const handleLogout = () => {
     dispatch(logout());
@@ -88,6 +97,33 @@ const Header = () => {
       icon: <History className="mr-2 h-4 w-4" />,
     },
   ];
+
+  const handleCreditAdd = () => {
+    let payload = {
+      ordertype: "credit",
+      userId: user!.id,
+      credits: 1,
+      status: "completed",
+      paymentMode: "PROMOTION",
+      paymentDate: new Date(),
+    };
+
+    UserOrderCredit(payload)
+      .then((res) => {
+        const prepareUser: any = user
+          ? { ...user, credits: user.credits + 1 }
+          : null;
+
+        setDailyCreditRes({ message: res.message, isSuccess: true });
+        dispatch(loginSuccess({ ...prepareUser }));
+      })
+      .catch((error) => {
+        setDailyCreditRes({ message: error.message, isSuccess: false });
+        // toast.error(
+        //   error.message || "Failed to get free credits. Please try again."
+        // );
+      });
+  };
 
   return (
     <>
@@ -143,6 +179,16 @@ const Header = () => {
                 <DropdownMenuContent className="w-56" align="end">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="cursor-pointer flex items-center"
+                    onClick={() => {
+                      // Delay opening the dialog so dropdown can close
+                      setTimeout(() => setDailyCredit(true), 50);
+                    }}
+                  >
+                    <HandCoins className="mr-2 h-4 w-4" />
+                    Get Daily Credits
+                  </DropdownMenuItem>
                   {user.role === "admin" && (
                     <DropdownMenuItem asChild>
                       <Link
@@ -223,6 +269,16 @@ const Header = () => {
           </div>
         </div>
       </header>
+      {dailyCredit && (
+        <DailyCreditAd
+          isOpen={dailyCredit}
+          onClose={() => setDailyCredit(false)}
+          onCreditAdd={handleCreditAdd}
+          dailyCreditRes={dailyCreditRes}
+        />
+      )}
+
+      {/* {dailyCredit && <DailyCreditAd />} */}
     </>
   );
 };

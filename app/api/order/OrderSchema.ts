@@ -1,8 +1,6 @@
 import * as yup from "yup";
 
 export const orderValidationSchema = yup.object().shape({
-  orderNumber: yup.string().required("Order number is required"),
-
   ordertype: yup
     .string()
     .oneOf(["subscription", "prediction", "credit"])
@@ -18,11 +16,9 @@ export const orderValidationSchema = yup.object().shape({
 
   credits: yup.number().nullable().min(0, "Credits cannot be negative"),
 
-  paymentStatus: yup.boolean().required("Payment status is required"),
-
   status: yup
     .string()
-    .oneOf(["pending", "verified", "completed", "failed"])
+    .oneOf(["pending", "refunded", "completed", "failed"])
     .default("pending"),
 
   paymentId: yup.string().nullable(),
@@ -30,9 +26,7 @@ export const orderValidationSchema = yup.object().shape({
   paymentMode: yup
     .string()
     .nullable()
-    .oneOf(["UPI", "NETBANKING", "CARD", "OFFLINE", null]),
-
-  senderId: yup.string().nullable(),
+    .oneOf(["UPI", "NETBANKING", "QRCODE", "PROMOTION", "DEDUCTION", null]),
 
   receiverId: yup.string().nullable(),
 

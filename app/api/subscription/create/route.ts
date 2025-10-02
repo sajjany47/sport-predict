@@ -3,6 +3,7 @@ import dbConnect from "../../db";
 import { subscriptionValidationSchema } from "../AubscriptionSchema";
 import Subscription from "../SubscriptionModel";
 import { SubscriptionData } from "../SubscriptionData";
+import { FormatErrorMessage } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   await dbConnect();
@@ -22,13 +23,14 @@ export async function POST(req: NextRequest) {
     }
     const prepareData = SubscriptionData(data);
     const newSub = await Subscription.create(prepareData);
+
     return NextResponse.json(
       { success: true, subscription: newSub },
-      { status: 201 }
+      { status: 200 }
     );
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message: FormatErrorMessage(error) },
       { status: 500 }
     );
   }

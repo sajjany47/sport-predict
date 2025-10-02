@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SubscriptionPlan {
-  id: string;
+  _id: string;
   name: string;
   price: number;
   credits: number;
@@ -14,51 +14,28 @@ interface OrderHistory {
   plan: string;
   amount: number;
   date: string;
-  status: 'completed' | 'pending' | 'failed';
+  status: "completed" | "pending" | "failed";
 }
 
 interface SubscriptionState {
-  plans: SubscriptionPlan[];
+  plans: SubscriptionPlan | null;
   orderHistory: OrderHistory[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: SubscriptionState = {
-  plans: [
-    {
-      id: '1',
-      name: 'Free',
-      price: 0,
-      credits: 2,
-      features: ['2 Daily Credits', 'Basic Predictions', 'Limited Player Stats'],
-    },
-    {
-      id: '2',
-      name: 'Pro',
-      price: 299,
-      credits: 50,
-      features: ['50 Monthly Credits', 'Advanced AI Predictions', 'Detailed Player Analytics', 'Priority Support'],
-      popular: true,
-    },
-    {
-      id: '3',
-      name: 'Elite',
-      price: 599,
-      credits: 150,
-      features: ['150 Monthly Credits', 'Premium AI Insights', 'Complete Player Database', 'VIP Support', 'Early Access'],
-    },
-  ],
+  plans: null,
   orderHistory: [],
   loading: false,
   error: null,
 };
 
 const subscriptionSlice = createSlice({
-  name: 'subscription',
+  name: "subscription",
   initialState,
   reducers: {
-    setPlans: (state, action: PayloadAction<SubscriptionPlan[]>) => {
+    setPlans: (state, action: PayloadAction<SubscriptionPlan>) => {
       state.plans = action.payload;
     },
     setOrderHistory: (state, action: PayloadAction<OrderHistory[]>) => {
@@ -76,5 +53,6 @@ const subscriptionSlice = createSlice({
   },
 });
 
-export const { setPlans, setOrderHistory, addOrder, setLoading, setError } = subscriptionSlice.actions;
+export const { setPlans, setOrderHistory, addOrder, setLoading, setError } =
+  subscriptionSlice.actions;
 export default subscriptionSlice.reducer;

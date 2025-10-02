@@ -8,3 +8,19 @@ export const subscriptionValidationSchema = yup.object({
   popular: yup.boolean().required("Popular flag is required"),
   isActive: yup.boolean().required("Status is required"),
 });
+
+export const subscriptionFrontendSchema = yup.object({
+  name: yup.string().required("Name is required"),
+  price: yup.number().min(0).required("Price is required"),
+  credits: yup.number().min(0).required("Credits are required"),
+  features: yup
+    .array()
+    .of(
+      yup.object().shape({
+        name: yup.string().required("Required"),
+      })
+    )
+    .required("Features are required"),
+  popular: yup.boolean().required("Popular flag is required"),
+  isActive: yup.boolean().required("Status is required"),
+});

@@ -19,7 +19,6 @@ import {
   Calendar,
   Clock,
   CheckCircle,
-  XCircle,
   AlertCircle,
   Flag,
   Send,
@@ -30,7 +29,9 @@ import {
   Edit,
   MoreHorizontal,
   FileText,
-  Activity,
+  Tag,
+  Shield,
+  UserCheck,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -39,25 +40,89 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
+import { TicketList, TicketUpdate } from "@/app/MainService";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Field, Form, Formik } from "formik";
+import {
+  FormikSelectField,
+  FormikTextArea,
+  FormikTextInput,
+} from "@/components/CustomField";
+import * as Yup from "yup";
 
+const validationSchema = Yup.object().shape({
+  subject: Yup.string()
+    .required("Subject is required")
+    .min(3, "Subject must be at least 3 characters"),
+  category: Yup.string().required("Category is required"),
+  description: Yup.string()
+    .required("Description is required")
+    .min(10, "Description must be at least 10 characters"),
+  username: Yup.string().required("User name is required"),
+});
 const TicketDetailsPage = () => {
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
+  );
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
-  const { tickets } = useSelector((state: RootState) => state.admin);
-
-  const ticketId = params.id as string;
-  const ticket = tickets.find((t) => t.id === ticketId);
 
   const [activeTab, setActiveTab] = useState("details");
   const [newMessage, setNewMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [ticket, setTicket] = useState<any>(null);
+  const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleStatusChange = (newStatus: string, assignedTo?: string) => {
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+    }
+    fetchTicketDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchTicketDetails = () => {
+    setIsLoading(true);
+    TicketList({ ticketId: params.id })
+      .then((res) => {
+        setTicket(res.data[0]);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.error(err.message || "Failed to get details. Please try again.");
+      });
+  };
+
+  const handleStatusChange = (newStatus: string) => {
     if (ticket) {
-      dispatch(
-        updateTicketStatus({ id: ticket.id, status: newStatus, assignedTo })
-      );
-      toast.success(`Ticket status updated to ${newStatus}`);
+      let reqData: any = { ticketId: ticket._id, status: newStatus };
+      if (newStatus === "resolved") {
+        reqData.ticketStatus = newStatus;
+      }
+      if (newStatus === "open") {
+        reqData.status = "in-progress";
+        reqData.ticketStatus = "in-progress";
+        reqData.text = "Issue not resolved, ticket re-open";
+      }
+      setIsLoading(true);
+      TicketUpdate(reqData)
+        .then((res) => {
+          setTicket(res.data);
+          toast.success(`Ticket status updated to ${newStatus}`);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          setIsLoading(false);
+          toast.error(err.message || "Failed to update ticket status");
+        });
     }
   };
 
@@ -69,8 +134,6 @@ const TicketDetailsPage = () => {
         return <Clock className="h-5 w-5 text-yellow-600" />;
       case "resolved":
         return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case "closed":
-        return <XCircle className="h-5 w-5 text-gray-600" />;
       default:
         return <MessageSquare className="h-5 w-5 text-gray-600" />;
     }
@@ -79,79 +142,82 @@ const TicketDetailsPage = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-800 border-red-200";
       case "in-progress":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "resolved":
-        return "bg-green-100 text-green-800";
-      case "closed":
-        return "bg-gray-100 text-gray-800";
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "urgent":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-800 border-red-200";
       case "high":
-        return "bg-orange-100 text-orange-800";
+        return "bg-orange-100 text-orange-800 border-orange-200";
       case "medium":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "low":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
-  // Mock customer data
-  const customerData = {
-    name: ticket?.userName || "Unknown User",
-    email: `${ticket?.userName}@example.com`,
-    phone: "+91 9876543210",
-    address: "Mumbai, Maharashtra, India",
-    joinDate: "2024-12-01",
-    totalTickets: 3,
-    resolvedTickets: 1,
-    subscriptionPlan: "Pro",
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "payment":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "technical":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "account":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+      case "prediction":
+        return "bg-amber-100 text-amber-800 border-amber-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
   };
-
-  // Mock conversation history
-  const conversationHistory = [
-    {
-      id: "1",
-      sender: "customer",
-      message: ticket?.description || "Initial ticket description",
-      timestamp: ticket?.createdAt || new Date().toISOString(),
-      attachments: [],
-    },
-    {
-      id: "2",
-      sender: "admin",
-      message:
-        "Thank you for contacting us. We have received your ticket and our team is looking into this issue.",
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      attachments: [],
-    },
-    {
-      id: "3",
-      sender: "admin",
-      message:
-        "We have identified the issue and are working on a solution. We will update you shortly.",
-      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-      attachments: [],
-    },
-  ];
 
   const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-
-    // Here you would typically send the message to your backend
-    toast.success("Message sent successfully");
-    setNewMessage("");
+    setIsSubmitting(true);
+    TicketUpdate({
+      ticketId: ticket._id,
+      status: ticket.status,
+      ticketStatus: ticket.status,
+      text: newMessage,
+    })
+      .then((res) => {
+        // let a = res.data[0];
+        setTicket({
+          ...res.data,
+        });
+        setNewMessage("");
+        setIsSubmitting(false);
+      })
+      .catch((err) => {
+        setIsSubmitting(false);
+        toast.error(
+          err.message || "Failed to update ticket. Please try again."
+        );
+      });
   };
+
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading ticket details...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   if (!ticket) {
     return (
@@ -179,6 +245,45 @@ const TicketDetailsPage = () => {
     );
   }
 
+  const handleFormSubmit = (values: any) => {
+    setIsLoading(true);
+    const payload = {
+      subject: values.subject,
+      description: values.description,
+      category: values.category,
+      status: "open",
+      priority: values.priority || "medium",
+      username: values.username,
+      ticketId: params.id,
+    };
+    TicketUpdate(payload)
+      .then((res) => {
+        toast.success(res.message);
+        setIsLoading(false);
+        setIsCreateTicketOpen(false);
+        fetchTicketDetails();
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.error(err.message || "Failed to save details. Please try again.");
+      });
+  };
+
+  // Function to determine if message is from user or admin
+  const isUserMessage = (message: any) => {
+    return message.replyBy._id === ticket.user._id;
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-8">
@@ -193,7 +298,9 @@ const TicketDetailsPage = () => {
               <h1 className="text-3xl font-bold text-gray-900">
                 Ticket Details
               </h1>
-              <p className="text-gray-600 mt-1">Ticket #{ticket.id}</p>
+              <p className="text-gray-600 mt-1">
+                Ticket #{ticket.ticketNumber}
+              </p>
             </div>
           </div>
           <div className="mt-4 md:mt-0 flex items-center space-x-2">
@@ -207,17 +314,17 @@ const TicketDetailsPage = () => {
               <DropdownMenuContent align="end">
                 {ticket.status === "open" && (
                   <DropdownMenuItem
-                    onClick={() =>
-                      handleStatusChange("in-progress", "Admin Support")
-                    }
+                    onClick={() => handleStatusChange("in-progress")}
+                    className="cursor-pointer"
                   >
                     <Clock className="h-4 w-4 mr-2" />
-                    Start Working
+                    In Progress
                   </DropdownMenuItem>
                 )}
                 {ticket.status === "in-progress" && (
                   <DropdownMenuItem
                     onClick={() => handleStatusChange("resolved")}
+                    className="cursor-pointer"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Mark as Resolved
@@ -225,19 +332,20 @@ const TicketDetailsPage = () => {
                 )}
                 {ticket.status === "resolved" && (
                   <DropdownMenuItem
-                    onClick={() => handleStatusChange("closed")}
+                    onClick={() => handleStatusChange("open")}
+                    className="cursor-pointer"
                   >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Close Ticket
-                  </DropdownMenuItem>
-                )}
-                {ticket.status !== "closed" && (
-                  <DropdownMenuItem onClick={() => handleStatusChange("open")}>
                     <AlertCircle className="h-4 w-4 mr-2" />
                     Reopen Ticket
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    // Delay opening the dialog so dropdown can close
+                    setTimeout(() => setIsCreateTicketOpen(true), 50);
+                  }}
+                  className="cursor-pointer"
+                >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Ticket
                 </DropdownMenuItem>
@@ -268,17 +376,23 @@ const TicketDetailsPage = () => {
                 <div className="flex items-center justify-center mb-2">
                   <Flag className="h-5 w-5 text-orange-600" />
                 </div>
-                <Badge className={getPriorityColor(ticket.priority)}>
-                  {ticket.priority.charAt(0).toUpperCase() +
-                    ticket.priority.slice(1)}
+                <Badge
+                  className={getPriorityColor(ticket.priority || "medium")}
+                >
+                  {(ticket.priority || "medium").charAt(0).toUpperCase() +
+                    (ticket.priority || "medium").slice(1)}
                 </Badge>
                 <p className="text-sm text-gray-600 mt-1">Priority</p>
               </div>
               <div className="text-center">
-                <div className="text-lg font-semibold text-gray-900">
-                  {ticket.userName}
+                <div className="flex items-center justify-center mb-2">
+                  <Tag className="h-5 w-5 text-purple-600" />
                 </div>
-                <p className="text-sm text-gray-600">Customer</p>
+                <Badge className={getCategoryColor(ticket.category)}>
+                  {ticket.category.charAt(0).toUpperCase() +
+                    ticket.category.slice(1)}
+                </Badge>
+                <p className="text-sm text-gray-600 mt-1">Category</p>
               </div>
               <div className="text-center">
                 <div className="text-lg font-semibold text-gray-900">
@@ -298,11 +412,10 @@ const TicketDetailsPage = () => {
 
         {/* Detailed Information Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details">Ticket Details</TabsTrigger>
             <TabsTrigger value="conversation">Conversation</TabsTrigger>
             <TabsTrigger value="customer">Customer Info</TabsTrigger>
-            <TabsTrigger value="activity">Activity Log</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="space-y-6">
@@ -317,17 +430,26 @@ const TicketDetailsPage = () => {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Ticket ID:</span>
-                    <span className="font-medium">{ticket.id}</span>
+                    <span className="font-medium">{ticket.ticketNumber}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subject:</span>
                     <span className="font-medium">{ticket.subject}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span className="text-gray-600">Category:</span>
+                    <Badge className={getCategoryColor(ticket.category)}>
+                      {ticket.category.charAt(0).toUpperCase() +
+                        ticket.category.slice(1)}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-gray-600">Priority:</span>
-                    <Badge className={getPriorityColor(ticket.priority)}>
-                      {ticket.priority.charAt(0).toUpperCase() +
-                        ticket.priority.slice(1)}
+                    <Badge
+                      className={getPriorityColor(ticket.priority || "medium")}
+                    >
+                      {(ticket.priority || "medium").charAt(0).toUpperCase() +
+                        (ticket.priority || "medium").slice(1)}
                     </Badge>
                   </div>
                   <div className="flex justify-between">
@@ -347,12 +469,6 @@ const TicketDetailsPage = () => {
                     <span className="text-gray-600">Last Updated:</span>
                     <span className="font-medium">
                       {new Date(ticket.updatedAt).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Assigned To:</span>
-                    <span className="font-medium">
-                      {ticket.assignedTo || "Unassigned"}
                     </span>
                   </div>
                 </CardContent>
@@ -385,59 +501,134 @@ const TicketDetailsPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {conversationHistory.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${
-                        message.sender === "admin"
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                          message.sender === "admin"
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 text-gray-900"
-                        }`}
-                      >
-                        <p className="text-sm">{message.message}</p>
-                        <p
-                          className={`text-xs mt-2 ${
-                            message.sender === "admin"
-                              ? "text-blue-100"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          {new Date(message.timestamp).toLocaleString()}
-                        </p>
-                      </div>
+                <div className="lg:col-span-3">
+                  <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                    <div className="p-6 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                        <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+                        Conversation History
+                      </h3>
                     </div>
-                  ))}
-                </div>
 
-                {/* Reply Section */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="space-y-4">
-                    <Textarea
-                      placeholder="Type your reply..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      rows={3}
-                    />
-                    <div className="flex items-center justify-between">
-                      <Button variant="outline" size="sm">
-                        <Paperclip className="h-4 w-4 mr-2" />
-                        Attach File
-                      </Button>
-                      <Button
-                        onClick={handleSendMessage}
-                        disabled={!newMessage.trim()}
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        Send Reply
-                      </Button>
+                    <div className="p-6 space-y-6 max-h-96 overflow-y-auto">
+                      {ticket.message.map((msg: any, index: number) => {
+                        const isUser = isUserMessage(msg);
+                        return (
+                          <div key={msg._id} className="space-y-2">
+                            {/* Date separator if needed */}
+                            {index === 0 ||
+                            formatDate(msg.replyAt) !==
+                              formatDate(ticket.message[index - 1].replyAt) ? (
+                              <div className="flex justify-center">
+                                <span className="px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
+                                  {formatDate(msg.replyAt)}
+                                </span>
+                              </div>
+                            ) : null}
+
+                            <div
+                              className={`flex ${
+                                isUser ? "justify-start" : "justify-end"
+                              }`}
+                            >
+                              <div
+                                className={`flex ${
+                                  isUser ? "flex-row" : "flex-row-reverse"
+                                } items-start space-x-3 max-w-xs lg:max-w-md`}
+                              >
+                                {/* Avatar */}
+                                <div
+                                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                    isUser
+                                      ? "bg-gradient-to-r from-green-400 to-blue-500"
+                                      : "bg-gradient-to-r from-purple-500 to-pink-500"
+                                  }`}
+                                >
+                                  {isUser ? (
+                                    <User className="h-4 w-4 text-white" />
+                                  ) : (
+                                    <Shield className="h-4 w-4 text-white" />
+                                  )}
+                                </div>
+
+                                {/* Message Bubble */}
+                                <div className="space-y-1">
+                                  <div
+                                    className={`px-4 py-3 rounded-2xl ${
+                                      isUser
+                                        ? "bg-gray-100 text-gray-900 rounded-bl-sm"
+                                        : "bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-sm"
+                                    } shadow-sm`}
+                                  >
+                                    <p className="text-sm leading-relaxed">
+                                      {msg.text}
+                                    </p>
+                                  </div>
+
+                                  {/* Message Info */}
+                                  <div
+                                    className={`flex items-center space-x-2 text-xs ${
+                                      isUser ? "text-gray-500" : "text-gray-400"
+                                    } ${isUser ? "ml-0" : "mr-0 justify-end"}`}
+                                  >
+                                    <span className="flex items-center space-x-1">
+                                      {isUser ? (
+                                        <UserCheck className="h-3 w-3" />
+                                      ) : (
+                                        <Shield className="h-3 w-3" />
+                                      )}
+                                      <span>{msg.replyBy.name}</span>
+                                    </span>
+                                    <span>•</span>
+                                    <span>{formatTime(msg.replyAt)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Reply Section */}
+                    <div className="p-6 border-t border-gray-200 bg-gray-50">
+                      {ticket.status === "resolved" ? (
+                        <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
+                          <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
+                          <h3 className="text-lg font-semibold text-green-800 mb-2">
+                            Ticket Resolved Successfully
+                          </h3>
+                          <p className="text-green-700">
+                            This conversation has been marked as resolved.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="relative">
+                            <textarea
+                              placeholder="Type your reply as admin..."
+                              value={newMessage}
+                              onChange={(e) => setNewMessage(e.target.value)}
+                              rows={3}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <button className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                              <Paperclip className="h-4 w-4" />
+                              <span>Attach File</span>
+                            </button>
+                            <button
+                              onClick={handleSendMessage}
+                              disabled={isSubmitting || !newMessage.trim()}
+                              className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                            >
+                              <Send className="h-4 w-4" />
+                              <span>Send Reply</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -460,19 +651,19 @@ const TicketDetailsPage = () => {
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <User className="h-4 w-4 text-gray-400" />
-                        <span>{customerData.name}</span>
+                        <span>{ticket.user.name}</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <Mail className="h-4 w-4 text-gray-400" />
-                        <span>{customerData.email}</span>
+                        <span>{ticket.user.email}</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <Phone className="h-4 w-4 text-gray-400" />
-                        <span>{customerData.phone}</span>
+                        <span>+91 ••••••••••</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <MapPin className="h-4 w-4 text-gray-400" />
-                        <span>{customerData.address}</span>
+                        <span>India</span>
                       </div>
                     </div>
                   </div>
@@ -482,110 +673,139 @@ const TicketDetailsPage = () => {
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between">
+                        <span className="text-gray-600">Username:</span>
+                        <span className="font-medium">
+                          @{ticket.user.username}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">User ID:</span>
+                        <span className="font-medium">{ticket.user._id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Tickets Created:</span>
+                        <span className="font-medium">3</span>
+                      </div>
+                      <div className="flex justify-between">
                         <span className="text-gray-600">Member Since:</span>
                         <span className="font-medium">
-                          {new Date(customerData.joinDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Subscription:</span>
-                        <Badge variant="secondary">
-                          {customerData.subscriptionPlan}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Total Tickets:</span>
-                        <span className="font-medium">
-                          {customerData.totalTickets}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Resolved Tickets:</span>
-                        <span className="font-medium">
-                          {customerData.resolvedTickets}
+                          {new Date(ticket.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="activity" className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Activity className="h-5 w-5 text-green-600" />
-                  <span>Activity Timeline</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="p-2 rounded-full bg-blue-100">
-                      <MessageSquare className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900">
-                          Ticket Created
-                        </h3>
-                        <span className="text-sm text-gray-500">
-                          {new Date(ticket.createdAt).toLocaleString()}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 text-sm mt-1">
-                        Customer submitted a new support ticket
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="p-2 rounded-full bg-yellow-100">
-                      <Clock className="h-4 w-4 text-yellow-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900">
-                          Status Updated
-                        </h3>
-                        <span className="text-sm text-gray-500">
-                          {new Date(ticket.updatedAt).toLocaleString()}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 text-sm mt-1">
-                        Ticket status changed to {ticket.status}
-                      </p>
-                    </div>
-                  </div>
-
-                  {ticket.assignedTo && (
-                    <div className="flex items-start space-x-4">
-                      <div className="p-2 rounded-full bg-purple-100">
-                        <User className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-gray-900">
-                            Ticket Assigned
-                          </h3>
-                          <span className="text-sm text-gray-500">
-                            {new Date(ticket.updatedAt).toLocaleString()}
-                          </span>
-                        </div>
-                        <p className="text-gray-600 text-sm mt-1">
-                          Assigned to {ticket.assignedTo}
-                        </p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
+      <Dialog open={isCreateTicketOpen} onOpenChange={setIsCreateTicketOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+              Edit Support Ticket
+            </DialogTitle>
+          </DialogHeader>
+          <Formik
+            initialValues={{
+              subject: ticket.subject,
+              description: ticket.description,
+              category: ticket.category,
+              priority: ticket.priority,
+              username: ticket.user.username,
+            }}
+            validationSchema={validationSchema}
+            onSubmit={handleFormSubmit}
+          >
+            {({ handleSubmit }) => (
+              <Form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  {/* User Name */}
+                  <div className="col-span-2">
+                    <Field
+                      label="User Name"
+                      component={FormikTextInput}
+                      name="username"
+                      placeholder="Enter username"
+                      disabled
+                    />
+                  </div>
+
+                  {/* Subject */}
+                  <div className="col-span-2">
+                    <Field
+                      label="Subject"
+                      component={FormikTextInput}
+                      name="subject"
+                      placeholder="Brief description of the issue"
+                    />
+                  </div>
+
+                  {/* Category and Priority */}
+                  <div className="col-span-1">
+                    <Field
+                      label="Category"
+                      name="category"
+                      component={FormikSelectField}
+                      options={[
+                        { label: "General", value: "general" },
+                        { label: "Payment", value: "payment" },
+                        { label: "Prediction", value: "prediction" },
+                        { label: "Technical", value: "technical" },
+                        { label: "Account", value: "account" },
+                      ]}
+                    />
+                  </div>
+
+                  <div className="col-span-1">
+                    <Field
+                      label="Priority"
+                      name="priority"
+                      component={FormikSelectField}
+                      options={[
+                        { label: "Low", value: "low" },
+                        { label: "Medium", value: "medium" },
+                        { label: "High", value: "high" },
+                        { label: "Urgent", value: "urgent" },
+                      ]}
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div className="col-span-2">
+                    <Field
+                      label="Description"
+                      component={FormikTextArea}
+                      name="description"
+                      rows={4}
+                      placeholder="Please provide detailed information about the issue..."
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsCreateTicketOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isLoading ? "Updating..." : "Update Ticket"}
+                  </Button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };

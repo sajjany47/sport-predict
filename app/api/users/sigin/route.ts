@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LoginRequest, ApiResponse } from "@/types/api";
-import { comparePassword, generateToken } from "../UtilAuth";
+import { generateToken } from "../UtilAuth";
 import dbConnect from "../../db";
 import User from "../UserModel";
 import bcrypt from "bcrypt";
+import { UserData } from "../UserData";
+import { FormatErrorMessage } from "@/lib/utils";
+import { serialize } from "cookie";
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,34 +59,55 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate token
-    const prepareResponse = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      mobileNumber: user.mobileNumber,
-      subscriptionId: user.subscriptionId,
-      username: user.username,
-      role: user.role,
-    };
-
-    const token = generateToken({ ...prepareResponse });
-
-    // Remove password from response
-
-    return NextResponse.json({
-      success: true,
-      message: "Login successful.",
-      data: {
-        user: prepareResponse,
-        token,
+    const prepareResponse = UserData(user);
+    const filterSubscription = user.subscription.find(
+      (item: any) => item.isActive
+    );
+    const accessToken = await generateToken(
+      {
+        ...prepareResponse,
+        subscription: filterSubscription._id,
+        _id: user._id,
       },
-    } as ApiResponse);
+      "15m"
+    );
+
+    const refreshToken = await generateToken(
+      {
+        ...prepareResponse,
+        subscription: filterSubscription._id,
+        _id: user._id,
+      },
+      "1d"
+    );
+
+    const cookie = serialize("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production" ? true : false, // allow insecure on localhost
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // safe for local dev
+      path: "/",
+      maxAge: 60 * 60 * 24, // 1 day
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Login successful.",
+        data: {
+          user: { ...prepareResponse, _id: user._id },
+          token: accessToken,
+        },
+      },
+      {
+        status: 200,
+        headers: { "Set-Cookie": cookie, "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
-    console.error("Login error:", error);
     return NextResponse.json(
       {
         success: false,
-        message: "Internal server error.",
+        message: FormatErrorMessage(error),
       } as ApiResponse,
       { status: 500 }
     );

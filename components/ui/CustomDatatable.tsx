@@ -38,33 +38,55 @@ export default function CustomDataTable<T extends Record<string, any>>({
         .includes(filterText.toLowerCase())
     );
   }, [data, filterText]);
+  const customStyles = {
+    headCells: {
+      style: {
+        fontWeight: "600",
+        fontSize: "14px",
+        backgroundColor: "#f9fafb",
+      },
+    },
+    rows: {
+      style: {
+        minHeight: "56px",
+      },
+    },
+    pagination: {
+      style: {
+        borderTop: "1px solid #e5e7eb",
+        paddingTop: "10px",
+      },
+    },
+  };
 
   return (
-    <div className="p-4 border rounded shadow-sm bg-white">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-4 border rounded shadow-sm bg-white w-full">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
         <h2 className="text-lg font-semibold">{title}</h2>
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
           {searchable && (
-            <div className="flex-1 relative">
+            <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
                 placeholder={searchPlaceholder}
                 value={filterText}
                 onChange={(e) => setFilterText(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
           )}
 
-          <div className="flex space-x-2">
-            {onAdd && (
-              <Button className="bg-blue-600 hover:bg-blue-700" onClick={onAdd}>
-                <Plus className="h-4 w-4 mr-2" />
-                {`Add`}
-              </Button>
-            )}
-          </div>
+          {onAdd && (
+            <Button
+              className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+              onClick={onAdd}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {`Add`}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -73,8 +95,9 @@ export default function CustomDataTable<T extends Record<string, any>>({
         data={filteredData}
         pagination
         highlightOnHover
-        responsive
         striped
+        customStyles={customStyles}
+        responsive
       />
     </div>
   );

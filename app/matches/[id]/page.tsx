@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 import {
   Trophy,
   Calendar,
@@ -33,136 +32,7 @@ import axios from "axios";
 import SquadDialoge from "./SquadDialoge";
 import CustomLoader from "@/components/ui/CustomLoader";
 import AIPredictionModal from "./ai-prediction-modal";
-
-interface Player {
-  id: number;
-  name: string;
-  shortName: string;
-  batStyle: string;
-  bowlStyle: string;
-  imageUrl: { src: string };
-  type: string;
-  fantasyPoints: Array<{
-    date: string;
-    match: string;
-    bat: string;
-    bowl: string;
-    field: string;
-    total: string;
-  }>;
-  battingForm: Array<{
-    date: string;
-    match: string;
-    bo: string;
-    run: string;
-    fours_sixes: string;
-    sr: string;
-    out: string;
-  }>;
-  bowlingForm: Array<{
-    date: string;
-    match: string;
-    o: string;
-    r: string;
-    w: string;
-    m: string;
-    eco: string;
-  }>;
-  battingStats: Array<{
-    year: string;
-    mode: string;
-    matches: string;
-    innings: string;
-    runs: string;
-    balls: string;
-    notOut: string;
-    average: string;
-    strikeRate: string;
-    highScore: string;
-    fifty: string;
-    hundred: string;
-    fours: string;
-    sixes: string;
-  }>;
-  bowlingStats: Array<{
-    year: string;
-    mode: string;
-    matches: string;
-    innings: string;
-    balls: string;
-    runs: string;
-    wicket: string;
-    strikeRate: string;
-    twoWicket: string;
-    threeWicket: string;
-    fiveWicket: string;
-    economy: string;
-    average: string;
-  }>;
-  overallStats: any;
-  stadiumStats: any;
-  againstTeamsStats: any;
-}
-
-interface Squad {
-  flag: string;
-  color: string;
-  shortName: string;
-  playingPlayer: Player[];
-  benchPlayer: Player[];
-}
-
-interface MatchData {
-  squadList: Squad[];
-  stadiumStats: Array<{
-    date: string;
-    matchTitle: string;
-    matchUrl: string;
-    inn1Score: string;
-    inn2Score: string;
-  }>;
-  matchInfo: {
-    matchId: number;
-    matchName: string;
-    matchDescription: string;
-    startTime: string;
-    status: string;
-    venue: string;
-    tour: {
-      id: number;
-      name: string;
-    };
-    format: string;
-    sport: string;
-    teams: Array<{
-      squadId: number;
-      teamName: string;
-      teamShortName: string;
-      teamFlagUrl: string;
-      isWinner: boolean | null;
-      color: string;
-      cricketScore: any[];
-      squadNo: number | null;
-    }>;
-  };
-  GroundWheather: any;
-  overview: {
-    groundAndWheather: {
-      pitchType: string;
-      avgScore: string;
-      wheatherType: string;
-      temprature: string;
-    };
-    stats: {
-      recentMatch: Array<any>;
-      h2h: {
-        h2hStat: Array<any>;
-        recentH2HMatch: Array<any>;
-      };
-      teamStrength: Array<any>;
-    };
-  };
-}
+import { MatchData } from "@/types/ui";
 
 const MatchDetailsPage = () => {
   const params = useParams();
@@ -189,12 +59,6 @@ const MatchDetailsPage = () => {
           ...details.data.data,
           matchInfo: {
             ...selectedMatch,
-          },
-          GroundWheather: {
-            temperature: "28°C",
-            humidity: "65%",
-            windSpeed: "12 km/h",
-            conditions: "Partly Cloudy",
           },
         });
         // setData(details.data.data);
@@ -350,11 +214,10 @@ const MatchDetailsPage = () => {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="squads">Squads</TabsTrigger>
                 <TabsTrigger value="stadium">Stadium Stats</TabsTrigger>
-                <TabsTrigger value="weather">Weather</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
@@ -745,49 +608,6 @@ const MatchDetailsPage = () => {
                             </div>
                           </div>
                         ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="weather" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Sun className="h-5 w-5 text-yellow-500" />
-                      <span>Weather Conditions</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <Thermometer className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">Temperature</p>
-                        <p className="text-xl font-bold text-gray-900">
-                          {matchData.GroundWheather.temperature}
-                        </p>
-                      </div>
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <Droplets className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">Humidity</p>
-                        <p className="text-xl font-bold text-gray-900">
-                          {matchData.GroundWheather.humidity}
-                        </p>
-                      </div>
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <Wind className="h-8 w-8 text-gray-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">Wind Speed</p>
-                        <p className="text-xl font-bold text-gray-900">
-                          {matchData.GroundWheather.windSpeed}
-                        </p>
-                      </div>
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <Sun className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">Conditions</p>
-                        <p className="text-xl font-bold text-gray-900">
-                          {matchData.GroundWheather.conditions}
-                        </p>
                       </div>
                     </div>
                   </CardContent>
