@@ -30,8 +30,8 @@ const InningScoreAndWicketCaculation = (team: any) => {
     0
   );
 
-  const avgInningScore = totalBattingContribute;
-  const avgWicket = totalBowlingContribute / 20;
+  const avgInningScore = totalBattingContribute / playerList.length;
+  const avgWicket = totalBowlingContribute / 20 / playerList.length;
 
   return { inningScore: avgInningScore, wicket: avgWicket };
 };
@@ -74,15 +74,32 @@ export const V2Prediction = (match: any) => {
     };
   });
 
-  const bothTeamInninScoreAndWicket = prepareData.map((team: any) => {
-    const { inningScore, wicket } = InningScoreAndWicketCaculation(team);
-    return {
-      flag: team.flag,
-      color: team.color,
-      shortName: team.shortName,
-      inningScore: inningScore,
-      wicket: wicket,
-    };
-  });
-  return bothTeamInninScoreAndWicket;
+  const bothTeamInninScoreAndWicket = prepareData.map(
+    (team: any, index: number) => {
+      const { inningScore, wicket } = InningScoreAndWicketCaculation(team);
+      return {
+        flag: team.flag,
+        color: team.color,
+        shortName: team.shortName,
+        inningScore: inningScore,
+        wicket: wicket,
+      };
+    }
+  );
+  const predictedInningScore = bothTeamInninScoreAndWicket.map(
+    (team: any, index: number) => {
+      const totalScore =
+        ((team.inningScore * 11 -
+          bothTeamInninScoreAndWicket[index === 0 ? 1 : 0].wicket * 11) /
+          20 -
+          bothTeamInninScoreAndWicket[index === 0 ? 1 : 0].wicket) *
+          20 -
+        (11 + 20);
+      return {
+        ...team,
+        predictedInningScore: Math.round(totalScore),
+      };
+    }
+  );
+  return predictedInningScore;
 };
