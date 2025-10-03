@@ -348,7 +348,9 @@ const AdminStatsPage = () => {
                       component={FormikAutoSelectField}
                       name="originalName"
                       loadOptions={fetchAutoSearch}
-                      onChange={(e: any) => setFieldValue("originalName", e)}
+                      onChange={(e: any) => {
+                        setFieldValue("originalName", e);
+                      }}
                     />
                   </div>
                   <div className="space-y-2">

@@ -37,6 +37,13 @@ const InningScoreAndWicketCaculation = (team: any) => {
 };
 
 export const V2Prediction = (match: any) => {
+  const matchFormat = {
+    t10: 10,
+    t20: 20,
+    odi: 50,
+    test: 100,
+    H100: 16.4,
+  };
   const prepareData = match?.squadList.map((team: any) => {
     const preparePlayingPlayers = team.playingPlayer.map((player: any) => ({
       id: player.id,
@@ -91,13 +98,17 @@ export const V2Prediction = (match: any) => {
       const totalScore =
         ((team.inningScore * 11 -
           bothTeamInninScoreAndWicket[index === 0 ? 1 : 0].wicket * 11) /
-          20 -
+          matchFormat.odi -
           bothTeamInninScoreAndWicket[index === 0 ? 1 : 0].wicket) *
-          20 -
-        (11 + 20);
+          matchFormat.odi -
+        (11 + matchFormat.odi);
+      let a =
+        team.inningScore -
+        bothTeamInninScoreAndWicket[index === 0 ? 1 : 0].wicket;
       return {
         ...team,
         predictedInningScore: Math.round(totalScore),
+        a: a,
       };
     }
   );

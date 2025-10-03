@@ -280,68 +280,50 @@ export const FormikSelectField = ({
 
 export const FormikAutoSelectField = ({
   field,
-  form: { touched, errors, setFieldValue },
+  form: { touched, errors },
   ...props
 }: any) => {
-  const [options, setOptions] = useState<any[]>([]);
+  const [options, setOptions] = useState([]);
 
   const hasError =
     Boolean(getIn(errors, field.name)) && getIn(touched, field.name);
 
-  // Debounced option loader
-  const loadOptions = async (inputValue: string) => {
-    if (inputValue.length >= 2 && props.loadOptions) {
+  const debouncedLoadOptions = async (inputValue: any) => {
+    if (inputValue.length >= 2) {
       const newOptions = await props.loadOptions(inputValue);
       setOptions(newOptions);
     }
   };
 
   const handleInputChange = (inputValue: string) => {
-    loadOptions(inputValue);
+    debouncedLoadOptions(inputValue);
   };
 
   return (
-    <div className={`${props.containerClass || ""} mb-2`}>
+    <div className="mb-4">
       {props.label && (
-        <Label
+        <label
           htmlFor={field.name}
-          className={props.labelClass || "text-gray-700 font-medium mb-1 block"}
+          className="block text-sm font-medium text-gray-700 mb-1"
         >
           {props.label}
-        </Label>
+        </label>
       )}
 
-      <div className="relative">
-        {props.icon && (
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            {props.icon}
-          </div>
-        )}
-
-        <Select
-          id={field.name}
-          {...props}
-          name={field.name}
-          value={options.find((opt) => opt.value === field.value) || null}
-          onChange={(option: any) =>
-            setFieldValue(field.name, option ? option.value : "")
-          }
-          onInputChange={handleInputChange}
-          options={options}
-          isClearable
-          isSearchable
-          placeholder={
-            props.placeholder || `Search ${props.label || field.name}...`
-          }
-          className={`mt-2  ${props.icon ? "pl-10" : ""} ${
-            hasError ? "react-select-error" : "react-select-normal"
-          } ${props.className || ""}`}
-          classNamePrefix="react-select"
-        />
-      </div>
+      <Select
+        id={field.name}
+        options={options}
+        {...field}
+        {...props}
+        onInputChange={handleInputChange}
+        placeholder={`Search...`}
+        isClearable
+        isSearchable
+        classNamePrefix="react-select"
+      />
 
       {hasError && (
-        <small className="text-red-600 mt-1 block text-sm">
+        <small className="text-red-600 mt-1 block">
           {getIn(errors, field.name)}
         </small>
       )}
