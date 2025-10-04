@@ -1,4 +1,5 @@
-import { GetHtml } from "@/lib/utils";
+import { GetHtml, GetTeamList } from "@/lib/utils";
+import Stats from "../stats/StatsModel";
 
 export const BattingForm = async (url: string) => {
   const $ = await GetHtml(url);
@@ -424,4 +425,120 @@ export const AgaintTeamStats = async (url: string, filterOpponent: string) => {
     battingStats,
     bowlingStats,
   };
+};
+
+export const FindTeamName = async (teamName: string) => {
+  let teamList: any = await GetTeamList(teamName);
+  if (teamList.length === 0) {
+    const playerDetails = await Stats.findOne({ publicName: teamName });
+    if (!playerDetails) {
+      teamList = [];
+    } else {
+      teamList = await GetTeamList(playerDetails.originalName);
+    }
+  }
+  const findTeam = teamList.find(
+    (team: any) => team.name.toLowerCase() === teamName.toLowerCase()
+  );
+  if (!findTeam) {
+    throw new Error(`Team ${teamName} not found`);
+  }
+  return { teamName: findTeam.name, teamUrl: findTeam.url };
+};
+
+export const TeamStats = async (reqTeamName: string) => {
+  try {
+    // Step 1: Get team name and base URL
+    const { teamName, teamUrl } = await FindTeamName(reqTeamName);
+
+    // Step 2: Extract slug and ID from the original team URL
+    const urlParts = teamUrl.split("/");
+    const teamSlug = urlParts[urlParts.length - 2]; // e.g. "west-indies"
+    const teamId = urlParts[urlParts.length - 1]; // e.g. "99447228"
+
+    // Step 3: Construct modified fixtures URL
+    const modifyUrl = `https://advancecricket.com/team-fixtures/${teamSlug}/${teamId}#${teamSlug}-recent-matches`;
+
+    // Step 4: Load HTML content
+    const $ = await GetHtml(modifyUrl);
+
+    // Step 5: Select recent matches section dynamically
+    const sectionSelector = `#${teamSlug}-recent-matches`;
+
+    const matches: {
+      match: string;
+      teamName: string;
+      team1: { name: string; image: string; score: string };
+      team2: { name: string; image: string; score: string };
+      result: string;
+      title: string;
+      url: string;
+    }[] = [];
+
+    $(`${sectionSelector} .row .col a`).each((_, element) => {
+      const url = $(element).attr("href")?.trim() || "";
+      const title = $(element).attr("title")?.trim() || "";
+      const match = $(element)
+        .find("b.font-14.fw-light.text-secondary")
+        .text()
+        .trim();
+
+      // Get all team images (usually 2 per match)
+      const teamImages = $(element)
+        .find("img.team-icon")
+        .map((_, el) => $(el).attr("src"))
+        .get();
+
+      // Get all team names (short names like NEP, WI)
+      const teamNames = $(element)
+        .find(".font-16.fw-bolder.mainhead")
+        .map((_, el) => $(el).text().trim())
+        .get();
+
+      // Get both team scores
+      const scores = $(element)
+        .find(".d-flex.justify-content-between b.font-14.fw-bold.mainhead")
+        .map((_, el) => $(el).text().trim())
+        .get();
+
+      const result = $(element)
+        .find(".bg-light.text-info.text-center.py-1.font-12")
+        .text()
+        .trim();
+
+      // Structure teams
+      const team1 = {
+        name: teamNames[0] || "",
+        image: teamImages[0] || "",
+        score: scores[0] || "",
+      };
+      const team2 = {
+        name: teamNames[1] || "",
+        image: teamImages[1] || "",
+        score: scores[1] || "",
+      };
+
+      if (match && title) {
+        matches.push({
+          match,
+          team1,
+          team2,
+          result,
+          title,
+          url,
+          teamName: teamName,
+        });
+      }
+    });
+
+    // Step 7: Validate and return results
+    if (matches.length === 0) {
+      return [];
+      // throw new Error(`No matches found for team: ${teamSlug}`);
+    }
+
+    return { teamName, teamSlug, teamId, matches };
+  } catch (error: any) {
+    return [];
+  }
 };

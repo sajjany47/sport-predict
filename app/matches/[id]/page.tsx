@@ -51,7 +51,15 @@ const MatchDetailsPage = () => {
       if (params.id) {
         const details = await axios.post(
           "/api/match-details",
-          { matchId: Number(params.id), venue: selectedMatch?.venue },
+          {
+            matchId: Number(params.id),
+            venue: selectedMatch?.venue,
+            team: selectedMatch?.teams.map((item) => ({
+              name: item.teamName,
+              shortName: item.teamShortName,
+              flagUrl: item.teamFlagUrl,
+            })),
+          },
           { headers: { "Content-Type": "application/json" } }
         );
 

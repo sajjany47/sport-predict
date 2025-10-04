@@ -88,6 +88,39 @@ export const GetStadiumList = async (searchTerm: string) => {
   }
 };
 
+export const GetTeamList = async (searchTerm: string) => {
+  const url = "https://advancecricket.com/player-load";
+  const formData = new FormData();
+
+  formData.append("team", searchTerm);
+
+  try {
+    const { data } = await axios.post(url, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    const $ = load(data);
+    const teams: { name: string; url: string }[] = [];
+
+    $(".row.row-cols-1.row-cols-lg-3 .col").each((index, element) => {
+      const name = $(element).find("b.card-title").text().trim();
+      const url = $(element).find("a").attr("href");
+
+      if (name && url) {
+        teams.push({ name, url });
+      }
+    });
+
+    if (teams.length === 0) {
+      throw new Error("No team found");
+    }
+
+    return teams;
+  } catch (error) {
+    console.error(`Error fetching team search list for ${searchTerm}:`, error);
+    return [];
+  }
+};
+
 export const TransAdvanceStatData = (originalData: any) => {
   if (Object.keys(originalData).length > 0) {
     // Extract recent matches

@@ -7,7 +7,7 @@ import {
   GetStadiumList,
   TransAdvanceStatData,
 } from "@/lib/utils";
-import { StadiumStats } from "./PerformanceDetail";
+import { StadiumStats, TeamStats } from "./PerformanceDetail";
 import cache from "@/lib/NodeCacheService";
 import dbConnect from "../db";
 import Stats from "../stats/StatsModel";
@@ -240,6 +240,7 @@ export async function POST(request: NextRequest) {
           return {
             flag: item.flag?.src,
             color: item.color,
+            name: item.name,
             shortName: item.shortName,
             playingPlayer: playingPlayers,
             benchPlayer: benchPlayers,
@@ -269,6 +270,56 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const prepareStats = await Promise.all(
+      body.team.map(async (item: any) => {
+        const teamData: any = await TeamStats(item.name);
+        const teamPreapareData = {
+          ...teamData,
+          matches: teamData.matches.map((elm: any) => {
+            return {
+              ...elm,
+              team1: {
+                ...elm.team1,
+                image:
+                  elm.team1.name.toLowerCase() === item.shortName
+                    ? item.flagUrl
+                    : elm.team1.image,
+              },
+              team2: {
+                ...elm.team2,
+                image:
+                  elm.team2.name.toLowerCase() === item.shortName
+                    ? item.flagUrl
+                    : elm.team2.image,
+              },
+            };
+          }),
+        };
+
+        return teamPreapareData;
+      })
+    );
+    // const team1Data: any = await TeamStats(body.team[0].name);
+    // const team2Data: any = await TeamStats(body.team[1].name);
+
+    const team1PrepareData = {
+      ...prepareStats[0],
+      matches: prepareStats[0].matches.slice(0, 10),
+    };
+    const team2PrepareData = {
+      ...prepareStats[1],
+      matches: prepareStats[1].matches.slice(0, 10),
+    };
+    const h2hStats = prepareStats[0].matches
+      .filter(
+        (item: any) =>
+          (item.team1.name === body.team[0].shortName &&
+            item.team2.name === body.team[1].shortName) ||
+          (item.team1.name === body.team[1].shortName &&
+            item.team2.name === body.team[0].shortName)
+      )
+      .slice(0, 20) as any[];
+
     return Response.json(
       {
         data: {
@@ -282,6 +333,11 @@ export async function POST(request: NextRequest) {
               temprature: "",
             },
             stats: transformedData ?? null,
+            fullStats: {
+              team1: team1PrepareData,
+              team2: team2PrepareData,
+              h2h: h2hStats,
+            },
           },
         },
       },
