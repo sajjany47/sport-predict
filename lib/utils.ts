@@ -301,59 +301,80 @@ export const FindWinner = (team: any, selectedMatch: any, teamName: any) => {
     const findTeamShortName = selectedMatch?.teams.find(
       (item: any) => item.teamName === teamName
     )?.teamShortName;
-    const team1Score = ParseScore(match.team1?.score);
-    const team2Score = ParseScore(match.team2?.score);
+    const team1Score: any = ParseScore(match.team1?.score);
+    const team2Score: any = ParseScore(match.team2?.score);
+    let winnerType = match.result
+      .toLowerCase()
+      .includes(`${teamName.toLowerCase()} beat`)
+      ? "bowling"
+      : "batting";
+    let winner = "";
+
     if (match.result.toLowerCase().includes("abandoned")) {
-      return { ...match, winner: "A" };
-    }
-    if (!team1Score || !team2Score) {
-      return { ...match, winner: "A" };
-    }
-    if (team1Score.runs > team2Score.runs) {
-      return {
-        ...match,
-        winner:
-          match.team1?.name.toLowerCase() ===
-          findTeamShortName?.toLocaleLowerCase()
-            ? "W"
-            : "L",
-        winnerType: "batting",
-      };
+      winner = "A";
+      // return { ...match, winner: "A" };
+    } else if (!team1Score || !team2Score) {
+      winner = "A";
+      // return { ...match, winner: "A" };
+    } else if (team1Score.runs > team2Score.runs) {
+      winner =
+        match.team1?.name.toLowerCase() ===
+        findTeamShortName?.toLocaleLowerCase()
+          ? "W"
+          : "L";
+      // return {
+      //   ...match,
+      //   winner:
+      //     match.team1?.name.toLowerCase() ===
+      //     findTeamShortName?.toLocaleLowerCase()
+      //       ? "W"
+      //       : "L",
+      //   winnerType: "batting",
+      // };
     } else if (team2Score.runs > team1Score.runs) {
-      return {
-        ...match,
-        winner:
-          match.team2?.name.toLowerCase() ===
-          findTeamShortName?.toLocaleLowerCase()
-            ? "W"
-            : "L",
-        winnerType: "batting",
-      };
-    } else {
-      // If runs equal, compare wickets (fewer wickets wins)
-      if (team1Score.wickets < team2Score.wickets) {
-        return {
-          ...match,
-          winner:
-            match.team1?.name.toLowerCase() ===
-            findTeamShortName?.toLocaleLowerCase()
-              ? "W"
-              : "L",
-          winnerType: "bowling",
-        };
-      } else if (team2Score.wickets < team1Score.wickets) {
-        return {
-          ...match,
-          winner:
-            match.team2?.name.toLowerCase() ===
-            findTeamShortName?.toLocaleLowerCase()
-              ? "W"
-              : "L",
-          winnerType: "bowling",
-        };
-      }
+      winner =
+        match.team2?.name.toLowerCase() ===
+        findTeamShortName?.toLocaleLowerCase()
+          ? "W"
+          : "L";
+      // return {
+      //   ...match,
+      //   winner:
+      //     match.team2?.name.toLowerCase() ===
+      //     findTeamShortName?.toLocaleLowerCase()
+      //       ? "W"
+      //       : "L",
+      //   winnerType: "batting",
+      // };
     }
+    // else {
+    //   // If runs equal, compare wickets (fewer wickets wins)
+    //   if (team1Score.wickets < team2Score.wickets) {
+    //     return {
+    //       ...match,
+    //       winner:
+    //         match.team1?.name.toLowerCase() ===
+    //         findTeamShortName?.toLocaleLowerCase()
+    //           ? "W"
+    //           : "L",
+    //       winnerType: "bowling",
+    //     };
+    //   } else if (team2Score.wickets < team1Score.wickets) {
+    //     return {
+    //       ...match,
+    //       winner:
+    //         match.team2?.name.toLowerCase() ===
+    //         findTeamShortName?.toLocaleLowerCase()
+    //           ? "W"
+    //           : "L",
+    //       winnerType: "bowling",
+    //     };
+    //   }
+    // }
+
+    return { ...match, winner, winnerType };
   });
+  console.log(prepareData);
 
   return prepareData;
 };
