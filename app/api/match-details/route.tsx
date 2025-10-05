@@ -275,6 +275,7 @@ export async function POST(request: NextRequest) {
         const teamData: any = await TeamStats(item.name);
         const teamPreapareData = {
           ...teamData,
+          flagUrl: item.flagUrl,
           matches: teamData.matches.map((elm: any) => {
             return {
               ...elm,
@@ -299,8 +300,6 @@ export async function POST(request: NextRequest) {
         return teamPreapareData;
       })
     );
-    // const team1Data: any = await TeamStats(body.team[0].name);
-    // const team2Data: any = await TeamStats(body.team[1].name);
 
     const team1PrepareData = {
       ...prepareStats[0],

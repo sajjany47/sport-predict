@@ -287,3 +287,11 @@ export const GenerateTicketNumber = (type: any) => {
   // Final Ticket Number
   return `${prefix}${date}${random}`;
 };
+
+export const ParseScore = (scoreStr: any) => {
+  if (!scoreStr || scoreStr.includes("-0 ()")) return null; // invalid or abandoned
+  const [runsWickets, oversStr] = scoreStr.split(" ");
+  const [runs, wickets] = runsWickets.split("-").map(Number);
+  const overs = parseFloat(oversStr?.replace(/[()]/g, "")) || 0;
+  return { runs, wickets, overs };
+};
