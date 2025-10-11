@@ -92,11 +92,15 @@ const MatchDetailsPage = () => {
     }
   };
 
-  const calculateH2HStats = (h2hMatches: any[]) => {
+  const calculateH2HStats = (
+    h2hMatches: any[],
+    team1Name: string,
+    team2Name: string
+  ) => {
     if (!h2hMatches || h2hMatches.length === 0) {
       return [
-        { label: "Team A", wins: 0 },
-        { label: "Team B", wins: 0 },
+        { label: team1Name, wins: 0 },
+        { label: team2Name, wins: 0 },
         { label: "Total", wins: 0 },
         { label: "No Result", wins: 0 },
       ];
@@ -430,7 +434,9 @@ const MatchDetailsPage = () => {
                       <CardContent>
                         <div className="flex justify-between items-center">
                           {calculateH2HStats(
-                            matchData.overview.fullStats.h2h
+                            matchData.overview.fullStats.h2h,
+                            matchData.overview.fullStats.team1.teamName,
+                            matchData.overview.fullStats.team2.teamName
                           ).map((stat, index) => (
                             <div key={index} className="text-center">
                               <div
