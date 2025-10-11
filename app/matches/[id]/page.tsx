@@ -349,148 +349,110 @@ const MatchDetailsPage = () => {
 
               <TabsContent value="overview" className="space-y-6">
                 {/* Quick Stats Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Form Summary */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center space-x-2 text-sm">
-                        <TrendingUp className="h-4 w-4 text-green-500" />
-                        <span>Current Form</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between items-center">
-                        <div className="text-center">
-                          <div className="flex space-x-1 mb-2">
-                            {getRecentMatchesWithScores(
-                              matchData.overview.fullStats.team1,
-                              matchData.overview.fullStats.team1.teamName
-                            )
-                              .slice(0, 7)
-                              .map((match: any, index: any) => (
-                                <div
-                                  key={index}
-                                  className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
-                                    match.winner === "W"
-                                      ? "bg-green-500"
-                                      : match.winner === "A"
-                                      ? "bg-gray-400"
-                                      : "bg-red-500"
-                                  }`}
-                                >
-                                  {match.winner}
-                                </div>
-                              ))}
-                          </div>
-                          <p className="text-xs text-gray-600">
-                            {matchData.overview.fullStats.team1.teamName}
-                          </p>
-                        </div>
-
-                        <div className="text-center">
-                          <div className="flex space-x-1 mb-2">
-                            {getRecentMatchesWithScores(
-                              matchData.overview.fullStats.team2,
-                              matchData.overview.fullStats.team2.teamName
-                            )
-                              .slice(0, 7)
-                              .map((match: any, index: any) => (
-                                <div
-                                  key={index}
-                                  className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
-                                    match.winner === "W"
-                                      ? "bg-green-500"
-                                      : match.winner === "A"
-                                      ? "bg-gray-400"
-                                      : "bg-red-500"
-                                  }`}
-                                >
-                                  {match.winner}
-                                </div>
-                              ))}
-                          </div>
-                          <p className="text-xs text-gray-600">
-                            {matchData.overview.fullStats.team2.teamName}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* H2H Summary */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center space-x-2 text-sm">
-                        <Trophy className="h-4 w-4 text-yellow-500" />
-                        <span>Head to Head</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between items-center">
-                        {calculateH2HStats(
-                          matchData.overview.fullStats.h2h
-                        ).map((stat, index) => (
-                          <div key={index} className="text-center">
-                            <div
-                              className={`text-lg font-bold ${
-                                stat.label === "No Result"
-                                  ? "text-yellow-500"
-                                  : stat.label === "Total"
-                                  ? "text-gray-700"
-                                  : "text-blue-600"
-                              }`}
-                            >
-                              {stat.wins}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+                  <div className="md:col-span-7">
+                    {/* Form Summary */}
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center space-x-2 text-sm">
+                          <TrendingUp className="h-4 w-4 text-green-500" />
+                          <span>Current Form</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex justify-between items-center">
+                          <div className="text-center">
+                            <div className="flex space-x-1 mb-2">
+                              {getRecentMatchesWithScores(
+                                matchData.overview.fullStats.team1,
+                                matchData.overview.fullStats.team1.teamName
+                              )
+                                .slice(0, 10)
+                                .map((match: any, index: any) => (
+                                  <div
+                                    key={index}
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
+                                      match.winner === "W"
+                                        ? "bg-green-500"
+                                        : match.winner === "A"
+                                        ? "bg-gray-400"
+                                        : "bg-red-500"
+                                    }`}
+                                  >
+                                    {match.winner}
+                                  </div>
+                                ))}
                             </div>
-                            <div className="text-xs text-gray-600">
-                              {stat.label}
-                            </div>
+                            <p className="text-xs text-gray-600">
+                              {matchData.overview.fullStats.team1.teamName}
+                            </p>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
 
-                  {/* Venue Stats */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center space-x-2 text-sm">
-                        <MapPin className="h-4 w-4 text-red-500" />
-                        <span>Venue Insight</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600">
-                            Pitch Type
-                          </span>
-                          <span className="text-sm font-semibold">
-                            {matchData?.overview.groundAndWheather?.pitchType ||
-                              "Balanced"}
-                          </span>
+                          <div className="text-center">
+                            <div className="flex space-x-1 mb-2">
+                              {getRecentMatchesWithScores(
+                                matchData.overview.fullStats.team2,
+                                matchData.overview.fullStats.team2.teamName
+                              )
+                                .slice(0, 10)
+                                .map((match: any, index: any) => (
+                                  <div
+                                    key={index}
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
+                                      match.winner === "W"
+                                        ? "bg-green-500"
+                                        : match.winner === "A"
+                                        ? "bg-gray-400"
+                                        : "bg-red-500"
+                                    }`}
+                                  >
+                                    {match.winner}
+                                  </div>
+                                ))}
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              {matchData.overview.fullStats.team2.teamName}
+                            </p>
+                          </div>
                         </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <div className="md:col-span-5">
+                    {/* H2H Summary */}
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center space-x-2 text-sm">
+                          <Trophy className="h-4 w-4 text-yellow-500" />
+                          <span>Head to Head</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600">
-                            Avg. Score
-                          </span>
-                          <span className="text-sm font-semibold">
-                            {matchData?.overview.groundAndWheather?.avgScore ||
-                              "160-180"}
-                          </span>
+                          {calculateH2HStats(
+                            matchData.overview.fullStats.h2h
+                          ).map((stat, index) => (
+                            <div key={index} className="text-center">
+                              <div
+                                className={`text-lg font-bold ${
+                                  stat.label === "No Result"
+                                    ? "text-yellow-500"
+                                    : stat.label === "Total"
+                                    ? "text-gray-700"
+                                    : "text-blue-600"
+                                }`}
+                              >
+                                {stat.wins}
+                              </div>
+                              <div className="text-xs text-gray-600">
+                                {stat.label}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600">
-                            Conditions
-                          </span>
-                          <span className="text-sm font-semibold">
-                            {matchData?.overview.groundAndWheather
-                              ?.wheatherType || "Clear"}
-                          </span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
 
                 {/* Team Performance Comparison */}
