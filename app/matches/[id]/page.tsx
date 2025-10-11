@@ -364,9 +364,10 @@ const MatchDetailsPage = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex justify-between items-center">
-                          <div className="text-center">
-                            <div className="flex space-x-1 mb-2">
+                        <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-4">
+                          {/* Team 1 Section */}
+                          <div className="text-center w-full md:w-auto">
+                            <div className="flex justify-center flex-wrap gap-1 mb-2">
                               {getRecentMatchesWithScores(
                                 matchData.overview.fullStats.team1,
                                 matchData.overview.fullStats.team1.teamName
@@ -392,8 +393,12 @@ const MatchDetailsPage = () => {
                             </p>
                           </div>
 
-                          <div className="text-center">
-                            <div className="flex space-x-1 mb-2">
+                          {/* Divider (visible only on mobile) */}
+                          <div className="w-full h-px bg-gray-300 md:hidden"></div>
+
+                          {/* Team 2 Section */}
+                          <div className="text-center w-full md:w-auto">
+                            <div className="flex justify-center flex-wrap gap-1 mb-2">
                               {getRecentMatchesWithScores(
                                 matchData.overview.fullStats.team2,
                                 matchData.overview.fullStats.team2.teamName
