@@ -88,6 +88,39 @@ export const GetStadiumList = async (searchTerm: string) => {
   }
 };
 
+export const GetTeamList = async (searchTerm: string) => {
+  const url = "https://advancecricket.com/player-load";
+  const formData = new FormData();
+
+  formData.append("team", searchTerm);
+
+  try {
+    const { data } = await axios.post(url, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    const $ = load(data);
+    const teams: { name: string; url: string }[] = [];
+
+    $(".row.row-cols-1.row-cols-lg-3 .col").each((index, element) => {
+      const name = $(element).find("b.card-title").text().trim();
+      const url = $(element).find("a").attr("href");
+
+      if (name && url) {
+        teams.push({ name, url });
+      }
+    });
+
+    if (teams.length === 0) {
+      throw new Error("No team found");
+    }
+
+    return teams;
+  } catch (error) {
+    console.error(`Error fetching team search list for ${searchTerm}:`, error);
+    return [];
+  }
+};
+
 export const TransAdvanceStatData = (originalData: any) => {
   if (Object.keys(originalData).length > 0) {
     // Extract recent matches
@@ -253,4 +286,65 @@ export const GenerateTicketNumber = (type: any) => {
 
   // Final Ticket Number
   return `${prefix}${date}${random}`;
+};
+
+export const ParseScore = (scoreStr: any) => {
+  if (!scoreStr || scoreStr.includes("-0 ()")) return null; // invalid or abandoned
+  const [runsWickets, oversStr] = scoreStr.split(" ");
+  const [runs, wickets] = runsWickets.split("-").map(Number);
+  const overs = parseFloat(oversStr?.replace(/[()]/g, "")) || 0;
+  return { runs, wickets, overs };
+};
+
+export const FindWinner = (team: any, selectedMatch: any, teamName: any) => {
+  const prepareData = team.map((match: any) => {
+    const findTeamShortName = selectedMatch?.teams.find(
+      (item: any) => item.teamName === teamName
+    )?.teamShortName;
+
+    const team1Score: any = ParseScore(match.team1?.score);
+    const team2Score: any = ParseScore(match.team2?.score);
+
+    let winnerType = "";
+    let winner = "";
+
+    if (match.result.toLowerCase().includes("abandoned")) {
+      winner = "A";
+    } else if (!team1Score || !team2Score) {
+      winner = "A";
+    } else if (match.result.toLowerCase().includes("dls")) {
+      if (
+        match.result.toLowerCase().includes(`${teamName.toLowerCase()} beat`)
+      ) {
+        if (match.result.toLowerCase().includes("wickets")) {
+          winner = "W";
+          winnerType = "bowling";
+        } else {
+          winner = "W";
+          winnerType = "batting";
+        }
+      } else {
+        winner = "L";
+        winnerType = "";
+      }
+    } else if (team1Score.runs > team2Score.runs) {
+      winner =
+        match.team1?.name.toLowerCase() ===
+        findTeamShortName?.toLocaleLowerCase()
+          ? "W"
+          : "L";
+      winnerType = "batting";
+    } else if (team2Score.runs > team1Score.runs) {
+      winner =
+        match.team2?.name.toLowerCase() ===
+        findTeamShortName?.toLocaleLowerCase()
+          ? "W"
+          : "L";
+      winnerType = "bowling";
+    }
+
+    return { ...match, winner, winnerType };
+  });
+
+  return prepareData;
 };

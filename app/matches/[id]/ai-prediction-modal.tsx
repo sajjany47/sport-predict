@@ -171,20 +171,6 @@ const AIPredictionModal: React.FC<{
         toast.error("Failed to generate prediction. Please try again.");
         setIsLoading(false);
       });
-
-    // try {
-    //   // Simulate API call with your actual response
-    //   const data: any = GetAIPrediction(match);
-
-    //   await new Promise((resolve) => setTimeout(resolve, 2000));
-    //   setPredictionData(data);
-    //   dispatch(updateCredits(user.credits - 1));
-    //   toast.success("AI Prediction generated successfully!");
-    // } catch (error) {
-    //   toast.error("Failed to generate prediction. Please try again.");
-    // } finally {
-    //   setIsLoading(false);
-    // }
   };
 
   const getRoleIcon = (type: string) => {
@@ -212,6 +198,19 @@ const AIPredictionModal: React.FC<{
         return "bg-purple-100 text-purple-800";
       case "WK":
         return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getConfidenceClass = (confidence: any) => {
+    switch (confidence) {
+      case "High":
+        return "bg-green-100 text-green-800";
+      case "Medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "Low":
+        return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -342,6 +341,7 @@ const AIPredictionModal: React.FC<{
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Team 1 */}
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-2 mb-3">
                         <img
@@ -353,22 +353,31 @@ const AIPredictionModal: React.FC<{
                           {predictionData.team1.shortName}
                         </h3>
                       </div>
+
                       <div className="text-3xl font-bold text-green-600 mb-2">
                         {predictionData.winnerPrediction.team1.probability}%
                       </div>
+
                       <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
                         <div
-                          className="bg-green-600 h-3 rounded-full"
+                          className="bg-green-600 h-3 rounded-full transition-all duration-500"
                           style={{
                             width: `${predictionData.winnerPrediction.team1.probability}%`,
                           }}
                         ></div>
                       </div>
-                      <Badge className="bg-green-100 text-green-800">
+
+                      <Badge
+                        className={getConfidenceClass(
+                          predictionData.winnerPrediction.team1.confidence
+                        )}
+                      >
                         {predictionData.winnerPrediction.team1.confidence}{" "}
                         Confidence
                       </Badge>
                     </div>
+
+                    {/* Team 2 */}
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-2 mb-3">
                         <img
@@ -380,18 +389,25 @@ const AIPredictionModal: React.FC<{
                           {predictionData.team2.shortName}
                         </h3>
                       </div>
+
                       <div className="text-3xl font-bold text-blue-600 mb-2">
                         {predictionData.winnerPrediction.team2.probability}%
                       </div>
+
                       <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
                         <div
-                          className="bg-blue-600 h-3 rounded-full"
+                          className="bg-blue-600 h-3 rounded-full transition-all duration-500"
                           style={{
                             width: `${predictionData.winnerPrediction.team2.probability}%`,
                           }}
                         ></div>
                       </div>
-                      <Badge className="bg-blue-100 text-blue-800">
+
+                      <Badge
+                        className={getConfidenceClass(
+                          predictionData.winnerPrediction.team2.confidence
+                        )}
+                      >
                         {predictionData.winnerPrediction.team2.confidence}{" "}
                         Confidence
                       </Badge>
