@@ -304,6 +304,19 @@ const FantasyAnalysis = (squad: any) => {
   };
 };
 
+export const getConfidence = (chance: number) => {
+  switch (true) {
+    case chance < 30:
+      return "Low";
+    case chance >= 30 && chance <= 55:
+      return "Medium";
+    case chance > 55:
+      return "High";
+    default:
+      return "Unknown";
+  }
+};
+
 export const GetAIPrediction = (data: any) => {
   const squadList = data.squadList.map((item: any) => {
     const playingPlayer = item.playingPlayer.map((playing: any) => {
@@ -416,13 +429,11 @@ export const GetAIPrediction = (data: any) => {
     winnerPrediction: {
       team1: {
         probability: Number(team1Chance).toFixed(2),
-        confidence:
-          Number(team1Chance) > Number(team2Chance) ? "High" : "Medium",
+        confidence: getConfidence(Number(team1Chance) || 0),
       },
       team2: {
         probability: Number(team2Chance).toFixed(2),
-        confidence:
-          Number(team2Chance) > Number(team1Chance) ? "High" : "Medium",
+        confidence: getConfidence(Number(team2Chance) || 0),
       },
     },
     ...fantasyReport,
