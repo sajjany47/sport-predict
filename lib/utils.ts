@@ -312,6 +312,21 @@ export const FindWinner = (team: any, selectedMatch: any, teamName: any) => {
       winner = "A";
     } else if (!team1Score || !team2Score) {
       winner = "A";
+    } else if (match.result.toLowerCase().includes("dls")) {
+      if (
+        match.result.toLowerCase().includes(`${teamName.toLowerCase()} beat`)
+      ) {
+        if (match.result.toLowerCase().includes("wickets")) {
+          winner = "W";
+          winnerType = "bowling";
+        } else {
+          winner = "W";
+          winnerType = "batting";
+        }
+      } else {
+        winner = "L";
+        winnerType = "";
+      }
     } else if (team1Score.runs > team2Score.runs) {
       winner =
         match.team1?.name.toLowerCase() ===
