@@ -77,16 +77,29 @@ const ParseScore = (score: any) => {
     overs: parseFloat(match[2]),
   };
 };
-const CalculateStadiumAverage = (matches: any) => {
+const CalculateStadiumAverage = (matches: any[]) => {
+  if (!matches || matches.length === 0) {
+    return {
+      averageInnings1Score: 0,
+      averageInnings2Score: 0,
+      innings1RunRate: 0,
+      innings2RunRate: 0,
+    };
+  }
+
   let totalInn1Runs = 0;
   let totalInn2Runs = 0;
   let totalInn1Overs = 0;
   let totalInn2Overs = 0;
-  let count = matches.length;
+  const count = matches.length;
 
   matches.forEach((match: any) => {
-    const inn1 = ParseScore(match.inn1Score) || 0;
-    const inn2 = ParseScore(match.inn2Score) || 0;
+    const inn1 = match.inn1Score
+      ? ParseScore(match.inn1Score)
+      : { runs: 0, overs: 0 };
+    const inn2 = match.inn2Score
+      ? ParseScore(match.inn2Score)
+      : { runs: 0, overs: 0 };
 
     totalInn1Runs += inn1.runs || 0;
     totalInn2Runs += inn2.runs || 0;
@@ -95,41 +108,55 @@ const CalculateStadiumAverage = (matches: any) => {
   });
 
   return {
-    averageInnings1Score: (totalInn1Runs / count).toFixed(2),
-    averageInnings2Score: (totalInn2Runs / count).toFixed(2),
-    innings1RunRate: (totalInn1Runs / totalInn1Overs).toFixed(2),
-    innings2RunRate: (totalInn2Runs / totalInn2Overs).toFixed(2),
+    averageInnings1Score: count ? (totalInn1Runs / count).toFixed(2) : "0.00",
+    averageInnings2Score: count ? (totalInn2Runs / count).toFixed(2) : "0.00",
+    innings1RunRate: totalInn1Overs
+      ? (totalInn1Runs / totalInn1Overs).toFixed(2)
+      : "0.00",
+    innings2RunRate: totalInn2Overs
+      ? (totalInn2Runs / totalInn2Overs).toFixed(2)
+      : "0.00",
   };
 };
 
 const AccordingPlayerTeamAvg = (squad: any, format: any, stadiumAvg: any) => {
   const playerSquad =
     squad.playingPlayer.length > 0 ? squad.playingPlayer : squad.benchPlayer;
+
   let totalScore = 0;
   playerSquad.forEach((element: any) => {
-    totalScore += Number(element.battingAvg.averageRuns) || 0;
+    totalScore += Number(element.battingAvg?.averageRuns) || 0;
   });
 
-  const bothIningAvgRunRate =
-    (Number(stadiumAvg.innings1RunRate) + Number(stadiumAvg.innings2RunRate)) /
-    2;
+  const innings1RunRate = Number(stadiumAvg?.innings1RunRate) || 0;
+  const innings2RunRate = Number(stadiumAvg?.innings2RunRate) || 0;
+  const avgInnings1Score = Number(stadiumAvg?.averageInnings1Score) || 0;
+  const avgInnings2Score = Number(stadiumAvg?.averageInnings2Score) || 0;
 
-  const bothIningsAvgScore =
-    (Number(stadiumAvg.averageInnings1Score) +
-      Number(stadiumAvg.averageInnings2Score)) /
-    2;
+  const bothIningAvgRunRate = (innings1RunRate + innings2RunRate) / 2;
+  const bothIningsAvgScore = (avgInnings1Score + avgInnings2Score) / 2;
 
-  const teamAvgScore =
-    ((totalScore + bothIningsAvgScore) / 2 +
-      format.over * bothIningAvgRunRate) /
-    2;
+  // ✅ Check if stadium average is zero
+  const isStadiumAvgZero =
+    avgInnings1Score === 0 &&
+    avgInnings2Score === 0 &&
+    innings1RunRate === 0 &&
+    innings2RunRate === 0;
+
+  let teamAvgScore;
+
+  if (isStadiumAvgZero) {
+    // ⚡ If stadium average is zero, don't divide by 2 — use only player data
+    teamAvgScore = totalScore + format.over * bothIningAvgRunRate;
+  } else {
+    // ✅ Normal formula
+    teamAvgScore =
+      ((totalScore + bothIningsAvgScore) / 2 +
+        format.over * bothIningAvgRunRate) /
+      2;
+  }
 
   return teamAvgScore;
-  // totalScore=======> 197.64999999999998
-
-  // format=======> 0.5
-
-  // stadiumAvg====> {averageInnings1Score: '181.00', averageInnings2Score: '172.90', innings1RunRate: '7.87', innings2RunRate: '8.24'}
 };
 
 const CalculateMatchPoint = (matchFormat: any) => {
@@ -335,6 +362,7 @@ export const GetAIPrediction = (data: any) => {
     };
   });
   const stadiumAvg = CalculateStadiumAverage(data.stadiumStats);
+
   const team1AvgScore = AccordingPlayerTeamAvg(
     squadList[0],
     CalculateMatchPoint(data.matchInfo.format),
