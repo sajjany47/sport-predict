@@ -62,9 +62,9 @@ const PaymentPage = () => {
   // Payment details
   const paymentDetails: any = {
     upi: {
-      id: "paytmqr28100505010111q7lvcklnvq@paytm",
-      upi: "paytmqr28100505010111q7lvcklnvq@paytm",
-      name: "SAJJAN KUMAR YADAV",
+      id: "7003031039@okbizaxis",
+      upi: "7003031039@okbizaxis",
+      name: "YADAV STORE",
       note: "SportPredict Subscription Payment",
     },
     bank: {
@@ -75,9 +75,9 @@ const PaymentPage = () => {
       branch: "Rashbehari Branch",
     },
     qrCode: {
-      url: "https://res.cloudinary.com/dzezstvvt/image/upload/v1757755207/1757754273909_lczcci.jpg",
-      name: "SAJJAN KUMAR YADAV",
-      upiId: "paytmqr28100505010111q7lvcklnvq@paytm",
+      url: "https://res.cloudinary.com/dzezstvvt/image/upload/v1760339025/QR_CROP_kntyy6.png",
+      name: "YADAV STORE",
+      upiId: "7003031039@okbizaxis",
     },
     // Placeholder QR code
   };
