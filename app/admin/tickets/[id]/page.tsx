@@ -411,294 +411,310 @@ const TicketDetailsPage = () => {
         </Card>
 
         {/* Detailed Information Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="details">Ticket Details</TabsTrigger>
-            <TabsTrigger value="conversation">Conversation</TabsTrigger>
-            <TabsTrigger value="customer">Customer Info</TabsTrigger>
-          </TabsList>
+        <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="sm:grid sm:grid-cols-3">
+              <TabsTrigger value="details">Ticket Details</TabsTrigger>
+              <TabsTrigger value="conversation">Conversation</TabsTrigger>
+              <TabsTrigger value="customer">Customer Info</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="details" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <TabsContent value="details" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                      <span>Ticket Information</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Ticket ID:</span>
+                      <span className="font-medium">{ticket.ticketNumber}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Subject:</span>
+                      <span className="font-medium">{ticket.subject}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Category:</span>
+                      <Badge className={getCategoryColor(ticket.category)}>
+                        {ticket.category.charAt(0).toUpperCase() +
+                          ticket.category.slice(1)}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Priority:</span>
+                      <Badge
+                        className={getPriorityColor(
+                          ticket.priority || "medium"
+                        )}
+                      >
+                        {(ticket.priority || "medium").charAt(0).toUpperCase() +
+                          (ticket.priority || "medium").slice(1)}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Status:</span>
+                      <Badge className={getStatusColor(ticket.status)}>
+                        {ticket.status.charAt(0).toUpperCase() +
+                          ticket.status.slice(1).replace("-", " ")}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Created:</span>
+                      <span className="font-medium">
+                        {new Date(ticket.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Last Updated:</span>
+                      <span className="font-medium">
+                        {new Date(ticket.updatedAt).toLocaleString()}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <MessageSquare className="h-5 w-5 text-green-600" />
+                      <span>Issue Description</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-gray-700 leading-relaxed">
+                        {ticket.description}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="conversation" className="space-y-6">
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <FileText className="h-5 w-5 text-blue-600" />
-                    <span>Ticket Information</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Ticket ID:</span>
-                    <span className="font-medium">{ticket.ticketNumber}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Subject:</span>
-                    <span className="font-medium">{ticket.subject}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Category:</span>
-                    <Badge className={getCategoryColor(ticket.category)}>
-                      {ticket.category.charAt(0).toUpperCase() +
-                        ticket.category.slice(1)}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Priority:</span>
-                    <Badge
-                      className={getPriorityColor(ticket.priority || "medium")}
-                    >
-                      {(ticket.priority || "medium").charAt(0).toUpperCase() +
-                        (ticket.priority || "medium").slice(1)}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
-                    <Badge className={getStatusColor(ticket.status)}>
-                      {ticket.status.charAt(0).toUpperCase() +
-                        ticket.status.slice(1).replace("-", " ")}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Created:</span>
-                    <span className="font-medium">
-                      {new Date(ticket.createdAt).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Last Updated:</span>
-                    <span className="font-medium">
-                      {new Date(ticket.updatedAt).toLocaleString()}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <MessageSquare className="h-5 w-5 text-green-600" />
-                    <span>Issue Description</span>
+                    <MessageSquare className="h-5 w-5 text-blue-600" />
+                    <span>Conversation History</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-gray-700 leading-relaxed">
-                      {ticket.description}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                  <div className="lg:col-span-3">
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                      <div className="p-6 border-b border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                          <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+                          Conversation History
+                        </h3>
+                      </div>
 
-          <TabsContent value="conversation" className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MessageSquare className="h-5 w-5 text-blue-600" />
-                  <span>Conversation History</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="lg:col-span-3">
-                  <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                    <div className="p-6 border-b border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                        <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
-                        Conversation History
-                      </h3>
-                    </div>
+                      <div className="p-6 space-y-6 max-h-96 overflow-y-auto">
+                        {ticket.message.map((msg: any, index: number) => {
+                          const isUser = isUserMessage(msg);
+                          return (
+                            <div key={msg._id} className="space-y-2">
+                              {/* Date separator if needed */}
+                              {index === 0 ||
+                              formatDate(msg.replyAt) !==
+                                formatDate(
+                                  ticket.message[index - 1].replyAt
+                                ) ? (
+                                <div className="flex justify-center">
+                                  <span className="px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
+                                    {formatDate(msg.replyAt)}
+                                  </span>
+                                </div>
+                              ) : null}
 
-                    <div className="p-6 space-y-6 max-h-96 overflow-y-auto">
-                      {ticket.message.map((msg: any, index: number) => {
-                        const isUser = isUserMessage(msg);
-                        return (
-                          <div key={msg._id} className="space-y-2">
-                            {/* Date separator if needed */}
-                            {index === 0 ||
-                            formatDate(msg.replyAt) !==
-                              formatDate(ticket.message[index - 1].replyAt) ? (
-                              <div className="flex justify-center">
-                                <span className="px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
-                                  {formatDate(msg.replyAt)}
-                                </span>
-                              </div>
-                            ) : null}
-
-                            <div
-                              className={`flex ${
-                                isUser ? "justify-start" : "justify-end"
-                              }`}
-                            >
                               <div
                                 className={`flex ${
-                                  isUser ? "flex-row" : "flex-row-reverse"
-                                } items-start space-x-3 max-w-xs lg:max-w-md`}
+                                  isUser ? "justify-start" : "justify-end"
+                                }`}
                               >
-                                {/* Avatar */}
                                 <div
-                                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    isUser
-                                      ? "bg-gradient-to-r from-green-400 to-blue-500"
-                                      : "bg-gradient-to-r from-purple-500 to-pink-500"
-                                  }`}
+                                  className={`flex ${
+                                    isUser ? "flex-row" : "flex-row-reverse"
+                                  } items-start space-x-3 max-w-xs lg:max-w-md`}
                                 >
-                                  {isUser ? (
-                                    <User className="h-4 w-4 text-white" />
-                                  ) : (
-                                    <Shield className="h-4 w-4 text-white" />
-                                  )}
-                                </div>
-
-                                {/* Message Bubble */}
-                                <div className="space-y-1">
+                                  {/* Avatar */}
                                   <div
-                                    className={`px-4 py-3 rounded-2xl ${
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                                       isUser
-                                        ? "bg-gray-100 text-gray-900 rounded-bl-sm"
-                                        : "bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-sm"
-                                    } shadow-sm`}
+                                        ? "bg-gradient-to-r from-green-400 to-blue-500"
+                                        : "bg-gradient-to-r from-purple-500 to-pink-500"
+                                    }`}
                                   >
-                                    <p className="text-sm leading-relaxed">
-                                      {msg.text}
-                                    </p>
+                                    {isUser ? (
+                                      <User className="h-4 w-4 text-white" />
+                                    ) : (
+                                      <Shield className="h-4 w-4 text-white" />
+                                    )}
                                   </div>
 
-                                  {/* Message Info */}
-                                  <div
-                                    className={`flex items-center space-x-2 text-xs ${
-                                      isUser ? "text-gray-500" : "text-gray-400"
-                                    } ${isUser ? "ml-0" : "mr-0 justify-end"}`}
-                                  >
-                                    <span className="flex items-center space-x-1">
-                                      {isUser ? (
-                                        <UserCheck className="h-3 w-3" />
-                                      ) : (
-                                        <Shield className="h-3 w-3" />
-                                      )}
-                                      <span>{msg.replyBy.name}</span>
-                                    </span>
-                                    <span>•</span>
-                                    <span>{formatTime(msg.replyAt)}</span>
+                                  {/* Message Bubble */}
+                                  <div className="space-y-1">
+                                    <div
+                                      className={`px-4 py-3 rounded-2xl ${
+                                        isUser
+                                          ? "bg-gray-100 text-gray-900 rounded-bl-sm"
+                                          : "bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-sm"
+                                      } shadow-sm`}
+                                    >
+                                      <p className="text-sm leading-relaxed">
+                                        {msg.text}
+                                      </p>
+                                    </div>
+
+                                    {/* Message Info */}
+                                    <div
+                                      className={`flex items-center space-x-2 text-xs ${
+                                        isUser
+                                          ? "text-gray-500"
+                                          : "text-gray-400"
+                                      } ${
+                                        isUser ? "ml-0" : "mr-0 justify-end"
+                                      }`}
+                                    >
+                                      <span className="flex items-center space-x-1">
+                                        {isUser ? (
+                                          <UserCheck className="h-3 w-3" />
+                                        ) : (
+                                          <Shield className="h-3 w-3" />
+                                        )}
+                                        <span>{msg.replyBy.name}</span>
+                                      </span>
+                                      <span>•</span>
+                                      <span>{formatTime(msg.replyAt)}</span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                          );
+                        })}
+                      </div>
 
-                    {/* Reply Section */}
-                    <div className="p-6 border-t border-gray-200 bg-gray-50">
-                      {ticket.status === "resolved" ? (
-                        <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
-                          <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
-                          <h3 className="text-lg font-semibold text-green-800 mb-2">
-                            Ticket Resolved Successfully
-                          </h3>
-                          <p className="text-green-700">
-                            This conversation has been marked as resolved.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <div className="relative">
-                            <textarea
-                              placeholder="Type your reply as admin..."
-                              value={newMessage}
-                              onChange={(e) => setNewMessage(e.target.value)}
-                              rows={3}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                            />
+                      {/* Reply Section */}
+                      <div className="p-6 border-t border-gray-200 bg-gray-50">
+                        {ticket.status === "resolved" ? (
+                          <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
+                            <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
+                            <h3 className="text-lg font-semibold text-green-800 mb-2">
+                              Ticket Resolved Successfully
+                            </h3>
+                            <p className="text-green-700">
+                              This conversation has been marked as resolved.
+                            </p>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <button className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                              <Paperclip className="h-4 w-4" />
-                              <span>Attach File</span>
-                            </button>
-                            <button
-                              onClick={handleSendMessage}
-                              disabled={isSubmitting || !newMessage.trim()}
-                              className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                            >
-                              <Send className="h-4 w-4" />
-                              <span>Send Reply</span>
-                            </button>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="relative">
+                              <textarea
+                                placeholder="Type your reply as admin..."
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                rows={3}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                              />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <button className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                                <Paperclip className="h-4 w-4" />
+                                <span>Attach File</span>
+                              </button>
+                              <button
+                                onClick={handleSendMessage}
+                                disabled={isSubmitting || !newMessage.trim()}
+                                className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                              >
+                                <Send className="h-4 w-4" />
+                                <span>Send Reply</span>
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          <TabsContent value="customer" className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <User className="h-5 w-5 text-purple-600" />
-                  <span>Customer Information</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Contact Details</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <User className="h-4 w-4 text-gray-400" />
-                        <span>{ticket.user.name}</span>
+            <TabsContent value="customer" className="space-y-6">
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <User className="h-5 w-5 text-purple-600" />
+                    <span>Customer Information</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-lg">Contact Details</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-3">
+                          <User className="h-4 w-4 text-gray-400" />
+                          <span>{ticket.user.name}</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Mail className="h-4 w-4 text-gray-400" />
+                          <span>{ticket.user.email}</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Phone className="h-4 w-4 text-gray-400" />
+                          <span>+91 ••••••••••</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <MapPin className="h-4 w-4 text-gray-400" />
+                          <span>India</span>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <Mail className="h-4 w-4 text-gray-400" />
-                        <span>{ticket.user.email}</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Phone className="h-4 w-4 text-gray-400" />
-                        <span>+91 ••••••••••</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <MapPin className="h-4 w-4 text-gray-400" />
-                        <span>India</span>
+                    </div>
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-lg">
+                        Account Information
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Username:</span>
+                          <span className="font-medium">
+                            @{ticket.user.username}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">User ID:</span>
+                          <span className="font-medium">{ticket.user._id}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">
+                            Tickets Created:
+                          </span>
+                          <span className="font-medium">3</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Member Since:</span>
+                          <span className="font-medium">
+                            {new Date(ticket.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">
-                      Account Information
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Username:</span>
-                        <span className="font-medium">
-                          @{ticket.user.username}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">User ID:</span>
-                        <span className="font-medium">{ticket.user._id}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Tickets Created:</span>
-                        <span className="font-medium">3</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Member Since:</span>
-                        <span className="font-medium">
-                          {new Date(ticket.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
       <Dialog open={isCreateTicketOpen} onOpenChange={setIsCreateTicketOpen}>
         <DialogContent className="max-w-2xl">

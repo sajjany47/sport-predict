@@ -295,39 +295,14 @@ const AIPredictionModal: React.FC<{
             </div>
           </div>
         </DialogHeader>
-        <div className="h-full max-h-[70vh] overflow-y-auto">
+        <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="flex w-full overflow-x-auto sm:grid sm:grid-cols-5 gap-1 sm:gap-0 scrollbar-hide">
-              <TabsTrigger
-                value="overview"
-                className="flex-1 min-w-max sm:min-w-0"
-              >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                value="dream11"
-                className="flex-1 min-w-max sm:min-w-0"
-              >
-                Dream11 Team
-              </TabsTrigger>
-              <TabsTrigger
-                value="players"
-                className="flex-1 min-w-max sm:min-w-0"
-              >
-                Key Players
-              </TabsTrigger>
-              <TabsTrigger
-                value="batsman"
-                className="flex-1 min-w-max sm:min-w-0"
-              >
-                Top Batsman
-              </TabsTrigger>
-              <TabsTrigger
-                value="bowler"
-                className="flex-1 min-w-max sm:min-w-0"
-              >
-                Top Bowler
-              </TabsTrigger>
+            <TabsList className="sm:grid sm:grid-cols-5">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="dream11">Dream11 Team</TabsTrigger>
+              <TabsTrigger value="players">Key Players</TabsTrigger>
+              <TabsTrigger value="batsman">Top Batsman</TabsTrigger>
+              <TabsTrigger value="bowler">Top Bowler</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">

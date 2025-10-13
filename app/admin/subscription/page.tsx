@@ -171,143 +171,145 @@ const AdminSubscription = () => {
         {/* Subscription List */}
         <Card className="border-0 shadow-lg">
           <CardContent>
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-4 mb-6">
-                <TabsTrigger value="all">
-                  All ({subscriptionPlans.length})
-                </TabsTrigger>
-                <TabsTrigger value="active">
-                  Active ({activeSubscription})
-                </TabsTrigger>
-                <TabsTrigger value="suspended">
-                  Inactive ({inactiveSubscription})
-                </TabsTrigger>
-              </TabsList>
+            <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="sm:grid sm:grid-cols-4 mb-6">
+                  <TabsTrigger value="all">
+                    All ({subscriptionPlans.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="active">
+                    Active ({activeSubscription})
+                  </TabsTrigger>
+                  <TabsTrigger value="suspended">
+                    Inactive ({inactiveSubscription})
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value={activeTab} className="space-y-4">
-                {filteredPlans.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredPlans.map((plan: any) => (
-                      <Card
-                        key={plan._id}
-                        className="hover:shadow-xl transition-shadow"
-                      >
-                        <CardContent className="p-6">
-                          <div className="flex flex-col h-full">
-                            {/* Plan header */}
-                            <div className="flex justify-between items-start mb-4">
-                              <h3 className="text-xl font-bold text-gray-900">
-                                {plan.name}
-                              </h3>
-                              {plan.popular && (
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                  <Star className="h-3 w-3 mr-1" />
-                                  Popular
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Price */}
-                            <div className="mb-6">
-                              <span className="text-3xl font-bold text-gray-900">
-                                ₹{plan.price}
-                              </span>
-                              <span className="text-gray-500">/month</span>
-                            </div>
-
-                            {/* Credits */}
-                            <div className="mb-6">
-                              <div className="flex items-center text-gray-700 mb-2">
-                                <span className="font-medium">
-                                  {plan.credits} Credits
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Features */}
-                            <div className="flex-1 mb-6">
-                              <ul className="space-y-2">
-                                {plan.features.map(
-                                  (feature: string, index: number) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start"
-                                    >
-                                      <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                                      <span className="text-gray-700">
-                                        {feature}
-                                      </span>
-                                    </li>
-                                  )
+                <TabsContent value={activeTab} className="space-y-4">
+                  {filteredPlans.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredPlans.map((plan: any) => (
+                        <Card
+                          key={plan._id}
+                          className="hover:shadow-xl transition-shadow"
+                        >
+                          <CardContent className="p-6">
+                            <div className="flex flex-col h-full">
+                              {/* Plan header */}
+                              <div className="flex justify-between items-start mb-4">
+                                <h3 className="text-xl font-bold text-gray-900">
+                                  {plan.name}
+                                </h3>
+                                {plan.popular && (
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <Star className="h-3 w-3 mr-1" />
+                                    Popular
+                                  </span>
                                 )}
-                              </ul>
-                            </div>
+                              </div>
 
-                            {/* Status and actions */}
-                            <div className="mt-auto">
-                              <div className="flex items-center justify-between">
-                                <span
-                                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    plan.isActive
-                                      ? "bg-green-100 text-green-800"
-                                      : "bg-red-100 text-red-800"
-                                  }`}
-                                >
-                                  {plan.isActive ? (
-                                    <>
-                                      <Check className="h-3 w-3 mr-1" />
-                                      Active
-                                    </>
-                                  ) : (
-                                    <>
-                                      <X className="h-3 w-3 mr-1" />
-                                      Inactive
-                                    </>
-                                  )}
+                              {/* Price */}
+                              <div className="mb-6">
+                                <span className="text-3xl font-bold text-gray-900">
+                                  ₹{plan.price}
                                 </span>
+                                <span className="text-gray-500">/month</span>
+                              </div>
 
-                                <div className="flex space-x-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    type="button"
-                                    onClick={() => {
-                                      setActionType("edit");
-                                      setModalOpen(true);
-                                      setSelectedPlan(plan);
-                                    }}
+                              {/* Credits */}
+                              <div className="mb-6">
+                                <div className="flex items-center text-gray-700 mb-2">
+                                  <span className="font-medium">
+                                    {plan.credits} Credits
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Features */}
+                              <div className="flex-1 mb-6">
+                                <ul className="space-y-2">
+                                  {plan.features.map(
+                                    (feature: string, index: number) => (
+                                      <li
+                                        key={index}
+                                        className="flex items-start"
+                                      >
+                                        <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                                        <span className="text-gray-700">
+                                          {feature}
+                                        </span>
+                                      </li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+
+                              {/* Status and actions */}
+                              <div className="mt-auto">
+                                <div className="flex items-center justify-between">
+                                  <span
+                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                      plan.isActive
+                                        ? "bg-green-100 text-green-800"
+                                        : "bg-red-100 text-red-800"
+                                    }`}
                                   >
-                                    Edit
-                                  </Button>
+                                    {plan.isActive ? (
+                                      <>
+                                        <Check className="h-3 w-3 mr-1" />
+                                        Active
+                                      </>
+                                    ) : (
+                                      <>
+                                        <X className="h-3 w-3 mr-1" />
+                                        Inactive
+                                      </>
+                                    )}
+                                  </span>
+
+                                  <div className="flex space-x-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      type="button"
+                                      onClick={() => {
+                                        setActionType("edit");
+                                        setModalOpen(true);
+                                        setSelectedPlan(plan);
+                                      }}
+                                    >
+                                      Edit
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="h-16 w-16 text-gray-400 mx-auto mb-4">
-                      <Search className="h-full w-full" />
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      No plans found
-                    </h3>
-                    <p className="text-gray-600">
-                      {searchTerm
-                        ? "Try adjusting your search criteria"
-                        : "No plans match the selected filter"}
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="h-16 w-16 text-gray-400 mx-auto mb-4">
+                        <Search className="h-full w-full" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        No plans found
+                      </h3>
+                      <p className="text-gray-600">
+                        {searchTerm
+                          ? "Try adjusting your search criteria"
+                          : "No plans match the selected filter"}
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
           </CardContent>
         </Card>
       </div>

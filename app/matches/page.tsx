@@ -132,110 +132,112 @@ const MatchesPage = () => {
             </div>
 
             {/* Match Tabs */}
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger
-                  value="upcoming"
-                  className="flex items-center space-x-2"
-                >
-                  <Calendar className="h-4 w-4" />
-                  <span>Upcoming ({upcomingCount})</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="live"
-                  className="flex items-center space-x-2"
-                >
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  <span>Live ({liveCount})</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="completed"
-                  className="flex items-center space-x-2"
-                >
-                  <Trophy className="h-4 w-4" />
-                  <span>Completed ({completedCount})</span>
-                </TabsTrigger>
-              </TabsList>
+            <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="sm:grid sm:grid-cols-3 mb-8">
+                  <TabsTrigger
+                    value="upcoming"
+                    className="flex items-center space-x-2"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span>Upcoming ({upcomingCount})</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="live"
+                    className="flex items-center space-x-2"
+                  >
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    <span>Live ({liveCount})</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="completed"
+                    className="flex items-center space-x-2"
+                  >
+                    <Trophy className="h-4 w-4" />
+                    <span>Completed ({completedCount})</span>
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="upcoming" className="space-y-6">
-                {filteredMatches.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredMatches.map((match: any) => (
-                      <MatchCard
-                        key={match.matchId}
-                        match={match}
-                        showPredictButton
-                        onClick={() => handleMatchClick(match)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      No upcoming matches found
-                    </h3>
-                    <p className="text-gray-600">
-                      Try adjusting your search criteria
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-
-              <TabsContent value="live" className="space-y-6">
-                {filteredMatches.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredMatches.map((match: any) => (
-                      <MatchCard
-                        key={match.matchId}
-                        match={match}
-                        onClick={() => handleMatchClick(match)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <div className="w-8 h-8 bg-red-500 rounded-full animate-pulse"></div>
+                <TabsContent value="upcoming" className="space-y-6">
+                  {filteredMatches.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredMatches.map((match: any) => (
+                        <MatchCard
+                          key={match.matchId}
+                          match={match}
+                          showPredictButton
+                          onClick={() => handleMatchClick(match)}
+                        />
+                      ))}
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      No live matches
-                    </h3>
-                    <p className="text-gray-600">
-                      Check back later for live cricket action
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        No upcoming matches found
+                      </h3>
+                      <p className="text-gray-600">
+                        Try adjusting your search criteria
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
 
-              <TabsContent value="completed" className="space-y-6">
-                {filteredMatches.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredMatches.map((match: any) => (
-                      <MatchCard
-                        key={match.matchId}
-                        match={match}
-                        onClick={() => handleMatchClick(match)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Trophy className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      No completed matches found
-                    </h3>
-                    <p className="text-gray-600">
-                      Try adjusting your search criteria
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+                <TabsContent value="live" className="space-y-6">
+                  {filteredMatches.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredMatches.map((match: any) => (
+                        <MatchCard
+                          key={match.matchId}
+                          match={match}
+                          onClick={() => handleMatchClick(match)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-8 h-8 bg-red-500 rounded-full animate-pulse"></div>
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        No live matches
+                      </h3>
+                      <p className="text-gray-600">
+                        Check back later for live cricket action
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="completed" className="space-y-6">
+                  {filteredMatches.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredMatches.map((match: any) => (
+                        <MatchCard
+                          key={match.matchId}
+                          match={match}
+                          onClick={() => handleMatchClick(match)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Trophy className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        No completed matches found
+                      </h3>
+                      <p className="text-gray-600">
+                        Try adjusting your search criteria
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
       )}

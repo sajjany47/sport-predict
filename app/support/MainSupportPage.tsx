@@ -456,181 +456,185 @@ const SupportPage = () => {
                         <span>Filter</span>
                       </Button>
                     </div>
+                    <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+                      <Tabs
+                        value={activeTab}
+                        onValueChange={setActiveTab}
+                        className="w-full"
+                      >
+                        <TabsList className="sm:grid sm:grid-cols-4 mb-6 bg-gray-100 p-1 rounded-lg">
+                          <TabsTrigger
+                            value="all"
+                            className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                          >
+                            All ({supportListData.length})
+                          </TabsTrigger>
+                          <TabsTrigger
+                            value="open"
+                            className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                          >
+                            Open ({openTickets})
+                          </TabsTrigger>
+                          <TabsTrigger
+                            value="in-progress"
+                            className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                          >
+                            In Progress ({inProgressTickets})
+                          </TabsTrigger>
+                          <TabsTrigger
+                            value="resolved"
+                            className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                          >
+                            Resolved ({resolvedTickets})
+                          </TabsTrigger>
+                        </TabsList>
 
-                    <Tabs
-                      value={activeTab}
-                      onValueChange={setActiveTab}
-                      className="w-full"
-                    >
-                      <TabsList className="grid w-full grid-cols-4 mb-6 bg-gray-100 p-1 rounded-lg">
-                        <TabsTrigger
-                          value="all"
-                          className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                        >
-                          All ({supportListData.length})
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="open"
-                          className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                        >
-                          Open ({openTickets})
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="in-progress"
-                          className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                        >
-                          In Progress ({inProgressTickets})
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="resolved"
-                          className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                        >
-                          Resolved ({resolvedTickets})
-                        </TabsTrigger>
-                      </TabsList>
+                        <TabsContent value={activeTab} className="space-y-4">
+                          {filteredTickets.length > 0 ? (
+                            <div className="space-y-4">
+                              {filteredTickets.map((ticket: any) => {
+                                const supportReplied =
+                                  hasSupportReplies(ticket);
+                                const latestSupportReply =
+                                  getLatestSupportReply(ticket);
 
-                      <TabsContent value={activeTab} className="space-y-4">
-                        {filteredTickets.length > 0 ? (
-                          <div className="space-y-4">
-                            {filteredTickets.map((ticket: any) => {
-                              const supportReplied = hasSupportReplies(ticket);
-                              const latestSupportReply =
-                                getLatestSupportReply(ticket);
-
-                              return (
-                                <div
-                                  key={ticket._id}
-                                  className="cursor-pointer p-5 bg-white rounded-xl border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all duration-200"
-                                  onClick={() =>
-                                    router.push(`/support/${ticket._id}`)
-                                  }
-                                >
-                                  <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-start space-x-3">
-                                      <div className="p-2 bg-blue-50 rounded-lg mt-1">
-                                        {getCategoryIcon(ticket.category)}
+                                return (
+                                  <div
+                                    key={ticket._id}
+                                    className="cursor-pointer p-5 bg-white rounded-xl border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all duration-200"
+                                    onClick={() =>
+                                      router.push(`/support/${ticket._id}`)
+                                    }
+                                  >
+                                    <div className="flex items-start justify-between mb-3">
+                                      <div className="flex items-start space-x-3">
+                                        <div className="p-2 bg-blue-50 rounded-lg mt-1">
+                                          {getCategoryIcon(ticket.category)}
+                                        </div>
+                                        <div className="flex-1">
+                                          <h3 className="font-semibold text-gray-900 text-lg">
+                                            {ticket.subject}
+                                          </h3>
+                                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                                            <Badge
+                                              className={getStatusColor(
+                                                ticket.status
+                                              )}
+                                              variant="outline"
+                                            >
+                                              <div className="flex items-center space-x-1">
+                                                {getStatusIcon(ticket.status)}
+                                                <span className="capitalize">
+                                                  {ticket.status.replace(
+                                                    "-",
+                                                    " "
+                                                  )}
+                                                </span>
+                                              </div>
+                                            </Badge>
+                                            <Badge
+                                              className={getCategoryColor(
+                                                ticket.category
+                                              )}
+                                              variant="outline"
+                                            >
+                                              <div className="flex items-center space-x-1">
+                                                <Tag className="h-3 w-3" />
+                                                <span className="capitalize">
+                                                  {ticket.category}
+                                                </span>
+                                              </div>
+                                            </Badge>
+                                            <span className="text-sm text-gray-500">
+                                              #{ticket.ticketNumber}
+                                            </span>
+                                          </div>
+                                        </div>
                                       </div>
-                                      <div className="flex-1">
-                                        <h3 className="font-semibold text-gray-900 text-lg">
-                                          {ticket.subject}
-                                        </h3>
-                                        <div className="flex flex-wrap items-center gap-2 mt-2">
-                                          <Badge
-                                            className={getStatusColor(
-                                              ticket.status
-                                            )}
-                                            variant="outline"
-                                          >
-                                            <div className="flex items-center space-x-1">
-                                              {getStatusIcon(ticket.status)}
-                                              <span className="capitalize">
-                                                {ticket.status.replace(
-                                                  "-",
-                                                  " "
-                                                )}
-                                              </span>
-                                            </div>
-                                          </Badge>
-                                          <Badge
-                                            className={getCategoryColor(
-                                              ticket.category
-                                            )}
-                                            variant="outline"
-                                          >
-                                            <div className="flex items-center space-x-1">
-                                              <Tag className="h-3 w-3" />
-                                              <span className="capitalize">
-                                                {ticket.category}
-                                              </span>
-                                            </div>
-                                          </Badge>
-                                          <span className="text-sm text-gray-500">
-                                            #{ticket.ticketNumber}
+                                      <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 mt-2" />
+                                    </div>
+
+                                    <p className="text-gray-700 mb-4 line-clamp-2">
+                                      {ticket.description}
+                                    </p>
+
+                                    {/* Support Reply Indicator */}
+                                    {supportReplied && (
+                                      <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                        <div className="flex items-center mb-2">
+                                          <div className="p-1 bg-blue-100 rounded-full mr-2">
+                                            <Sparkles className="h-4 w-4 text-blue-600" />
+                                          </div>
+                                          <span className="text-sm font-medium text-blue-800">
+                                            Support has replied to your ticket
                                           </span>
                                         </div>
+                                        {latestSupportReply && (
+                                          <div className="pl-6">
+                                            <p className="text-sm text-gray-700 line-clamp-1">
+                                              {latestSupportReply.text}
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              {formatDate(
+                                                latestSupportReply.replyAt
+                                              )}
+                                            </p>
+                                          </div>
+                                        )}
                                       </div>
-                                    </div>
-                                    <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 mt-2" />
-                                  </div>
+                                    )}
 
-                                  <p className="text-gray-700 mb-4 line-clamp-2">
-                                    {ticket.description}
-                                  </p>
-
-                                  {/* Support Reply Indicator */}
-                                  {supportReplied && (
-                                    <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                      <div className="flex items-center mb-2">
-                                        <div className="p-1 bg-blue-100 rounded-full mr-2">
-                                          <Sparkles className="h-4 w-4 text-blue-600" />
-                                        </div>
-                                        <span className="text-sm font-medium text-blue-800">
-                                          Support has replied to your ticket
+                                    <div className="flex items-center justify-between text-sm text-gray-500">
+                                      <div className="flex items-center space-x-4">
+                                        <span className="flex items-center">
+                                          <Calendar className="h-4 w-4 mr-1" />
+                                          Created:{" "}
+                                          {formatDate(ticket.createdAt)}
+                                        </span>
+                                        <span className="flex items-center">
+                                          <Clock className="h-4 w-4 mr-1" />
+                                          Updated:{" "}
+                                          {formatDate(ticket.updatedAt)}
                                         </span>
                                       </div>
-                                      {latestSupportReply && (
-                                        <div className="pl-6">
-                                          <p className="text-sm text-gray-700 line-clamp-1">
-                                            {latestSupportReply.text}
-                                          </p>
-                                          <p className="text-xs text-gray-500 mt-1">
-                                            {formatDate(
-                                              latestSupportReply.replyAt
-                                            )}
-                                          </p>
+                                      {ticket.ticketUnread !== 0 && (
+                                        <div className="flex items-center">
+                                          <MessageCircle className="h-4 w-4 mr-1" />
+                                          {ticket.ticketUnread} messages
                                         </div>
                                       )}
                                     </div>
-                                  )}
-
-                                  <div className="flex items-center justify-between text-sm text-gray-500">
-                                    <div className="flex items-center space-x-4">
-                                      <span className="flex items-center">
-                                        <Calendar className="h-4 w-4 mr-1" />
-                                        Created: {formatDate(ticket.createdAt)}
-                                      </span>
-                                      <span className="flex items-center">
-                                        <Clock className="h-4 w-4 mr-1" />
-                                        Updated: {formatDate(ticket.updatedAt)}
-                                      </span>
-                                    </div>
-                                    {ticket.ticketUnread !== 0 && (
-                                      <div className="flex items-center">
-                                        <MessageCircle className="h-4 w-4 mr-1" />
-                                        {ticket.ticketUnread} messages
-                                      </div>
-                                    )}
                                   </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="text-center py-12">
-                            <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                              <Ticket className="h-8 w-8 text-blue-600" />
+                                );
+                              })}
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                              No tickets found
-                            </h3>
-                            <p className="text-gray-600 mb-6">
-                              {searchTerm
-                                ? "Try adjusting your search criteria"
-                                : "You haven't created any support tickets yet"}
-                            </p>
-                            {!searchTerm && (
-                              <Button
-                                onClick={() => setIsCreateTicketOpen(true)}
-                                className="bg-blue-600 hover:bg-blue-700"
-                              >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Create Your First Ticket
-                              </Button>
-                            )}
-                          </div>
-                        )}
-                      </TabsContent>
-                    </Tabs>
+                          ) : (
+                            <div className="text-center py-12">
+                              <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Ticket className="h-8 w-8 text-blue-600" />
+                              </div>
+                              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                No tickets found
+                              </h3>
+                              <p className="text-gray-600 mb-6">
+                                {searchTerm
+                                  ? "Try adjusting your search criteria"
+                                  : "You haven't created any support tickets yet"}
+                              </p>
+                              {!searchTerm && (
+                                <Button
+                                  onClick={() => setIsCreateTicketOpen(true)}
+                                  className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Create Your First Ticket
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </TabsContent>
+                      </Tabs>
+                    </div>
                   </CardContent>
                 </Card>
               ) : (
