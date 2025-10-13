@@ -72,7 +72,7 @@ const LoginPage = () => {
           token: res.data.token,
           subscription: res.data.user.subscription ?? [],
         };
-        localStorage.setItem("token", res.data.token);
+        sessionStorage.setItem("token", res.data.token);
         dispatch(loginSuccess(userData));
         setIsLoading(false);
         toast.success("Login successful!");

@@ -258,7 +258,7 @@ export const getHeaders = () => {
 };
 
 export const getHeadersWithToken = () => {
-  const token = localStorage.getItem("token"); // or whatever key you used
+  const token = sessionStorage.getItem("token"); // or whatever key you used
   return {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
