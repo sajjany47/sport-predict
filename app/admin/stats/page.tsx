@@ -277,44 +277,46 @@ const AdminStatsPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="player">
-                  Players ({players.length})
-                </TabsTrigger>
-                <TabsTrigger value="stadium">
-                  Stadiums ({stadiums.length})
-                </TabsTrigger>
-              </TabsList>
+            <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="sm:grid sm:grid-cols-2 mb-6">
+                  <TabsTrigger value="player">
+                    Players ({players.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="stadium">
+                    Stadiums ({stadiums.length})
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="player" className="space-y-4">
-                <CustomDataTable
-                  title="Player Stats"
-                  data={filteredPlayers}
-                  columns={columns}
-                  onAdd={handelModal}
-                  searchable
-                  searchPlaceholder="Search Players..."
-                />
-              </TabsContent>
+                <TabsContent value="player" className="space-y-4">
+                  <CustomDataTable
+                    title="Player Stats"
+                    data={filteredPlayers}
+                    columns={columns}
+                    onAdd={handelModal}
+                    searchable
+                    searchPlaceholder="Search Players..."
+                  />
+                </TabsContent>
 
-              <TabsContent value="stadium" className="space-y-4">
-                <CustomDataTable
-                  title="Stadium Stats"
-                  data={filteredStadiums}
-                  columns={columns}
-                  onAdd={handelModal}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  searchable
-                  searchPlaceholder="Search Stadium..."
-                />
-              </TabsContent>
-            </Tabs>
+                <TabsContent value="stadium" className="space-y-4">
+                  <CustomDataTable
+                    title="Stadium Stats"
+                    data={filteredStadiums}
+                    columns={columns}
+                    onAdd={handelModal}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    searchable
+                    searchPlaceholder="Search Stadium..."
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -62,9 +62,9 @@ const PaymentPage = () => {
   // Payment details
   const paymentDetails: any = {
     upi: {
-      id: "paytmqr28100505010111q7lvcklnvq@paytm",
-      upi: "paytmqr28100505010111q7lvcklnvq@paytm",
-      name: "SAJJAN KUMAR YADAV",
+      id: "7003031039@okbizaxis",
+      upi: "7003031039@okbizaxis",
+      name: "YADAV STORE",
       note: "SportPredict Subscription Payment",
     },
     bank: {
@@ -75,9 +75,9 @@ const PaymentPage = () => {
       branch: "Rashbehari Branch",
     },
     qrCode: {
-      url: "https://res.cloudinary.com/dzezstvvt/image/upload/v1757755207/1757754273909_lczcci.jpg",
-      name: "SAJJAN KUMAR YADAV",
-      upiId: "paytmqr28100505010111q7lvcklnvq@paytm",
+      url: "https://res.cloudinary.com/dzezstvvt/image/upload/v1760339025/QR_CROP_kntyy6.png",
+      name: "YADAV STORE",
+      upiId: "7003031039@okbizaxis",
     },
     // Placeholder QR code
   };
@@ -193,276 +193,278 @@ const PaymentPage = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Tabs
-                      value={selectedPaymentMethod}
-                      onValueChange={setSelectedPaymentMethod}
-                    >
-                      <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger
-                          value="UPI"
-                          className="flex items-center space-x-2"
-                        >
-                          <Smartphone className="h-4 w-4" />
-                          <span>UPI</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="NETBANKING"
-                          className="flex items-center space-x-2"
-                        >
-                          <Building className="h-4 w-4" />
-                          <span>Bank Transfer</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="QRCODE"
-                          className="flex items-center space-x-2"
-                        >
-                          <QrCode className="h-4 w-4" />
-                          <span>QR Code</span>
-                        </TabsTrigger>
-                      </TabsList>
-
-                      {/* UPI Payment */}
-                      <TabsContent value="UPI" className="space-y-6 mt-6">
-                        <div className="bg-blue-50 p-6 rounded-lg">
-                          <h3 className="font-semibold text-lg mb-4 flex items-center">
-                            <Smartphone className="h-5 w-5 mr-2 text-blue-600" />
-                            UPI Payment Details
-                          </h3>
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                              <div>
-                                <Label className="text-sm text-gray-600">
-                                  UPI ID
-                                </Label>
-                                <p className="font-mono text-lg font-semibold">
-                                  {paymentDetails.upi.id}
-                                </p>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  handleCopy(paymentDetails.upi.id, "upi")
-                                }
-                                className={
-                                  copied === "upi"
-                                    ? "bg-green-100 text-green-700"
-                                    : ""
-                                }
-                              >
-                                {copied === "upi" ? (
-                                  <CheckCircle className="h-4 w-4" />
-                                ) : (
-                                  <Copy className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </div>
-                            <div className="p-3 bg-white rounded-lg">
-                              <Label className="text-sm text-gray-600">
-                                Payee Name
-                              </Label>
-                              <p className="font-semibold">
-                                {paymentDetails.upi.name}
-                              </p>
-                            </div>
-                            <div className="p-3 bg-white rounded-lg">
-                              <Label className="text-sm text-gray-600">
-                                Amount
-                              </Label>
-                              <p className="font-semibold text-xl text-green-600">
-                                ₹{selectedPlan.price}
-                              </p>
-                            </div>
-                            <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                              <div className="flex items-start space-x-2">
-                                <Info className="h-5 w-5 text-yellow-600 mt-0.5" />
-                                <div>
-                                  <p className="text-sm text-yellow-800">
-                                    <strong>Note:</strong> Please add "
-                                    {paymentDetails.upi.note}" in the payment
-                                    description
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </TabsContent>
-
-                      {/* Bank Transfer */}
-                      <TabsContent
-                        value="NETBANKING"
-                        className="space-y-6 mt-6"
+                    <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+                      <Tabs
+                        value={selectedPaymentMethod}
+                        onValueChange={setSelectedPaymentMethod}
                       >
-                        <div className="bg-green-50 p-6 rounded-lg">
-                          <h3 className="font-semibold text-lg mb-4 flex items-center">
-                            <Building className="h-5 w-5 mr-2 text-green-600" />
-                            Bank Transfer Details
-                          </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-3 bg-white rounded-lg">
-                              <Label className="text-sm text-gray-600">
-                                Bank Name
-                              </Label>
-                              <p className="font-semibold">
-                                {paymentDetails.bank.bankName}
-                              </p>
-                            </div>
-                            <div className="p-3 bg-white rounded-lg">
-                              <Label className="text-sm text-gray-600">
-                                Branch
-                              </Label>
-                              <p className="font-semibold">
-                                {paymentDetails.bank.branch}
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                              <div>
-                                <Label className="text-sm text-gray-600">
-                                  Account Number
-                                </Label>
-                                <p className="font-mono font-semibold">
-                                  {paymentDetails.bank.accountNumber}
-                                </p>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  handleCopy(
-                                    paymentDetails.bank.accountNumber,
-                                    "account"
-                                  )
-                                }
-                                className={
-                                  copied === "account"
-                                    ? "bg-green-100 text-green-700"
-                                    : ""
-                                }
-                              >
-                                {copied === "account" ? (
-                                  <CheckCircle className="h-4 w-4" />
-                                ) : (
-                                  <Copy className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </div>
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                              <div>
-                                <Label className="text-sm text-gray-600">
-                                  IFSC Code
-                                </Label>
-                                <p className="font-mono font-semibold">
-                                  {paymentDetails.bank.ifscCode}
-                                </p>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  handleCopy(
-                                    paymentDetails.bank.ifscCode,
-                                    "ifsc"
-                                  )
-                                }
-                                className={
-                                  copied === "ifsc"
-                                    ? "bg-green-100 text-green-700"
-                                    : ""
-                                }
-                              >
-                                {copied === "ifsc" ? (
-                                  <CheckCircle className="h-4 w-4" />
-                                ) : (
-                                  <Copy className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </div>
-                            <div className="md:col-span-2 p-3 bg-white rounded-lg">
-                              <Label className="text-sm text-gray-600">
-                                Account Holder Name
-                              </Label>
-                              <p className="font-semibold">
-                                {paymentDetails.bank.accountHolder}
-                              </p>
-                            </div>
-                            <div className="md:col-span-2 p-3 bg-white rounded-lg">
-                              <Label className="text-sm text-gray-600">
-                                Transfer Amount
-                              </Label>
-                              <p className="font-semibold text-xl text-green-600">
-                                ₹{selectedPlan.price}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </TabsContent>
+                        <TabsList className="sm:grid sm:grid-cols-3">
+                          <TabsTrigger
+                            value="UPI"
+                            className="flex items-center space-x-2"
+                          >
+                            <Smartphone className="h-4 w-4" />
+                            <span>UPI</span>
+                          </TabsTrigger>
+                          <TabsTrigger
+                            value="NETBANKING"
+                            className="flex items-center space-x-2"
+                          >
+                            <Building className="h-4 w-4" />
+                            <span>Bank Transfer</span>
+                          </TabsTrigger>
+                          <TabsTrigger
+                            value="QRCODE"
+                            className="flex items-center space-x-2"
+                          >
+                            <QrCode className="h-4 w-4" />
+                            <span>QR Code</span>
+                          </TabsTrigger>
+                        </TabsList>
 
-                      {/* QR Code Payment */}
-                      <TabsContent value="QRCODE" className="space-y-6 mt-6">
-                        <div className="bg-purple-50 p-6 rounded-lg">
-                          <h3 className="font-semibold text-lg mb-4 flex items-center">
-                            <QrCode className="h-5 w-5 mr-2 text-purple-600" />
-                            Scan QR Code to Pay
-                          </h3>
-                          <div className="text-center">
-                            <div className="inline-block p-4 bg-white rounded-lg shadow-md mb-4">
-                              <div className="w-68 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                                <img
-                                  src={paymentDetails.qrCode.url}
-                                  alt="demo@ybl"
-                                  className="w-44 h-44 object-contain"
-                                />
-                              </div>
-                              {/* Name & UPI ID below QR */}
-                              <div className="mt-2">
-                                <p className="font-semibold text-gray-800">
-                                  {paymentDetails.qrCode.name}
-                                </p>
-                                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                                  <p className="text-sm text-gray-600 mr-4">
-                                    UPI ID: {paymentDetails.qrCode.upiId}
+                        {/* UPI Payment */}
+                        <TabsContent value="UPI" className="space-y-6 mt-6">
+                          <div className="bg-blue-50 p-6 rounded-lg">
+                            <h3 className="font-semibold text-lg mb-4 flex items-center">
+                              <Smartphone className="h-5 w-5 mr-2 text-blue-600" />
+                              UPI Payment Details
+                            </h3>
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                <div>
+                                  <Label className="text-sm text-gray-600">
+                                    UPI ID
+                                  </Label>
+                                  <p className="font-mono text-lg font-semibold">
+                                    {paymentDetails.upi.id}
                                   </p>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                      handleCopy(
-                                        paymentDetails.qrCode.upiId,
-                                        "qrCode"
-                                      )
-                                    }
-                                    className={
-                                      copied === "qrCode"
-                                        ? "bg-green-100 text-green-700"
-                                        : ""
-                                    }
-                                  >
-                                    {copied === "qrCode" ? (
-                                      <CheckCircle className="h-4 w-4" />
-                                    ) : (
-                                      <Copy className="h-4 w-4" />
-                                    )}
-                                  </Button>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleCopy(paymentDetails.upi.id, "upi")
+                                  }
+                                  className={
+                                    copied === "upi"
+                                      ? "bg-green-100 text-green-700"
+                                      : ""
+                                  }
+                                >
+                                  {copied === "upi" ? (
+                                    <CheckCircle className="h-4 w-4" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                              <div className="p-3 bg-white rounded-lg">
+                                <Label className="text-sm text-gray-600">
+                                  Payee Name
+                                </Label>
+                                <p className="font-semibold">
+                                  {paymentDetails.upi.name}
+                                </p>
+                              </div>
+                              <div className="p-3 bg-white rounded-lg">
+                                <Label className="text-sm text-gray-600">
+                                  Amount
+                                </Label>
+                                <p className="font-semibold text-xl text-green-600">
+                                  ₹{selectedPlan.price}
+                                </p>
+                              </div>
+                              <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <div className="flex items-start space-x-2">
+                                  <Info className="h-5 w-5 text-yellow-600 mt-0.5" />
+                                  <div>
+                                    <p className="text-sm text-yellow-800">
+                                      <strong>Note:</strong> Please add "
+                                      {paymentDetails.upi.note}" in the payment
+                                      description
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                            <p className="text-gray-600 mb-2">
-                              Scan this QR code with any UPI app
-                            </p>
-                            <p className="font-semibold text-xl text-purple-600">
-                              Amount: ₹{selectedPlan.price}
-                            </p>
-                            <div className="mt-4 p-3 bg-purple-100 rounded-lg">
-                              <p className="text-sm text-purple-800">
-                                <strong>Supported Apps:</strong> PhonePe, Google
-                                Pay, Paytm, BHIM, Amazon Pay
-                              </p>
+                          </div>
+                        </TabsContent>
+
+                        {/* Bank Transfer */}
+                        <TabsContent
+                          value="NETBANKING"
+                          className="space-y-6 mt-6"
+                        >
+                          <div className="bg-green-50 p-6 rounded-lg">
+                            <h3 className="font-semibold text-lg mb-4 flex items-center">
+                              <Building className="h-5 w-5 mr-2 text-green-600" />
+                              Bank Transfer Details
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="p-3 bg-white rounded-lg">
+                                <Label className="text-sm text-gray-600">
+                                  Bank Name
+                                </Label>
+                                <p className="font-semibold">
+                                  {paymentDetails.bank.bankName}
+                                </p>
+                              </div>
+                              <div className="p-3 bg-white rounded-lg">
+                                <Label className="text-sm text-gray-600">
+                                  Branch
+                                </Label>
+                                <p className="font-semibold">
+                                  {paymentDetails.bank.branch}
+                                </p>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                <div>
+                                  <Label className="text-sm text-gray-600">
+                                    Account Number
+                                  </Label>
+                                  <p className="font-mono font-semibold">
+                                    {paymentDetails.bank.accountNumber}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleCopy(
+                                      paymentDetails.bank.accountNumber,
+                                      "account"
+                                    )
+                                  }
+                                  className={
+                                    copied === "account"
+                                      ? "bg-green-100 text-green-700"
+                                      : ""
+                                  }
+                                >
+                                  {copied === "account" ? (
+                                    <CheckCircle className="h-4 w-4" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                <div>
+                                  <Label className="text-sm text-gray-600">
+                                    IFSC Code
+                                  </Label>
+                                  <p className="font-mono font-semibold">
+                                    {paymentDetails.bank.ifscCode}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleCopy(
+                                      paymentDetails.bank.ifscCode,
+                                      "ifsc"
+                                    )
+                                  }
+                                  className={
+                                    copied === "ifsc"
+                                      ? "bg-green-100 text-green-700"
+                                      : ""
+                                  }
+                                >
+                                  {copied === "ifsc" ? (
+                                    <CheckCircle className="h-4 w-4" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                              <div className="md:col-span-2 p-3 bg-white rounded-lg">
+                                <Label className="text-sm text-gray-600">
+                                  Account Holder Name
+                                </Label>
+                                <p className="font-semibold">
+                                  {paymentDetails.bank.accountHolder}
+                                </p>
+                              </div>
+                              <div className="md:col-span-2 p-3 bg-white rounded-lg">
+                                <Label className="text-sm text-gray-600">
+                                  Transfer Amount
+                                </Label>
+                                <p className="font-semibold text-xl text-green-600">
+                                  ₹{selectedPlan.price}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </TabsContent>
-                    </Tabs>
+                        </TabsContent>
+
+                        {/* QR Code Payment */}
+                        <TabsContent value="QRCODE" className="space-y-6 mt-6">
+                          <div className="bg-purple-50 p-6 rounded-lg">
+                            <h3 className="font-semibold text-lg mb-4 flex items-center">
+                              <QrCode className="h-5 w-5 mr-2 text-purple-600" />
+                              Scan QR Code to Pay
+                            </h3>
+                            <div className="text-center">
+                              <div className="inline-block p-4 bg-white rounded-lg shadow-md mb-4">
+                                <div className="w-68 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                                  <img
+                                    src={paymentDetails.qrCode.url}
+                                    alt="demo@ybl"
+                                    className="w-44 h-44 object-contain"
+                                  />
+                                </div>
+                                {/* Name & UPI ID below QR */}
+                                <div className="mt-2">
+                                  <p className="font-semibold text-gray-800">
+                                    {paymentDetails.qrCode.name}
+                                  </p>
+                                  <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                    <p className="text-sm text-gray-600 mr-4">
+                                      UPI ID: {paymentDetails.qrCode.upiId}
+                                    </p>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() =>
+                                        handleCopy(
+                                          paymentDetails.qrCode.upiId,
+                                          "qrCode"
+                                        )
+                                      }
+                                      className={
+                                        copied === "qrCode"
+                                          ? "bg-green-100 text-green-700"
+                                          : ""
+                                      }
+                                    >
+                                      {copied === "qrCode" ? (
+                                        <CheckCircle className="h-4 w-4" />
+                                      ) : (
+                                        <Copy className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                              <p className="text-gray-600 mb-2">
+                                Scan this QR code with any UPI app
+                              </p>
+                              <p className="font-semibold text-xl text-purple-600">
+                                Amount: ₹{selectedPlan.price}
+                              </p>
+                              <div className="mt-4 p-3 bg-purple-100 rounded-lg">
+                                <p className="text-sm text-purple-800">
+                                  <strong>Supported Apps:</strong> PhonePe,
+                                  Google Pay, Paytm, BHIM, Amazon Pay
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    </div>
 
                     {/* Transaction ID Input */}
                     <form onSubmit={handleSubmit} className="mt-8 space-y-6">

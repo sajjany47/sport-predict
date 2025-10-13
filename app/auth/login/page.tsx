@@ -3,11 +3,10 @@
 
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import {
   Card,
   CardContent,
@@ -15,23 +14,13 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import {
-  Trophy,
-  Mail,
-  Phone,
-  Lock,
-  Eye,
-  EyeOff,
-  Sparkles,
-  ChevronRight,
-} from "lucide-react";
+import { Trophy, Mail, Lock, Sparkles, ChevronRight } from "lucide-react";
 import { loginSuccess } from "@/store/slices/authSlice";
 import toast from "react-hot-toast";
 import * as Yup from "yup";
 import { Field, Form, Formik } from "formik";
 import { FormikTextInput, FormikTextPassword } from "@/components/CustomField";
 import { UserLogin } from "@/app/MainService";
-import moment from "moment";
 import CustomLoader from "@/components/ui/CustomLoader";
 
 // ✅ Validation Schema
@@ -45,6 +34,7 @@ const LoginPage = () => {
 
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
 
   // ✅ Initial Values
   const initialValues = {
@@ -53,6 +43,7 @@ const LoginPage = () => {
   };
 
   const handleEmailLogin = (e: any) => {
+    const prev = document.referrer;
     setIsLoading(true);
     UserLogin({ ...e })
       .then((res) => {
@@ -72,11 +63,22 @@ const LoginPage = () => {
           token: res.data.token,
           subscription: res.data.user.subscription ?? [],
         };
-        localStorage.setItem("token", res.data.token);
+        sessionStorage.setItem("token", res.data.token);
         dispatch(loginSuccess(userData));
         setIsLoading(false);
         toast.success("Login successful!");
-        router.back();
+        const storedPath = sessionStorage.getItem("currentPath");
+
+        if (
+          storedPath === "/auth/register" ||
+          storedPath === "/auth/forgot-password"
+        ) {
+          sessionStorage.setItem("currentPath", "");
+          router.push("/matches");
+        } else {
+          sessionStorage.setItem("currentPath", "");
+          router.back();
+        }
       })
       .catch((error) => {
         setIsLoading(false);

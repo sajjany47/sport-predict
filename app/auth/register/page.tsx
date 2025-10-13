@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,18 +12,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import {
-  Trophy,
-  Mail,
-  Phone,
-  Lock,
-  Eye,
-  EyeOff,
-  User,
-  Sparkles,
-  ChevronRight,
-  Check,
-} from "lucide-react";
+import { Trophy, Mail, Phone, Lock, User, Sparkles, Check } from "lucide-react";
 import { loginSuccess } from "@/store/slices/authSlice";
 import toast from "react-hot-toast";
 import { Field, Form, Formik } from "formik";
@@ -77,6 +66,12 @@ const RegisterPage = () => {
 
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    sessionStorage.setItem("currentPath", pathname);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleRegister = (e: any) => {
     setIsLoading(true);
@@ -107,7 +102,7 @@ const RegisterPage = () => {
           token: res.data.token,
           subscription: res.data.user.subscription ?? [],
         };
-        localStorage.setItem("token", res.data.token);
+        sessionStorage.setItem("token", res.data.token);
         dispatch(loginSuccess(userData));
         setIsLoading(false);
         toast.success("Account created successfully!");

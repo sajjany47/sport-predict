@@ -295,137 +295,139 @@ const AdminOrdersPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-5 mb-6">
-                  <TabsTrigger value="pending">
-                    Pending ({pendingOrders})
-                  </TabsTrigger>
-                  <TabsTrigger value="failed">
-                    Failed ({failedOrders})
-                  </TabsTrigger>
-                  <TabsTrigger value="refunded">
-                    Refunded ({refundedOrders})
-                  </TabsTrigger>
-                  <TabsTrigger value="completed">
-                    Completed ({completedOrders})
-                  </TabsTrigger>
-                  <TabsTrigger value="all">All ({data.length})</TabsTrigger>
-                </TabsList>
+              <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="sm:grid sm:grid-cols-5 mb-6">
+                    <TabsTrigger value="pending">
+                      Pending ({pendingOrders})
+                    </TabsTrigger>
+                    <TabsTrigger value="failed">
+                      Failed ({failedOrders})
+                    </TabsTrigger>
+                    <TabsTrigger value="refunded">
+                      Refunded ({refundedOrders})
+                    </TabsTrigger>
+                    <TabsTrigger value="completed">
+                      Completed ({completedOrders})
+                    </TabsTrigger>
+                    <TabsTrigger value="all">All ({data.length})</TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value={activeTab} className="space-y-4">
-                  {filteredOrders.length > 0 ? (
-                    <div className="space-y-4">
-                      {filteredOrders.map((order: any) => (
-                        <div
-                          key={order._id}
-                          className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                            <div className="flex items-start space-x-4">
-                              <div className="p-3 bg-white rounded-lg shadow-sm">
-                                <ShoppingCart className="h-6 w-6 text-blue-600" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-3 mb-2">
-                                  <h3 className="font-semibold text-gray-900 text-lg">
-                                    {order.orderNumber}
-                                  </h3>
-                                  <Badge
-                                    className={getStatusColor(order.status)}
-                                  >
-                                    <div className="flex items-center space-x-1">
-                                      {getStatusIcon(order.status)}
-                                      <span className="capitalize">
-                                        {order.status}
+                  <TabsContent value={activeTab} className="space-y-4">
+                    {filteredOrders.length > 0 ? (
+                      <div className="space-y-4">
+                        {filteredOrders.map((order: any) => (
+                          <div
+                            key={order._id}
+                            className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                              <div className="flex items-start space-x-4">
+                                <div className="p-3 bg-white rounded-lg shadow-sm">
+                                  <ShoppingCart className="h-6 w-6 text-blue-600" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-3 mb-2">
+                                    <h3 className="font-semibold text-gray-900 text-lg">
+                                      {order.orderNumber}
+                                    </h3>
+                                    <Badge
+                                      className={getStatusColor(order.status)}
+                                    >
+                                      <div className="flex items-center space-x-1">
+                                        {getStatusIcon(order.status)}
+                                        <span className="capitalize">
+                                          {order.status}
+                                        </span>
+                                      </div>
+                                    </Badge>
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
+                                    <div className="flex items-center space-x-2">
+                                      <User className="h-4 w-4" />
+                                      <span>{order?.user?.username}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <CreditCard className="h-4 w-4" />
+                                      <span>{order?.plan.name} Plan</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <DollarSign className="h-4 w-4" />
+                                      <span>₹{order.price}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Calendar className="h-4 w-4" />
+                                      <span>
+                                        {new Date(
+                                          order.paymentDate
+                                        ).toLocaleDateString()}
                                       </span>
                                     </div>
-                                  </Badge>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
-                                  <div className="flex items-center space-x-2">
-                                    <User className="h-4 w-4" />
-                                    <span>{order?.user?.username}</span>
                                   </div>
-                                  <div className="flex items-center space-x-2">
-                                    <CreditCard className="h-4 w-4" />
-                                    <span>{order?.plan.name} Plan</span>
+                                  <div className="mt-2 text-sm text-gray-600">
+                                    <span className="font-medium">
+                                      Payment Method:
+                                    </span>{" "}
+                                    {order.paymentMode}
                                   </div>
-                                  <div className="flex items-center space-x-2">
-                                    <DollarSign className="h-4 w-4" />
-                                    <span>₹{order.price}</span>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <Calendar className="h-4 w-4" />
-                                    <span>
-                                      {new Date(
-                                        order.paymentDate
-                                      ).toLocaleDateString()}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="mt-2 text-sm text-gray-600">
-                                  <span className="font-medium">
-                                    Payment Method:
-                                  </span>{" "}
-                                  {order.paymentMode}
                                 </div>
                               </div>
-                            </div>
-                            <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewOrder(order._id)}
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="outline" size="sm">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem
-                                    className="cursor-pointer"
-                                    onClick={() => {
-                                      setTimeout(
-                                        () => setStatusDialoge(true),
-                                        50
-                                      );
-                                      setSelectedOrder(order);
-                                    }}
-                                  >
-                                    <Wallet className="h-4 w-4 mr-2" />
-                                    Transaction Status
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              <div className="mt-4 lg:mt-0 flex items-center space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewOrder(order._id)}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                      className="cursor-pointer"
+                                      onClick={() => {
+                                        setTimeout(
+                                          () => setStatusDialoge(true),
+                                          50
+                                        );
+                                        setSelectedOrder(order);
+                                      }}
+                                    >
+                                      <Wallet className="h-4 w-4 mr-2" />
+                                      Transaction Status
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        No orders found
-                      </h3>
-                      <p className="text-gray-600">
-                        {searchTerm
-                          ? "Try adjusting your search criteria"
-                          : "No orders match the selected filter"}
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                          No orders found
+                        </h3>
+                        <p className="text-gray-600">
+                          {searchTerm
+                            ? "Try adjusting your search criteria"
+                            : "No orders match the selected filter"}
+                        </p>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </div>
             </CardContent>
           </Card>
         </div>

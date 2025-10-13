@@ -132,130 +132,133 @@ const MatchCard = ({
 
   // Helper function to get match status text
   const getMatchStatusText = (): string => {
-    if (match.status === "ABANDONED") {
-      return "Match Abandoned";
-    }
+    const team1 = match.teams[0];
+    const team2 = match.teams[1];
+    const team1Innings = team1.cricketScore || [];
+    const team2Innings = team2.cricketScore || [];
+
+    // 🟢 1. Abandoned or Not Started
+    if (match.status === "ABANDONED") return "Match Abandoned";
 
     if (match.status === "NOT_STARTED") {
       return `Starts ${new Date(match.startTime).toLocaleDateString()}`;
     }
 
+    // 🟢 2. Completed match
     if (match.status === "COMPLETED") {
-      // Determine winner and margin
-      if (team1.isWinner) {
-        const team1Total = team1.cricketScore.reduce(
-          (sum, score) => sum + score.runs,
-          0
-        );
-        const team2Total = team2.cricketScore.reduce(
-          (sum, score) => sum + score.runs,
-          0
-        );
-        const runMargin = team1Total - team2Total;
-
-        // Check if team2 was all out in their last innings
-        const team2LastInnings =
-          team2.cricketScore[team2.cricketScore.length - 1];
-        if (team2LastInnings && team2LastInnings.wickets === 10) {
-          return `${team1.teamShortName} won by ${runMargin} runs`;
-        } else {
-          // Team1 batted second and won by wickets
-          const wicketsRemaining =
-            10 -
-            (team1.cricketScore[team1.cricketScore.length - 1]?.wickets || 0);
-          return `${team1.teamShortName} won by ${wicketsRemaining} wickets`;
-        }
-      } else if (team2.isWinner) {
-        const team1Total = team1.cricketScore.reduce(
-          (sum, score) => sum + score.runs,
-          0
-        );
-        const team2Total = team2.cricketScore.reduce(
-          (sum, score) => sum + score.runs,
-          0
-        );
-        const runMargin = team2Total - team1Total;
-
-        // Check if team1 was all out in their last innings
-        const team1LastInnings =
-          team1.cricketScore[team1.cricketScore.length - 1];
-        if (team1LastInnings && team1LastInnings.wickets === 10) {
-          return `${team2.teamShortName} won by ${runMargin} runs`;
-        } else {
-          // Team2 batted second and won by wickets
-          const wicketsRemaining =
-            10 -
-            (team2.cricketScore[team2.cricketScore.length - 1]?.wickets || 0);
-          return `${team2.teamShortName} won by ${wicketsRemaining} wickets`;
-        }
-      }
+      if (team1.isWinner) return `${team1.teamShortName} won the match`;
+      if (team2.isWinner) return `${team2.teamShortName} won the match`;
       return "Match completed";
     }
 
-    // Live match logic
+    // 🟢 3. LIVE match (detailed test logic)
     if (match.status === "LIVE") {
-      const team1Innings = team1.cricketScore || [];
-      const team2Innings = team2.cricketScore || [];
+      // ✅ Calculate total runs from all innings
+      const t1Total = team1Innings.reduce((sum, s) => sum + s.runs, 0);
+      const t2Total = team2Innings.reduce((sum, s) => sum + s.runs, 0);
 
-      // Test match 4th innings - show runs needed to win
+      const t1InningsCount = team1Innings.length;
+      const t2InningsCount = team2Innings.length;
+
+      // --- Case 1: India batted first, declared, WI followed on ---
       if (
-        match.format.toUpperCase() === "TEST" &&
-        team1Innings.length === 2 &&
-        team2Innings.length === 2
+        match.format === "TEST" &&
+        t1InningsCount === 1 &&
+        t2InningsCount === 2
       ) {
-        const team1Total = team1Innings.reduce(
-          (sum, score) => sum + score.runs,
-          0
-        );
-        const team2Total = team2Innings.reduce(
-          (sum, score) => sum + score.runs,
-          0
-        );
-        const target = team1Total - team2Total + 1;
-        const team2CurrentRuns = team2Innings[1]?.runs || 0;
-        const runsNeeded = Math.max(0, target - team2CurrentRuns);
+        const t1Runs = team1Innings[0].runs;
+        const t2First = team2Innings[0].runs;
+        const t2Second = team2Innings[1].runs;
+        const t2TotalRuns = t2First + t2Second;
 
-        if (runsNeeded > 0) {
-          return `${team2.teamShortName} need ${runsNeeded} runs to win`;
-        }
-      }
+        // 🧮 Check if follow-on is in play
+        const followOn = t1Runs - t2First >= 200;
 
-      // Limited overs - second innings
-      if (team1Innings.length > 0 && team2Innings.length > 0) {
-        const team1Total = team1Innings.reduce(
-          (sum, score) => sum + score.runs,
-          0
-        );
-        const team2Current = team2Innings[team2Innings.length - 1];
+        if (followOn) {
+          const trailBy = t1Runs - t2TotalRuns;
+          const wicketsDown = team2Innings[1].wickets ?? 0;
 
-        if (team2Current && team2Current.status === "IN_PROGRESS") {
-          const target = team1Total + 1;
-          const runsNeeded = target - team2Current.runs;
-
-          if (match.format.toUpperCase() !== "TEST") {
-            const remainingBalls = getRemainingBalls(
-              match.format,
-              team2Current.overs
-            );
-            if (remainingBalls > 0 && runsNeeded > 0) {
-              return `${team2.teamShortName} need ${runsNeeded} runs in ${remainingBalls} balls`;
-            }
+          if (trailBy > 0 && wicketsDown < 10) {
+            return `${team2.teamShortName} trail by ${trailBy} runs with ${
+              10 - wicketsDown
+            } wickets remaining`;
           }
 
-          if (runsNeeded > 0) {
-            return `${team2.teamShortName} need ${runsNeeded} runs to win`;
+          if (trailBy <= 0) {
+            return `${team2.teamShortName} lead by ${Math.abs(
+              trailBy
+            )} runs with ${10 - wicketsDown} wickets remaining`;
+          }
+
+          // If all out in 2nd innings
+          if (wicketsDown === 10 && trailBy > 0) {
+            return `${team1.teamShortName} need ${trailBy + 1} runs to win`;
           }
         }
       }
 
-      // First innings in progress
-      if (team1Innings.length > 0 && team2Innings.length === 0) {
-        return `${team1.teamShortName} batting`;
+      // --- Case 2: Normal 4th innings situation ---
+      if (
+        match.format === "TEST" &&
+        ((t1InningsCount === 2 && t2InningsCount === 1) ||
+          (t1InningsCount === 1 && t2InningsCount === 2))
+      ) {
+        const t1Runs = t1Total;
+        const t2Runs = t2Total;
+
+        const target =
+          t1Runs - (t2Runs - (team2Innings.slice(-1)[0]?.runs || 0)) + 1;
+        const currentRuns = team2Innings.slice(-1)[0]?.runs || 0;
+        const currentWickets = team2Innings.slice(-1)[0]?.wickets || 0;
+
+        const runsNeeded = target - currentRuns;
+        if (runsNeeded > 0 && currentWickets < 10) {
+          return `${team2.teamShortName} need ${runsNeeded} runs with ${
+            10 - currentWickets
+          } wickets remaining`;
+        }
+
+        if (runsNeeded <= 0) {
+          return `${team2.teamShortName} won the match`;
+        }
+      }
+
+      // --- Case 3: First innings ongoing ---
+      if (t1InningsCount === 1 && t2InningsCount === 0) {
+        return `${team1.teamShortName} batting first`;
+      }
+
+      // --- Case 4: Second innings ongoing ---
+      if (t1InningsCount === 1 && t2InningsCount === 1) {
+        const target = t1InningsCount && t1Total > t2Total ? t1Total + 1 : 0;
+        const current = team2Innings[0];
+        if (current.status === "IN_PROGRESS") {
+          const runsNeeded = target - current.runs;
+          return `${team2.teamShortName} need ${runsNeeded} runs`;
+        }
+      }
+
+      // --- Case 5: Follow-on active (team2 batting again) ---
+      if (t1InningsCount === 1 && t2InningsCount === 2) {
+        const t1Runs = team1Innings[0].runs;
+        const t2FirstRuns = team2Innings[0].runs;
+        const t2Second = team2Innings[1];
+        const totalRuns = t2FirstRuns + t2Second.runs;
+        const trailBy = t1Runs - totalRuns;
+
+        if (trailBy > 0) {
+          return `${team2.teamShortName} trail by ${trailBy} runs with ${
+            10 - (t2Second.wickets ?? 0)
+          } wickets remaining`;
+        } else {
+          return `${team2.teamShortName} lead by ${Math.abs(trailBy)} runs`;
+        }
       }
 
       return "Match in progress";
     }
 
+    // 🟢 Fallback
     return "Match status unknown";
   };
 

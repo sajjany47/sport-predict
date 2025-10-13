@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ import ForgetPassword from "@/components/ForgetPassword";
 
 const ForgotPasswordPage = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password, 4: Success
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -34,7 +35,11 @@ const ForgotPasswordPage = () => {
   const [countdown, setCountdown] = useState(0);
   const [resData, setResData] = useState<any>(null);
 
-  const resetPassword = (payload: any) => {
+  useEffect(() => {
+    sessionStorage.setItem("currentPath", pathname);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const resetPassword = async (payload: any) => {
     setIsLoading(true);
     return UserResetPassword(payload)
       .then((res) => {

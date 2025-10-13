@@ -254,173 +254,179 @@ const AdminUsersPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-4 mb-6">
-                  <TabsTrigger value="all">All ({users.length})</TabsTrigger>
-                  <TabsTrigger value="active">
-                    Active ({activeUsers})
-                  </TabsTrigger>
-                  <TabsTrigger value="suspended">
-                    Suspended ({suspendedUsers})
-                  </TabsTrigger>
-                  <TabsTrigger value="banned">
-                    Banned ({bannedUsers})
-                  </TabsTrigger>
-                </TabsList>
+              <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="sm:grid sm:grid-cols-4 mb-6">
+                    <TabsTrigger value="all">All ({users.length})</TabsTrigger>
+                    <TabsTrigger value="active">
+                      Active ({activeUsers})
+                    </TabsTrigger>
+                    <TabsTrigger value="suspended">
+                      Suspended ({suspendedUsers})
+                    </TabsTrigger>
+                    <TabsTrigger value="banned">
+                      Banned ({bannedUsers})
+                    </TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value={activeTab} className="space-y-4">
-                  {filteredUsers.length > 0 ? (
-                    <div className="space-y-4">
-                      {filteredUsers.map((user: any, index) => (
-                        <div
-                          key={index}
-                          className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                            <div className="flex items-start space-x-4">
-                              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                                {user.username.charAt(0).toUpperCase()}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-3 mb-2">
-                                  <h3 className="font-semibold text-gray-900 text-lg">
-                                    {user.username}
-                                  </h3>
-                                  <Badge
-                                    className={getStatusColor(user.status)}
-                                  >
-                                    <div className="flex items-center space-x-1">
-                                      {getStatusIcon(user.status)}
-                                      <span className="capitalize">
-                                        {user.status}
+                  <TabsContent value={activeTab} className="space-y-4">
+                    {filteredUsers.length > 0 ? (
+                      <div className="space-y-4">
+                        {filteredUsers.map((user: any, index) => (
+                          <div
+                            key={index}
+                            className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                              <div className="flex items-start space-x-4">
+                                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                                  {user.username.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-3 mb-2">
+                                    <h3 className="font-semibold text-gray-900 text-lg">
+                                      {user.username}
+                                    </h3>
+                                    <Badge
+                                      className={getStatusColor(user.status)}
+                                    >
+                                      <div className="flex items-center space-x-1">
+                                        {getStatusIcon(user.status)}
+                                        <span className="capitalize">
+                                          {user.status}
+                                        </span>
+                                      </div>
+                                    </Badge>
+                                    {user.role === "admin" && (
+                                      <Badge
+                                        variant="outline"
+                                        className="bg-purple-100 text-purple-800"
+                                      >
+                                        <Crown className="h-3 w-3 mr-1" />
+                                        Admin
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
+                                    <div className="flex items-center space-x-2">
+                                      <Mail className="h-4 w-4" />
+                                      <span>{user.email}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Phone className="h-4 w-4" />
+                                      <span>{user.mobileNumber}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <CreditCard className="h-4 w-4" />
+                                      <span>{user.credits} Credits</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Calendar className="h-4 w-4" />
+                                      <span>
+                                        Joined {formatDate(user.createdAt)}
                                       </span>
                                     </div>
-                                  </Badge>
-                                  {user.role === "admin" && (
-                                    <Badge
-                                      variant="outline"
-                                      className="bg-purple-100 text-purple-800"
-                                    >
-                                      <Crown className="h-3 w-3 mr-1" />
-                                      Admin
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
-                                  <div className="flex items-center space-x-2">
-                                    <Mail className="h-4 w-4" />
-                                    <span>{user.email}</span>
                                   </div>
-                                  <div className="flex items-center space-x-2">
-                                    <Phone className="h-4 w-4" />
-                                    <span>{user.mobileNumber}</span>
+                                  <div className="mt-2 text-sm text-gray-600">
+                                    <span className="font-medium">Plan:</span>{" "}
+                                    {user.subscriptionDetails?.name ||
+                                      "No Plan"}{" "}
+                                    |
+                                    <span className="font-medium">
+                                      {" "}
+                                      Expires:
+                                    </span>{" "}
+                                    {user.subscription?.expiryDate
+                                      ? formatDate(user.subscription.expiryDate)
+                                      : "N/A"}
                                   </div>
-                                  <div className="flex items-center space-x-2">
-                                    <CreditCard className="h-4 w-4" />
-                                    <span>{user.credits} Credits</span>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <Calendar className="h-4 w-4" />
-                                    <span>
-                                      Joined {formatDate(user.createdAt)}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="mt-2 text-sm text-gray-600">
-                                  <span className="font-medium">Plan:</span>{" "}
-                                  {user.subscriptionDetails?.name || "No Plan"}{" "}
-                                  |
-                                  <span className="font-medium"> Expires:</span>{" "}
-                                  {user.subscription?.expiryDate
-                                    ? formatDate(user.subscription.expiryDate)
-                                    : "N/A"}
                                 </div>
                               </div>
-                            </div>
-                            <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewUser(user)}
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                View
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="outline" size="sm">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      console.log("Edit user", user._id)
-                                    }
-                                  >
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Edit User
-                                  </DropdownMenuItem>
-                                  {user.status === "active" && (
+                              <div className="mt-4 lg:mt-0 flex items-center space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewUser(user)}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
                                     <DropdownMenuItem
                                       onClick={() =>
-                                        handleStatusChange(
-                                          user._id,
-                                          "suspended"
-                                        )
+                                        console.log("Edit user", user._id)
                                       }
                                     >
-                                      <Clock className="h-4 w-4 mr-2" />
-                                      Suspend User
+                                      <Edit className="h-4 w-4 mr-2" />
+                                      Edit User
                                     </DropdownMenuItem>
-                                  )}
-                                  {user.status === "suspended" && (
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleStatusChange(user._id, "active")
-                                      }
-                                    >
-                                      <CheckCircle className="h-4 w-4 mr-2" />
-                                      Activate User
-                                    </DropdownMenuItem>
-                                  )}
-                                  {user.status !== "banned" && (
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleStatusChange(user._id, "banned")
-                                      }
-                                      className="text-red-600"
-                                    >
-                                      <Ban className="h-4 w-4 mr-2" />
-                                      Ban User
-                                    </DropdownMenuItem>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                    {user.status === "active" && (
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          handleStatusChange(
+                                            user._id,
+                                            "suspended"
+                                          )
+                                        }
+                                      >
+                                        <Clock className="h-4 w-4 mr-2" />
+                                        Suspend User
+                                      </DropdownMenuItem>
+                                    )}
+                                    {user.status === "suspended" && (
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          handleStatusChange(user._id, "active")
+                                        }
+                                      >
+                                        <CheckCircle className="h-4 w-4 mr-2" />
+                                        Activate User
+                                      </DropdownMenuItem>
+                                    )}
+                                    {user.status !== "banned" && (
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          handleStatusChange(user._id, "banned")
+                                        }
+                                        className="text-red-600"
+                                      >
+                                        <Ban className="h-4 w-4 mr-2" />
+                                        Ban User
+                                      </DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        No users found
-                      </h3>
-                      <p className="text-gray-600">
-                        {searchTerm
-                          ? "Try adjusting your search criteria"
-                          : "No users match the selected filter"}
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                          No users found
+                        </h3>
+                        <p className="text-gray-600">
+                          {searchTerm
+                            ? "Try adjusting your search criteria"
+                            : "No users match the selected filter"}
+                        </p>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </div>
             </CardContent>
           </Card>
         </div>

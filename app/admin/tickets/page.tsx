@@ -467,212 +467,222 @@ const AdminTicketsPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-4 mb-6 bg-gray-100 p-1 rounded-lg">
-                <TabsTrigger
-                  value="all"
-                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                >
-                  All ({tickets.length})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="open"
-                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                >
-                  Open ({openTickets})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="in-progress"
-                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                >
-                  In Progress ({inProgressTickets})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="resolved"
-                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                >
-                  Resolved ({resolvedTickets})
-                </TabsTrigger>
-              </TabsList>
+            <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="sm:grid sm:grid-cols-4 mb-6 bg-gray-100 p-1 rounded-lg">
+                  <TabsTrigger
+                    value="all"
+                    className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  >
+                    All ({tickets.length})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="open"
+                    className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  >
+                    Open ({openTickets})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="in-progress"
+                    className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  >
+                    In Progress ({inProgressTickets})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="resolved"
+                    className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  >
+                    Resolved ({resolvedTickets})
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value={activeTab} className="space-y-4">
-                {filteredTickets.length > 0 ? (
-                  <div className="space-y-4">
-                    {filteredTickets.map((ticket: any) => (
-                      <div
-                        key={ticket._id}
-                        className="p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all duration-200"
-                      >
-                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-                          <div className="flex items-start space-x-4 flex-1">
-                            <div className="p-3 bg-blue-50 rounded-lg mt-1">
-                              <MessageSquare className="h-6 w-6 text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex flex-wrap items-center gap-2 mb-3">
-                                <h3 className="font-semibold text-gray-900 text-lg">
-                                  {ticket.subject}
-                                </h3>
-                                <Badge
-                                  className={getStatusColor(ticket.status)}
-                                >
-                                  <div className="flex items-center space-x-1">
-                                    {getStatusIcon(ticket.status)}
-                                    <span className="capitalize">
-                                      {ticket.status.replace("-", " ")}
-                                    </span>
-                                  </div>
-                                </Badge>
-                                <Badge
-                                  className={getPriorityColor(ticket.priority)}
-                                >
-                                  <div className="flex items-center space-x-1">
-                                    <Zap className="h-3 w-3" />
-                                    <span className="capitalize">
-                                      {ticket.priority}
-                                    </span>
-                                  </div>
-                                </Badge>
-                                <Badge
-                                  className={getCategoryColor(ticket.category)}
-                                >
-                                  <div className="flex items-center space-x-1">
-                                    <Tag className="h-3 w-3" />
-                                    <span className="capitalize">
-                                      {ticket.category}
-                                    </span>
-                                  </div>
-                                </Badge>
+                <TabsContent value={activeTab} className="space-y-4">
+                  {filteredTickets.length > 0 ? (
+                    <div className="space-y-4">
+                      {filteredTickets.map((ticket: any) => (
+                        <div
+                          key={ticket._id}
+                          className="p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all duration-200"
+                        >
+                          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+                            <div className="flex items-start space-x-4 flex-1">
+                              <div className="p-3 bg-blue-50 rounded-lg mt-1">
+                                <MessageSquare className="h-6 w-6 text-blue-600" />
                               </div>
-                              <p className="text-gray-700 mb-4 line-clamp-2">
-                                {ticket.description}
-                              </p>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
-                                <div className="flex items-center space-x-2">
-                                  <Ticket className="h-4 w-4 text-blue-600" />
-                                  <span className="font-mono">
-                                    #{ticket.ticketNumber}
-                                  </span>
+                              <div className="flex-1">
+                                <div className="flex flex-wrap items-center gap-2 mb-3">
+                                  <h3 className="font-semibold text-gray-900 text-lg">
+                                    {ticket.subject}
+                                  </h3>
+                                  <Badge
+                                    className={getStatusColor(ticket.status)}
+                                  >
+                                    <div className="flex items-center space-x-1">
+                                      {getStatusIcon(ticket.status)}
+                                      <span className="capitalize">
+                                        {ticket.status.replace("-", " ")}
+                                      </span>
+                                    </div>
+                                  </Badge>
+                                  <Badge
+                                    className={getPriorityColor(
+                                      ticket.priority
+                                    )}
+                                  >
+                                    <div className="flex items-center space-x-1">
+                                      <Zap className="h-3 w-3" />
+                                      <span className="capitalize">
+                                        {ticket.priority}
+                                      </span>
+                                    </div>
+                                  </Badge>
+                                  <Badge
+                                    className={getCategoryColor(
+                                      ticket.category
+                                    )}
+                                  >
+                                    <div className="flex items-center space-x-1">
+                                      <Tag className="h-3 w-3" />
+                                      <span className="capitalize">
+                                        {ticket.category}
+                                      </span>
+                                    </div>
+                                  </Badge>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                  <User className="h-4 w-4 text-blue-600" />
-                                  <span>
-                                    {ticket.user.name} (@{ticket.user.username})
-                                  </span>
+                                <p className="text-gray-700 mb-4 line-clamp-2">
+                                  {ticket.description}
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
+                                  <div className="flex items-center space-x-2">
+                                    <Ticket className="h-4 w-4 text-blue-600" />
+                                    <span className="font-mono">
+                                      #{ticket.ticketNumber}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <User className="h-4 w-4 text-blue-600" />
+                                    <span>
+                                      {ticket.user.name} (@
+                                      {ticket.user.username})
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <Calendar className="h-4 w-4 text-blue-600" />
+                                    <span>{formatDate(ticket.createdAt)}</span>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <User className="h-4 w-4 text-blue-600" />
+                                    <span>
+                                      {ticket.assignedTo || "Unassigned"}
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                  <Calendar className="h-4 w-4 text-blue-600" />
-                                  <span>{formatDate(ticket.createdAt)}</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <User className="h-4 w-4 text-blue-600" />
-                                  <span>
-                                    {ticket.assignedTo || "Unassigned"}
-                                  </span>
-                                </div>
+                                {ticket.ticketUnread !== 0 && (
+                                  <div className="mt-3 text-sm text-blue-600 flex items-center">
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    {ticket.ticketUnread} message
+                                    {ticket.ticketUnread !== 1 ? "s" : ""}
+                                  </div>
+                                )}
                               </div>
-                              {ticket.ticketUnread !== 0 && (
-                                <div className="mt-3 text-sm text-blue-600 flex items-center">
-                                  <MessageSquare className="h-4 w-4 mr-1" />
-                                  {ticket.ticketUnread} message
-                                  {ticket.ticketUnread !== 1 ? "s" : ""}
-                                </div>
-                              )}
                             </div>
-                          </div>
-                          <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewTicket(ticket._id)}
-                              className="rounded-lg"
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="rounded-lg"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="rounded-xl"
+                            <div className="mt-4 lg:mt-0 flex items-center space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewTicket(ticket._id)}
+                                className="rounded-lg"
                               >
-                                {ticket.status === "open" && (
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleStatusChange(
-                                        ticket._id,
-                                        "in-progress",
-                                        "Admin Support"
-                                      )
-                                    }
-                                    className="cursor-pointer"
+                                <Eye className="h-4 w-4 mr-2" />
+                                View
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="rounded-lg"
                                   >
-                                    <Clock className="h-4 w-4 mr-2" />
-                                    Start Working
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="rounded-xl"
+                                >
+                                  {ticket.status === "open" && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleStatusChange(
+                                          ticket._id,
+                                          "in-progress",
+                                          "Admin Support"
+                                        )
+                                      }
+                                      className="cursor-pointer"
+                                    >
+                                      <Clock className="h-4 w-4 mr-2" />
+                                      Start Working
+                                    </DropdownMenuItem>
+                                  )}
+                                  {ticket.status === "in-progress" && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleStatusChange(
+                                          ticket._id,
+                                          "resolved"
+                                        )
+                                      }
+                                      className="cursor-pointer"
+                                    >
+                                      <CheckCircle className="h-4 w-4 mr-2" />
+                                      Mark as Resolved
+                                    </DropdownMenuItem>
+                                  )}
+                                  {ticket.status === "resolved" && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleStatusChange(ticket._id, "open")
+                                      }
+                                      className="cursor-pointer"
+                                    >
+                                      <AlertCircle className="h-4 w-4 mr-2" />
+                                      Reopen Ticket
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem className="cursor-pointer">
+                                    <MessageSquare className="h-4 w-4 mr-2" />
+                                    Add Comment
                                   </DropdownMenuItem>
-                                )}
-                                {ticket.status === "in-progress" && (
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleStatusChange(ticket._id, "resolved")
-                                    }
-                                    className="cursor-pointer"
-                                  >
-                                    <CheckCircle className="h-4 w-4 mr-2" />
-                                    Mark as Resolved
-                                  </DropdownMenuItem>
-                                )}
-                                {ticket.status === "resolved" && (
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleStatusChange(ticket._id, "open")
-                                    }
-                                    className="cursor-pointer"
-                                  >
-                                    <AlertCircle className="h-4 w-4 mr-2" />
-                                    Reopen Ticket
-                                  </DropdownMenuItem>
-                                )}
-                                <DropdownMenuItem className="cursor-pointer">
-                                  <MessageSquare className="h-4 w-4 mr-2" />
-                                  Add Comment
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Ticket className="h-8 w-8 text-gray-500" />
+                      ))}
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      No tickets found
-                    </h3>
-                    <p className="text-gray-600">
-                      {searchTerm
-                        ? "Try adjusting your search criteria"
-                        : "No tickets match the selected filter"}
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Ticket className="h-8 w-8 text-gray-500" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        No tickets found
+                      </h3>
+                      <p className="text-gray-600">
+                        {searchTerm
+                          ? "Try adjusting your search criteria"
+                          : "No tickets match the selected filter"}
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
           </CardContent>
         </Card>
       </div>

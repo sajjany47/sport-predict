@@ -44,8 +44,7 @@ import MarqueeNotice from "../ui/marquee-notice";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { DailyCreditAd } from "../GetDailyCredit";
-import { UserCreditUpdate, UserOrderCredit } from "@/app/MainService";
-import toast from "react-hot-toast";
+import { UserOrderCredit } from "@/app/MainService";
 
 const Header = () => {
   const pathname = usePathname();
@@ -68,7 +67,7 @@ const Header = () => {
   };
 
   const navItems = [
-    { href: "/", label: "Home", icon: Home },
+    { href: "/home", label: "Home", icon: Home },
     { href: "/about", label: "About", icon: Info },
     { href: "/support", label: "Support", icon: HelpCircle },
     { href: "/matches", label: "Matches", icon: Calendar },
