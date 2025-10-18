@@ -1,17 +1,21 @@
-// components/CustomLoader.tsx
+// components/CricketBallLoader.tsx
 import React from "react";
+import Lottie from "lottie-react";
+import cricketBallAnimation from "../../Bouncing Cricket Ball.json";
 
-interface CustomLoaderProps {
+interface LoaderProps {
   message?: string;
 }
 
-const CustomLoader: React.FC<CustomLoaderProps> = ({ message }) => {
+const CustomLoader: React.FC<LoaderProps> = ({ message }) => {
   return (
-    <div className="fixed inset-0 z-[9999] bg-white/70 backdrop-blur-sm flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-700">{message || "Loading"}...</p>
+    <div className="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center">
+      <div className="w-40 h-40">
+        <Lottie animationData={cricketBallAnimation} loop={true} />
       </div>
+      <p className="mt-4 text-gray-700 font-medium text-lg">
+        {message || "Loading..."}
+      </p>
     </div>
   );
 };
