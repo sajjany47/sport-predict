@@ -689,14 +689,14 @@ const MatchDetailsPage = () => {
                     <CardContent>
                       <div className="space-y-3">
                         {getRecentH2HMatches(
-                          matchData.overview.fullStats.h2h
+                          matchData?.overview?.fullStats?.h2h
                         ).map((match, index) => (
                           <div
                             key={index}
                             className="p-4 bg-gray-50 rounded-lg border-l-4"
                             style={{
                               borderLeftColor:
-                                match.winner === "Abandoned"
+                                match?.winner === "Abandoned"
                                   ? "#6B7280"
                                   : "#3B82F6",
                             }}
@@ -704,47 +704,47 @@ const MatchDetailsPage = () => {
                             <div className="flex justify-between items-start mb-2">
                               <div className="flex-1">
                                 <p className="font-medium text-gray-900">
-                                  {match.match}
+                                  {match?.match}
                                 </p>
                               </div>
                               <Badge variant="outline" className="text-xs">
-                                {match.format}
+                                {match?.format}
                               </Badge>
                             </div>
 
                             <p className="text-sm font-medium text-gray-900 mb-2">
-                              {match.result}
+                              {match?.result}
                             </p>
 
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               <div>
                                 <span className="text-gray-600">
-                                  {match.team1.name}:{" "}
+                                  {match?.team1?.name}:{" "}
                                 </span>
                                 <span className="font-medium">
-                                  {match.team1.score}
+                                  {match?.team1?.score}
                                 </span>
                               </div>
                               <div>
                                 <span className="text-gray-600">
-                                  {match.team2.name}:{" "}
+                                  {match?.team2?.name}:{" "}
                                 </span>
                                 <span className="font-medium">
-                                  {match.team2.score}
+                                  {match?.team2?.score}
                                 </span>
                               </div>
                             </div>
 
-                            {match.winner !== "Abandoned" && (
+                            {match?.winner !== "Abandoned" && (
                               <div className="mt-2">
                                 <Badge
                                   className={`text-xs ${
-                                    match.winner === match.team1.name
+                                    match?.winner === match?.team1?.name
                                       ? "bg-green-100 text-green-800"
                                       : "bg-blue-100 text-blue-800"
                                   }`}
                                 >
-                                  Winner: {match.winner}
+                                  Winner: {match?.winner}
                                 </Badge>
                               </div>
                             )}
