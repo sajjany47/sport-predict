@@ -31,11 +31,16 @@ export async function POST(request: Request) {
       })
     );
 
+    const headers = {
+      "x-apollo-operation-name": "FetchScheduleData",
+      "content-type": "application/json",
+    };
+
     const extension = `%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22daa7405dc9b181163b7140f8ff190c08155f1cdb925d122725922a7199b3773b%22%7D%7D`;
 
     const targetUrl = `https://www.fancode.com/graphql?extensions=${extension}&operation=query&operationName=FetchScheduleData&variables=${encodeData}`;
 
-    const data = await axios.get(targetUrl);
+    const data = await axios.get(targetUrl, { headers });
     const prepareData = (
       data.data.data.fetchScheduleData.edges[0].tours ?? []
     ).flatMap((item: any) =>
