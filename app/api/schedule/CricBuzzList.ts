@@ -1,0 +1,65 @@
+import { Target } from "@/types/CricbuzzListType";
+import axios from "axios";
+import moment from "moment";
+
+export const CricBuzzList = async (toDate: string): Promise<Target[]> => {
+  const timestamp = Date.now();
+  const apiUrl = `https://www.cricbuzz.com/api/cricket-schedule/upcoming-series/all/${timestamp}`;
+  const response = await axios.get(apiUrl);
+
+  if (response.status !== 200) return [];
+
+  const data = response.data ?? [];
+
+  return data
+    .flatMap(
+      (day: any) =>
+        day.scheduleAdWrapper?.matchScheduleList?.flatMap(
+          (series: any) =>
+            series.matchInfo?.map((match: any) => {
+              const venue = match.venueInfo || {};
+              const tz = venue.timezone || "+00:00";
+
+              const makeTeam = (t: any) => ({
+                squadId: t.teamId,
+                teamName: t.teamName,
+                teamShortName: t.teamSName,
+                teamFlagUrl: `https://static.cricbuzz.com/a/img/v1/25x18/i1/c${
+                  t.imageId
+                }/${t.teamName.toLowerCase().trim().replace(/\s+/g, "-")}.jpg`,
+                isWinner: null,
+                color: null,
+                cricketScore: null,
+                squadNo: null,
+              });
+
+              const formatDate = (ms: string | number | null) =>
+                ms
+                  ? moment().utcOffset(tz).format("DD-MM-YYYY HH:mm:ss")
+                  : null;
+
+              return {
+                tourId: series.seriesId ?? null,
+                tourName: series.seriesName ?? null,
+                matchId: match.matchId,
+                matchName: null,
+                matchDescription: match.matchDesc ?? null,
+                startTime: formatDate(match.startDate),
+                endTime: formatDate(match.endDate),
+                status: null,
+                venue: {
+                  ground: venue.ground ?? null,
+                  city: venue.city ?? null,
+                  country: venue.country ?? null,
+                  timezone: venue.timezone ?? null,
+                },
+                tour: series.seriesCategory ?? null,
+                format: match.matchFormat ?? null,
+                sport: "cricket",
+                teams: [makeTeam(match.team1), makeTeam(match.team2)],
+              } as Target;
+            }) ?? []
+        ) ?? []
+    )
+    .filter(Boolean);
+};
