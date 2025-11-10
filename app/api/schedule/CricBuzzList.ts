@@ -3,7 +3,8 @@ import axios from "axios";
 import moment from "moment";
 
 export const CricBuzzList = async (toDate: string): Promise<Target[]> => {
-  const timestamp = Date.now();
+  const timestamp = Date.now() + 5.5 * 60 * 60 * 1000;
+
   const apiUrl = `https://www.cricbuzz.com/api/cricket-schedule/upcoming-series/all/${timestamp}`;
   const response = await axios.get(apiUrl);
 
@@ -18,7 +19,6 @@ export const CricBuzzList = async (toDate: string): Promise<Target[]> => {
           (series: any) =>
             series.matchInfo?.map((match: any) => {
               const venue = match.venueInfo || {};
-              const tz = venue.timezone || "+00:00";
 
               const makeTeam = (t: any) => ({
                 squadId: t.teamId,
@@ -33,10 +33,14 @@ export const CricBuzzList = async (toDate: string): Promise<Target[]> => {
                 squadNo: null,
               });
 
+              // const formatDate = (ms: string | number | null) =>
+              //   ms
+              //     ? new Date(Number(ms)).toLocaleString("en-IN", {
+              //         timeZone: "Asia/Kolkata",
+              //       })
+              //     : null;
               const formatDate = (ms: string | number | null) =>
-                ms
-                  ? moment().utcOffset(tz).format("DD-MM-YYYY HH:mm:ss")
-                  : null;
+                ms ? moment(Number(ms)).format("DD MMM YYYY, HH:mm") : null;
 
               return {
                 tourId: series.seriesId ?? null,
