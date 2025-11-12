@@ -3,6 +3,7 @@ import axios from "axios";
 import moment from "moment";
 import { AdvanceCricketList } from "./AdvanceCricketList";
 import { CricBuzzList } from "./CricBuzzList";
+import { CricSquadDetails } from "../match-details/CricSquadDetails";
 
 export async function POST(request: Request) {
   try {
@@ -71,7 +72,8 @@ export async function POST(request: Request) {
       }))
     );
 
-    const advanceCricketList = await CricBuzzList(fromDate);
+    // const advanceCricketList = await CricBuzzList(fromDate);
+    const advanceCricketList = await CricSquadDetails("sa");
 
     // const finalData = prepareData.map((apiMatch: any) => {
     //   const scraped = advanceCricketList.find((scr) => {
