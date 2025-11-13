@@ -33,12 +33,6 @@ export const CricBuzzList = async (toDate: string): Promise<Target[]> => {
                 squadNo: null,
               });
 
-              // const formatDate = (ms: string | number | null) =>
-              //   ms
-              //     ? new Date(Number(ms)).toLocaleString("en-IN", {
-              //         timeZone: "Asia/Kolkata",
-              //       })
-              //     : null;
               const formatDate = (ms: string | number | null) =>
                 ms ? moment(Number(ms)).format("DD MMM YYYY, HH:mm") : null;
 

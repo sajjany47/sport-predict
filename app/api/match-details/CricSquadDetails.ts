@@ -1,6 +1,6 @@
 import { GetHtml } from "@/lib/utils";
 
-export const CricSquadDetails = async (_matchId: string) => {
+export const CricSquadDetails = async (matchUrl: string) => {
   try {
     /* --- helpers --- */
 
@@ -41,9 +41,7 @@ export const CricSquadDetails = async (_matchId: string) => {
         .join(" ");
     };
     //helper..................
-    const $ = await GetHtml(
-      "https://www.cricbuzz.com/cricket-match-squads/135041/ban-vs-ire-1st-test-ireland-tour-of-bangladesh-2025"
-    );
+    const $ = await GetHtml(matchUrl);
     // collect short names & flag imgs (attempt order left->right)
     const teamShorts: any = [];
     $("h1.font-bold").each((i, el) => {
