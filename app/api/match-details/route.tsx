@@ -32,7 +32,18 @@ export async function POST(request: NextRequest) {
 
     let url = `https://www.cricbuzz.com/cricket-match-squads/${body.matchId}/${team1}-vs-${team2}-${modDis}-${modTour}`;
 
-    const squadList = await CricSquadDetails(url);
+    const rowSquadList = await CricSquadDetails(url);
+    const squadList = rowSquadList.map((item: any) => {
+      const matchedTeam = body.teams.find(
+        (elm: any) => elm.teamShortName === item.shortName
+      );
+
+      return {
+        ...item,
+        name: matchedTeam ? matchedTeam.teamName : item.name,
+      };
+    });
+
     // Fetch stadium details and stats
 
     const stadiumStatsKey = `stadiumStats-${body.matchId}`;
@@ -85,13 +96,13 @@ export async function POST(request: NextRequest) {
 
     const prepareData = await Promise.all(
       squadList.map(async (item: any, index: number) => {
-        const playingPlayers = item.playingPlayers
+        const playingPlayers = item.playingPlayer
           ? await Promise.all(
-              item.playingPlayers.map(async (elm: any) => {
+              item.playingPlayer.map(async (elm: any) => {
                 const playerData = await playerDetails(
                   CleanName(elm?.name),
                   stadiumDetails?.name || "",
-                  squadList[index === 0 ? 1 : 0].teamShortName,
+                  squadList[index === 0 ? 1 : 0].shortName,
                   elm?.name
                 );
                 return {
@@ -102,13 +113,13 @@ export async function POST(request: NextRequest) {
             )
           : [];
 
-        const benchPlayers = item.benchPlayers
+        const benchPlayers = item.benchPlayer
           ? await Promise.all(
-              item.benchPlayers.map(async (elm: any) => {
+              item.benchPlayer.map(async (elm: any) => {
                 const playerData = await playerDetails(
                   elm.name,
                   stadiumDetails.name || "",
-                  squadList[index === 0 ? 1 : 0].teamShortName,
+                  squadList[index === 0 ? 1 : 0].shortName,
                   elm.name
                 );
                 return {
@@ -120,10 +131,10 @@ export async function POST(request: NextRequest) {
           : [];
 
         return {
-          flag: item.teamFlagUrl,
-          color: item.color,
+          flag: item.flag,
+          color: item.color ?? null,
           name: item.name,
-          shortName: item.teamShortName,
+          shortName: item.shortName,
           playingPlayer: playingPlayers,
           benchPlayer: benchPlayers,
         };
@@ -132,7 +143,7 @@ export async function POST(request: NextRequest) {
 
     const prepareStats = await Promise.all(
       body.teams.map(async (item: any) => {
-        const teamData: any = await TeamStats(item.name);
+        const teamData: any = await TeamStats(item.teamName);
         const teamPreapareData = {
           ...teamData,
           flagUrl: item.teamFlagUrl,
@@ -142,15 +153,17 @@ export async function POST(request: NextRequest) {
               team1: {
                 ...elm.team1,
                 image:
-                  elm.team1.name.toLowerCase() === item.teamShortName
-                    ? item.flagUrl
+                  elm.team1.name.toLowerCase() ===
+                  item.teamShortName.toLowerCase()
+                    ? item.teamFlagUrl
                     : elm.team1.image,
               },
               team2: {
                 ...elm.team2,
                 image:
-                  elm.team2.name.toLowerCase() === item.teamShortName
-                    ? item.flagUrl
+                  elm.team2.name.toLowerCase() ===
+                  item.teamShortName.toLowerCase()
+                    ? item.teamFlagUrl
                     : elm.team2.image,
               },
             };
@@ -160,7 +173,12 @@ export async function POST(request: NextRequest) {
         return teamPreapareData;
       })
     );
-
+    // return Response.json(
+    //   {
+    //     data: prepareStats,
+    //   },
+    //   { status: 200 }
+    // );
     const team1PrepareData = {
       ...prepareStats[0],
       matches: prepareStats[0].matches.slice(0, 10),
@@ -172,10 +190,10 @@ export async function POST(request: NextRequest) {
     const h2hStats = prepareStats[0].matches
       .filter(
         (item: any) =>
-          (item.team1.name === body.team[0].teamShortName &&
-            item.team2.name === body.team[1].teamShortName) ||
-          (item.team1.name === body.team[1].teamShortName &&
-            item.team2.name === body.team[0].teamShortName)
+          (item.team1.name === body.teams[0].teamShortName &&
+            item.team2.name === body.teams[1].teamShortName) ||
+          (item.team1.name === body.teams[1].teamShortName &&
+            item.team2.name === body.teams[0].teamShortName)
       )
       .slice(0, 20) as any[];
 
