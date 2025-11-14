@@ -7,13 +7,13 @@ import { setMatches, setSelectedMatch } from "@/store/slices/matchSlice";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import MatchCard from "@/components/ui/match-card";
 import { Search, Calendar, Trophy, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import CustomLoader from "@/components/ui/CustomLoader";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useQuery } from "@tanstack/react-query";
 import { FetchMatchList } from "./MatchService";
+import MatchCard from "./MatchCard";
 
 const MatchesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
