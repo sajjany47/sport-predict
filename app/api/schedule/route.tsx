@@ -16,18 +16,37 @@ export async function POST(request: Request) {
 
     const advanceCricketList = await CricBuzzList(toDate);
 
-    const modifyResult = advanceCricketList.map((item: any) => ({
-      ...item,
-      status:
-        item.startTime > moment().format("DD MMM YYYY, HH:mm")
-          ? "LIVE"
-          : "NOT_STARTED",
-    }));
-    const score = await ScoreCard();
+    const modifyResult = await Promise.all(
+      advanceCricketList.map(async (item: any) => {
+        let team1 = item.teams[0].teamShortName.toLowerCase();
+        let team2 = item.teams[1].teamShortName.toLowerCase();
+        let modDis = item.matchDescription
+          .split(",")[0]
+          .trim()
+          .replace(/\s+/g, "-")
+          .toLowerCase();
+        let modTour = item.tourName
+          .replace(/,/g, "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-");
+        let url: string = `https://www.cricbuzz.com/live-cricket-scores/${item.matchId}/${team1}-vs-${team2}-${modDis}-${modTour}`;
+
+        const score = await ScoreCard(url);
+        let a = {
+          ...item,
+          status:
+            item.startTime > moment().format("DD MMM YYYY, HH:mm")
+              ? "LIVE"
+              : "NOT_STARTED",
+          score: score,
+        };
+        return a;
+      })
+    );
 
     return Response.json(
       {
-        score: score,
         data: modifyResult,
         date: toDate,
         success: true,

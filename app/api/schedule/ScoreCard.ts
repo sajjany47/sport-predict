@@ -1,8 +1,8 @@
 import { GetHtml } from "@/lib/utils";
 
-export const ScoreCard = async () => {
+export const ScoreCard = async (url: string) => {
   try {
-    const url = `https://www.cricbuzz.com/live-cricket-scores/137327/paka-vs-oman-1st-match-group-b-acc-mens-asia-cup-rising-stars-2025`;
+    // const url = `https://www.cricbuzz.com/live-cricket-scorecard/117371/ind-vs-rsa-1st-test-south-africa-tour-of-india-2025`;
     const $ = await GetHtml(url);
 
     const matchName = ($("h1").first().text() || "")
