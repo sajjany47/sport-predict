@@ -43,10 +43,12 @@ export async function POST(request: Request) {
         };
         if (score) {
           const checkScore =
-            score.score[0].team ===
-            (item.teams[0].teamShortName || item.teams[1].teamShortName)
-              ? true
-              : false;
+            score.score.find(
+              (s: any) => s.team === item.teams[0].teamShortName
+            ) ||
+            score.score.find(
+              (s: any) => s.team === item.teams[1].teamShortName
+            );
 
           if (checkScore) {
             const resultText = (score?.result ?? "").toLowerCase();
