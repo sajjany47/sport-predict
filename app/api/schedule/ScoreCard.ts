@@ -16,7 +16,7 @@ export const ScoreCard = async () => {
 
     // --- RESULT / SESSION INFO (robust) ---
     // 1) quick checks on known selectors
-    let result =
+    let result: any =
       ($(".text-cbTxtLive").first().text() || "").trim() ||
       ($(".text-cbLive").first().text() || "").trim() ||
       ($(".text-cbTextLink").first().text() || "").trim() ||
@@ -24,7 +24,7 @@ export const ScoreCard = async () => {
 
     // 2) If quick checks returned nothing or something not result-like,
     // scan container children for short text nodes that look like a result/session line.
-    const isResultLike = (t) => {
+    const isResultLike = (t: any) => {
       if (!t) return false;
       const s = t.replace(/\s+/g, " ").trim();
       // common patterns: Day X:, Stumps, trail by, Session, Innings, won by
@@ -35,7 +35,7 @@ export const ScoreCard = async () => {
 
     if (!isResultLike(result)) {
       // gather candidate texts (short, non-empty) from the container and choose the best match
-      const candidates = [];
+      const candidates: any = [];
       container.find("*").each((i, el) => {
         const text = ($(el).text() || "").replace(/\s+/g, " ").trim();
         if (!text) return;
@@ -46,7 +46,7 @@ export const ScoreCard = async () => {
 
       if (candidates.length) {
         // prefer the shortest candidate (usually the concise "Day 1: Stumps - ...")
-        candidates.sort((a, b) => a.length - b.length);
+        candidates.sort((a: any, b: any) => a.length - b.length);
         result = candidates[0];
       } else {
         // last fallback: scan whole page for "Day X:" pattern
@@ -61,8 +61,8 @@ export const ScoreCard = async () => {
 
     // --- SCORE extraction (kept same as before; truncated here for brevity) ---
     // (You can paste your existing score extraction logic here — unchanged.)
-    const scoreCandidates = [];
-    const norm = (t) => (t || "").trim().replace(/\s+/g, " ");
+    const scoreCandidates: any = [];
+    const norm = (t: any) => (t || "").trim().replace(/\s+/g, " ");
 
     // same team extraction logic (compact)
     container.find("*").each((i, el) => {
@@ -71,7 +71,7 @@ export const ScoreCard = async () => {
       if (!text) return;
       if (/^[A-Z]{2,4}$/.test(text)) {
         const team = text;
-        if (scoreCandidates.some((s) => s.team === team)) return;
+        if (scoreCandidates.some((s: any) => s.team === team)) return;
         let run = null;
         let next = $el.next();
         for (let j = 0; j < 4 && next && next.length; j++, next = next.next()) {
@@ -139,7 +139,7 @@ export const ScoreCard = async () => {
         const second = gm[3];
         const overs = gm[4] ? gm[4] : "";
         const full = second ? `${first}-${second}${overs}` : `${first}${overs}`;
-        if (!scoreCandidates.some((s) => s.team === team)) {
+        if (!scoreCandidates.some((s: any) => s.team === team)) {
           scoreCandidates.push({ team, run: full });
         }
         if (scoreCandidates.length >= 4) break;
