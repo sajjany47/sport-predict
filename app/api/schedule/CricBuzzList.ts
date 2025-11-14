@@ -2,7 +2,7 @@ import { Target } from "@/types/CricbuzzListType";
 import axios from "axios";
 import moment from "moment";
 
-export const CricBuzzList = async (toDate: string): Promise<Target[]> => {
+export const CricBuzzList = async (fromDate: Date): Promise<Target[]> => {
   const timestamp = Date.now() + 5.5 * 60 * 60 * 1000;
 
   const apiUrl = `https://www.cricbuzz.com/api/cricket-schedule/upcoming-series/all/${timestamp}`;
@@ -60,11 +60,11 @@ export const CricBuzzList = async (toDate: string): Promise<Target[]> => {
     )
     .filter(Boolean);
 
-  const filterData = toDate
+  const filterData = fromDate
     ? a.filter(
         (item: any) =>
           moment(item.startTime, "DD MMM YYYY, HH:mm").format("YYYY-MM-DD") ===
-          moment(toDate).format("YYYY-MM-DD")
+          moment(fromDate).format("YYYY-MM-DD")
       )
     : a;
   return filterData;

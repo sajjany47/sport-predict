@@ -7,14 +7,10 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const fromDate = body.fromDate
-      ? moment(body.fromDate).format("YYYY-MM-DD")
-      : moment().format("YYYY-MM-DD");
-    const toDate = body.toDate
-      ? moment(body.toDate).format("YYYY-MM-DD")
-      : moment().add(1, "days").format("YYYY-MM-DD");
+    const fromDate = body.fromDate ? new Date(body.fromDate) : new Date();
+    // const toDate = body.toDate ? moment(body.toDate) : moment().add(1, "days");
 
-    const advanceCricketList = await CricBuzzList(toDate);
+    const advanceCricketList = await CricBuzzList(fromDate);
 
     const modifyResult = await Promise.all(
       advanceCricketList.map(async (item: any) => {
@@ -71,7 +67,7 @@ export async function POST(request: Request) {
     return Response.json(
       {
         data: modifyResult,
-        date: toDate,
+        date: moment(fromDate).format("DD-MM-YYYY"),
         success: true,
         message: "Schedule fetched successfully",
       },
