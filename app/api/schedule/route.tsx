@@ -1,6 +1,7 @@
 import { FormatErrorMessage } from "@/lib/utils";
 import moment from "moment";
 import { CricBuzzList } from "./CricBuzzList";
+import { ScoreCard } from "./ScoreCard";
 
 export async function POST(request: Request) {
   try {
@@ -22,9 +23,11 @@ export async function POST(request: Request) {
           ? "LIVE"
           : "NOT_STARTED",
     }));
+    const score = await ScoreCard();
 
     return Response.json(
       {
+        score: score,
         data: modifyResult,
         date: toDate,
         success: true,
