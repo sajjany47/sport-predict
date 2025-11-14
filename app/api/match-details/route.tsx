@@ -1,12 +1,6 @@
-import axios from "axios";
 import { NextRequest } from "next/server";
 import { NewPlayerDetails } from "./NewPlayerDetails";
-import {
-  CleanName,
-  FormatErrorMessage,
-  GetStadiumList,
-  TransAdvanceStatData,
-} from "@/lib/utils";
+import { CleanName, FormatErrorMessage, GetStadiumList } from "@/lib/utils";
 import { StadiumStats, TeamStats } from "./PerformanceDetail";
 import cache from "@/lib/NodeCacheService";
 import dbConnect from "../db";
@@ -173,12 +167,7 @@ export async function POST(request: NextRequest) {
         return teamPreapareData;
       })
     );
-    // return Response.json(
-    //   {
-    //     data: prepareStats,
-    //   },
-    //   { status: 200 }
-    // );
+
     const team1PrepareData = {
       ...prepareStats[0],
       matches: prepareStats[0].matches.slice(0, 10),
