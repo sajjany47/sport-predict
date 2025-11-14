@@ -33,14 +33,35 @@ export async function POST(request: Request) {
         let url: string = `https://www.cricbuzz.com/live-cricket-scores/${item.matchId}/${team1}-vs-${team2}-${modDis}-${modTour}`;
 
         const score = await ScoreCard(url);
+
         let a = {
           ...item,
-          status:
-            item.startTime > moment().format("DD MMM YYYY, HH:mm")
-              ? "LIVE"
-              : "NOT_STARTED",
-          score: score,
+          status: moment(item.startTime, "DD MMM YYYY, HH:mm").isAfter(moment())
+            ? "NOT_STARTED"
+            : "LIVE",
+          score: score ?? null,
         };
+        if (score) {
+          const checkScore =
+            score.score[0].team ===
+            (item.teams[0].teamShortName || item.teams[1].teamShortName)
+              ? true
+              : false;
+
+          if (checkScore) {
+            const resultText = (score?.result ?? "").toLowerCase();
+            if (resultText.includes("no result")) {
+              a.status = "ABANDONED";
+            } else if (
+              resultText.includes("won") ||
+              resultText.includes("win")
+            ) {
+              a.status = "COMPLETED";
+            }
+          } else {
+            a.score = null;
+          }
+        }
         return a;
       })
     );
