@@ -11,8 +11,7 @@ export const CricBuzzList = async (toDate: string): Promise<Target[]> => {
   if (response.status !== 200) return [];
 
   const data = response.data ?? [];
-
-  return data
+  const a = data
     .flatMap(
       (day: any) =>
         day.scheduleAdWrapper?.matchScheduleList?.flatMap(
@@ -60,4 +59,13 @@ export const CricBuzzList = async (toDate: string): Promise<Target[]> => {
         ) ?? []
     )
     .filter(Boolean);
+
+  const filterData = toDate
+    ? a.filter(
+        (item: any) =>
+          moment(item.startTime, "DD MMM YYYY, HH:mm").format("YYYY-MM-DD") ===
+          moment(toDate).format("YYYY-MM-DD")
+      )
+    : a;
+  return filterData;
 };

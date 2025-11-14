@@ -15,9 +15,17 @@ export async function POST(request: Request) {
 
     const advanceCricketList = await CricBuzzList(toDate);
 
+    const modifyResult = advanceCricketList.map((item: any) => ({
+      ...item,
+      status:
+        item.startTime > moment().format("DD MMM YYYY, HH:mm")
+          ? "LIVE"
+          : "NOT_STARTED",
+    }));
+
     return Response.json(
       {
-        data: advanceCricketList,
+        data: modifyResult,
         date: toDate,
         success: true,
         message: "Schedule fetched successfully",
