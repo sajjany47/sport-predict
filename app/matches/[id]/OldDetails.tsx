@@ -47,7 +47,13 @@ const MatchDetailsPage = () => {
         const details = await axios.post(
           "/api/match-details",
           {
-            ...selectedMatch,
+            matchId: Number(params.id),
+            venue: selectedMatch?.venue,
+            team: selectedMatch?.teams.map((item) => ({
+              name: item.teamName,
+              shortName: item.teamShortName,
+              flagUrl: item.teamFlagUrl,
+            })),
           },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -254,7 +260,7 @@ const MatchDetailsPage = () => {
                   <div>
                     <Badge className="mb-2">{matchData.matchInfo.format}</Badge>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                      {matchData.matchInfo.tourName}
+                      {matchData.matchInfo.matchName}
                     </h1>
                     <p className="text-gray-600">
                       {matchData.matchInfo.matchDescription}
@@ -284,10 +290,10 @@ const MatchDetailsPage = () => {
                 {/* Teams */}
                 <div className="flex items-center justify-center space-x-8 mb-6">
                   {matchData?.matchInfo?.teams?.map((team: any, index: any) => (
-                    <div key={index} className="text-center">
+                    <div key={team.squadId} className="text-center">
                       <div
                         className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2 border-4"
-                        // style={{ borderColor: team.color }}
+                        style={{ borderColor: team.color }}
                       >
                         <img
                           src={team.teamFlagUrl}
@@ -326,7 +332,7 @@ const MatchDetailsPage = () => {
                   <div className="flex items-center justify-center space-x-2">
                     <MapPin className="h-5 w-5 text-gray-500" />
                     <span className="text-gray-700">
-                      {`${matchData.matchInfo.venue.ground}, ${matchData.matchInfo.venue.city}, ${matchData.matchInfo.venue.country}`}
+                      {matchData.matchInfo.venue}
                     </span>
                   </div>
                 </div>

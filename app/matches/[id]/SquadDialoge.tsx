@@ -117,10 +117,7 @@ const SquadDialoge = (data: any) => {
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg cursor-pointer hover:bg-green-100 transition-colors">
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage
-                      src={player?.imageUrl?.src}
-                      alt={player?.name}
-                    />
+                    <AvatarImage src={player?.image} alt={player?.name} />
                     <AvatarFallback>{player?.shortName}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
@@ -153,10 +150,7 @@ const SquadDialoge = (data: any) => {
               <DialogHeader>
                 <DialogTitle className="flex items-center space-x-3">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage
-                      src={player?.imageUrl?.src}
-                      alt={player?.name}
-                    />
+                    <AvatarImage src={player?.image} alt={player?.name} />
                     <AvatarFallback>{player?.shortName}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -173,8 +167,8 @@ const SquadDialoge = (data: any) => {
                         </Tooltip>
                       )}
                     </div>
-                    <Badge className={getPlayerTypeColor(player?.type)}>
-                      {player?.type}
+                    <Badge className={getPlayerTypeColor(player?.role)}>
+                      {player?.role}
                     </Badge>
                   </div>
                 </DialogTitle>
