@@ -5,7 +5,6 @@ import React, { useState } from "react";
 
 import {
   Trophy,
-  Target,
   Users,
   Star,
   Zap,
@@ -14,6 +13,11 @@ import {
   Sparkles,
   Brain,
   X,
+  InfoIcon,
+  Shield,
+  Target,
+  AlertTriangle,
+  TrendingUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -301,6 +305,46 @@ const AIPredictionModal: React.FC<{
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {/* User Highlights Section */}
+                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h4 className="font-semibold text-yellow-800 mb-3 flex items-center">
+                      <InfoIcon className="h-4 w-4 mr-2" />
+                      Important Points to Focus
+                    </h4>
+                    <ul className="space-y-2 text-sm text-yellow-700">
+                      <li className="flex items-start">
+                        <Shield className="h-4 w-4 mr-2 mt-0.5 text-green-600" />
+                        <span>
+                          <strong>Loss cut mandatory</strong> - Be safe, Earn
+                          More
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <Target className="h-4 w-4 mr-2 mt-0.5 text-blue-600" />
+                        <span>
+                          <strong>Medium Confidence:</strong> Both teams have
+                          chance to win (70% chance odds above 2.6) - Take
+                          Chance Both Team
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <AlertTriangle className="h-4 w-4 mr-2 mt-0.5 text-red-600" />
+                        <span>
+                          <strong>High Confidence:</strong> Less than 20% chance
+                          odds go both team - Never Take Chance
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <TrendingUp className="h-4 w-4 mr-2 mt-0.5 text-purple-600" />
+                        <span>
+                          <strong>Jackpot Match:</strong> Only 2 in 30 matches
+                          are jackpot - Never loss 28 matches for 2 jackpot
+                          matches
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Team 1 */}
                     <div className="text-center">
@@ -336,6 +380,20 @@ const AIPredictionModal: React.FC<{
                         {predictionData.winnerPrediction.team1.confidence}{" "}
                         Confidence
                       </Badge>
+
+                      {/* Confidence based advice */}
+                      {predictionData.winnerPrediction.team1.confidence ===
+                        "Medium" && (
+                        <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                          Both teams have chance - Consider odds above 2.6
+                        </div>
+                      )}
+                      {predictionData.winnerPrediction.team1.confidence ===
+                        "High" && (
+                        <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                          Low chance for both team odds - Avoid taking chance
+                        </div>
+                      )}
                     </div>
 
                     {/* Team 2 */}
@@ -372,6 +430,31 @@ const AIPredictionModal: React.FC<{
                         {predictionData.winnerPrediction.team2.confidence}{" "}
                         Confidence
                       </Badge>
+
+                      {/* Confidence based advice */}
+                      {predictionData.winnerPrediction.team2.confidence ===
+                        "Medium" && (
+                        <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                          Both teams have chance - Consider odds above 2.6
+                        </div>
+                      )}
+                      {predictionData.winnerPrediction.team2.confidence ===
+                        "High" && (
+                        <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                          Low chance for both team odds - Avoid taking chance
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Additional Safety Note */}
+                  <div className="mt-6 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center text-green-700 text-sm">
+                      <Shield className="h-4 w-4 mr-2" />
+                      <span>
+                        <strong>Remember:</strong> Always set loss cut limits.
+                        Safety first for long-term earnings.
+                      </span>
                     </div>
                   </div>
                 </CardContent>
