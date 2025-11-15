@@ -32,7 +32,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserOrderCredit } from "@/app/MainService";
@@ -257,562 +256,434 @@ const AIPredictionModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto w-[95vw] sm:w-full">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center space-x-2">
               <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
                 <Brain className="h-6 w-6 text-white" />
               </div>
-              <span>AI Match Prediction</span>
+              <span className="text-xl sm:text-2xl">AI Match Prediction</span>
             </DialogTitle>
           </div>
-          <div className="flex items-center space-x-4 text-sm text-gray-600">
+          <div className="flex items-center space-x-4 text-sm text-gray-600 mt-2">
             <div className="flex items-center space-x-2">
               <img
                 src={predictionData.team1.flag}
                 alt={predictionData.team1.shortName}
                 className="w-6 h-6 rounded"
               />
-              <span>{predictionData.team1.shortName}</span>
+              <span className="font-medium">
+                {predictionData.team1.shortName}
+              </span>
             </div>
-            <span>vs</span>
+            <span className="text-gray-400">vs</span>
             <div className="flex items-center space-x-2">
               <img
                 src={predictionData.team2.flag}
                 alt={predictionData.team2.shortName}
                 className="w-6 h-6 rounded"
               />
-              <span>{predictionData.team2.shortName}</span>
+              <span className="font-medium">
+                {predictionData.team2.shortName}
+              </span>
             </div>
           </div>
         </DialogHeader>
-        <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="sm:grid sm:grid-cols-5">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="batsman">Top Batsman</TabsTrigger>
-              <TabsTrigger value="bowler">Top Bowler</TabsTrigger>
-            </TabsList>
 
-            <TabsContent value="overview" className="space-y-6">
-              {/* Winner Prediction */}
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Trophy className="h-5 w-5 text-yellow-600" />
-                    <span>Winner Prediction</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {/* User Highlights Section */}
-                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <h4 className="font-semibold text-yellow-800 mb-3 flex items-center">
-                      <InfoIcon className="h-4 w-4 mr-2" />
-                      Important Points to Focus
-                    </h4>
-                    <ul className="space-y-2 text-sm text-yellow-700">
-                      <li className="flex items-start">
-                        <Shield className="h-4 w-4 mr-2 mt-0.5 text-green-600" />
-                        <span>
-                          <strong>Loss cut mandatory</strong> - Be safe, Earn
-                          More
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <Target className="h-4 w-4 mr-2 mt-0.5 text-blue-600" />
-                        <span>
-                          <strong>Medium Confidence:</strong> Both teams have
-                          chance to win (70% chance odds above 2.6) - Take
-                          Chance Both Team
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <AlertTriangle className="h-4 w-4 mr-2 mt-0.5 text-red-600" />
-                        <span>
-                          <strong>High Confidence:</strong> Less than 20% chance
-                          odds go both team - Never Take Chance
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <TrendingUp className="h-4 w-4 mr-2 mt-0.5 text-purple-600" />
-                        <span>
-                          <strong>Jackpot Match:</strong> Only 2 in 30 matches
-                          are jackpot - Never loss 28 matches for 2 jackpot
-                          matches
-                        </span>
-                      </li>
-                    </ul>
+        <div className="space-y-6 pb-6">
+          {/* User Highlights Section */}
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-yellow-50 to-orange-50">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center space-x-2 text-yellow-800">
+                <InfoIcon className="h-5 w-5" />
+                <span>Important Betting Strategy</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-3">
+                    <Shield className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-green-700">
+                        Loss Cut Mandatory
+                      </h4>
+                      <p className="text-sm text-gray-700">
+                        Be safe, Earn More - Always set stop loss limits
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <Target className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-blue-700">
+                        Medium Confidence Strategy
+                      </h4>
+                      <p className="text-sm text-gray-700">
+                        Both teams have chance (70% odds above 2.6) - Take
+                        Chance Both Team
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-3">
+                    <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-red-700">
+                        High Confidence Warning
+                      </h4>
+                      <p className="text-sm text-gray-700">
+                        Less than 20% chance odds go both team - Never Take
+                        Chance
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <TrendingUp className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-purple-700">
+                        Jackpot Match Reality
+                      </h4>
+                      <p className="text-sm text-gray-700">
+                        Only 2 in 30 matches are jackpot - Never loss 28 matches
+                        for 2 jackpot matches
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Winner Prediction */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Trophy className="h-5 w-5 text-yellow-600" />
+                <span>Winner Prediction</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                {/* Team 1 */}
+                <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-100">
+                  <div className="flex items-center justify-center space-x-2 mb-4">
+                    <img
+                      src={predictionData.team1.flag}
+                      alt={predictionData.team1.shortName}
+                      className="w-10 h-10 rounded-lg shadow-sm"
+                    />
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {predictionData.team1.shortName}
+                    </h3>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Team 1 */}
-                    <div className="text-center">
-                      <div className="flex items-center justify-center space-x-2 mb-3">
-                        <img
-                          src={predictionData.team1.flag}
-                          alt={predictionData.team1.shortName}
-                          className="w-8 h-8 rounded"
-                        />
-                        <h3 className="text-xl font-bold">
-                          {predictionData.team1.shortName}
-                        </h3>
-                      </div>
+                  <div className="text-4xl font-bold text-green-600 mb-3">
+                    {predictionData.winnerPrediction.team1.probability}%
+                  </div>
 
-                      <div className="text-3xl font-bold text-green-600 mb-2">
-                        {predictionData.winnerPrediction.team1.probability}%
-                      </div>
+                  <div className="w-full bg-gray-200 rounded-full h-4 mb-3">
+                    <div
+                      className="bg-green-600 h-4 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${predictionData.winnerPrediction.team1.probability}%`,
+                      }}
+                    ></div>
+                  </div>
 
-                      <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-                        <div
-                          className="bg-green-600 h-3 rounded-full transition-all duration-500"
-                          style={{
-                            width: `${predictionData.winnerPrediction.team1.probability}%`,
-                          }}
-                        ></div>
-                      </div>
+                  <Badge
+                    className={`${getConfidenceClass(
+                      predictionData.winnerPrediction.team1.confidence
+                    )} text-sm px-3 py-1 mb-3`}
+                  >
+                    {predictionData.winnerPrediction.team1.confidence}{" "}
+                    Confidence
+                  </Badge>
 
+                  {/* Confidence based advice */}
+                  {predictionData.winnerPrediction.team1.confidence ===
+                    "Medium" && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                      <Target className="h-4 w-4 inline mr-1" />
+                      Both teams have chance - Consider odds above 2.6
+                    </div>
+                  )}
+                  {predictionData.winnerPrediction.team1.confidence ===
+                    "High" && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                      <AlertTriangle className="h-4 w-4 inline mr-1" />
+                      Low chance for both team odds - Avoid taking chance
+                    </div>
+                  )}
+                </div>
+
+                {/* Team 2 */}
+                <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
+                  <div className="flex items-center justify-center space-x-2 mb-4">
+                    <img
+                      src={predictionData.team2.flag}
+                      alt={predictionData.team2.shortName}
+                      className="w-10 h-10 rounded-lg shadow-sm"
+                    />
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {predictionData.team2.shortName}
+                    </h3>
+                  </div>
+
+                  <div className="text-4xl font-bold text-blue-600 mb-3">
+                    {predictionData.winnerPrediction.team2.probability}%
+                  </div>
+
+                  <div className="w-full bg-gray-200 rounded-full h-4 mb-3">
+                    <div
+                      className="bg-blue-600 h-4 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${predictionData.winnerPrediction.team2.probability}%`,
+                      }}
+                    ></div>
+                  </div>
+
+                  <Badge
+                    className={`${getConfidenceClass(
+                      predictionData.winnerPrediction.team2.confidence
+                    )} text-sm px-3 py-1 mb-3`}
+                  >
+                    {predictionData.winnerPrediction.team2.confidence}{" "}
+                    Confidence
+                  </Badge>
+
+                  {/* Confidence based advice */}
+                  {predictionData.winnerPrediction.team2.confidence ===
+                    "Medium" && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                      <Target className="h-4 w-4 inline mr-1" />
+                      Both teams have chance - Consider odds above 2.6
+                    </div>
+                  )}
+                  {predictionData.winnerPrediction.team2.confidence ===
+                    "High" && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                      <AlertTriangle className="h-4 w-4 inline mr-1" />
+                      Low chance for both team odds - Avoid taking chance
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Additional Safety Note */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                <div className="flex items-center text-green-700 text-sm">
+                  <Shield className="h-5 w-5 mr-3 flex-shrink-0" />
+                  <span>
+                    <strong>Remember:</strong> Always set loss cut limits.
+                    Safety first for long-term earnings. Never risk more than
+                    you can afford to lose.
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* First Innings Score Prediction */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                <span>First Innings Score Prediction</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl border border-blue-200">
+                  <div className="flex items-center justify-center space-x-2 mb-4">
+                    <img
+                      src={predictionData.team1.flag}
+                      alt={predictionData.team1.shortName}
+                      className="w-8 h-8 rounded"
+                    />
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {predictionData.team1.shortName}
+                    </h3>
+                  </div>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">
+                    {predictionData.firstInningScore.team1.predicted.toFixed(0)}
+                  </div>
+                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border">
+                    Range:{" "}
+                    <span className="font-semibold">
+                      {predictionData.firstInningScore.team1.min.toFixed(0)} -{" "}
+                      {predictionData.firstInningScore.team1.max.toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-100 rounded-xl border border-purple-200">
+                  <div className="flex items-center justify-center space-x-2 mb-4">
+                    <img
+                      src={predictionData.team2.flag}
+                      alt={predictionData.team2.shortName}
+                      className="w-8 h-8 rounded"
+                    />
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {predictionData.team2.shortName}
+                    </h3>
+                  </div>
+                  <div className="text-3xl font-bold text-purple-600 mb-2">
+                    {predictionData.firstInningScore.team2.predicted.toFixed(0)}
+                  </div>
+                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border">
+                    Range:{" "}
+                    <span className="font-semibold">
+                      {predictionData.firstInningScore.team2.min.toFixed(0)} -{" "}
+                      {predictionData.firstInningScore.team2.max.toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Top Performers Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Top Batsmen */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Target className="h-5 w-5 text-red-600" />
+                  <span>Top Batsmen Prediction</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Team 1 Batsman */}
+                  <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-100">
+                    <img
+                      src={predictionData.topBatsman.team1.imageUrl}
+                      alt={predictionData.topBatsman.team1.shortName}
+                      className="w-16 h-16 rounded-lg shadow-sm"
+                    />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">
+                        {predictionData.topBatsman.team1.name}
+                      </h3>
+                      <div className="text-sm text-gray-600 mb-2">
+                        {predictionData.topBatsman.team1.batStyle} |{" "}
+                        {predictionData.topBatsman.team1.teamShortName}
+                      </div>
                       <Badge
-                        className={getConfidenceClass(
-                          predictionData.winnerPrediction.team1.confidence
+                        className={getRoleColor(
+                          predictionData.topBatsman.team1.type
                         )}
                       >
-                        {predictionData.winnerPrediction.team1.confidence}{" "}
-                        Confidence
+                        {getRoleIcon(predictionData.topBatsman.team1.type)}
+                        <span className="ml-1">
+                          {predictionData.topBatsman.team1.type}
+                        </span>
                       </Badge>
-
-                      {/* Confidence based advice */}
-                      {predictionData.winnerPrediction.team1.confidence ===
-                        "Medium" && (
-                        <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
-                          Both teams have chance - Consider odds above 2.6
-                        </div>
-                      )}
-                      {predictionData.winnerPrediction.team1.confidence ===
-                        "High" && (
-                        <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                          Low chance for both team odds - Avoid taking chance
-                        </div>
-                      )}
                     </div>
+                  </div>
 
-                    {/* Team 2 */}
-                    <div className="text-center">
-                      <div className="flex items-center justify-center space-x-2 mb-3">
-                        <img
-                          src={predictionData.team2.flag}
-                          alt={predictionData.team2.shortName}
-                          className="w-8 h-8 rounded"
-                        />
-                        <h3 className="text-xl font-bold">
-                          {predictionData.team2.shortName}
-                        </h3>
+                  {/* Team 2 Batsman */}
+                  <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+                    <img
+                      src={predictionData.topBatsman.team2.imageUrl}
+                      alt={predictionData.topBatsman.team2.shortName}
+                      className="w-16 h-16 rounded-lg shadow-sm"
+                    />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">
+                        {predictionData.topBatsman.team2.name}
+                      </h3>
+                      <div className="text-sm text-gray-600 mb-2">
+                        {predictionData.topBatsman.team2.batStyle} |{" "}
+                        {predictionData.topBatsman.team2.teamShortName}
                       </div>
-
-                      <div className="text-3xl font-bold text-blue-600 mb-2">
-                        {predictionData.winnerPrediction.team2.probability}%
-                      </div>
-
-                      <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-                        <div
-                          className="bg-blue-600 h-3 rounded-full transition-all duration-500"
-                          style={{
-                            width: `${predictionData.winnerPrediction.team2.probability}%`,
-                          }}
-                        ></div>
-                      </div>
-
                       <Badge
-                        className={getConfidenceClass(
-                          predictionData.winnerPrediction.team2.confidence
+                        className={getRoleColor(
+                          predictionData.topBatsman.team2.type
                         )}
                       >
-                        {predictionData.winnerPrediction.team2.confidence}{" "}
-                        Confidence
+                        {getRoleIcon(predictionData.topBatsman.team2.type)}
+                        <span className="ml-1">
+                          {predictionData.topBatsman.team2.type}
+                        </span>
                       </Badge>
-
-                      {/* Confidence based advice */}
-                      {predictionData.winnerPrediction.team2.confidence ===
-                        "Medium" && (
-                        <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
-                          Both teams have chance - Consider odds above 2.6
-                        </div>
-                      )}
-                      {predictionData.winnerPrediction.team2.confidence ===
-                        "High" && (
-                        <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                          Low chance for both team odds - Avoid taking chance
-                        </div>
-                      )}
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                  {/* Additional Safety Note */}
-                  <div className="mt-6 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center text-green-700 text-sm">
-                      <Shield className="h-4 w-4 mr-2" />
-                      <span>
-                        <strong>Remember:</strong> Always set loss cut limits.
-                        Safety first for long-term earnings.
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* First Innings Score Prediction */}
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <BarChart3 className="h-5 w-5 text-blue-600" />
-                    <span>First Innings Score Prediction</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                      <div className="flex items-center justify-center space-x-2 mb-3">
-                        <img
-                          src={predictionData.team1.flag}
-                          alt={predictionData.team1.shortName}
-                          className="w-6 h-6 rounded"
-                        />
-                        <h3 className="font-semibold">
-                          {predictionData.team1.shortName}
-                        </h3>
+            {/* Top Bowlers */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Zap className="h-5 w-5 text-blue-600" />
+                  <span>Top Bowlers Prediction</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Team 1 Bowler */}
+                  <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-100">
+                    <img
+                      src={predictionData.topBowler.team1.imageUrl}
+                      alt={predictionData.topBowler.team1.shortName}
+                      className="w-16 h-16 rounded-lg shadow-sm"
+                    />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">
+                        {predictionData.topBowler.team1.name}
+                      </h3>
+                      <div className="text-sm text-gray-600 mb-2">
+                        {predictionData.topBowler.team1.bowlStyle} |{" "}
+                        {predictionData.topBowler.team1.teamShortName}
                       </div>
-                      <div className="text-2xl font-bold text-blue-600 mb-2">
-                        {predictionData.firstInningScore.team1.predicted.toFixed(
-                          0
+                      <Badge
+                        className={getRoleColor(
+                          predictionData.topBowler.team1.type
                         )}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        Range:{" "}
-                        {predictionData.firstInningScore.team1.min.toFixed(0)} -{" "}
-                        {predictionData.firstInningScore.team1.max.toFixed(0)}
-                      </div>
-                    </div>
-                    <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-                      <div className="flex items-center justify-center space-x-2 mb-3">
-                        <img
-                          src={predictionData.team2.flag}
-                          alt={predictionData.team2.shortName}
-                          className="w-6 h-6 rounded"
-                        />
-                        <h3 className="font-semibold">
-                          {predictionData.team2.shortName}
-                        </h3>
-                      </div>
-                      <div className="text-2xl font-bold text-purple-600 mb-2">
-                        {predictionData.firstInningScore.team2.predicted.toFixed(
-                          0
-                        )}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        Range:{" "}
-                        {predictionData.firstInningScore.team2.min.toFixed(0)} -{" "}
-                        {predictionData.firstInningScore.team2.max.toFixed(0)}
-                      </div>
+                      >
+                        {getRoleIcon(predictionData.topBowler.team1.type)}
+                        <span className="ml-1">
+                          {predictionData.topBowler.team1.type}
+                        </span>
+                      </Badge>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
-            <TabsContent value="batsman" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Target className="h-5 w-5 text-blue-600" />
-                      <img
-                        src={predictionData.team1.flag}
-                        alt={predictionData.team1.shortName}
-                        className="w-6 h-6 rounded"
-                      />
-                      <span>{predictionData.team1.shortName} Top Batsman</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-4 mb-6">
-                      <img
-                        src={predictionData.topBatsman.team1.imageUrl}
-                        alt={predictionData.topBatsman.team1.shortName}
-                        className="w-16 h-16 rounded"
-                      />
-                      <div>
-                        <h3 className="text-2xl font-bold text-blue-600 mb-1">
-                          {predictionData.topBatsman.team1.name}
-                        </h3>
-                        <div className="text-sm text-gray-600 mb-2">
-                          {predictionData.topBatsman.team1.batStyle} |{" "}
-                          {predictionData.topBatsman.team1.teamShortName}
-                        </div>
-                        <Badge
-                          className={getRoleColor(
-                            predictionData.topBatsman.team1.type
-                          )}
-                        >
-                          {getRoleIcon(predictionData.topBatsman.team1.type)}
-                          <span className="ml-1">
-                            {predictionData.topBatsman.team1.type}
-                          </span>
-                        </Badge>
+                  {/* Team 2 Bowler */}
+                  <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
+                    <img
+                      src={predictionData.topBowler.team2.imageUrl}
+                      alt={predictionData.topBowler.team2.shortName}
+                      className="w-16 h-16 rounded-lg shadow-sm"
+                    />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">
+                        {predictionData.topBowler.team2.name}
+                      </h3>
+                      <div className="text-sm text-gray-600 mb-2">
+                        {predictionData.topBowler.team2.bowlStyle} |{" "}
+                        {predictionData.topBowler.team2.teamShortName}
                       </div>
+                      <Badge
+                        className={getRoleColor(
+                          predictionData.topBowler.team2.type
+                        )}
+                      >
+                        {getRoleIcon(predictionData.topBowler.team2.type)}
+                        <span className="ml-1">
+                          {predictionData.topBowler.team2.type}
+                        </span>
+                      </Badge>
                     </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Recent Average:</span>
-                        <span className="font-semibold">
-                          {
-                            predictionData.topBatsman.team1.battingAvg
-                              .averageRuns
-                          }{" "}
-                          runs
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Strike Rate:</span>
-                        <span className="font-semibold">
-                          {predictionData.topBatsman.team1.battingAvg.averageSR}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">
-                          Balls per Innings:
-                        </span>
-                        <span className="font-semibold">
-                          {
-                            predictionData.topBatsman.team1.battingAvg
-                              .averageBalls
-                          }
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Target className="h-5 w-5 text-purple-600" />
-                      <img
-                        src={predictionData.team2.flag}
-                        alt={predictionData.team2.shortName}
-                        className="w-6 h-6 rounded"
-                      />
-                      <span>{predictionData.team2.shortName} Top Batsman</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-4 mb-6">
-                      <img
-                        src={predictionData.topBatsman.team2.imageUrl}
-                        alt={predictionData.topBatsman.team2.shortName}
-                        className="w-16 h-16 rounded"
-                      />
-                      <div>
-                        <h3 className="text-2xl font-bold text-purple-600 mb-1">
-                          {predictionData.topBatsman.team2.name}
-                        </h3>
-                        <div className="text-sm text-gray-600 mb-2">
-                          {predictionData.topBatsman.team2.batStyle} |{" "}
-                          {predictionData.topBatsman.team2.teamShortName}
-                        </div>
-                        <Badge
-                          className={getRoleColor(
-                            predictionData.topBatsman.team2.type
-                          )}
-                        >
-                          {getRoleIcon(predictionData.topBatsman.team2.type)}
-                          <span className="ml-1">
-                            {predictionData.topBatsman.team2.type}
-                          </span>
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Recent Average:</span>
-                        <span className="font-semibold">
-                          {
-                            predictionData.topBatsman.team2.battingAvg
-                              .averageRuns
-                          }{" "}
-                          runs
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Strike Rate:</span>
-                        <span className="font-semibold">
-                          {predictionData.topBatsman.team2.battingAvg.averageSR}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">
-                          Balls per Innings:
-                        </span>
-                        <span className="font-semibold">
-                          {
-                            predictionData.topBatsman.team2.battingAvg
-                              .averageBalls
-                          }
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="bowler" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Zap className="h-5 w-5 text-blue-600" />
-                      <img
-                        src={predictionData.team1.flag}
-                        alt={predictionData.team1.shortName}
-                        className="w-6 h-6 rounded"
-                      />
-                      <span>{predictionData.team1.shortName} Top Bowler</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-4 mb-6">
-                      <img
-                        src={predictionData.topBowler.team1.imageUrl}
-                        alt={predictionData.topBowler.team1.shortName}
-                        className="w-16 h-16 rounded"
-                      />
-                      <div>
-                        <h3 className="text-2xl font-bold text-blue-600 mb-1">
-                          {predictionData.topBowler.team1.name}
-                        </h3>
-                        <div className="text-sm text-gray-600 mb-2">
-                          {predictionData.topBowler.team1.bowlStyle} |{" "}
-                          {predictionData.topBowler.team1.teamShortName}
-                        </div>
-                        <Badge
-                          className={getRoleColor(
-                            predictionData.topBowler.team1.type
-                          )}
-                        >
-                          {getRoleIcon(predictionData.topBowler.team1.type)}
-                          <span className="ml-1">
-                            {predictionData.topBowler.team1.type}
-                          </span>
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Recent Wickets:</span>
-                        <span className="font-semibold">
-                          {
-                            predictionData.topBowler.team1.bowlingAvg
-                              ?.averageWickets
-                          }{" "}
-                          per match
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Economy:</span>
-                        <span className="font-semibold">
-                          {
-                            predictionData.topBowler.team1.bowlingAvg
-                              ?.averageEconomy
-                          }
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Overs per Match:</span>
-                        <span className="font-semibold">
-                          {
-                            predictionData.topBowler.team1.bowlingAvg
-                              ?.averageOvers
-                          }
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Zap className="h-5 w-5 text-purple-600" />
-                      <img
-                        src={predictionData.team2.flag}
-                        alt={predictionData.team2.shortName}
-                        className="w-6 h-6 rounded"
-                      />
-                      <span>{predictionData.team2.shortName} Top Bowler</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-4 mb-6">
-                      <img
-                        src={predictionData.topBowler.team2.imageUrl}
-                        alt={predictionData.topBowler.team2.shortName}
-                        className="w-16 h-16 rounded"
-                      />
-                      <div>
-                        <h3 className="text-2xl font-bold text-purple-600 mb-1">
-                          {predictionData.topBowler.team2.name}
-                        </h3>
-                        <div className="text-sm text-gray-600 mb-2">
-                          {predictionData.topBowler.team2.bowlStyle} |{" "}
-                          {predictionData.topBowler.team2.teamShortName}
-                        </div>
-                        <Badge
-                          className={getRoleColor(
-                            predictionData.topBowler.team2.type
-                          )}
-                        >
-                          {getRoleIcon(predictionData.topBowler.team2.type)}
-                          <span className="ml-1">
-                            {predictionData.topBowler.team2.type}
-                          </span>
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Recent Wickets:</span>
-                        <span className="font-semibold">
-                          {
-                            predictionData.topBowler.team2.bowlingAvg
-                              ?.averageWickets
-                          }{" "}
-                          per match
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Economy:</span>
-                        <span className="font-semibold">
-                          {
-                            predictionData.topBowler.team2.bowlingAvg
-                              ?.averageEconomy
-                          }
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Overs per Match:</span>
-                        <span className="font-semibold">
-                          {
-                            predictionData.topBowler.team2.bowlingAvg
-                              ?.averageOvers
-                          }
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
