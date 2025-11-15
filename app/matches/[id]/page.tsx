@@ -78,14 +78,6 @@ const MatchDetailsPage = () => {
     setIsPredictionModalOpen(true);
   };
 
-  const getFormIcon = (result: string) => {
-    if (result.includes("won") || result.includes("beat")) {
-      return <CheckCircle className="h-4 w-4 text-green-600" />;
-    } else {
-      return <XCircle className="h-4 w-4 text-red-600" />;
-    }
-  };
-
   const calculateH2HStats = (
     h2hMatches: any[],
     team1Name: string,
@@ -796,7 +788,10 @@ const MatchDetailsPage = () => {
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
                         <BarChart3 className="h-5 w-5 text-green-600" />
-                        <span>Stadium: {matchData.matchInfo.venue}</span>
+                        <span>
+                          Stadium:{" "}
+                          {`${matchData.matchInfo.venue.ground}, ${matchData.matchInfo.venue.city}, ${matchData.matchInfo.venue.country}`}
+                        </span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -805,7 +800,7 @@ const MatchDetailsPage = () => {
                           Last 10 Matches at this Venue
                         </h3>
                         <div className="space-y-3">
-                          {matchData?.stadiumStats?.map(
+                          {(matchData?.stadiumStats ?? []).map(
                             (match: any, index: any) => (
                               <div
                                 key={index}

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
@@ -217,6 +218,12 @@ const AIPredictionModal: React.FC<{
     }
   };
 
+  const checkSquad =
+    match.squadList[0].benchPlayer.length === 0 ||
+    match.squadList[0].playingPlayer.length === 0 ||
+    match.squadList[1].benchPlayer.length === 0 ||
+    match.squadList[1].playingPlayer.length === 0;
+
   if (!predictionData) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -229,36 +236,60 @@ const AIPredictionModal: React.FC<{
               <span>AI Match Prediction</span>
             </DialogTitle>
           </DialogHeader>
-          <div className="text-center py-12">
-            <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Brain className="h-10 w-10 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Get AI-Powered Match Prediction
-            </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Our advanced AI analyzes 50+ factors including player form, pitch
-              conditions, weather, and historical data to provide accurate
-              predictions.
-            </p>
-            <Button
-              onClick={handleGetPrediction}
-              disabled={isLoading}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3"
-            >
-              {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Analyzing Match...</span>
+          {checkSquad ? (
+            <div className="text-center py-12">
+              <div className="w-20 h-20 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Brain className="h-10 w-10 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Team Squads Not Available Yet
+              </h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                ⏳ Both team squads haven't been announced yet. Please check
+                back later when the teams are finalized to get accurate AI
+                predictions.
+              </p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto">
+                <div className="flex items-center justify-center space-x-2 text-yellow-800">
+                  <InfoIcon className="h-5 w-5" />
+                  <span className="text-sm font-medium">
+                    Predictions will be available after squad announcements
+                  </span>
                 </div>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Get AI Prediction
-                </>
-              )}
-            </Button>
-          </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Brain className="h-10 w-10 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Get AI-Powered Match Prediction
+              </h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                Our advanced AI analyzes 50+ factors including player form,
+                pitch conditions, weather, and historical data to provide
+                accurate predictions.
+              </p>
+              <Button
+                onClick={handleGetPrediction}
+                disabled={isLoading}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3"
+              >
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Analyzing Match...</span>
+                  </div>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Get AI Prediction
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     );
