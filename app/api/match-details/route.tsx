@@ -27,6 +27,15 @@ export async function POST(request: NextRequest) {
     let url = `https://www.cricbuzz.com/cricket-match-squads/${body.matchId}/${team1}-vs-${team2}-${modDis}-${modTour}`;
 
     const rowSquadList = await CricSquadDetails(url);
+
+    // return Response.json(
+    //   {
+    //     data: rowSquadList,
+    //   },
+
+    //   { status: 200 }
+    // );
+
     const squadList = rowSquadList.map((item: any) => {
       const matchedTeam = body.teams.find(
         (elm: any) => elm.teamShortName === item.shortName
