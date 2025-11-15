@@ -69,23 +69,6 @@ const MatchCard = ({
   const team1 = match.teams[0];
   const team2 = match.teams[1];
 
-  // Helper function to get total balls from overs for different formats
-  const getTotalBalls = (format: string): number => {
-    switch (format.toUpperCase()) {
-      case "T10":
-        return 60; // 10 overs * 6 balls
-      case "T20":
-      case "T20I":
-        return 120; // 20 overs * 6 balls
-      case "ODI":
-        return 300; // 50 overs * 6 balls
-      case "TEST":
-        return 0; // No ball limit in Test matches
-      default:
-        return 120;
-    }
-  };
-
   // Helper function to format score display
   const formatScore = (team: Team): string => {
     if (match?.score === null) {
@@ -96,7 +79,7 @@ const MatchCard = ({
       (item: any) => item.team === team.teamShortName
     );
 
-    return scores.run;
+    return scores ? scores?.run : "Yet to bat";
   };
 
   // Helper function to get match status text

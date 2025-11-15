@@ -4,9 +4,18 @@ import moment from "moment";
 
 export const CricBuzzList = async (fromDate: Date): Promise<Target[]> => {
   const timestamp = Date.now() + 5.5 * 60 * 60 * 1000;
+  const finalTimestamp = timestamp - 24 * 60 * 60 * 1000;
 
-  const apiUrl = `https://www.cricbuzz.com/api/cricket-schedule/upcoming-series/all/${timestamp}`;
-  const response = await axios.get(apiUrl);
+  const apiUrl = `https://www.cricbuzz.com/api/cricket-schedule/upcoming-series/all/${finalTimestamp}`;
+  const response = await axios.get(apiUrl, {
+    headers: {
+      "x-csrf-token": "",
+      "user-agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36",
+      accept: "application/json, text/plain, */*",
+      referer: "https://www.cricbuzz.com/",
+    },
+  });
 
   if (response.status !== 200) return [];
 
