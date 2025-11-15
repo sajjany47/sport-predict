@@ -581,6 +581,64 @@ const AIPredictionModal: React.FC<{
                           {predictionData.topBatsman.team1.type}
                         </span>
                       </Badge>
+
+                      {/* Batting Stats */}
+                      <div className="grid grid-cols-3 gap-2 mt-3 p-2 bg-white rounded-lg border">
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Avg Runs</div>
+                          <div className="text-sm font-bold text-green-600">
+                            {Number(
+                              predictionData.topBatsman.team1.battingAvg
+                                .averageRuns || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">
+                            Strike Rate
+                          </div>
+                          <div className="text-sm font-bold text-blue-600">
+                            {Number(
+                              predictionData.topBatsman.team1.battingAvg
+                                .averageSR || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Avg Balls</div>
+                          <div className="text-sm font-bold text-purple-600">
+                            {Number(
+                              predictionData.topBatsman.team1.battingAvg
+                                .averageBalls || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Predicted Score */}
+                      <div className="mt-3 p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-semibold text-green-800">
+                            Predicted Score:
+                          </span>
+                          <span className="text-lg font-bold text-green-600">
+                            {Math.round(
+                              parseFloat(
+                                predictionData.topBatsman.team1.battingAvg
+                                  .averageRuns
+                              ) * 1.2
+                            )}
+                            -
+                            {Math.round(
+                              parseFloat(
+                                predictionData.topBatsman.team1.battingAvg
+                                  .averageRuns
+                              ) * 1.5
+                            )}{" "}
+                            runs
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -609,6 +667,64 @@ const AIPredictionModal: React.FC<{
                           {predictionData.topBatsman.team2.type}
                         </span>
                       </Badge>
+
+                      {/* Batting Stats */}
+                      <div className="grid grid-cols-3 gap-2 mt-3 p-2 bg-white rounded-lg border">
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Avg Runs</div>
+                          <div className="text-sm font-bold text-green-600">
+                            {Number(
+                              predictionData.topBatsman.team2.battingAvg
+                                .averageRuns || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">
+                            Strike Rate
+                          </div>
+                          <div className="text-sm font-bold text-blue-600">
+                            {Number(
+                              predictionData.topBatsman.team2.battingAvg
+                                .averageSR || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Avg Balls</div>
+                          <div className="text-sm font-bold text-purple-600">
+                            {Number(
+                              predictionData.topBatsman.team2.battingAvg
+                                .averageBalls || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Predicted Score */}
+                      <div className="mt-3 p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-semibold text-green-800">
+                            Predicted Score:
+                          </span>
+                          <span className="text-lg font-bold text-green-600">
+                            {Math.round(
+                              parseFloat(
+                                predictionData.topBatsman.team2.battingAvg
+                                  .averageRuns
+                              ) * 1.2
+                            )}
+                            -
+                            {Math.round(
+                              parseFloat(
+                                predictionData.topBatsman.team2.battingAvg
+                                  .averageRuns
+                              ) * 1.5
+                            )}{" "}
+                            runs
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -650,6 +766,64 @@ const AIPredictionModal: React.FC<{
                           {predictionData.topBowler.team1.type}
                         </span>
                       </Badge>
+
+                      {/* Bowling Stats */}
+                      <div className="grid grid-cols-3 gap-2 mt-3 p-2 bg-white rounded-lg border">
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">
+                            Avg Wickets
+                          </div>
+                          <div className="text-sm font-bold text-red-600">
+                            {Number(
+                              predictionData.topBowler.team1.bowlingAvg
+                                ?.averageWickets || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Economy</div>
+                          <div className="text-sm font-bold text-orange-600">
+                            {Number(
+                              predictionData.topBowler.team1.bowlingAvg
+                                ?.averageEconomy || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Avg Overs</div>
+                          <div className="text-sm font-bold text-purple-600">
+                            {Number(
+                              predictionData.topBowler.team1.bowlingAvg
+                                ?.averageOvers || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Predicted Wickets */}
+                      <div className="mt-3 p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-semibold text-red-800">
+                            Predicted Wickets:
+                          </span>
+                          <span className="text-lg font-bold text-red-600">
+                            {predictionData.topBowler.team1.bowlingAvg
+                              ?.averageWickets
+                              ? `${Math.round(
+                                  parseFloat(
+                                    predictionData.topBowler.team1.bowlingAvg
+                                      .averageWickets
+                                  )
+                                )}-${Math.round(
+                                  parseFloat(
+                                    predictionData.topBowler.team1.bowlingAvg
+                                      .averageWickets
+                                  ) + 1
+                                )} wickets`
+                              : "2-3 wickets"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -678,6 +852,64 @@ const AIPredictionModal: React.FC<{
                           {predictionData.topBowler.team2.type}
                         </span>
                       </Badge>
+
+                      {/* Bowling Stats */}
+                      <div className="grid grid-cols-3 gap-2 mt-3 p-2 bg-white rounded-lg border">
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">
+                            Avg Wickets
+                          </div>
+                          <div className="text-sm font-bold text-red-600">
+                            {Number(
+                              predictionData.topBowler.team2.bowlingAvg
+                                ?.averageWickets || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Economy</div>
+                          <div className="text-sm font-bold text-orange-600">
+                            {Number(
+                              predictionData.topBowler.team2.bowlingAvg
+                                ?.averageEconomy || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Avg Overs</div>
+                          <div className="text-sm font-bold text-purple-600">
+                            {Number(
+                              predictionData.topBowler.team2.bowlingAvg
+                                ?.averageOvers || 0
+                            ).toFixed(0)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Predicted Wickets */}
+                      <div className="mt-3 p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-semibold text-red-800">
+                            Predicted Wickets:
+                          </span>
+                          <span className="text-lg font-bold text-red-600">
+                            {predictionData.topBowler.team2.bowlingAvg
+                              ?.averageWickets
+                              ? `${Math.round(
+                                  parseFloat(
+                                    predictionData.topBowler.team2.bowlingAvg
+                                      .averageWickets
+                                  )
+                                )}-${Math.round(
+                                  parseFloat(
+                                    predictionData.topBowler.team2.bowlingAvg
+                                      .averageWickets
+                                  ) + 1
+                                )} wickets`
+                              : "2-3 wickets"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
