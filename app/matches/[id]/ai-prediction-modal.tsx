@@ -94,10 +94,20 @@ interface PredictionData {
     team1: {
       probability: string;
       confidence: string;
+      hint: {
+        hintMessage: string;
+        badgeColor: string;
+        color: string;
+      };
     };
     team2: {
       probability: string;
       confidence: string;
+      hint: {
+        hintMessage: string;
+        badgeColor: string;
+        color: string;
+      };
     };
   };
   topBatsman: {
@@ -403,20 +413,13 @@ const AIPredictionModal: React.FC<{
                   </Badge>
 
                   {/* Confidence based advice */}
-                  {predictionData.winnerPrediction.team1.confidence ===
-                    "Medium" && (
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
-                      <Target className="h-4 w-4 inline mr-1" />
-                      Both teams have chance - Consider odds above 2.6
+                  {
+                    <div
+                      className={`mt-4 p-3 ${predictionData.winnerPrediction.team1.hint.color} border border-blue-200 rounded-lg text-sm text-blue-700`}
+                    >
+                      {predictionData.winnerPrediction.team1.hint.hintMessage}
                     </div>
-                  )}
-                  {predictionData.winnerPrediction.team1.confidence ===
-                    "High" && (
-                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                      <AlertTriangle className="h-4 w-4 inline mr-1" />
-                      Low chance for both team odds - Avoid taking chance
-                    </div>
-                  )}
+                  }
                 </div>
 
                 {/* Team 2 */}
@@ -455,20 +458,13 @@ const AIPredictionModal: React.FC<{
                   </Badge>
 
                   {/* Confidence based advice */}
-                  {predictionData.winnerPrediction.team2.confidence ===
-                    "Medium" && (
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
-                      <Target className="h-4 w-4 inline mr-1" />
-                      Both teams have chance - Consider odds above 2.6
+                  {
+                    <div
+                      className={`mt-4 p-3 ${predictionData.winnerPrediction.team2.hint.color} border border-blue-200 rounded-lg text-sm text-blue-700`}
+                    >
+                      {predictionData.winnerPrediction.team2.hint.hintMessage}
                     </div>
-                  )}
-                  {predictionData.winnerPrediction.team2.confidence ===
-                    "High" && (
-                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                      <AlertTriangle className="h-4 w-4 inline mr-1" />
-                      Low chance for both team odds - Avoid taking chance
-                    </div>
-                  )}
+                  }
                 </div>
               </div>
 
