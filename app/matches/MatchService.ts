@@ -22,6 +22,7 @@ export const FetchMatchList = async (date: any) => {
       {
         fromDate: moment(date).format("YYYY-MM-DD"),
         toDate: moment(date).add(1, "days").format("YYYY-MM-DD"),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
       { headers: { "Content-Type": "application/json" } }
     );

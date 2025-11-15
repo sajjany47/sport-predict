@@ -5,7 +5,6 @@ import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import MatchCard from "@/components/ui/match-card";
 import {
   Star,
   Trophy,
@@ -24,6 +23,7 @@ import { setSelectedMatch } from "@/store/slices/matchSlice";
 import { useQuery } from "@tanstack/react-query";
 import { FetchMatchList } from "../matches/MatchService";
 import { SubscriptionList } from "../MainService";
+import MatchCard from "../matches/MatchCard";
 
 const HomePage = () => {
   const router = useRouter();

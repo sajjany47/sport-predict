@@ -247,12 +247,16 @@ const FantasyAnalysis = (squad: any) => {
   const dream11Team = {
     captain: {
       ...playingPlayer[0],
-      points: parseFloat(playingPlayer[0].totalPoint.toFixed(1)),
+      points: playingPlayer[0]?.totalPoint
+        ? parseFloat(playingPlayer[0].totalPoint.toFixed(1))
+        : 0,
       form: "Excellent",
     },
     viceCaptain: {
       ...playingPlayer[1],
-      points: parseFloat(playingPlayer[1].totalPoint.toFixed(1)),
+      points: playingPlayer[1]?.totalPoint
+        ? parseFloat(playingPlayer[1].totalPoint.toFixed(1))
+        : 0,
       form: "Good",
     },
     players: playingPlayer.filter(
@@ -317,6 +321,130 @@ export const getConfidence = (chance: number) => {
   }
 };
 
+export const getHint = (team1Chance: number, team2Chance: number) => {
+  switch (true) {
+    // Team 2 is strong favorite
+    case team1Chance < 30 && team2Chance >= 70:
+      return {
+        team1: {
+          message: "❌ Never take chance - Avoid betting on this team",
+          color: "text-red-600 bg-red-50 border-red-200",
+          badgeColor: "bg-red-100 text-red-800",
+        },
+        team2: {
+          message: "✅ Safe bet - Take chance when odds above 1.6",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+      };
+
+    // Team 1 is strong favorite
+    case team2Chance < 30 && team1Chance >= 70:
+      return {
+        team1: {
+          message: "✅ Safe bet - Take chance when odds above 1.7",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+        team2: {
+          message: "❌ Never take chance - Avoid betting on this team",
+          color: "text-red-600 bg-red-50 border-red-200",
+          badgeColor: "bg-red-100 text-red-800",
+        },
+      };
+
+    // Team 2 is moderate favorite
+    case team1Chance >= 30 && team1Chance <= 45 && team2Chance >= 55:
+      return {
+        team1: {
+          message: "⚠️ Risky bet - Only if odds above 3.0",
+          color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+          badgeColor: "bg-yellow-100 text-yellow-800",
+        },
+        team2: {
+          message: "🟢 Good bet - Take chance when odds above 2.5",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+      };
+
+    // Team 1 is moderate favorite
+    case team2Chance >= 30 && team2Chance <= 45 && team1Chance >= 55:
+      return {
+        team1: {
+          message: "🟢 Good bet - Take chance when odds above 2.5",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+        team2: {
+          message: "⚠️ Risky bet - Only if odds above 3.0",
+          color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+          badgeColor: "bg-yellow-100 text-yellow-800",
+        },
+      };
+
+    // Balanced match - both teams competitive
+    case team1Chance >= 45 && team2Chance >= 50:
+      return {
+        team1: {
+          message: "🟡 Consider betting - Wait for odds above 2.5",
+          color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+          badgeColor: "bg-yellow-100 text-yellow-800",
+        },
+        team2: {
+          message: "🟢 Better option - Take chance when odds above 2.5",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+      };
+
+    // Balanced match - both teams competitive (reverse)
+    case team2Chance >= 45 && team1Chance >= 50:
+      return {
+        team1: {
+          message: "🟢 Better option - Take chance when odds above 2.5",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+        team2: {
+          message: "🟡 Consider betting - Wait for odds above 2.5",
+          color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+          badgeColor: "bg-yellow-100 text-yellow-800",
+        },
+      };
+
+    // Very close match
+    case Math.abs(team1Chance - team2Chance) <= 5:
+      return {
+        team1: {
+          message: "⚖️ Balanced match - Wait for odds above 2.8",
+          color: "text-blue-600 bg-blue-50 border-blue-200",
+          badgeColor: "bg-blue-100 text-blue-800",
+        },
+        team2: {
+          message: "⚖️ Balanced match - Wait for odds above 2.8",
+          color: "text-blue-600 bg-blue-50 border-blue-200",
+          badgeColor: "bg-blue-100 text-blue-800",
+        },
+      };
+
+    // Default case for unknown scenarios
+    default:
+      return {
+        team1: {
+          message: "🔍 Analyze match conditions before betting",
+          color: "text-gray-600 bg-gray-50 border-gray-200",
+          badgeColor: "bg-gray-100 text-gray-800",
+        },
+        team2: {
+          message: "🔍 Analyze match conditions before betting",
+          color: "text-gray-600 bg-gray-50 border-gray-200",
+          badgeColor: "bg-gray-100 text-gray-800",
+        },
+      };
+  }
+};
+
 export const GetAIPrediction = (data: any) => {
   const squadList = data.squadList.map((item: any) => {
     const playingPlayer = item.playingPlayer.map((playing: any) => {
@@ -335,8 +463,8 @@ export const GetAIPrediction = (data: any) => {
         shortName: playing.shortName,
         batStyle: playing.batStyle,
         bowlStyle: playing.bowlStyle,
-        imageUrl: playing.imageUrl.src,
-        type: playing.type,
+        imageUrl: playing.image,
+        type: playing.role,
         battingAvg: battingAvg,
         bowlingAvg: bowlingAvg,
         fantasyAvg: fantasyAvg,
@@ -356,10 +484,10 @@ export const GetAIPrediction = (data: any) => {
         id: bench.id,
         name: bench.name,
         shortName: bench.shortName,
-        batStyle: bench.batStyle,
-        bowlStyle: bench.bowlStyle,
-        imageUrl: bench.imageUrl.src,
-        type: bench.type,
+        batStyle: bench?.batStyle,
+        bowlStyle: bench?.bowlStyle,
+        imageUrl: bench.image,
+        type: bench.role,
         battingAvg: battingAvg,
         bowlingAvg: bowlingAvg,
         fantasyAvg: fantasyAvg,
@@ -403,6 +531,8 @@ export const GetAIPrediction = (data: any) => {
 
   const fantasyReport = FantasyAnalysis(squadList);
 
+  const hintData = getHint(Number(team1Chance), Number(team2Chance));
+
   const response = {
     team1: {
       flag: squadList[0].flag,
@@ -430,10 +560,20 @@ export const GetAIPrediction = (data: any) => {
       team1: {
         probability: Number(team1Chance).toFixed(2),
         confidence: getConfidence(Number(team1Chance) || 0),
+        hint: {
+          hintMessage: hintData.team1.message,
+          badgeColor: hintData.team1.badgeColor,
+          color: hintData.team1.color,
+        },
       },
       team2: {
         probability: Number(team2Chance).toFixed(2),
         confidence: getConfidence(Number(team2Chance) || 0),
+        hint: {
+          hintMessage: hintData.team2.message,
+          badgeColor: hintData.team2.badgeColor,
+          color: hintData.team2.color,
+        },
       },
     },
     ...fantasyReport,
