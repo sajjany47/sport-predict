@@ -247,12 +247,16 @@ const FantasyAnalysis = (squad: any) => {
   const dream11Team = {
     captain: {
       ...playingPlayer[0],
-      points: parseFloat(playingPlayer[0].totalPoint.toFixed(1)),
+      points: playingPlayer[0]?.totalPoint
+        ? parseFloat(playingPlayer[0].totalPoint.toFixed(1))
+        : 0,
       form: "Excellent",
     },
     viceCaptain: {
       ...playingPlayer[1],
-      points: parseFloat(playingPlayer[1].totalPoint.toFixed(1)),
+      points: playingPlayer[1]?.totalPoint
+        ? parseFloat(playingPlayer[1].totalPoint.toFixed(1))
+        : 0,
       form: "Good",
     },
     players: playingPlayer.filter(
@@ -335,8 +339,8 @@ export const GetAIPrediction = (data: any) => {
         shortName: playing.shortName,
         batStyle: playing.batStyle,
         bowlStyle: playing.bowlStyle,
-        imageUrl: playing.imageUrl.src,
-        type: playing.type,
+        imageUrl: playing.image,
+        type: playing.role,
         battingAvg: battingAvg,
         bowlingAvg: bowlingAvg,
         fantasyAvg: fantasyAvg,
@@ -356,10 +360,10 @@ export const GetAIPrediction = (data: any) => {
         id: bench.id,
         name: bench.name,
         shortName: bench.shortName,
-        batStyle: bench.batStyle,
-        bowlStyle: bench.bowlStyle,
-        imageUrl: bench.imageUrl.src,
-        type: bench.type,
+        batStyle: bench?.batStyle,
+        bowlStyle: bench?.bowlStyle,
+        imageUrl: bench.image,
+        type: bench.role,
         battingAvg: battingAvg,
         bowlingAvg: bowlingAvg,
         fantasyAvg: fantasyAvg,
