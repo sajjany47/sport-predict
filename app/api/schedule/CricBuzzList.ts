@@ -1,12 +1,21 @@
 import { Target } from "@/types/CricbuzzListType";
 import axios from "axios";
-import moment from "moment";
+import moment from "moment-timezone";
 
-export const CricBuzzList = async (fromDate: Date): Promise<Target[]> => {
+export const CricBuzzList = async (
+  fromDate: Date,
+  timeZone: string
+): Promise<Target[]> => {
   const timestamp = Date.now() + 5.5 * 60 * 60 * 1000;
-  const finalTimestamp = timestamp - 24 * 60 * 60 * 1000;
+  const finalTimestamp = timestamp - 24 * 2 * 60 * 60 * 1000;
 
-  const apiUrl = `https://www.cricbuzz.com/api/cricket-schedule/upcoming-series/all/${finalTimestamp}`;
+  const timestampch = moment(fromDate, "YYYY-MM-DD")
+    .tz(timeZone)
+    .startOf("day")
+    .subtract(1, "day")
+    .valueOf();
+
+  const apiUrl = `https://www.cricbuzz.com/api/cricket-schedule/upcoming-series/all/${timestampch}`;
   const response = await axios.get(apiUrl, {
     headers: {
       "x-csrf-token": "",

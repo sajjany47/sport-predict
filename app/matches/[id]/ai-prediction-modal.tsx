@@ -219,10 +219,10 @@ const AIPredictionModal: React.FC<{
   };
 
   const checkSquad =
-    match.squadList[0].benchPlayer.length === 0 ||
-    match.squadList[0].playingPlayer.length === 0 ||
-    match.squadList[1].benchPlayer.length === 0 ||
-    match.squadList[1].playingPlayer.length === 0;
+    (match.squadList[0].benchPlayer.length === 0 &&
+      match.squadList[0].playingPlayer.length === 0) ||
+    (match.squadList[1].benchPlayer.length === 0 &&
+      match.squadList[1].playingPlayer.length === 0);
 
   if (!predictionData) {
     return (

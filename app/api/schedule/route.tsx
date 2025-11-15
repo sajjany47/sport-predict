@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const fromDate = body.fromDate ? new Date(body.fromDate) : new Date();
     // const toDate = body.toDate ? moment(body.toDate) : moment().add(1, "days");
 
-    const advanceCricketList = await CricBuzzList(fromDate);
+    const advanceCricketList = await CricBuzzList(fromDate, body.timezone);
 
     const modifyResult = await Promise.all(
       advanceCricketList.map(async (item: any) => {
