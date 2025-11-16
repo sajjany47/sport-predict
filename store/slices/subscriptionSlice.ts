@@ -28,7 +28,7 @@ const subscriptionSlice = createSlice({
   name: "subscription",
   initialState,
   reducers: {
-    setPlans: (state, action: PayloadAction<SubscriptionPlan>) => {
+    setPlans: (state, action: PayloadAction<SubscriptionPlan | null>) => {
       state.plans = action.payload;
     },
     setOrderHistory: (state, action: PayloadAction<any>) => {

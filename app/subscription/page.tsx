@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import { DailyCreditAd } from "@/components/GetDailyCredit";
 import { PaymentCreate, UserOrderCredit } from "../MainService";
 import { loginSuccess } from "@/store/slices/authSlice";
 import { load } from "@cashfreepayments/cashfree-js";
+import CustomLoader from "@/components/ui/CustomLoader";
 
 const SubscriptionPage = () => {
   const { isAuthenticated, user } = useSelector(
@@ -41,6 +42,14 @@ const SubscriptionPage = () => {
     isSuccess: null,
   });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tokenPackages = [
     {
@@ -123,11 +132,12 @@ const SubscriptionPage = () => {
   };
 
   const initiatePayment = async (data: any) => {
+    setLoading(true);
     let cashfree;
     cashfree = await load({
       mode: process.env.NEXT_PUBLIC_CASH_MODE, // or "sandbox" for testing
     });
-    setLoading(true);
+
     PaymentCreate({
       orderNumber:
         Date.now().toString(36) + Math.random().toString(36).substring(2),
@@ -214,14 +224,12 @@ const SubscriptionPage = () => {
       })
       .catch((error) => {
         setDailyCreditRes({ message: error.message, isSuccess: false });
-        // toast.error(
-        //   error.message || "Failed to get free credits. Please try again."
-        // );
       });
   };
 
   return (
     <>
+      {loading && <CustomLoader />}
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="container mx-auto px-4 py-12">
           {/* Header */}

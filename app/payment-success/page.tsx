@@ -7,14 +7,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Clock, Coins, ExternalLink } from "lucide-react";
 import { RootState } from "@/store";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { UserOrderCredit } from "../MainService";
+import { loginSuccess } from "@/store/slices/authSlice";
+import toast from "react-hot-toast";
+import { setOrderHistory, setPlans } from "@/store/slices/subscriptionSlice";
 
 const PaymentSuccessPage = () => {
+  const dispatch = useDispatch();
   const { orderHistory, plans } = useSelector(
     (state: RootState) => state.subscription
   );
-  console.log("plans======", plans);
-  console.log("orderHistory======", orderHistory);
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
+  );
+
   const router = useRouter();
   const [countdown, setCountdown] = useState(2);
 
@@ -24,21 +31,47 @@ const PaymentSuccessPage = () => {
   const tokens = plans?.tokens || "N/A";
   const packageName = plans?.name || "N/A";
 
-  //   useEffect(() => {
-  //     // Countdown timer for automatic redirect
-  //     const timer = setInterval(() => {
-  //       setCountdown((prev) => {
-  //         if (prev <= 1) {
-  //           clearInterval(timer);
-  //           router.push("/matches");
-  //           return 0;
-  //         }
-  //         return prev - 1;
-  //       });
-  //     }, 1000);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+    let payload = {
+      ordertype: "purchase",
+      userId: user!.id,
+      credits: plans?.tokens || 0,
+      status: "completed",
+    };
 
-  //     return () => clearInterval(timer);
-  //   }, [router]);
+    UserOrderCredit(payload)
+      .then((res) => {
+        const prepareUser: any = user
+          ? { ...user, credits: user.credits + (plans?.tokens || 0) }
+          : null;
+
+        dispatch(loginSuccess({ ...prepareUser }));
+        dispatch(setPlans(null));
+        dispatch(setOrderHistory(null));
+      })
+      .catch((error) => {
+        toast.error(error.message || "Error submit order. Please try again.");
+      });
+
+    // Countdown timer for automatic redirect
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          router.push("/matches");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
   const handleManualRedirect = () => {
     router.push("/matches");

@@ -22,18 +22,11 @@ export function PrepareOrderData(formData: any, isEdit = false) {
     orderNumber:
       formData.orderNumber || (isEdit ? undefined : generateOrderNumber()),
 
-    ordertype: formData.ordertype || "subscription",
+    ordertype: formData.ordertype || "purchase",
 
     price: formData.price !== undefined ? Number(formData.price) : null,
 
     userId: new mongoose.Types.ObjectId(formData.userId),
-
-    subscriptionId:
-      new mongoose.Types.ObjectId(formData.subscriptionId) || null,
-
-    subscriptionExpired: formData.subscriptionExpired
-      ? new Date(formData.subscriptionExpired)
-      : null,
 
     credits: formData.credits !== undefined ? Number(formData.credits) : null,
 
@@ -45,16 +38,8 @@ export function PrepareOrderData(formData: any, isEdit = false) {
         ? "completed"
         : formData.status || "pending",
 
-    paymentId: formData.paymentId || null,
-
+    paymentDetails: formData.paymentDetails || null,
     paymentMode: formData.paymentMode || null,
-
-    paymentModeDetails: formData.paymentModeDetails || null,
-
-    // senderId: formData.senderId || null,
-
-    receiverId: new mongoose.Types.ObjectId(formData.receiverId) || null,
-
     paymentDate: formData.paymentDate ? new Date(formData.paymentDate) : null,
 
     matchId: formData.matchId ? Number(formData.matchId) : null,
