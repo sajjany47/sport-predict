@@ -22,6 +22,9 @@ import {
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { setPlans } from "@/store/slices/subscriptionSlice";
+import { DailyCreditAd } from "@/components/GetDailyCredit";
+import { UserOrderCredit } from "../MainService";
+import { loginSuccess } from "@/store/slices/authSlice";
 
 const SubscriptionPage = () => {
   const { isAuthenticated, user } = useSelector(
@@ -30,6 +33,11 @@ const SubscriptionPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [customTokens, setCustomTokens] = useState(1);
+  const [dailyCredit, setDailyCredit] = useState(false);
+  const [dailyCreditRes, setDailyCreditRes] = useState<any>({
+    message: "",
+    isSuccess: null,
+  });
 
   const tokenPackages = [
     {
@@ -123,7 +131,8 @@ const SubscriptionPage = () => {
 
     if (packageId === "free") {
       // Handle free token with ad watch
-      toast.success("Watch ad to claim your free token!");
+      setDailyCredit(true);
+      // toast.success("Watch ad to claim your free token!");
       // Here you would integrate with your ad service
       return;
     }
@@ -152,6 +161,33 @@ const SubscriptionPage = () => {
       return "Save ₹601";
     }
     return null;
+  };
+
+  const handleCreditAdd = () => {
+    let payload = {
+      ordertype: "credit",
+      userId: user!.id,
+      credits: 1,
+      status: "completed",
+      paymentMode: "PROMOTION",
+      paymentDate: new Date(),
+    };
+
+    UserOrderCredit(payload)
+      .then((res) => {
+        const prepareUser: any = user
+          ? { ...user, credits: user.credits + 1 }
+          : null;
+
+        setDailyCreditRes({ message: res.message, isSuccess: true });
+        dispatch(loginSuccess({ ...prepareUser }));
+      })
+      .catch((error) => {
+        setDailyCreditRes({ message: error.message, isSuccess: false });
+        // toast.error(
+        //   error.message || "Failed to get free credits. Please try again."
+        // );
+      });
   };
 
   return (
@@ -715,6 +751,14 @@ const SubscriptionPage = () => {
           </Card>
         </div>
       </div>
+      {dailyCredit && (
+        <DailyCreditAd
+          isOpen={dailyCredit}
+          onClose={() => setDailyCredit(false)}
+          onCreditAdd={handleCreditAdd}
+          dailyCreditRes={dailyCreditRes}
+        />
+      )}
     </>
   );
 };
