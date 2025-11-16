@@ -71,7 +71,7 @@ const Header = () => {
     { href: "/about", label: "About", icon: Info },
     { href: "/support", label: "Support", icon: HelpCircle },
     { href: "/matches", label: "Matches", icon: Calendar },
-    { href: "/subscription", label: "Subscription", icon: CreditCard },
+    { href: "/subscription", label: "Token", icon: CreditCard },
   ];
 
   const menuItems = [
@@ -86,8 +86,8 @@ const Header = () => {
       icon: <LayoutDashboard className="mr-2 h-4 w-4" />,
     },
     {
-      label: "Subscription",
-      href: "/dashboard/subscription",
+      label: "Token",
+      href: "/subscription",
       icon: <Settings className="mr-2 h-4 w-4" />,
     },
     {

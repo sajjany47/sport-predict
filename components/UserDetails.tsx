@@ -398,7 +398,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                       className="flex items-center gap-2"
                     >
                       <Crown className="h-4 w-4" />
-                      <span className="hidden sm:inline">Subscription</span>
+                      <span className="hidden sm:inline">Token</span>
                     </TabsTrigger>
                     <TabsTrigger
                       value="profile"
