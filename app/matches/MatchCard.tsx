@@ -91,14 +91,16 @@ const MatchCard = ({
       return `Starts ${new Date(match.startTime).toLocaleDateString()}`;
     }
 
+    const result = match?.score?.result ?? "";
+    const hasGarbage = result.includes("{\\") || result.includes('\\"');
     // 🟢 2. Completed match
     if (match.status === "COMPLETED") {
-      return match.score !== null ? match.score.result : "Match completed";
+      return result !== "" && !hasGarbage ? result : "Match completed";
     }
 
     // 🟢 3. LIVE match (detailed test logic)
     if (match.status === "LIVE") {
-      return match.score !== null ? match.score.result : "Match in progress";
+      return result !== "" && !hasGarbage ? result : "Match in progress";
     }
 
     // 🟢 Fallback

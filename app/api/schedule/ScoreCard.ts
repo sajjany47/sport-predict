@@ -17,59 +17,123 @@ export type ScoreCardResult = {
 export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
   try {
     const $ = await GetHtml(url);
-
     // --- MATCH NAME ---
     const matchName = ($("h1").first().text() || "")
       .trim()
       .replace(/\s+/g, " ");
 
-    // container for miniscore areas (cover multiple possible ids)
+    // container for miniscore areas
     const container = $(
       "#miniscore-branding-container, #sticky-mscore, #sticky-mcomplete"
     );
 
-    // --- RESULT / SESSION INFO (robust) ---
-    let result: string | null =
-      ($(".text-cbTxtLive").first().text() || "").trim() ||
-      ($(".text-cbLive").first().text() || "").trim() ||
-      ($(".text-cbTextLink").first().text() || "").trim() ||
-      "";
+    // ---------------- RESULT / SESSION INFO (improved) ----------------
+    // collect candidates from known selectors, sticky, and container children
+    const quickSelectors = [
+      ".text-cbTxtLive",
+      ".text-cbLive",
+      ".text-cbTextLink",
+      "#sticky-mscore .text-cbLive",
+      "#sticky-mscore .text-cbTxtLive",
+      "#sticky-mcomplete .text-cbTextLink",
+    ];
 
-    const isResultLike = (t: string | undefined | null) => {
-      if (!t) return false;
+    const candidatesSet = new Set<string>();
+    const addCandidate = (t?: string | null) => {
+      if (!t) return;
       const s = (t || "").replace(/\s+/g, " ").trim();
-      return /(?:Day\s*\d+\s*:|Stumps|trail by|Session|won by|innings|innings and)\b/i.test(
-        s
-      );
+      if (!s) return;
+      // ignore long blocks
+      if (s.length > 200) return;
+      candidatesSet.add(s);
     };
 
-    if (!isResultLike(result)) {
-      const candidates: string[] = [];
-      container.find("*").each((i, el) => {
-        const text = ($(el).text() || "").replace(/\s+/g, " ").trim();
-        if (!text) return;
-        if (text.length > 200) return;
-        if (isResultLike(text)) candidates.push(text);
-      });
+    // add quick selectors
+    quickSelectors.forEach((sel) => addCandidate($(sel).first().text()));
 
-      if (candidates.length) {
-        candidates.sort((a, b) => a.length - b.length);
-        result = candidates[0];
-      } else {
-        const bodyText = ($("body").text() || "").replace(/\s+/g, " ").trim();
-        const m = bodyText.match(/(Day\s*\d+\s*[:\-–].{1,200})/i);
-        if (m) result = m[1].trim();
-      }
+    // scan container children for short result-like texts
+    container.find("*").each((i, el) => {
+      const txt = ($(el).text() || "").replace(/\s+/g, " ").trim();
+      if (!txt) return;
+      if (txt.length > 160) return;
+      addCandidate(txt);
+    });
+
+    // also add a few small obvious places (header area)
+    addCandidate($(".bg-cbGrnCyn .text-cbTxtLive").first().text());
+    addCandidate(container.find(".text-cbTxtLive").first().text());
+    addCandidate(container.find(".text-cbTextLink").first().text());
+
+    // fallback: body-wide short matches containing Day or need/won keywords
+    const bodyText = ($("body").text() || "").replace(/\s+/g, " ").trim();
+    const bodyMatches = bodyText.match(
+      /(Day\s*\d+\s*[:\-–][^\.]{1,120}|[A-Z][a-z]+ (?:need|needs|require|requires|required) [0-9]+ runs|[A-Za-z ]{1,30} (?:need|needs|required|require) [0-9]+|[A-Za-z ]{1,30} (?:won by|lost by|lead by|trail by|lead the match by|lead by))/gi
+    );
+    if (bodyMatches) bodyMatches.forEach((m) => addCandidate(m));
+
+    // prepare array of unique candidates
+    const candidates = Array.from(candidatesSet)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    // scoring / priority rules for candidates
+    // higher number = more likely to be the "result" line
+    const priorityScore = (s: string) => {
+      const lower = s.toLowerCase();
+
+      // exact high-priority patterns
+      if (/\bneed\s+[0-9]+\s+runs\b/i.test(lower)) return 100; // "West Indies need 260 runs"
+      if (/\breq[:\s]/i.test(s)) return 95; // "REQ: 5.47"
+      if (/\bwon by\b/i.test(lower)) return 90; // "Bangladesh won by..."
+      if (/\blead by\b/i.test(lower)) return 85; // "lead by 63"
+      if (/\btrail by\b/i.test(lower)) return 85;
+      if (/\binnings\b/i.test(lower) && /\bwon by/i.test(lower)) return 92;
+      if (/\bstumps\b/i.test(lower)) return 80; // "Stumps - India trail by..."
+      if (/\bday\s*\d+\b/i.test(lower)) return 80; // Day x
+      if (/\bsession\b/i.test(lower)) return 70;
+      if (/\btargets?\b/i.test(lower)) return 60;
+      if (/\bpartnership\b/i.test(lower)) return 40;
+
+      // presence of "REQ" or "CRR" but alone is lower priority
+      if (/\bcrr\b/i.test(lower) || /\bsreq\b/i.test(lower)) return 30;
+
+      // short informative lines still OK
+      if (lower.length < 40) return 20;
+
+      // everything else fallback
+      return 10;
+    };
+
+    // choose best candidate: highest priority, then shortest length
+    let bestResult: string | null = null;
+    if (candidates.length) {
+      candidates.sort((a, b) => {
+        const pa = priorityScore(a);
+        const pb = priorityScore(b);
+        if (pa !== pb) return pb - pa; // descending priority
+        return a.length - b.length; // shorter preferred
+      });
+      bestResult = candidates[0];
     }
 
-    result = (result || "").replace(/\s+/g, " ").trim();
-    if (!result) result = null;
+    // final fallback: try to extract "Team need X runs" from the compact sticky area
+    if (!bestResult) {
+      const sticky =
+        $("#sticky-mscore, #miniscore-branding-container").text() || "";
+      const m = sticky.match(
+        /([A-Za-z ]{2,40}\s+(?:need|needs)\s+[0-9]+(?:\s*runs)?)/i
+      );
+      if (m) bestResult = m[1].trim();
+    }
 
-    // ---------------- SCORE EXTRACTION ----------------
+    // normalize whitespace and set null if empty
+    const result = bestResult ? bestResult.replace(/\s+/g, " ").trim() : null;
+
+    // ---------------- SCORE extraction (kept from previous robust version) ----------------
     const scoreCandidates: ScoreEntry[] = [];
-    const norm = (t: string | undefined | null) =>
+    const norm = (t?: string) =>
       (t || "").toString().trim().replace(/\s+/g, " ");
-    const normalizeRunText = (raw: string | undefined | null) => {
+    const normalizeRunText = (raw?: string) => {
       if (!raw) return "";
       return raw
         .toString()
@@ -79,12 +143,6 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
         .trim();
     };
 
-    // permissive run pattern:
-    // - single number: 159
-    // - wickets: 37/1 or 37-1
-    // - overs: (35) or (35.0)
-    // - multi-innings joined by &: "286 & 254"
-    // - declared: "587/8 d"
     const runPattern =
       /^(?:[0-9]+(?:[\/\-\u2013][0-9]+)?(?:\s*\([0-9.]+\))?(?:\s*[dD])?)(?:\s*(?:&|\band\b)\s*[0-9]+(?:[\/\-\u2013][0-9]+)?(?:\s*\([0-9.]+\))?(?:\s*[dD])?)*$/i;
 
@@ -102,25 +160,20 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
       "RECENT",
     ]);
 
-    // Primary strategy: when a team token is found, read siblings in same parent row,
-    // combine adjacent numeric children, and validate the combined run string.
+    // Primary strategy: when a team token is found, read siblings in same parent row
     container.find("*").each((i, el) => {
       const $el = $(el);
       const text = norm($el.text());
       if (!text) return;
-
-      // team token heuristic: 2-4 uppercase letters (IND, RSA, BAN, IRE, ENG)
       if (/^[A-Z]{2,4}$/.test(text)) {
         const team = text.toUpperCase();
         if (scoreCandidates.some((s) => s.team === team)) return;
-
         let run: string | null = null;
 
-        // 1) inspect parent row children: collect parts after the team token
+        // inspect parent children after token
         const parent = $el.parent();
         if (parent && parent.length) {
           const children = parent.children().toArray();
-          // find index of the child that exactly equals this token (or contains it)
           let idx = -1;
           for (let k = 0; k < children.length; k++) {
             if (norm($(children[k]).text()) === team) {
@@ -136,7 +189,6 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
               }
             }
           }
-
           if (idx >= 0) {
             const parts: string[] = [];
             for (let p = idx + 1; p < children.length; p++) {
@@ -146,10 +198,8 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
               parts.push(part);
             }
             const joined = normalizeRunText(parts.join(" "));
-            if (joined && runPattern.test(joined)) {
-              run = joined;
-            } else {
-              // try combining only numeric-like children
+            if (joined && runPattern.test(joined)) run = joined;
+            else {
               const numericParts: string[] = [];
               for (let p = idx + 1; p < children.length; p++) {
                 const part = norm($(children[p]).text());
@@ -163,7 +213,7 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
           }
         }
 
-        // 2) fallback: scan next siblings in DOM (small window)
+        // fallback: scan next siblings
         if (!run) {
           let next = $el.next();
           const collected: string[] = [];
@@ -181,7 +231,7 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
           if (candidate && runPattern.test(candidate)) run = candidate;
         }
 
-        // 3) final fallback: search container text for "TEAM <numbers...>"
+        // final fallback: search container text
         if (!run) {
           const big = normalizeRunText(
             norm(container.text() || $("body").text())
@@ -189,7 +239,7 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
           const rx = new RegExp(
             `${team.replace(
               /[-/\\^$*+?.()|[\\]{}]/g,
-              "\\$&"
+              "\\\\$&"
             )}[^A-Z0-9\\n]{0,10}([0-9][0-9\\s\\/\\-\\&\\(\\)\\.dD]+)`,
             "i"
           );
@@ -200,14 +250,13 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
           }
         }
 
-        // push validated entry
         if (run && !excludeSet.has(team) && runPattern.test(run)) {
           scoreCandidates.push({ team, run });
         }
       }
     });
 
-    // Additional fallback scanning for team + run pairs if not enough candidates
+    // fallback scan if needed
     if (scoreCandidates.length < 2) {
       const big = normalizeRunText(norm(container.text() || $("body").text()));
       const multiRe = new RegExp(
@@ -231,13 +280,12 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
       }
     }
 
-    // Return only the first two valid team entries (dynamic)
     const finalScore = scoreCandidates.slice(0, 2);
 
     return {
       matchName: matchName || null,
       score: finalScore,
-      result: result || null,
+      result,
     };
   } catch (error) {
     // optional: console.error("ScoreCard error", error);
