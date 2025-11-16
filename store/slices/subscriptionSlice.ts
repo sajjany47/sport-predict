@@ -1,34 +1,27 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SubscriptionPlan {
-  _id: string;
+  id: string;
   name: string;
   price: number;
-  credits: number;
+  tokens: number;
+  description: string;
+  popular: boolean;
   features: string[];
-  popular?: boolean;
-}
-
-interface OrderHistory {
-  id: string;
-  plan: string;
-  amount: number;
-  date: string;
-  status: "completed" | "pending" | "failed";
+  icon: any;
+  color: string;
+  bgColor: string;
+  borderColor: string;
 }
 
 interface SubscriptionState {
   plans: SubscriptionPlan | null;
-  orderHistory: OrderHistory[];
-  loading: boolean;
-  error: string | null;
+  orderHistory: any;
 }
 
 const initialState: SubscriptionState = {
   plans: null,
-  orderHistory: [],
-  loading: false,
-  error: null,
+  orderHistory: null,
 };
 
 const subscriptionSlice = createSlice({
@@ -38,21 +31,11 @@ const subscriptionSlice = createSlice({
     setPlans: (state, action: PayloadAction<SubscriptionPlan>) => {
       state.plans = action.payload;
     },
-    setOrderHistory: (state, action: PayloadAction<OrderHistory[]>) => {
+    setOrderHistory: (state, action: PayloadAction<any>) => {
       state.orderHistory = action.payload;
-    },
-    addOrder: (state, action: PayloadAction<OrderHistory>) => {
-      state.orderHistory.unshift(action.payload);
-    },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
-    },
-    setError: (state, action: PayloadAction<string | null>) => {
-      state.error = action.payload;
     },
   },
 });
 
-export const { setPlans, setOrderHistory, addOrder, setLoading, setError } =
-  subscriptionSlice.actions;
+export const { setPlans, setOrderHistory } = subscriptionSlice.actions;
 export default subscriptionSlice.reducer;
