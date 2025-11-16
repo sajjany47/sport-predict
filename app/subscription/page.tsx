@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React, { useState } from "react";
@@ -147,7 +148,7 @@ const SubscriptionPage = () => {
     // For paid packages, redirect to payment
     const packageData = tokenPackages.find((pkg) => pkg.id === packageId);
     if (packageData) {
-      dispatch(setPlans(packageData));
+      // dispatch(setPlans(packageData));
       router.push(
         `/payment?package=${packageId}&tokens=${tokens}&amount=${price}`
       );
