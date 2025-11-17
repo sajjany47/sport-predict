@@ -155,7 +155,8 @@ export const POST = async (req: NextRequest) => {
       if (createdOrder.ordertype === "prediction") {
         await User.updateOne(
           { _id: new mongoose.Types.ObjectId(loggedInUser._id) },
-          { $inc: { credits: -(createdOrder.credits || 0) } }
+          { $inc: { credits: -(createdOrder.credits || 0) } },
+          { session }
         );
       } else if (createdOrder.ordertype === "credit") {
         await User.updateOne(
