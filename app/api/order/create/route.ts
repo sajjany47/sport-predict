@@ -8,7 +8,6 @@ import mongoose from "mongoose";
 import User from "../../users/UserModel";
 import moment from "moment";
 import axios from "axios";
-import { use } from "react";
 
 export const POST = async (req: NextRequest) => {
   await dbConnect();
@@ -70,6 +69,7 @@ export const POST = async (req: NextRequest) => {
     }
 
     let prepareData = PrepareOrderData({ ...data, userId: loggedInUser._id });
+
     if (data.ordertype === "purchase") {
       const headers = {
         "Content-Type": "application/json",

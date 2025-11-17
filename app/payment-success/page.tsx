@@ -41,6 +41,7 @@ const PaymentSuccessPage = () => {
       userId: user!.id,
       credits: plans?.tokens || 0,
       status: "completed",
+      paymentIntentId: orderHistory?.order_id,
     };
 
     UserOrderCredit(payload)
