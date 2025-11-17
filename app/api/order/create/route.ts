@@ -7,21 +7,19 @@ import Order from "../OrderModel";
 import mongoose from "mongoose";
 import User from "../../users/UserModel";
 import moment from "moment";
-import { MailSend } from "@/lib/MailSend";
-import {
-  AdminPaymentConfirmationTemp,
-  UserPaymentConfirmationTemp,
-} from "@/components/template/subscription-temp";
-import Subscription from "../../subscription/SubscriptionModel";
+import axios from "axios";
+import { use } from "react";
 
 export const POST = async (req: NextRequest) => {
   await dbConnect();
   try {
     const data = await req.json();
+    const xUser = req.headers.get("x-user");
+    const loggedInUser = xUser ? JSON.parse(xUser) : null;
     await orderValidationSchema.validate(data, { abortEarly: false });
 
     const findUser = await User.findOne({
-      _id: new mongoose.Types.ObjectId(data.userId),
+      _id: new mongoose.Types.ObjectId(loggedInUser._id),
     });
 
     if (!findUser) {
@@ -33,7 +31,7 @@ export const POST = async (req: NextRequest) => {
 
     if (data.ordertype === "prediction") {
       const findMatchId = await Order.findOne({
-        userId: new mongoose.Types.ObjectId(data.userId),
+        userId: new mongoose.Types.ObjectId(loggedInUser._id),
         paymentMode: "DEDUCTION",
         matchId: Number(data.matchId),
       });
@@ -57,7 +55,7 @@ export const POST = async (req: NextRequest) => {
       const startOfDay = moment().startOf("day").toDate();
       const endOfDay = moment().endOf("day").toDate();
       const checkDailyCredit = await Order.findOne({
-        userId: new mongoose.Types.ObjectId(data.userId),
+        userId: new mongoose.Types.ObjectId(loggedInUser._id),
         ordertype: "credit",
         status: "completed",
         paymentMode: "PROMOTION",
@@ -71,7 +69,38 @@ export const POST = async (req: NextRequest) => {
       }
     }
 
-    const prepareData = PrepareOrderData(data);
+    let prepareData = PrepareOrderData({ ...data, userId: loggedInUser._id });
+    if (data.ordertype === "purchase") {
+      const headers = {
+        "Content-Type": "application/json",
+        "x-api-version": "2025-01-01",
+        "x-client-id": process.env.NEXT_PUBLIC_CASH_ID,
+        "x-client-secret": process.env.NEXT_PUBLIC_CASH_KEY,
+      };
+
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_CASH_URL}/orders/${data.paymentIntentId}`,
+        {
+          headers,
+        }
+      );
+
+      if (response.data.order_status === "PAID") {
+        const paymentDetails = await axios.get(
+          `${process.env.NEXT_PUBLIC_CASH_URL}/orders/${response.data.order_id}/payments`,
+          {
+            headers,
+          }
+        );
+
+        prepareData.paymentStatus = true;
+        prepareData.status = "completed";
+        prepareData.paymentDate = paymentDetails.data[0]?.payment_time;
+        prepareData.paymentDetails = paymentDetails.data;
+      }
+
+      // const verifyPayment=
+    }
     const orderData = await Order.create({
       ...prepareData,
       _id: new mongoose.Types.ObjectId(),
@@ -88,42 +117,20 @@ export const POST = async (req: NextRequest) => {
         { $set: { credits: (findUser?.credits ?? 0) + (data?.credits ?? 0) } }
       );
     }
-    if (orderData && orderData.ordertype === "subscription") {
-      const findSUbscription = await Subscription.findOne({
-        _id: new mongoose.Types.ObjectId(prepareData.subscriptionId),
-      });
-      const findAdmin = await User.findOne({ role: "admin" });
-      await MailSend({
-        to: [findUser.email],
-        subject: "Payment Submitted - SportPredict",
-        html: UserPaymentConfirmationTemp({
-          subscriptionPlan: findSUbscription?.name || "",
-          paymentId: orderData.paymentId || "",
-          paymentMode: orderData.paymentMode || "",
-          paymentDate: moment(prepareData.paymentDate).format(
-            "MMMM DD, YYYY HH:mm"
-          ),
-          paymentModeDetails: orderData.paymentModeDetails || "",
-          price: prepareData.price || 0,
-          username: findUser.username,
-        }),
-      });
-      await MailSend({
-        to: [findAdmin.email],
-        subject: `Payment Submitted(${findUser.username}) - SportPredict`,
-        html: AdminPaymentConfirmationTemp({
-          subscriptionPlan: findSUbscription?.name || "",
-          paymentId: prepareData.paymentId || "",
-          paymentMode: prepareData.paymentMode || "",
-          paymentDate: moment(prepareData.paymentDate).format(
-            "MMMM DD, YYYY HH:mm"
-          ),
-          paymentModeDetails: prepareData.paymentModeDetails || "",
-          price: prepareData.price || 0,
-          username: findUser.username,
-          email: findUser.email,
-        }),
-      });
+    if (orderData && orderData.ordertype === "purchase") {
+      const userCreditUpdate = await User.updateOne(
+        {
+          _id: new mongoose.Types.ObjectId(findUser._id),
+        },
+        {
+          $set: {
+            credits:
+              Number(findUser.credits || 0) + (prepareData?.credits || 0),
+          },
+        }
+      );
+      if (userCreditUpdate) {
+      }
     }
     return NextResponse.json(
       { success: true, message: "Order created successfully", data: orderData },

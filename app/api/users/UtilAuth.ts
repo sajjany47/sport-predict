@@ -9,7 +9,6 @@ export async function generateToken(payload: any, expiresIn: string) {
     name: payload.name,
     email: payload.email,
     mobileNumber: payload.mobileNumber,
-    subscription: payload.subscription.toString(),
     username: payload.username,
     role: payload.role,
     isActive: payload.isActive,

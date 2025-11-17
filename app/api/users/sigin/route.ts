@@ -60,13 +60,10 @@ export async function POST(request: NextRequest) {
 
     // Generate token
     const prepareResponse = UserData(user);
-    const filterSubscription = user.subscription.find(
-      (item: any) => item.isActive
-    );
+
     const accessToken = await generateToken(
       {
         ...prepareResponse,
-        subscription: filterSubscription._id,
         _id: user._id,
       },
       "15m"
@@ -75,7 +72,6 @@ export async function POST(request: NextRequest) {
     const refreshToken = await generateToken(
       {
         ...prepareResponse,
-        subscription: filterSubscription._id,
         _id: user._id,
       },
       "1d"
