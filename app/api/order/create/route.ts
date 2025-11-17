@@ -124,7 +124,7 @@ export const POST = async (req: NextRequest) => {
       } else {
         // Not paid - keep as pending
         prepareData.paymentStatus = false;
-        prepareData.status = prepareData.status || "pending";
+        prepareData.status = "failed";
       }
       // const verifyPayment=
     }
