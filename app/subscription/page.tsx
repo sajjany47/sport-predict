@@ -162,18 +162,42 @@ const SubscriptionPage = () => {
     tokens: number,
     price: number
   ) => {
-    // ... (existing checks) ...
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+
+    if (packageId === "free") {
+      setDailyCredit(true);
+      return;
+    }
+
+    if (packageId === "custom" && customTokens < 1) {
+      toast.error("Please select at least 1 token");
+      return;
+    }
 
     const packageData = tokenPackages.find((pkg) => pkg.id === packageId);
+    if (!packageData) return;
 
-    if (packageData) {
-      initiatePayment(packageData);
+    const actualPrice = packageId === "custom" ? customTokens * 100 : price;
 
-      // FIX: Destructure out the non-serializable 'icon' property before dispatching
-      const { icon, ...serializableData }: any = packageData;
+    // Save chosen plan before redirect and call payment
+    const prepareData = {
+      ...packageData,
+      price: actualPrice,
+      tokens: packageId === "custom" ? customTokens : packageData.tokens,
+    };
+    const { icon, ...serializableData }: any = prepareData;
+    console.log(serializableData);
 
-      dispatch(setPlans(serializableData)); // Dispatch the clean object
-    }
+    dispatch(setPlans(serializableData));
+    initiatePayment({
+      id: packageData.id,
+      price: actualPrice,
+      tokens: packageId === "custom" ? customTokens : packageData.tokens,
+      name: packageData.name,
+    });
   };
 
   const calculateSavings = (packageId: string) => {
