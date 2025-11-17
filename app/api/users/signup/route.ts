@@ -52,22 +52,11 @@ export async function POST(request: NextRequest) {
       );
     } else {
       // ✅ Create new user
-      const modifySubscription = [
-        {
-          _id: new mongoose.Types.ObjectId(),
-          subscriptionId: new mongoose.Types.ObjectId(
-            "6873c7502d01bea623cac559"
-          ),
-          isActive: true,
-          expiryDate: new Date(),
-          purchaseDate: new Date(),
-        },
-      ];
+
       let userData: any = {
         _id: new mongoose.Types.ObjectId(),
         ...UserData({
           ...body,
-          subscription: modifySubscription,
           credits: 1,
           role: "user",
           isActive: true,
@@ -84,15 +73,9 @@ export async function POST(request: NextRequest) {
 
         // Generate token
         // const token = await generateToken({ ...userData });
-        const accessToken = await generateToken(
-          { ...userData, subscription: modifySubscription[0]._id },
-          "15m"
-        );
+        const accessToken = await generateToken({ ...userData }, "15m");
 
-        const refreshToken = await generateToken(
-          { ...userData, subscription: modifySubscription[0]._id },
-          "1d"
-        );
+        const refreshToken = await generateToken({ ...userData }, "1d");
         const cookie = serialize("refreshToken", refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",

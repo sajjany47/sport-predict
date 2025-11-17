@@ -9,15 +9,6 @@ const UserSchema = new Schema(
       lowercase: true,
     },
     mobileNumber: { type: String, trim: true },
-    subscription: [
-      {
-        subscriptionId: Schema.Types.ObjectId,
-        isActive: Boolean,
-        expiryDate: Date,
-        purchaseDate: Date,
-        credits: Number,
-      },
-    ],
     status: {
       type: String,
       enum: ["active", "suspended", "banned"], // 👈 Allowed roles

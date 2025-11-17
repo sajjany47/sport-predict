@@ -21,8 +21,11 @@ export const POST = async (request: NextRequest) => {
       query.push({
         $match: {
           $or: [
+            { "user.username": { $regex: reqData.search, $options: "i" } },
+            { "user.mobileNumber": { $regex: reqData.search, $options: "i" } },
             { "user.name": { $regex: reqData.search, $options: "i" } },
             { "user.email": { $regex: reqData.search, $options: "i" } },
+            { orderNumber: { $regex: reqData.search, $options: "i" } },
           ],
         },
       });
@@ -61,20 +64,6 @@ export const POST = async (request: NextRequest) => {
       {
         $match: {
           $and: query.length > 0 ? query : [{}],
-        },
-      },
-      {
-        $lookup: {
-          from: "subscriptions",
-          localField: "subscriptionId",
-          foreignField: "_id",
-          as: "plan",
-        },
-      },
-      {
-        $unwind: {
-          path: "$plan",
-          preserveNullAndEmptyArrays: true,
         },
       },
     ];
