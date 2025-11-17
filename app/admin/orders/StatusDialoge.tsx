@@ -8,7 +8,11 @@ import {
 } from "@/components/ui/dialog";
 import { Field, Form, Formik } from "formik";
 import * as yup from "yup";
-import { FormikSelectField, FormikTextArea } from "@/components/CustomField";
+import {
+  FormikSelectField,
+  FormikTextArea,
+  FormikTextInput,
+} from "@/components/CustomField";
 import { Button } from "@/components/ui/button";
 import { OrderUpdate } from "../AdminService";
 import toast from "react-hot-toast";
@@ -72,26 +76,65 @@ const StatusDialoge = ({
           >
             {({ handleSubmit }) => (
               <Form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
-                  <div className="md:col-span-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <div className="md:col-span-4">
                     <Field
-                      label="Transaction Status"
-                      component={FormikSelectField}
-                      options={[
-                        { label: "Pending", value: "pending" },
-                        { label: "Completed", value: "completed" },
-                        { label: "Declined", value: "failed" },
-                        { label: "Refunded", value: "refunded" },
-                      ]}
-                      name="transactionStatus"
+                      label="Order Number"
+                      component={FormikTextInput}
+                      name="remarks"
                     />
                   </div>
-                  <div className="md:col-span-12">
+                  <div className="md:col-span-4">
                     <Field
-                      label="Remarks"
-                      component={FormikTextArea}
-                      name="remarks"
-                      size="3"
+                      label="Type"
+                      component={FormikSelectField}
+                      options={[
+                        { label: "Purchase", value: "purchase" },
+                        { label: "Prediction", value: "prediction" },
+                        { label: "Free Credit", value: "credit" },
+                      ]}
+                      name="ordertype"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <Field
+                      label="Status"
+                      component={FormikSelectField}
+                      options={[
+                        { label: "Completed", value: "completed" },
+                        { label: "Pending", value: "pending" },
+                        { label: "Failed", value: "failed" },
+                        { label: "Refunded", value: "refunded" },
+                      ]}
+                      name="status"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <Field
+                      label="Name"
+                      component={FormikTextInput}
+                      name="name"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <Field
+                      label="Username"
+                      component={FormikTextInput}
+                      name="username"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <Field
+                      label="Email"
+                      component={FormikTextInput}
+                      name="email"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <Field
+                      label="Mobile Nummber"
+                      component={FormikTextInput}
+                      name="monileNumber"
                     />
                   </div>
                 </div>
@@ -103,7 +146,7 @@ const StatusDialoge = ({
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">Update Status</Button>
+                  <Button type="submit">Submit</Button>
                 </div>
               </Form>
             )}

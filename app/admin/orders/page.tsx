@@ -27,6 +27,7 @@ import {
   User,
   DollarSign,
   Wallet,
+  ScanEye,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -41,6 +42,8 @@ import { DateRangePicker } from "@/components/DateRangePicker";
 import moment from "moment";
 import CustomLoader from "@/components/ui/CustomLoader";
 import StatusDialoge from "./StatusDialoge";
+import DataTable from "react-data-table-component";
+import { CustomStyles } from "@/lib/utils";
 
 const AdminOrdersPage = () => {
   const { orders } = useSelector((state: RootState) => state.admin);
@@ -55,6 +58,7 @@ const AdminOrdersPage = () => {
   });
   const [statusDialoge, setStatusDialoge] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>({});
+  const [orderData, setOrderData] = useState<any[]>([]);
 
   const {
     data = [],
@@ -66,7 +70,7 @@ const AdminOrdersPage = () => {
       const response = await OrderList({
         startDate: dateRange.from,
         endDate: dateRange.to,
-        ordertype: "subscription",
+        // ordertype: "subscription",
       });
       return response.data; // extract only the array part
     },
@@ -143,6 +147,47 @@ const AdminOrdersPage = () => {
     setStatusDialoge(false);
     refetch();
   };
+
+  const columns: any[] = [
+    // {
+    //   name: "#",
+    //   selector: (row: any, index: number) => index + 1,
+    //   sortable: true,
+    //   width: "60px",
+    // },
+    {
+      name: "Order Number",
+      selector: (row: any) => row.orderNumber,
+      sortable: true,
+      width: "170px",
+    },
+    { name: "Amount", selector: (row: any) => row.price },
+    { name: "Username", selector: (row: any) => row.user.username },
+    { name: "Type", selector: (row: any) => row.ordertype },
+    {
+      name: "Payment",
+      selector: (row: any) => (row.paymentStatus === true ? "Paid" : "Failed"),
+    },
+    { name: "Status", selector: (row: any) => row.status },
+    {
+      name: "Created At",
+      selector: (row: any) => row.createdAt,
+      cell: (row: any) => moment(row.createdAt).format("Do MMM,YYYY HH:mm"),
+    },
+    {
+      name: "Actions",
+      cell: (row: any) => (
+        <div className="flex space-x-2">
+          <button
+            // onClick={() => handleEdit(row)}
+            className="text-blue-600 hover:text-blue-800"
+          >
+            <ScanEye className="w-4 h-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <>
@@ -430,6 +475,32 @@ const AdminOrdersPage = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+        <div className="p-4 border rounded shadow-sm bg-white w-full">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <h2 className="text-lg font-semibold">All Orders</h2>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+                onClick={() => setStatusDialoge(true)}
+              >
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                {/* <Plus className="h-4 w-4 mr-2" /> */}
+                {`Search`}
+              </Button>
+            </div>
+          </div>
+
+          <DataTable
+            columns={columns}
+            data={data}
+            pagination
+            highlightOnHover
+            striped
+            customStyles={CustomStyles}
+            responsive
+          />
         </div>
       </AdminLayout>
       {statusDialoge && (

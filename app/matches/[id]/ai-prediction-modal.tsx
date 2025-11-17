@@ -158,6 +158,7 @@ const AIPredictionModal: React.FC<{
       userId: user!.id,
       credits: 1,
       status: "completed",
+      paymentStatus: true,
       paymentMode: "DEDUCTION",
       paymentDate: new Date(),
       matchId: selectedMatch?.matchId,
