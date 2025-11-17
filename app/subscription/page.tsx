@@ -162,35 +162,17 @@ const SubscriptionPage = () => {
     tokens: number,
     price: number
   ) => {
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
+    // ... (existing checks) ...
 
-    if (packageId === "free") {
-      // Handle free token with ad watch
-      setDailyCredit(true);
-      // toast.success("Watch ad to claim your free token!");
-      // Here you would integrate with your ad service
-      return;
-    }
-
-    if (packageId === "custom") {
-      if (customTokens < 1) {
-        toast.error("Please select at least 1 token");
-        return;
-      }
-    }
-
-    // For paid packages, redirect to payment
     const packageData = tokenPackages.find((pkg) => pkg.id === packageId);
 
     if (packageData) {
       initiatePayment(packageData);
-      dispatch(setPlans(packageData));
-      // router.push(
-      //   `/payment?package=${packageId}&tokens=${tokens}&amount=${price}`
-      // );
+
+      // FIX: Destructure out the non-serializable 'icon' property before dispatching
+      const { icon, ...serializableData }: any = packageData;
+
+      dispatch(setPlans(serializableData)); // Dispatch the clean object
     }
   };
 

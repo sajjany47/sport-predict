@@ -63,7 +63,7 @@ const PaymentSuccessPage = () => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          router.push("/matches");
+          // router.push("/matches");
           return 0;
         }
         return prev - 1;
@@ -72,7 +72,15 @@ const PaymentSuccessPage = () => {
 
     return () => clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  }, []);
+
+  useEffect(() => {
+    if (countdown === 0) {
+      // Trigger the route change only when countdown state is finalized at 0
+      router.push("/matches");
+    }
+    // The router and countdown are the only necessary dependencies here
+  }, [countdown, router]);
 
   const handleManualRedirect = () => {
     router.push("/matches");
