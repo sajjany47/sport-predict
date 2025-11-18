@@ -93,7 +93,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
   // Helper functions
   const getOrderTypeIcon = (ordertype: string) => {
     switch (ordertype) {
-      case "subscription":
+      case "purchase":
         return <Crown className="h-5 w-5 text-purple-600" />;
       case "prediction":
         return <Target className="h-5 w-5 text-blue-600" />;
@@ -106,7 +106,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
 
   const getOrderTypeColor = (ordertype: string) => {
     switch (ordertype) {
-      case "subscription":
+      case "purchase":
         return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
       case "prediction":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
@@ -203,7 +203,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
     .reduce((sum: any, order: any) => sum + order.credits, 0);
 
   const subscriptionOrders = userData?.orderDetails?.filter(
-    (o: any) => o.ordertype === "subscription"
+    (o: any) => o.ordertype === "purchase"
   ).length;
   const predictionOrders = userData?.orderDetails?.filter(
     (o: any) => o.ordertype === "prediction"
@@ -232,7 +232,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
     {
       title: "Total Spent",
       value: `₹${totalSpent?.toLocaleString()}`,
-      change: `${subscriptionOrders} subscriptions`,
+      change: `${subscriptionOrders} purchase`,
       icon: DollarSign,
       color: "text-purple-600",
       bgColor: "bg-purple-100 dark:bg-purple-900/30",
@@ -566,11 +566,11 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                   <div>
                                     <div className="flex items-center gap-2 mb-1">
                                       <p className="font-medium text-gray-900 dark:text-white">
-                                        {order.ordertype === "subscription"
-                                          ? "Subscription Purchase"
+                                        {order.ordertype === "purchase"
+                                          ? "Credit Purchase"
                                           : order.ordertype === "prediction"
                                           ? `Match Prediction`
-                                          : "Credit Purchase"}
+                                          : "Free Credit"}
                                       </p>
                                       <Badge
                                         className={getOrderTypeColor(
