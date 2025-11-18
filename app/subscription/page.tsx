@@ -73,7 +73,7 @@ const SubscriptionPage = () => {
     {
       id: "basic",
       name: "Starter Pack",
-      price: 299,
+      price: 1,
       tokens: 5,
       description: "Perfect for casual players",
       popular: true,
