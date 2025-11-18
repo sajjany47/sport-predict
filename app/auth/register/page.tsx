@@ -101,7 +101,7 @@ const RegisterPage = () => {
         dispatch(loginSuccess(userData));
         setIsLoading(false);
         toast.success("Account created successfully!");
-        router.push("/dashboard");
+        router.push("/matches");
       })
       .catch((error) => {
         setIsLoading(false);
