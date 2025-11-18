@@ -56,21 +56,6 @@ const AdminOrdersPage = () => {
     router.push(`/admin/orders/${orderId}`);
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "pending":
-        return <Clock className="h-4 w-4 text-yellow-600" />;
-      case "failed":
-        return <XCircle className="h-4 w-4 text-red-600" />;
-      case "refunded":
-        return <RefreshCw className="h-4 w-4 text-blue-600" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-600" />;
-    }
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
@@ -108,7 +93,7 @@ const AdminOrdersPage = () => {
       name: "Order Number",
       selector: (row: any) => row?.orderNumber || "N/A",
       sortable: true,
-      width: "170px",
+      width: "160px",
       cell: (row: any) => (
         <span className="font-medium text-blue-600">
           {row?.orderNumber || "N/A"}
@@ -161,7 +146,6 @@ const AdminOrdersPage = () => {
       sortable: true,
       cell: (row: any) => (
         <div className="flex items-center gap-2">
-          {getStatusIcon(row?.status)}
           <span
             className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(
               row.status
