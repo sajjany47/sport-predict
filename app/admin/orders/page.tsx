@@ -27,10 +27,6 @@ import SearchPage from "./SearchPage";
 const AdminOrdersPage = () => {
   const router = useRouter();
 
-  const [dateRange, setDateRange] = useState({
-    from: moment().subtract(30, "days").toDate(),
-    to: moment().toDate(),
-  });
   const [isSearch, setIsSearch] = useState(false);
   const [searchData, setSearchData] = useState({});
 
@@ -39,17 +35,15 @@ const AdminOrdersPage = () => {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["order-list", dateRange, searchData],
+    queryKey: ["order-list", searchData],
     queryFn: async () => {
       const apiResponse = await OrderList({
-        startDate: dateRange.from,
-        endDate: dateRange.to,
         ...searchData,
       });
       return apiResponse || {};
     },
 
-    enabled: !!dateRange.from && !!dateRange.to,
+    // enabled: !!dateRange.from && !!dateRange.to,
   });
 
   const handleViewOrder = (orderId: string) => {
