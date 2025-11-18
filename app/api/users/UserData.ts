@@ -3,7 +3,6 @@ export const UserData = (data: any) => {
     name: data.name,
     email: data.email,
     mobileNumber: data.mobileNumber,
-    subscription: data.subscription,
     role: data.role,
     username: data.username,
     isActive: data.isActive,

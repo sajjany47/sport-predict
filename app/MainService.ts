@@ -159,3 +159,14 @@ export const TicketDetails = async (id: any) => {
     throw new Error(error.response?.data?.message);
   }
 };
+
+export const PaymentCreate = async (payload: any) => {
+  try {
+    const response = await privateApi.post("/api/payment-intent", payload, {
+      headers: getHeadersWithToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};

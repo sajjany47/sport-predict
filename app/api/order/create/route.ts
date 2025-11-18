@@ -7,21 +7,18 @@ import Order from "../OrderModel";
 import mongoose from "mongoose";
 import User from "../../users/UserModel";
 import moment from "moment";
-import { MailSend } from "@/lib/MailSend";
-import {
-  AdminPaymentConfirmationTemp,
-  UserPaymentConfirmationTemp,
-} from "@/components/template/subscription-temp";
-import Subscription from "../../subscription/SubscriptionModel";
+import axios from "axios";
 
 export const POST = async (req: NextRequest) => {
   await dbConnect();
   try {
     const data = await req.json();
+    const xUser = req.headers.get("x-user");
+    const loggedInUser = xUser ? JSON.parse(xUser) : null;
     await orderValidationSchema.validate(data, { abortEarly: false });
 
     const findUser = await User.findOne({
-      _id: new mongoose.Types.ObjectId(data.userId),
+      _id: new mongoose.Types.ObjectId(loggedInUser._id),
     });
 
     if (!findUser) {
@@ -32,32 +29,32 @@ export const POST = async (req: NextRequest) => {
     }
 
     if (data.ordertype === "prediction") {
-      const findMatchId = await Order.findOne({
-        userId: new mongoose.Types.ObjectId(data.userId),
+      const existingPrediction = await Order.findOne({
+        userId: new mongoose.Types.ObjectId(loggedInUser._id),
         paymentMode: "DEDUCTION",
         matchId: Number(data.matchId),
       });
-      if (findMatchId) {
+      if (existingPrediction) {
         return NextResponse.json(
-          { message: "Already sibscribe this match", credits: 0 },
+          { message: "Already subscribe this match", credits: 0 },
           { status: 200 }
         );
-      } else {
-        const hasSufficientCredit =
-          (findUser?.credits ?? 0) >= (data?.credits ?? 0);
-        if (!hasSufficientCredit) {
-          return NextResponse.json(
-            { success: false, message: "Not sufficient credits for purchase" },
-            { status: 402 } // Payment Required
-          );
-        }
+      }
+
+      const hasSufficientCredit =
+        (findUser?.credits ?? 0) >= (data?.credits ?? 0);
+      if (!hasSufficientCredit) {
+        return NextResponse.json(
+          { success: false, message: "Not sufficient credits for purchase" },
+          { status: 402 }
+        );
       }
     }
     if (data.ordertype === "credit") {
       const startOfDay = moment().startOf("day").toDate();
       const endOfDay = moment().endOf("day").toDate();
       const checkDailyCredit = await Order.findOne({
-        userId: new mongoose.Types.ObjectId(data.userId),
+        userId: new mongoose.Types.ObjectId(loggedInUser._id),
         ordertype: "credit",
         status: "completed",
         paymentMode: "PROMOTION",
@@ -71,64 +68,144 @@ export const POST = async (req: NextRequest) => {
       }
     }
 
-    const prepareData = PrepareOrderData(data);
-    const orderData = await Order.create({
-      ...prepareData,
-      _id: new mongoose.Types.ObjectId(),
-    });
-    if (orderData && data.ordertype === "prediction") {
-      await User.updateOne(
-        { _id: new mongoose.Types.ObjectId(data.userId) },
-        { $set: { credits: (findUser?.credits ?? 0) - (data?.credits ?? 0) } }
+    let prepareData = PrepareOrderData({ ...data, userId: loggedInUser._id });
+
+    if (data.ordertype === "purchase" && data.paymentIntentId) {
+      const headers = {
+        "Content-Type": "application/json",
+        "x-api-version": "2025-01-01",
+        "x-client-id": process.env.NEXT_PUBLIC_CASH_ID,
+        "x-client-secret": process.env.NEXT_PUBLIC_CASH_KEY,
+      };
+
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_CASH_URL}/orders/${data.paymentIntentId}`,
+        {
+          headers,
+          timeout: 10000,
+        }
+      );
+      const orderBody = response.data;
+      const orderStatus = (
+        orderBody?.order_status ||
+        orderBody?.order?.status ||
+        orderBody?.status ||
+        ""
+      )
+        .toString()
+        .toUpperCase();
+      if (orderStatus === "PAID") {
+        let paymentDetails = null;
+        try {
+          const paymentsResp = await axios.get(
+            `${process.env.NEXT_PUBLIC_CASH_URL}/orders/${response.data.order_id}/payments`,
+            { headers, timeout: 10000 }
+          );
+          paymentDetails = paymentsResp.data;
+        } catch (e: any) {
+          // Do not fail processing if payments fetch fails; we still mark PAID but log.
+          console.warn(
+            "Could not fetch payment details:",
+            e?.response?.data || e.message
+          );
+        }
+
+        prepareData.paymentStatus = true;
+        prepareData.status = "completed";
+        // Prefer payment_time from payments list if present
+        if (Array.isArray(paymentDetails) && paymentDetails[0]?.payment_time) {
+          prepareData.paymentDate = new Date(paymentDetails[0].payment_time);
+        } else if (orderBody?.order_time) {
+          prepareData.paymentDate = new Date(orderBody.order_time);
+        } else {
+          prepareData.paymentDate = new Date();
+        }
+        prepareData.paymentDetails = paymentDetails || orderBody;
+      } else {
+        // Not paid - keep as pending
+        prepareData.paymentStatus = false;
+        prepareData.status = "failed";
+      }
+      // const verifyPayment=
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const existingOrder = await Order.findOne({
+        orderNumber: prepareData.orderNumber,
+      }).session(session);
+      if (existingOrder) {
+        await session.commitTransaction();
+        session.endSession();
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Order already exists",
+            data: existingOrder,
+          },
+          { status: 200 }
+        );
+      }
+      const orderData = await Order.create(
+        [{ ...prepareData, _id: new mongoose.Types.ObjectId() }],
+        { session }
+      );
+      const createdOrder = orderData[0];
+      if (createdOrder.ordertype === "prediction") {
+        await User.updateOne(
+          { _id: new mongoose.Types.ObjectId(loggedInUser._id) },
+          {
+            $inc: {
+              credits: -(createdOrder.paymentStatus ? createdOrder.credits : 0),
+            },
+          },
+          { session }
+        );
+      } else if (createdOrder.ordertype === "credit") {
+        await User.updateOne(
+          { _id: new mongoose.Types.ObjectId(loggedInUser._id) },
+          {
+            $inc: {
+              credits: createdOrder.paymentStatus ? createdOrder.credits : 0,
+            },
+          },
+          { session }
+        );
+      } else if (
+        createdOrder.ordertype === "purchase" &&
+        createdOrder.status === "completed"
+      ) {
+        // For successful purchase, add credits
+        await User.updateOne(
+          { _id: new mongoose.Types.ObjectId(loggedInUser._id) },
+          {
+            $inc: {
+              credits: createdOrder.paymentStatus ? createdOrder.credits : 0,
+            },
+          },
+          { session }
+        );
+      }
+      await session.commitTransaction();
+      session.endSession();
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Order created successfully",
+          data: createdOrder,
+        },
+        { status: 200 }
+      );
+    } catch (txnErr) {
+      await session.abortTransaction();
+      session.endSession();
+
+      return NextResponse.json(
+        { success: false, message: FormatErrorMessage(txnErr) },
+        { status: 500 }
       );
     }
-    if (orderData && data.ordertype === "credit") {
-      await User.updateOne(
-        { _id: new mongoose.Types.ObjectId(data.userId) },
-        { $set: { credits: (findUser?.credits ?? 0) + (data?.credits ?? 0) } }
-      );
-    }
-    if (orderData && orderData.ordertype === "subscription") {
-      const findSUbscription = await Subscription.findOne({
-        _id: new mongoose.Types.ObjectId(prepareData.subscriptionId),
-      });
-      const findAdmin = await User.findOne({ role: "admin" });
-      await MailSend({
-        to: [findUser.email],
-        subject: "Payment Submitted - SportPredict",
-        html: UserPaymentConfirmationTemp({
-          subscriptionPlan: findSUbscription?.name || "",
-          paymentId: orderData.paymentId || "",
-          paymentMode: orderData.paymentMode || "",
-          paymentDate: moment(prepareData.paymentDate).format(
-            "MMMM DD, YYYY HH:mm"
-          ),
-          paymentModeDetails: orderData.paymentModeDetails || "",
-          price: prepareData.price || 0,
-          username: findUser.username,
-        }),
-      });
-      await MailSend({
-        to: [findAdmin.email],
-        subject: `Payment Submitted(${findUser.username}) - SportPredict`,
-        html: AdminPaymentConfirmationTemp({
-          subscriptionPlan: findSUbscription?.name || "",
-          paymentId: prepareData.paymentId || "",
-          paymentMode: prepareData.paymentMode || "",
-          paymentDate: moment(prepareData.paymentDate).format(
-            "MMMM DD, YYYY HH:mm"
-          ),
-          paymentModeDetails: prepareData.paymentModeDetails || "",
-          price: prepareData.price || 0,
-          username: findUser.username,
-          email: findUser.email,
-        }),
-      });
-    }
-    return NextResponse.json(
-      { success: true, message: "Order created successfully", data: orderData },
-      { status: 200 }
-    );
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: FormatErrorMessage(error) },

@@ -6,8 +6,6 @@ interface User {
   email: string;
   mobile: string;
   credits: number;
-  subscriptionPlan: string;
-  subscriptionExpiry: string;
   role?: "user" | "admin";
 }
 
@@ -56,25 +54,10 @@ const authSlice = createSlice({
         state.user.credits = action.payload;
       }
     },
-    updateSubscription: (
-      state,
-      action: PayloadAction<{ plan: string; expiry: string }>
-    ) => {
-      if (state.user) {
-        state.user.subscriptionPlan = action.payload.plan;
-        state.user.subscriptionExpiry = action.payload.expiry;
-      }
-    },
   },
 });
 
-export const {
-  loginStart,
-  loginSuccess,
-  loginFailure,
-  logout,
-  updateCredits,
-  updateSubscription,
-} = authSlice.actions;
+export const { loginStart, loginSuccess, loginFailure, logout, updateCredits } =
+  authSlice.actions;
 
 export default authSlice.reducer;

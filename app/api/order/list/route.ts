@@ -11,30 +11,33 @@ export const POST = async (request: NextRequest) => {
 
     let query: any = [
       {
-        paymentDate: {
-          $gte: new Date(reqData.startDate),
-          $lte: new Date(reqData.endDate),
-        },
+        ordertype: reqData.ordertype ? reqData.ordertype : "purchase",
       },
     ];
-    if (reqData.hasOwnProperty("search") && reqData.search) {
-      query.push({
-        $match: {
-          $or: [
-            { "user.name": { $regex: reqData.search, $options: "i" } },
-            { "user.email": { $regex: reqData.search, $options: "i" } },
-          ],
-        },
-      });
-    }
+
     if (reqData.hasOwnProperty("status") && reqData.status) {
       query.push({
         status: reqData.status,
       });
     }
-    if (reqData.hasOwnProperty("ordertype") && reqData.ordertype) {
+    if (reqData.hasOwnProperty("username") && reqData.username) {
       query.push({
-        ordertype: reqData.ordertype,
+        "user.username": { $regex: reqData.username, $options: "i" },
+      });
+    }
+    if (reqData.hasOwnProperty("email") && reqData.email) {
+      query.push({
+        "user.email": { $regex: reqData.email, $options: "i" },
+      });
+    }
+    if (reqData.hasOwnProperty("mobileNumber") && reqData.mobileNumber) {
+      query.push({
+        "user.mobileNumber": { $regex: reqData.mobileNumber, $options: "i" },
+      });
+    }
+    if (reqData.hasOwnProperty("orderNumber") && reqData.orderNumber) {
+      query.push({
+        orderNumber: { $regex: reqData.orderNumber, $options: "i" },
       });
     }
 
@@ -63,20 +66,6 @@ export const POST = async (request: NextRequest) => {
           $and: query.length > 0 ? query : [{}],
         },
       },
-      {
-        $lookup: {
-          from: "subscriptions",
-          localField: "subscriptionId",
-          foreignField: "_id",
-          as: "plan",
-        },
-      },
-      {
-        $unwind: {
-          path: "$plan",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
     ];
 
     if (reqData.hasOwnProperty("userId") && reqData.userId) {
@@ -103,9 +92,32 @@ export const POST = async (request: NextRequest) => {
         },
       },
     ]);
-
+    const totalFailedOrder = data.filter(
+      (item: any) => item.status === "failed"
+    );
+    const totalCompletedOrder = data.filter(
+      (item: any) => item.status === "completed"
+    );
+    const totalRevenue = data
+      .filter(
+        (item: any) =>
+          item.paymentStatus &&
+          item.status === "completed" &&
+          item.ordertype === "purchase"
+      )
+      .reduce((sum: number, order: any) => sum + order.price, 0);
     return NextResponse.json(
-      { success: true, data: data, count: total },
+      {
+        success: true,
+        data: data,
+        count: total,
+        overview: [
+          { value: total, name: "Total Orders" },
+          { value: totalCompletedOrder.length, name: "Completed" },
+          { value: totalFailedOrder.length, name: "Failed" },
+          { value: totalRevenue, name: "Revenue" },
+        ],
+      },
       { status: 200 }
     );
   } catch (error) {

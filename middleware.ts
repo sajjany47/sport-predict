@@ -22,6 +22,7 @@ const protectedPaths: any = [
   "/api/support/update",
   "/api/support/list",
   "/api/support/:id",
+  "/api/payment-intent",
 ];
 
 export async function middleware(request: NextRequest) {
@@ -54,42 +55,6 @@ export async function middleware(request: NextRequest) {
         request: { headers: requestHeaders },
       });
     } catch (error) {
-      // const refreshRes = await fetch(
-      //   `${process.env.NEXT_PUBLIC_API_URL}/api/refresh-token-api`,
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       cookie: request.headers.get("cookie") || "",
-      //     },
-      //   }
-      // );
-
-      // if (refreshRes.ok) {
-      //   console.log("first");
-      //   const { accessToken } = await refreshRes.json();
-
-      //   const requestHeaders = new Headers(request.headers);
-      //   requestHeaders.set("authorization", `Bearer ${accessToken}`);
-      //   const { payload } = await jwtVerify(accessToken, SECRET_KEY);
-      //   requestHeaders.set("x-user", JSON.stringify(payload));
-      //   const res = NextResponse.next({ request: { headers: requestHeaders } });
-
-      //   const setCookie = refreshRes.headers.get("set-cookie");
-      //   if (setCookie) {
-      //     res.headers.set("set-cookie", setCookie);
-      //   }
-
-      //   return res;
-      // } else {
-      //   return NextResponse.json(
-      //     {
-      //       success: false,
-      //       message: "Invalid or expired token. Please login first",
-      //     },
-      //     { status: 401 }
-      //   );
-      // }
-
       return NextResponse.json(
         {
           success: false,

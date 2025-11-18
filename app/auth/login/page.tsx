@@ -47,17 +47,12 @@ const LoginPage = () => {
     setIsLoading(true);
     UserLogin({ ...e })
       .then((res) => {
-        const findSubscription = (res.data.user.subscription ?? []).find(
-          (sub: any) => sub.isActive === true
-        );
         const userData = {
           id: res.data.user._id,
           username: res.data.user.username,
           email: res.data.user.email,
           mobile: res.data.user.mobileNumber,
           credits: res.data.user.credits,
-          subscriptionPlan: findSubscription.subscriptionId || null,
-          subscriptionExpiry: findSubscription.expiryDate || null,
           role: res.data.user.role,
           isActive: res.data.user.isActive,
           token: res.data.token,

@@ -7,6 +7,27 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const CustomStyles = {
+  headCells: {
+    style: {
+      fontWeight: "600",
+      fontSize: "14px",
+      backgroundColor: "#f9fafb",
+    },
+  },
+  rows: {
+    style: {
+      minHeight: "56px",
+    },
+  },
+  pagination: {
+    style: {
+      borderTop: "1px solid #e5e7eb",
+      paddingTop: "10px",
+    },
+  },
+};
+
 export const GetHtml = async (url: string) => {
   const response = await axios.get(url);
   const data = response.data;

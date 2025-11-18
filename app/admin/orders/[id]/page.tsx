@@ -25,23 +25,16 @@ import {
   Package,
   FileText,
   AlertCircle,
-  Edit,
-  MoreHorizontal,
   Receipt,
   Sparkles,
   Wallet,
+  IndianRupee,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import toast from "react-hot-toast";
 import { OrderDetails } from "../../AdminService";
 import CustomLoader from "@/components/ui/CustomLoader";
 import moment from "moment";
-import StatusDialoge from "../StatusDialoge";
 
 const OrderDetailsPage = () => {
   const params = useParams();
@@ -49,7 +42,6 @@ const OrderDetailsPage = () => {
   const [activeTab, setActiveTab] = useState("details");
   const [order, setOrder] = useState<any>({});
   const [loading, setLoading] = useState(false);
-  const [statusDialoge, setStatusDialoge] = useState(false);
   const orderId = params.id as string;
 
   const GetDetails = () => {
@@ -107,7 +99,21 @@ const OrderDetailsPage = () => {
       : "bg-yellow-100 text-yellow-800";
   };
 
+  const getPaymentGatewayStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "success":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "failed":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -117,40 +123,47 @@ const OrderDetailsPage = () => {
     });
   };
 
+  const formatIndianDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    return moment(dateString).format("DD MMM YYYY, hh:mm A");
+  };
+
+  // Get payment details from the response
+  const paymentDetails = order?.paymentDetails?.[0];
+  const user = order?.user;
+
   const timeline = [
     {
       status: "Order Placed",
-      timestamp: moment(order.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+      timestamp: order?.createdAt,
       description: "Customer placed the order",
       icon: ShoppingCart,
       color: "text-blue-600",
     },
     {
-      status: "Payment Processing",
-      timestamp: moment(order.createdAt)
-        .add(2, "minutes")
-        .format("YYYY-MM-DD HH:mm:ss"),
-      description: "Payment is being processed",
+      status: "Payment Initiated",
+      timestamp: paymentDetails?.payment_time || order?.createdAt,
+      description: "Payment process started",
       icon: CreditCard,
       color: "text-yellow-600",
     },
     {
-      status: order.paymentStatus ? "Payment Confirmed" : "Payment Pending",
-      timestamp: moment(order.createdAt)
-        .add(5, "minutes")
-        .format("YYYY-MM-DD HH:mm:ss"),
-      description: order.paymentStatus
-        ? "Payment confirmed and subscription activated"
+      status: order?.paymentStatus ? "Payment Confirmed" : "Payment Pending",
+      timestamp: paymentDetails?.payment_completion_time || order?.createdAt,
+      description: order?.paymentStatus
+        ? "Payment confirmed successfully"
         : "Payment pending - awaiting confirmation",
-      icon: order.paymentStatus ? CheckCircle : Clock,
-      color: order.paymentStatus ? "text-green-600" : "text-yellow-600",
+      icon: order?.paymentStatus ? CheckCircle : Clock,
+      color: order?.paymentStatus ? "text-green-600" : "text-yellow-600",
+    },
+    {
+      status: "Order Completed",
+      timestamp: order?.updatedAt,
+      description: "Order processing completed",
+      icon: CheckCircle,
+      color: "text-green-600",
     },
   ];
-
-  const handelClose = () => {
-    setStatusDialoge(false);
-    GetDetails();
-  };
 
   return (
     <>
@@ -179,33 +192,6 @@ const OrderDetailsPage = () => {
                     <Download className="h-4 w-4 mr-2" />
                     Download Invoice
                   </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button>
-                        <MoreHorizontal className="h-4 w-4 mr-2" />
-                        Actions
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setTimeout(() => setStatusDialoge(true), 50);
-                        }}
-                      >
-                        <Wallet className="h-4 w-4 mr-2" />
-                        Transaction Status
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Order
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Mail className="h-4 w-4 mr-2" />
-                        Send Email
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </div>
             </div>
@@ -225,16 +211,17 @@ const OrderDetailsPage = () => {
                     <p className="text-sm text-gray-600 mt-1">Order Status</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">
-                      ₹{order?.price}
+                    <div className="text-2xl font-bold text-gray-900 flex items-center justify-center">
+                      <IndianRupee className="h-5 w-5 mr-1" />
+                      {order?.price}
                     </div>
                     <p className="text-sm text-gray-600">Total Amount</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-gray-900">
-                      {order?.plan?.name} Plan
+                    <div className="text-lg font-semibold text-gray-900 capitalize">
+                      {order?.ordertype}
                     </div>
-                    <p className="text-sm text-gray-600">Subscription</p>
+                    <p className="text-sm text-gray-600">Order Type</p>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-semibold text-gray-900">
@@ -283,14 +270,11 @@ const OrderDetailsPage = () => {
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Plan:</span>
-                          <span className="font-medium">
-                            {order?.plan?.name} Subscription
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
                           <span className="text-gray-600">Amount:</span>
-                          <span className="font-medium">₹{order?.price}</span>
+                          <span className="font-medium flex items-center">
+                            <IndianRupee className="h-4 w-4 mr-1" />
+                            {order?.price}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Credits:</span>
@@ -300,6 +284,12 @@ const OrderDetailsPage = () => {
                           <span className="text-gray-600">Order Date:</span>
                           <span className="font-medium">
                             {formatDate(order?.createdAt)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Last Updated:</span>
+                          <span className="font-medium">
+                            {formatDate(order?.updatedAt)}
                           </span>
                         </div>
                         <div className="flex justify-between">
@@ -315,77 +305,59 @@ const OrderDetailsPage = () => {
                     <Card className="border-0 shadow-lg">
                       <CardHeader>
                         <CardTitle className="flex items-center space-x-2">
-                          <FileText className="h-5 w-5 text-green-600" />
-                          <span>Subscription Details</span>
+                          <Wallet className="h-5 w-5 text-green-600" />
+                          <span>Credit Information</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Plan Type:</span>
-                          <span className="font-medium">
-                            {order?.plan?.name}
+                          <span className="text-gray-600">
+                            Credits Purchased:
+                          </span>
+                          <span className="font-medium">{order?.credits}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Order Value:</span>
+                          <span className="font-medium flex items-center">
+                            <IndianRupee className="h-4 w-4 mr-1" />
+                            {order?.price}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Duration:</span>
-                          <span className="font-medium">1 Month</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Credits:</span>
-                          <span className="font-medium">
-                            {order?.plan?.credits}
+                          <span className="text-gray-600">Credit Rate:</span>
+                          <span className="font-medium flex items-center">
+                            <IndianRupee className="h-4 w-4 mr-1" />
+                            {order?.price && order?.credits
+                              ? (order.price / order.credits).toFixed(2)
+                              : "0.00"}
+                            /credit
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Price:</span>
+                          <span className="text-gray-600">Payment Status:</span>
+                          <Badge
+                            className={getPaymentStatusColor(
+                              order?.paymentStatus
+                            )}
+                          >
+                            {order?.paymentStatus ? "Success" : "Pending"}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Match ID:</span>
                           <span className="font-medium">
-                            ₹{order?.plan?.price}
+                            {order?.matchId || "N/A"}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Expiry Date:</span>
+                          <span className="text-gray-600">Remarks:</span>
                           <span className="font-medium">
-                            {formatDate(order?.subscriptionExpired)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Auto Renewal:</span>
-                          <span className="font-medium">Disabled</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Activation:</span>
-                          <span className="font-medium">
-                            {order?.paymentStatus ? "Activated" : "Pending"}
+                            {order?.remarks || "No remarks"}
                           </span>
                         </div>
                       </CardContent>
                     </Card>
                   </div>
-
-                  {/* Plan Features */}
-                  <Card className="border-0 shadow-lg">
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <Sparkles className="h-5 w-5 text-purple-600" />
-                        <span>Plan Features</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {order?.plan?.features?.map(
-                          (feature: any, index: any) => (
-                            <div
-                              key={index}
-                              className="flex items-start space-x-3"
-                            >
-                              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                              <span className="text-gray-700">{feature}</span>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
                 </TabsContent>
 
                 <TabsContent value="customer" className="space-y-6">
@@ -405,15 +377,15 @@ const OrderDetailsPage = () => {
                           <div className="space-y-3">
                             <div className="flex items-center space-x-3">
                               <User className="h-4 w-4 text-gray-400" />
-                              <span>{order?.user?.name}</span>
+                              <span>{user?.name}</span>
                             </div>
                             <div className="flex items-center space-x-3">
                               <Mail className="h-4 w-4 text-gray-400" />
-                              <span>{order?.user?.email}</span>
+                              <span>{user?.email}</span>
                             </div>
                             <div className="flex items-center space-x-3">
                               <Phone className="h-4 w-4 text-gray-400" />
-                              <span>{order?.user?.mobileNumber}</span>
+                              <span>{user?.mobileNumber}</span>
                             </div>
                             <div className="flex items-center space-x-3">
                               <MapPin className="h-4 w-4 text-gray-400" />
@@ -431,13 +403,13 @@ const OrderDetailsPage = () => {
                                 Member Since:
                               </span>
                               <span className="font-medium">
-                                {formatDate(order?.user?.createdAt)}
+                                {formatDate(user?.createdAt)}
                               </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-600">Username:</span>
                               <span className="font-medium">
-                                {order?.user?.username}
+                                {user?.username}
                               </span>
                             </div>
                             <div className="flex justify-between">
@@ -445,16 +417,14 @@ const OrderDetailsPage = () => {
                                 Current Credits:
                               </span>
                               <span className="font-medium">
-                                {order?.user?.credits}
+                                {user?.credits}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">
-                                Active Subscriptions:
-                              </span>
-                              <span className="font-medium">
-                                {order?.user?.subscription?.length}
-                              </span>
+                              <span className="text-gray-600">Role:</span>
+                              <Badge variant="secondary" className="capitalize">
+                                {user?.role}
+                              </Badge>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-600">
@@ -462,13 +432,19 @@ const OrderDetailsPage = () => {
                               </span>
                               <Badge
                                 variant={
-                                  order?.user?.isActive
-                                    ? "default"
-                                    : "secondary"
+                                  user?.isActive ? "default" : "secondary"
                                 }
                               >
-                                {order?.user?.isActive ? "Active" : "Inactive"}
+                                {user?.isActive ? "Active" : "Inactive"}
                               </Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">
+                                Terms Accepted:
+                              </span>
+                              <span className="font-medium">
+                                {user?.agreeToTerms ? "Yes" : "No"}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -486,7 +462,7 @@ const OrderDetailsPage = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div className="space-y-4">
                           <h3 className="font-semibold text-lg">
                             Transaction Details
@@ -495,15 +471,23 @@ const OrderDetailsPage = () => {
                             <div className="flex justify-between">
                               <span className="text-gray-600">Payment ID:</span>
                               <span className="font-medium">
-                                {order?.paymentId}
+                                {paymentDetails?.cf_payment_id || "N/A"}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Order ID:</span>
+                              <span className="font-medium">
+                                {paymentDetails?.order_id}
                               </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-600">
                                 Payment Method:
                               </span>
-                              <span className="font-medium">
-                                {order?.paymentMode}
+                              <span className="font-medium capitalize">
+                                {paymentDetails?.payment_group === "upi"
+                                  ? "UPI"
+                                  : paymentDetails?.payment_group}
                               </span>
                             </div>
                             <div className="flex justify-between">
@@ -511,11 +495,11 @@ const OrderDetailsPage = () => {
                                 Payment Status:
                               </span>
                               <Badge
-                                className={getPaymentStatusColor(
-                                  order?.paymentStatus
+                                className={getPaymentGatewayStatusColor(
+                                  paymentDetails?.payment_status
                                 )}
                               >
-                                {order?.paymentStatus ? "Success" : "Pending"}
+                                {paymentDetails?.payment_status || "N/A"}
                               </Badge>
                             </div>
                             <div className="flex justify-between">
@@ -523,39 +507,104 @@ const OrderDetailsPage = () => {
                                 Payment Date:
                               </span>
                               <span className="font-medium">
-                                {formatDate(order?.paymentDate)}
+                                {formatIndianDate(paymentDetails?.payment_time)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">
+                                Completion Time:
+                              </span>
+                              <span className="font-medium">
+                                {formatIndianDate(
+                                  paymentDetails?.payment_completion_time
+                                )}
                               </span>
                             </div>
                           </div>
                         </div>
                         <div className="space-y-4">
                           <h3 className="font-semibold text-lg">
-                            Payment Details
+                            Payment Gateway
                           </h3>
                           <div className="space-y-3">
                             <div className="flex justify-between">
-                              <span className="text-gray-600">UPI ID:</span>
+                              <span className="text-gray-600">Gateway:</span>
                               <span className="font-medium">
-                                {order?.paymentModeDetails?.id}
+                                {
+                                  paymentDetails?.payment_gateway_details
+                                    ?.gateway_name
+                                }
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Settlement:</span>
+                              <span className="font-medium">
+                                {
+                                  paymentDetails?.payment_gateway_details
+                                    ?.gateway_settlement
+                                }
                               </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-600">
-                                Account Name:
+                                Bank Reference:
                               </span>
                               <span className="font-medium">
-                                {order?.paymentModeDetails?.name}
+                                {paymentDetails?.bank_reference || "N/A"}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Note:</span>
+                              <span className="text-gray-600">Captured:</span>
                               <span className="font-medium">
-                                {order?.paymentModeDetails?.note}
+                                {paymentDetails?.is_captured ? "Yes" : "No"}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">
+                                International:
+                              </span>
+                              <span className="font-medium">
+                                {paymentDetails?.international_payment
+                                  ?.international
+                                  ? "Yes"
+                                  : "No"}
                               </span>
                             </div>
                           </div>
                         </div>
                       </div>
+
+                      {/* UPI Details */}
+                      {paymentDetails?.payment_method?.upi && (
+                        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                          <h4 className="font-semibold text-lg mb-3">
+                            UPI Details
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">UPI ID:</span>
+                              <span className="font-medium">
+                                {paymentDetails.payment_method.upi.upi_id}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Channel:</span>
+                              <span className="font-medium capitalize">
+                                {paymentDetails.payment_method.upi.channel}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Instrument:</span>
+                              <span className="font-medium">
+                                {
+                                  paymentDetails.payment_method.upi
+                                    .upi_instrument
+                                }
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
@@ -569,25 +618,48 @@ const OrderDetailsPage = () => {
                     <CardContent>
                       <div className="space-y-3 max-w-md">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Plan Price:</span>
-                          <span className="font-medium">₹{order?.price}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Tax (18% GST):</span>
-                          <span className="font-medium">
-                            ₹{((order?.price || 0) * 0.18).toFixed(2)}
+                          <span className="text-gray-600">Order Amount:</span>
+                          <span className="font-medium flex items-center">
+                            <IndianRupee className="h-4 w-4 mr-1" />
+                            {paymentDetails?.order_amount || order?.price}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Processing Fee:</span>
+                          <span className="text-gray-600">Payment Amount:</span>
+                          <span className="font-medium flex items-center">
+                            <IndianRupee className="h-4 w-4 mr-1" />
+                            {paymentDetails?.payment_amount || order?.price}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Currency:</span>
                           <span className="font-medium">
-                            ₹{((order?.price || 0) * 0.02).toFixed(2)}
+                            {paymentDetails?.order_currency || "INR"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-500">
+                          <span>Service Charge:</span>
+                          <span className="flex items-center">
+                            <IndianRupee className="h-3 w-3 mr-1" />
+                            {paymentDetails?.payment_surcharge
+                              ?.payment_surcharge_service_charge || "0.00"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-500">
+                          <span>Service Tax:</span>
+                          <span className="flex items-center">
+                            <IndianRupee className="h-3 w-3 mr-1" />
+                            {paymentDetails?.payment_surcharge
+                              ?.payment_surcharge_service_tax || "0.00"}
                           </span>
                         </div>
                         <div className="border-t pt-2">
                           <div className="flex justify-between font-semibold">
                             <span>Total Amount:</span>
-                            <span>₹{order?.price}</span>
+                            <span className="flex items-center">
+                              <IndianRupee className="h-4 w-4 mr-1" />
+                              {order?.price}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -623,7 +695,7 @@ const OrderDetailsPage = () => {
                                     {event?.status}
                                   </h3>
                                   <span className="text-sm text-gray-500">
-                                    {formatDate(event?.timestamp)}
+                                    {formatIndianDate(event?.timestamp)}
                                   </span>
                                 </div>
                                 <p className="text-gray-600 text-sm mt-1">
@@ -663,15 +735,6 @@ const OrderDetailsPage = () => {
           </div>
         )}
       </AdminLayout>
-      {statusDialoge && (
-        <StatusDialoge
-          isOpen={statusDialoge}
-          onClose={handelClose}
-          transactionStatus={order.status}
-          remarks={order.remarks ?? ""}
-          orderId={order._id}
-        />
-      )}
     </>
   );
 };
