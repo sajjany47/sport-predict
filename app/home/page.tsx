@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,6 @@ import { RootState } from "@/store";
 import { setSelectedMatch } from "@/store/slices/matchSlice";
 import { useQuery } from "@tanstack/react-query";
 import { FetchMatchList } from "../matches/MatchService";
-import { SubscriptionList } from "../MainService";
 import MatchCard from "../matches/MatchCard";
 
 const HomePage = () => {
@@ -36,14 +35,6 @@ const HomePage = () => {
     queryKey: ["match-list"],
     queryFn: async () => {
       const response = await FetchMatchList(new Date());
-      return response.data; // extract only the array part
-    },
-  });
-
-  const { data: subscriptionPlans = [] } = useQuery({
-    queryKey: ["subscription-list"],
-    queryFn: async () => {
-      const response = await SubscriptionList();
       return response.data; // extract only the array part
     },
   });
@@ -294,105 +285,6 @@ const HomePage = () => {
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Link>
             </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Subscription Plans */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Choose Your Plan
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Start free and upgrade as you win more contests
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {subscriptionPlans.map((plan: any, index: any) => {
-              const isCurrentPlan = user?.subscriptionPlan === plan._id;
-
-              return (
-                <Card
-                  key={index}
-                  className={`relative ${
-                    plan.popular
-                      ? "ring-2 ring-blue-600 shadow-xl scale-105"
-                      : "shadow-lg"
-                  } ${
-                    isCurrentPlan ? "ring-2 ring-green-500" : ""
-                  } border-0 transition-all duration-300`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-gradient-to-r from-blue-600 to-purple-600">
-                        Most Popular
-                      </Badge>
-                    </div>
-                  )}
-                  {isCurrentPlan && (
-                    <div className="absolute -top-4 right-4 transform">
-                      <Badge className="bg-green-500">Current Plan</Badge>
-                    </div>
-                  )}
-                  <CardContent className="p-8 text-center">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      {plan.name}
-                    </h3>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-blue-600">
-                        ₹{plan.price}
-                      </span>
-                      {plan.price > 0 && (
-                        <span className="text-gray-600">/month</span>
-                      )}
-                    </div>
-                    <div className="mb-6">
-                      <div className="text-3xl font-bold text-gray-900">
-                        {plan.credits}
-                      </div>
-                      <div className="text-gray-600">
-                        Credits {plan.price === 0 ? "Daily" : "Monthly"}
-                      </div>
-                    </div>
-                    <ul className="space-y-3 mb-8">
-                      {plan.features.map((feature: any, featureIndex: any) => (
-                        <li
-                          key={featureIndex}
-                          className="flex items-center justify-center text-gray-600"
-                        >
-                          <Trophy className="h-4 w-4 text-green-500 mr-2" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-
-                    {isCurrentPlan ? (
-                      <Button
-                        className="w-full bg-green-500 hover:bg-green-600"
-                        disabled
-                      >
-                        Current Plan
-                      </Button>
-                    ) : (
-                      <Button
-                        className={`w-full ${
-                          plan.popular
-                            ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                            : "bg-gray-900 hover:bg-gray-800"
-                        }`}
-                        asChild
-                      >
-                        <Link href="/subscription">
-                          {plan.price === 0 ? "Get Started" : "Upgrade Plan"}
-                        </Link>
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
           </div>
         </div>
       </section>
