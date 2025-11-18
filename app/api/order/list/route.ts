@@ -17,17 +17,45 @@ export const POST = async (request: NextRequest) => {
         },
       },
     ];
-    if (reqData.hasOwnProperty("search") && reqData.search) {
+    if (
+      reqData.hasOwnProperty("startDate") &&
+      reqData.hasOwnProperty("endDate")
+    ) {
+    }
+    query.push({
+      paymentDate: {
+        $gte: new Date(reqData.startDate),
+        $lte: new Date(reqData.endDate),
+      },
+    });
+    if (
+      reqData.hasOwnProperty("startDate") &&
+      !reqData.hasOwnProperty("endDate")
+    ) {
+    }
+    query.push({
+      paymentDate: {
+        $gte: new Date(reqData.startDate),
+      },
+    });
+    if (
+      !reqData.hasOwnProperty("startDate") &&
+      reqData.hasOwnProperty("endDate")
+    ) {
+    }
+    query.push({
+      paymentDate: {
+        $lte: new Date(reqData.endDate),
+      },
+    });
+
+    if (reqData.hasOwnProperty("ordertype") && reqData.ordertype) {
       query.push({
-        $match: {
-          $or: [
-            { "user.username": { $regex: reqData.search, $options: "i" } },
-            { "user.mobileNumber": { $regex: reqData.search, $options: "i" } },
-            { "user.name": { $regex: reqData.search, $options: "i" } },
-            { "user.email": { $regex: reqData.search, $options: "i" } },
-            { orderNumber: { $regex: reqData.search, $options: "i" } },
-          ],
-        },
+        ordertype: reqData.ordertype,
+      });
+    } else {
+      query.push({
+        ordertype: "purchase",
       });
     }
     if (reqData.hasOwnProperty("status") && reqData.status) {
@@ -35,9 +63,24 @@ export const POST = async (request: NextRequest) => {
         status: reqData.status,
       });
     }
-    if (reqData.hasOwnProperty("ordertype") && reqData.ordertype) {
+    if (reqData.hasOwnProperty("username") && reqData.username) {
       query.push({
-        ordertype: reqData.ordertype,
+        "user.username": { $regex: reqData.username, $options: "i" },
+      });
+    }
+    if (reqData.hasOwnProperty("email") && reqData.email) {
+      query.push({
+        "user.email": { $regex: reqData.email, $options: "i" },
+      });
+    }
+    if (reqData.hasOwnProperty("mobileNumber") && reqData.mobileNumber) {
+      query.push({
+        "user.mobileNumber": { $regex: reqData.mobileNumber, $options: "i" },
+      });
+    }
+    if (reqData.hasOwnProperty("orderNumber") && reqData.orderNumber) {
+      query.push({
+        orderNumber: { $regex: reqData.orderNumber, $options: "i" },
       });
     }
 
@@ -92,9 +135,32 @@ export const POST = async (request: NextRequest) => {
         },
       },
     ]);
-
+    const totalFailedOrder = data.filter(
+      (item: any) => item.status === "failed"
+    );
+    const totalCompletedOrder = data.filter(
+      (item: any) => item.status === "completed"
+    );
+    const totalRevenue = data
+      .filter(
+        (item: any) =>
+          item.paymentStatus &&
+          item.status === "completed" &&
+          item.ordertype === "purchase"
+      )
+      .reduce((sum: number, order: any) => sum + order.price, 0);
     return NextResponse.json(
-      { success: true, data: data, count: total },
+      {
+        success: true,
+        data: data,
+        count: total,
+        overview: [
+          { value: total, name: "Total Orders" },
+          { value: totalCompletedOrder.length, name: "Completed" },
+          { value: totalFailedOrder.length, name: "Failed" },
+          { value: totalRevenue, name: "Revenue" },
+        ],
+      },
       { status: 200 }
     );
   } catch (error) {

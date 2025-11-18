@@ -41,7 +41,7 @@ import toast from "react-hot-toast";
 import { OrderDetails } from "../../AdminService";
 import CustomLoader from "@/components/ui/CustomLoader";
 import moment from "moment";
-import StatusDialoge from "../StatusDialoge";
+import StatusDialoge from "../SearchPage";
 
 const OrderDetailsPage = () => {
   const params = useParams();
