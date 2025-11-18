@@ -11,53 +11,10 @@ export const POST = async (request: NextRequest) => {
 
     let query: any = [
       {
-        paymentDate: {
-          $gte: new Date(reqData.startDate),
-          $lte: new Date(reqData.endDate),
-        },
+        ordertype: reqData.ordertype ? reqData.ordertype : "purchase",
       },
     ];
-    if (
-      reqData.hasOwnProperty("startDate") &&
-      reqData.hasOwnProperty("endDate")
-    ) {
-    }
-    query.push({
-      paymentDate: {
-        $gte: new Date(reqData.startDate),
-        $lte: new Date(reqData.endDate),
-      },
-    });
-    if (
-      reqData.hasOwnProperty("startDate") &&
-      !reqData.hasOwnProperty("endDate")
-    ) {
-    }
-    query.push({
-      paymentDate: {
-        $gte: new Date(reqData.startDate),
-      },
-    });
-    if (
-      !reqData.hasOwnProperty("startDate") &&
-      reqData.hasOwnProperty("endDate")
-    ) {
-    }
-    query.push({
-      paymentDate: {
-        $lte: new Date(reqData.endDate),
-      },
-    });
 
-    if (reqData.hasOwnProperty("ordertype") && reqData.ordertype) {
-      query.push({
-        ordertype: reqData.ordertype,
-      });
-    } else {
-      query.push({
-        ordertype: "purchase",
-      });
-    }
     if (reqData.hasOwnProperty("status") && reqData.status) {
       query.push({
         status: reqData.status,
