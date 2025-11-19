@@ -12,57 +12,65 @@ export async function POST(request: Request) {
 
     const advanceCricketList = await CricBuzzList(fromDate, body.timezone);
 
-    const modifyResult = await Promise.all(
-      advanceCricketList.map(async (item: any) => {
-        let team1 = item.teams[0].teamShortName.toLowerCase();
-        let team2 = item.teams[1].teamShortName.toLowerCase();
-        let modDis = item.matchDescription
-          .split(",")[0]
-          .trim()
-          .replace(/\s+/g, "-")
-          .toLowerCase();
-        let modTour = item.tourName
-          .replace(/,/g, "")
-          .trim()
-          .toLowerCase()
-          .replace(/\s+/g, "-");
-        let url: string = `https://www.cricbuzz.com/live-cricket-scores/${item.matchId}/${team1}-vs-${team2}-${modDis}-${modTour}`;
+    // const modifyResult = await Promise.all(
+    //   advanceCricketList.map(async (item: any) => {
+    //     let team1 = item.teams[0].teamShortName.toLowerCase();
+    //     let team2 = item.teams[1].teamShortName.toLowerCase();
+    //     let modDis = item.matchDescription
+    //       .split(",")[0]
+    //       .trim()
+    //       .replace(/\s+/g, "-")
+    //       .toLowerCase();
+    //     let modTour = item.tourName
+    //       .replace(/,/g, "")
+    //       .trim()
+    //       .toLowerCase()
+    //       .replace(/\s+/g, "-");
+    //     let url: string = `https://www.cricbuzz.com/live-cricket-scores/${item.matchId}/${team1}-vs-${team2}-${modDis}-${modTour}`;
 
-        const score = await ScoreCard(url);
+    //     const score = await ScoreCard(url);
 
-        let a = {
-          ...item,
-          status: moment(item.startTime, "DD MMM YYYY, HH:mm").isAfter(moment())
-            ? "NOT_STARTED"
-            : "LIVE",
-          score: score ?? null,
-        };
-        if (score) {
-          const checkScore =
-            score.score.find(
-              (s: any) => s.team === item.teams[0].teamShortName
-            ) ||
-            score.score.find(
-              (s: any) => s.team === item.teams[1].teamShortName
-            );
+    //     let a = {
+    //       ...item,
+    //       status: moment(item.startTime, "DD MMM YYYY, HH:mm").isAfter(moment())
+    //         ? "NOT_STARTED"
+    //         : "LIVE",
+    //       score: score ?? null,
+    //     };
+    //     if (score) {
+    //       const checkScore =
+    //         score.score.find(
+    //           (s: any) => s.team === item.teams[0].teamShortName
+    //         ) ||
+    //         score.score.find(
+    //           (s: any) => s.team === item.teams[1].teamShortName
+    //         );
 
-          if (checkScore) {
-            const resultText = (score?.result ?? "").toLowerCase();
-            if (resultText.includes("no result")) {
-              a.status = "ABANDONED";
-            } else if (
-              resultText.includes("won") ||
-              resultText.includes("win")
-            ) {
-              a.status = "COMPLETED";
-            }
-          } else {
-            a.score = null;
-          }
-        }
-        return a;
-      })
-    );
+    //       if (checkScore) {
+    //         const resultText = (score?.result ?? "").toLowerCase();
+    //         if (resultText.includes("no result")) {
+    //           a.status = "ABANDONED";
+    //         } else if (
+    //           resultText.includes("won") ||
+    //           resultText.includes("win")
+    //         ) {
+    //           a.status = "COMPLETED";
+    //         }
+    //       } else {
+    //         a.score = null;
+    //       }
+    //     }
+    //     return a;
+    //   })
+    // );
+
+    const modifyResult = advanceCricketList.map((item) => ({
+      ...item,
+      status: moment(item.startTime, "DD MMM YYYY, HH:mm").isAfter(moment())
+        ? "NOT_STARTED"
+        : "LIVE",
+      score: null,
+    }));
 
     return Response.json(
       {

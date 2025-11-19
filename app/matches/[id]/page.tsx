@@ -26,6 +26,8 @@ import SquadDialoge from "./SquadDialoge";
 import CustomLoader from "@/components/ui/CustomLoader";
 import AIPredictionModal from "./ai-prediction-modal";
 import { FindWinner, ParseScore } from "@/lib/utils";
+import { FetchMatchDetails } from "../MatchService";
+import toast from "react-hot-toast";
 
 const MatchDetailsPage = () => {
   const params = useParams();
@@ -42,27 +44,44 @@ const MatchDetailsPage = () => {
   const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchDetails = async () => {
-      if (params.id) {
-        const details = await axios.post(
-          "/api/match-details",
-          {
-            ...selectedMatch,
-          },
-          { headers: { "Content-Type": "application/json" } }
-        );
-
+    setIsLoading(true);
+    FetchMatchDetails({
+      ...selectedMatch,
+    })
+      .then((res) => {
         setMatchData({
-          ...details.data.data,
+          ...res.data,
           matchInfo: {
             ...selectedMatch,
           },
         });
-      } else {
-        setMatchData(null);
-      }
-    };
-    fetchDetails();
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to fetch match details.");
+        setIsLoading(false);
+      });
+    // const fetchDetails = async () => {
+    //   if (params.id) {
+    //     const details = await axios.post(
+    //       "/api/match-details",
+    //       {
+    //         ...selectedMatch,
+    //       },
+    //       { headers: { "Content-Type": "application/json" } }
+    //     );
+
+    //     setMatchData({
+    //       ...details.data.data,
+    //       matchInfo: {
+    //         ...selectedMatch,
+    //       },
+    //     });
+    //   } else {
+    //     setMatchData(null);
+    //   }
+    // };
+    // fetchDetails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
@@ -227,6 +246,7 @@ const MatchDetailsPage = () => {
 
   return (
     <>
+      {/* {isLoading && <CustomLoader message="Fetching match details..." />} */}
       {matchData ? (
         <div className="min-h-screen bg-gray-50">
           <div className="container mx-auto px-4 py-8">

@@ -22,7 +22,7 @@ const SearchPage = ({ onClose, setSearchData }: StatusDialogProps) => {
     };
 
     setSearchData(payload);
-    onClose();
+    // onClose();
   };
 
   const handleReset = (resetForm: any) => {
@@ -64,7 +64,6 @@ const SearchPage = ({ onClose, setSearchData }: StatusDialogProps) => {
                 <Field
                   component={FormikSelectField}
                   options={[
-                    { label: "All Types", value: "" },
                     { label: "Purchase", value: "purchase" },
                     { label: "Prediction", value: "prediction" },
                     { label: "Free Credit", value: "credit" },
@@ -80,7 +79,6 @@ const SearchPage = ({ onClose, setSearchData }: StatusDialogProps) => {
                   label="Status"
                   component={FormikSelectField}
                   options={[
-                    { label: "All Status", value: "" },
                     { label: "Completed", value: "completed" },
                     { label: "Pending", value: "pending" },
                     { label: "Failed", value: "failed" },

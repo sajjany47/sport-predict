@@ -9,11 +9,12 @@ export const POST = async (request: NextRequest) => {
   try {
     const reqData = await request.json();
 
-    let query: any = [
-      {
-        ordertype: reqData.ordertype ? reqData.ordertype : "purchase",
-      },
-    ];
+    let query: any = [];
+    if (reqData.hasOwnProperty("ordertype") && reqData.ordertype) {
+      query.push({
+        ordertype: reqData.ordertype,
+      });
+    }
 
     if (reqData.hasOwnProperty("status") && reqData.status) {
       query.push({

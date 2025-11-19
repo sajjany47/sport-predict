@@ -28,7 +28,7 @@ const PaymentSuccessPage = () => {
   // Get transaction details from URL parameters or CashFree response
   const transactionId = orderHistory?.order_id || "N/A";
   const amount = orderHistory?.order_amount || "N/A";
-  const tokens = plans?.tokens || "N/A";
+  const tokens = plans?.credits || "N/A";
   const packageName = plans?.name || "N/A";
 
   useEffect(() => {
@@ -39,7 +39,7 @@ const PaymentSuccessPage = () => {
     let payload = {
       ordertype: "purchase",
       userId: user!.id,
-      credits: plans?.tokens || 0,
+      credits: plans?.credits || 0,
       status: "completed",
       price: Number(orderHistory?.order_amount) || 0,
       paymentIntentId: orderHistory?.order_id,
@@ -48,7 +48,7 @@ const PaymentSuccessPage = () => {
     UserOrderCredit(payload)
       .then((res) => {
         const prepareUser: any = user
-          ? { ...user, credits: user.credits + (plans?.tokens || 0) }
+          ? { ...user, credits: user.credits + (plans?.credits || 0) }
           : null;
 
         dispatch(loginSuccess({ ...prepareUser }));

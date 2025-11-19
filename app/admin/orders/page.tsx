@@ -67,7 +67,7 @@ const AdminOrdersPage = () => {
 
   const handleClose = () => {
     setIsSearch(false);
-    refetch();
+    // refetch();
   };
 
   const handleSearchData = (searchParams: any) => {
