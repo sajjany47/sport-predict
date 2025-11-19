@@ -29,10 +29,23 @@ export const CustomStyles = {
 };
 
 export const GetHtml = async (url: string) => {
-  const response = await axios.get(url);
-  const data = response.data;
-  const $ = load(data);
-  return $;
+  try {
+    if (!url) return null;
+
+    const response = await axios.get(url, {
+      timeout: 15000,
+      validateStatus: (status) => status >= 200 && status < 400,
+    });
+
+    if (!response?.data) return null;
+
+    const $ = load(response.data);
+    return $;
+  } catch (error: any) {
+    // log error internally but return empty
+    console.error("GetHtml Error:", error?.message || error);
+    return null; // return empty instead of throwing
+  }
 };
 
 export const GetPSearchList = async (searchTerm: string) => {
@@ -43,8 +56,13 @@ export const GetPSearchList = async (searchTerm: string) => {
 
   try {
     const { data } = await axios.post(url, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 15000, // prevent stuck requests
+      validateStatus: (status) => status >= 200 && status < 400,
     });
+
     const $ = load(data);
     const playerList: { name: string; url: string }[] = [];
 
@@ -62,48 +80,55 @@ export const GetPSearchList = async (searchTerm: string) => {
       }
     });
 
-    if (playerList.length === 0) {
-      throw new Error("No players found");
-    }
-    return playerList; // Return the first player found
-  } catch (error) {
+    return playerList.length > 0 ? playerList : [];
+  } catch (error: any) {
     console.error(
-      `Error fetching player search list for ${searchTerm}:`,
-      error
+      `GetPSearchList error for "${searchTerm}":`,
+      error?.message || error
     );
-    return [];
+    return []; // always return empty on error
   }
 };
 
 export const GetStadiumList = async (searchTerm: string) => {
   const url = "https://advancecricket.com/player-load";
-  const formData = new FormData();
 
+  // quick guard
+  if (!searchTerm) return [];
+
+  const formData = new FormData();
   formData.append("stadium", searchTerm);
 
   try {
     const { data } = await axios.post(url, formData, {
       headers: { "Content-Type": "multipart/form-data" },
+      timeout: 15000, // avoid hanging requests
+      validateStatus: (status) => status >= 200 && status < 400, // treat 4xx/5xx as error
     });
+
+    if (!data) return [];
+
     const $ = load(data);
     const stadiums: { name: string; url: string }[] = [];
 
-    $(".row.row-cols-1.row-cols-lg-3 .col").each((index, element) => {
+    $(".row.row-cols-1.row-cols-lg-3 .col").each((_, element) => {
       const name = $(element).find("b.card-title").text().trim();
-      const url = $(element).find("a").attr("href");
+      const href = $(element).find("a").attr("href") || "";
 
-      if (name && url) {
-        stadiums.push({ name, url });
+      if (name && href) {
+        const stadiumUrl = href.startsWith("http")
+          ? href
+          : `https://advancecricket.com${href}`;
+        stadiums.push({ name, url: stadiumUrl });
       }
     });
-    if (stadiums.length === 0) {
-      throw new Error("No stadium found");
-    }
-    return stadiums; // Return the first player found
-  } catch (error) {
+
+    return stadiums.length > 0 ? stadiums : [];
+  } catch (err) {
+    // internal logging only — function never throws
     console.error(
-      `Error fetching player search list for ${searchTerm}:`,
-      error
+      `GetStadiumList error for "${searchTerm}":`,
+      (err as any)?.message || err
     );
     return [];
   }
@@ -111,33 +136,42 @@ export const GetStadiumList = async (searchTerm: string) => {
 
 export const GetTeamList = async (searchTerm: string) => {
   const url = "https://advancecricket.com/player-load";
-  const formData = new FormData();
 
+  if (!searchTerm) return [];
+
+  const formData = new FormData();
   formData.append("team", searchTerm);
 
   try {
     const { data } = await axios.post(url, formData, {
       headers: { "Content-Type": "multipart/form-data" },
+      timeout: 15000, // prevents long wait
+      validateStatus: (status) => status >= 200 && status < 400,
     });
+
+    if (!data) return [];
+
     const $ = load(data);
     const teams: { name: string; url: string }[] = [];
 
-    $(".row.row-cols-1.row-cols-lg-3 .col").each((index, element) => {
+    $(".row.row-cols-1.row-cols-lg-3 .col").each((_, element) => {
       const name = $(element).find("b.card-title").text().trim();
-      const url = $(element).find("a").attr("href");
+      const href = $(element).find("a").attr("href") || "";
 
-      if (name && url) {
-        teams.push({ name, url });
+      if (name && href) {
+        const teamUrl = href.startsWith("http")
+          ? href
+          : `https://advancecricket.com${href}`;
+        teams.push({ name, url: teamUrl });
       }
     });
 
-    if (teams.length === 0) {
-      throw new Error("No team found");
-    }
-
-    return teams;
-  } catch (error) {
-    console.error(`Error fetching team search list for ${searchTerm}:`, error);
+    return teams.length > 0 ? teams : [];
+  } catch (err) {
+    console.error(
+      `GetTeamList error for "${searchTerm}":`,
+      (err as any)?.message || err
+    );
     return [];
   }
 };

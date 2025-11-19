@@ -111,8 +111,8 @@ const SquadDialoge = (data: any) => {
   return (
     <TooltipProvider>
       <>
-        {data?.data?.map((player: any) => (
-          <Dialog key={player?.id}>
+        {data?.data?.map((player: any, index: number) => (
+          <Dialog key={index}>
             <DialogTrigger asChild>
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg cursor-pointer hover:bg-green-100 transition-colors">
                 <div className="flex items-center space-x-3">
