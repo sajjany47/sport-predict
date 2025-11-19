@@ -11,31 +11,6 @@ export const POST = async (request: NextRequest) => {
 
     let query: any = [
       {
-        $unwind: {
-          path: "$subscription",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $match: {
-          "subscription.isActive": true,
-        },
-      },
-      {
-        $lookup: {
-          from: "subscriptions",
-          localField: "subscription.subscriptionId",
-          foreignField: "_id",
-          as: "subscriptionDetails",
-        },
-      },
-      {
-        $unwind: {
-          path: "$subscriptionDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $lookup: {
           from: "orders",
           localField: "_id",
@@ -59,6 +34,9 @@ export const POST = async (request: NextRequest) => {
         $sort: {
           createdAt: -1,
         },
+      },
+      {
+        $project: { password: 0 },
       },
     ]);
 

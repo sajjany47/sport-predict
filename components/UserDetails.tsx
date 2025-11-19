@@ -48,6 +48,8 @@ import {
   Sparkles,
   Award,
   Coins,
+  Calendar,
+  IndianRupee,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -73,7 +75,6 @@ export const UserDetails = ({ userId }: { userId: any }) => {
 
   useEffect(() => {
     GetUserDetails();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editOpen]);
 
@@ -94,7 +95,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
   const getOrderTypeIcon = (ordertype: string) => {
     switch (ordertype) {
       case "purchase":
-        return <Crown className="h-5 w-5 text-purple-600" />;
+        return <Coins className="h-5 w-5 text-purple-600" />;
       case "prediction":
         return <Target className="h-5 w-5 text-blue-600" />;
       case "credit":
@@ -147,8 +148,10 @@ export const UserDetails = ({ userId }: { userId: any }) => {
     }
   };
 
-  const getPaymentModeIcon = (paymentMode: string) => {
-    switch (paymentMode) {
+  const getPaymentModeIcon = (paymentMode: string | null) => {
+    if (!paymentMode) return <DollarSign className="h-4 w-4 text-gray-600" />;
+
+    switch (paymentMode.toUpperCase()) {
       case "UPI":
         return <Smartphone className="h-4 w-4 text-blue-600" />;
       case "NETBANKING":
@@ -191,31 +194,33 @@ export const UserDetails = ({ userId }: { userId: any }) => {
   };
 
   // Calculate dashboard stats from real data
-  const totalOrders = userData?.orderDetails?.length;
-  const completedOrders = userData?.orderDetails?.filter(
+  const orderDetails = userData?.orderDetails || [];
+  const totalOrders = orderDetails.length;
+  const completedOrders = orderDetails.filter(
     (o: any) => o.status === "completed"
   ).length;
-  const totalSpent = userData?.orderDetails
-    ?.filter((o: any) => o.status === "completed" && o.price)
+  const totalSpent = orderDetails
+    .filter((o: any) => o.status === "completed" && o.price)
     .reduce((sum: any, order: any) => sum + (order.price || 0), 0);
-  const creditsEarned = userData?.orderDetails
-    ?.filter((o: any) => o.status === "completed")
-    .reduce((sum: any, order: any) => sum + order.credits, 0);
 
-  const subscriptionOrders = userData?.orderDetails?.filter(
+  const creditsEarned = orderDetails
+    .filter((o: any) => o.status === "completed" && o.credits > 0)
+    .reduce((sum: any, order: any) => sum + (order.credits || 0), 0);
+
+  const purchaseOrders = orderDetails.filter(
     (o: any) => o.ordertype === "purchase"
   ).length;
-  const predictionOrders = userData?.orderDetails?.filter(
+  const predictionOrders = orderDetails.filter(
     (o: any) => o.ordertype === "prediction"
   ).length;
-  const creditOrders = userData?.orderDetails?.filter(
+  const creditOrders = orderDetails.filter(
     (o: any) => o.ordertype === "credit"
   ).length;
 
   const dashboardStats = [
     {
       title: "Total Orders",
-      value: totalOrders?.toString(),
+      value: totalOrders.toString(),
       change: `${completedOrders} completed`,
       icon: Activity,
       color: "text-blue-600",
@@ -223,29 +228,40 @@ export const UserDetails = ({ userId }: { userId: any }) => {
     },
     {
       title: "Current Credits",
-      value: userData?.credits?.toLocaleString(),
-      change: `${userData?.subscriptionDetails?.name} Plan`,
+      value: (userData?.credits || 0).toLocaleString(),
+      change: "Available balance",
       icon: Trophy,
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900/30",
     },
     {
       title: "Total Spent",
-      value: `₹${totalSpent?.toLocaleString()}`,
-      change: `${subscriptionOrders} purchase`,
-      icon: DollarSign,
+      value: `₹${totalSpent.toLocaleString()}`,
+      change: `${purchaseOrders} purchases`,
+      icon: IndianRupee,
       color: "text-purple-600",
       bgColor: "bg-purple-100 dark:bg-purple-900/30",
     },
     {
       title: "Predictions Made",
-      value: predictionOrders?.toString(),
+      value: predictionOrders.toString(),
       change: `${creditsEarned} credits earned`,
       icon: Target,
       color: "text-orange-600",
       bgColor: "bg-orange-100 dark:bg-orange-900/30",
     },
   ];
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
     <>
@@ -294,7 +310,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                         />
                         <AvatarFallback className="bg-blue-600 text-white text-xl">
                           {userData.name
-                            .split(" ")
+                            ?.split(" ")
                             .map((n: any) => n[0])
                             .join("")}
                         </AvatarFallback>
@@ -322,7 +338,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                       <div className="flex items-center gap-4 mt-2">
                         <div className="text-center">
                           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                            {userData.credits.toLocaleString()}
+                            {(userData.credits || 0).toLocaleString()}
                           </div>
                           <div className="text-sm text-gray-600 dark:text-gray-400">
                             Credits
@@ -394,11 +410,11 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                       <span className="hidden sm:inline">Activity</span>
                     </TabsTrigger>
                     <TabsTrigger
-                      value="subscription"
+                      value="credits"
                       className="flex items-center gap-2"
                     >
-                      <Crown className="h-4 w-4" />
-                      <span className="hidden sm:inline">Token</span>
+                      <Coins className="h-4 w-4" />
+                      <span className="hidden sm:inline">Credits</span>
                     </TabsTrigger>
                     <TabsTrigger
                       value="profile"
@@ -425,26 +441,28 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-4">
-                            <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                               <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-                                  <Crown className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
+                                  <Coins className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                                 </div>
                                 <div>
-                                  <p className="font-medium">Subscriptions</p>
+                                  <p className="font-medium">
+                                    Credit Purchases
+                                  </p>
                                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    Premium plans
+                                    Buying credits
                                   </p>
                                 </div>
                               </div>
                               <Badge variant="outline" className="px-3 py-1">
-                                {subscriptionOrders} orders
+                                {purchaseOrders} orders
                               </Badge>
                             </div>
 
-                            <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                               <div className="flex items-center gap-3">
-                                <div className="p-2 bg-green-100 dark:bg-green-800 rounded-lg">
+                                <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
                                   <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                                 </div>
                                 <div>
@@ -459,17 +477,15 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                               </Badge>
                             </div>
 
-                            <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                               <div className="flex items-center gap-3">
-                                <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
+                                <div className="p-2 bg-green-100 dark:bg-green-800 rounded-lg">
                                   <Gift className="h-5 w-5 text-green-600 dark:text-green-400" />
                                 </div>
                                 <div>
-                                  <p className="font-medium">
-                                    Credit Purchases
-                                  </p>
+                                  <p className="font-medium">Free Credits</p>
                                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    Extra credits
+                                    Promotional credits
                                   </p>
                                 </div>
                               </div>
@@ -498,10 +514,22 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                               Success Rate
                             </span>
                             <span className="text-lg font-bold text-green-600">
-                              82%
+                              {totalOrders > 0
+                                ? Math.round(
+                                    (completedOrders / totalOrders) * 100
+                                  )
+                                : 0}
+                              %
                             </span>
                           </div>
-                          <Progress value={82} className="h-2" />
+                          <Progress
+                            value={
+                              totalOrders > 0
+                                ? (completedOrders / totalOrders) * 100
+                                : 0
+                            }
+                            className="h-2"
+                          />
 
                           <div className="flex justify-between items-center">
                             <span className="text-sm font-medium">
@@ -512,19 +540,22 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                             </span>
                           </div>
                           <Progress
-                            value={(completedOrders / totalOrders) * 100}
+                            value={
+                              totalOrders > 0
+                                ? (completedOrders / totalOrders) * 100
+                                : 0
+                            }
                             className="h-2"
                           />
 
                           <div className="flex justify-between items-center">
                             <span className="text-sm font-medium">
-                              Monthly Activity
+                              Member Since
                             </span>
-                            <span className="text-lg font-bold text-purple-600">
-                              24
+                            <span className="text-sm font-bold text-purple-600">
+                              {formatDate(userData.createdAt).split(",")[0]}
                             </span>
                           </div>
-                          <Progress value={80} className="h-2" />
 
                           <Button className="w-full mt-4 gap-2">
                             <Sparkles className="h-4 w-4" />
@@ -546,15 +577,94 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                             Your most recent transactions
                           </CardDescription>
                         </div>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href="/dashboard/orders">View All</Link>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setActiveTab("activity")}
+                        >
+                          View All
                         </Button>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
-                          {userData.orderDetails
-                            .slice(0, 3)
-                            .map((order: any) => (
+                          {orderDetails.slice(0, 3).map((order: any) => (
+                            <div
+                              key={order._id}
+                              className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                  {getOrderTypeIcon(order.ordertype)}
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <p className="font-medium text-gray-900 dark:text-white">
+                                      {order.ordertype === "purchase"
+                                        ? "Credit Purchase"
+                                        : order.ordertype === "prediction"
+                                        ? `Match Prediction`
+                                        : "Free Credit"}
+                                    </p>
+                                    <Badge
+                                      className={getOrderTypeColor(
+                                        order.ordertype
+                                      )}
+                                    >
+                                      {order.ordertype}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                                    <span>#{order.orderNumber}</span>
+                                    <div className="flex items-center gap-1">
+                                      {getPaymentModeIcon(order.paymentMode)}
+                                      <span>{order.paymentMode || "N/A"}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="flex items-center gap-2 mb-1 justify-end">
+                                  <Badge
+                                    className={getStatusColor(order.status)}
+                                  >
+                                    <div className="flex items-center gap-1">
+                                      {getStatusIcon(order.status)}
+                                      <span>{order.status}</span>
+                                    </div>
+                                  </Badge>
+                                </div>
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {order.price
+                                    ? `₹${order.price}`
+                                    : `${order.credits} credits`}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  {formatDate(order.paymentDate)}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Activity Tab */}
+                  <TabsContent value="activity">
+                    <Card className="border-0 shadow-lg">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Activity className="h-5 w-5 text-green-600" />
+                          All Activity
+                        </CardTitle>
+                        <CardDescription>
+                          Your complete order history
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {orderDetails.length > 0 ? (
+                            orderDetails.map((order: any) => (
                               <div
                                 key={order._id}
                                 className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -584,8 +694,13 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                       <span>#{order.orderNumber}</span>
                                       <div className="flex items-center gap-1">
                                         {getPaymentModeIcon(order.paymentMode)}
-                                        <span>{order.paymentMode}</span>
+                                        <span>
+                                          {order.paymentMode || "N/A"}
+                                        </span>
                                       </div>
+                                      {order.matchId && (
+                                        <span>Match: {order.matchId}</span>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
@@ -606,110 +721,32 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                       : `${order.credits} credits`}
                                   </div>
                                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                                    {new Date(
-                                      order.paymentDate
-                                    ).toLocaleDateString()}
+                                    {formatDate(order.paymentDate)}
                                   </div>
                                 </div>
                               </div>
-                            ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-
-                  {/* Activity Tab */}
-                  <TabsContent value="activity">
-                    <Card className="border-0 shadow-lg">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Activity className="h-5 w-5 text-green-600" />
-                          All Activity
-                        </CardTitle>
-                        <CardDescription>
-                          Your complete order history
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {userData.orderDetails.map((order: any) => (
-                            <div
-                              key={order._id}
-                              className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
-                            >
-                              <div className="flex items-center gap-4">
-                                <div className="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                  {getOrderTypeIcon(order.ordertype)}
-                                </div>
-                                <div>
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <p className="font-medium text-gray-900 dark:text-white">
-                                      {order.ordertype === "subscription"
-                                        ? "Subscription Purchase"
-                                        : order.ordertype === "prediction"
-                                        ? `Match Prediction`
-                                        : "Credit Purchase"}
-                                    </p>
-                                    <Badge
-                                      className={getOrderTypeColor(
-                                        order.ordertype
-                                      )}
-                                    >
-                                      {order.ordertype}
-                                    </Badge>
-                                  </div>
-                                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                                    <span>#{order.orderNumber}</span>
-                                    <div className="flex items-center gap-1">
-                                      {getPaymentModeIcon(order.paymentMode)}
-                                      <span>{order.paymentMode}</span>
-                                    </div>
-                                    {order.matchId && (
-                                      <span>Match: {order.matchId}</span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="flex items-center gap-2 mb-1 justify-end">
-                                  <Badge
-                                    className={getStatusColor(order.status)}
-                                  >
-                                    <div className="flex items-center gap-1">
-                                      {getStatusIcon(order.status)}
-                                      <span>{order.status}</span>
-                                    </div>
-                                  </Badge>
-                                </div>
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {order.price
-                                    ? `₹${order.price}`
-                                    : `${order.credits} credits`}
-                                </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">
-                                  {new Date(
-                                    order.paymentDate
-                                  ).toLocaleDateString()}
-                                </div>
-                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                              No activity found
                             </div>
-                          ))}
+                          )}
                         </div>
                       </CardContent>
                     </Card>
                   </TabsContent>
 
-                  {/* Subscription Tab */}
-                  <TabsContent value="subscription">
+                  {/* Credits Tab */}
+                  <TabsContent value="credits">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       <Card className="lg:col-span-2 border-0 shadow-lg">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            <Crown className="h-5 w-5 text-purple-600" />
-                            Current Subscription
+                            <Coins className="h-5 w-5 text-yellow-600" />
+                            Credit History
                           </CardTitle>
                           <CardDescription>
-                            Your active plan and usage details
+                            Your credit transactions and balance
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -717,30 +754,34 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                             <div className="flex-1 space-y-6">
                               <div>
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                  {userData.subscriptionDetails.name}
+                                  Current Balance
                                 </h3>
+                                <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                                  {userData.credits?.toLocaleString()} credits
+                                </p>
                                 <p className="text-gray-600 dark:text-gray-400">
-                                  {userData.subscriptionDetails.description}
+                                  Last updated: {formatDate(userData.updatedAt)}
                                 </p>
                               </div>
 
                               <div className="space-y-2">
                                 <div className="flex justify-between">
                                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                                    Credits Used
+                                    Total Credits Earned
                                   </span>
                                   <span className="text-sm font-medium">
-                                    {userData.subscription.credits -
-                                      userData.credits}{" "}
-                                    / {userData.subscription.credits}
+                                    {creditsEarned} credits
                                   </span>
                                 </div>
                                 <Progress
                                   value={
-                                    ((userData.subscription.credits -
-                                      userData.credits) /
-                                      userData.subscription.credits) *
-                                    100
+                                    userData.credits > 0
+                                      ? Math.min(
+                                          (userData.credits / creditsEarned) *
+                                            100,
+                                          100
+                                        )
+                                      : 0
                                   }
                                   className="h-2"
                                 />
@@ -749,56 +790,90 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                               <div className="space-y-2">
                                 <div className="flex justify-between">
                                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                                    Plan Expiry
+                                    Last Credit Purchase
                                   </span>
                                   <span className="text-sm font-medium">
-                                    {new Date(
-                                      userData.subscription.expiryDate
-                                    ).toLocaleDateString()}
+                                    {purchaseOrders > 0
+                                      ? formatDate(
+                                          orderDetails.find(
+                                            (o: any) =>
+                                              o.ordertype === "purchase"
+                                          )?.paymentDate || userData.createdAt
+                                        ).split(",")[0]
+                                      : "Never"}
                                   </span>
-                                </div>
-                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                  <div
-                                    className="bg-blue-600 h-2 rounded-full"
-                                    style={{ width: "65%" }}
-                                  ></div>
                                 </div>
                               </div>
                             </div>
 
                             <div className="md:w-1/3 flex flex-col justify-between">
-                              <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                                  {userData.subscription.credits}
+                              <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                                <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                                  {purchaseOrders}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  Monthly Credits
+                                  Credit Purchases
                                 </p>
                               </div>
 
-                              <Button className="w-full mt-4 gap-2">
-                                <Zap className="h-4 w-4" />
-                                Upgrade Plan
+                              <Button asChild className="w-full mt-4 gap-2">
+                                <Link href="/subscription">
+                                  <Zap className="h-4 w-4" />
+                                  Buy More Credits
+                                </Link>
                               </Button>
                             </div>
                           </div>
 
                           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                             <h4 className="font-medium text-gray-900 dark:text-white mb-3">
-                              Plan Features
+                              Recent Credit Transactions
                             </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {userData.subscriptionDetails.features.map(
-                                (feature: any, index: any) => (
+                            <div className="space-y-3">
+                              {orderDetails
+                                .filter((o: any) => o.credits && o.credits > 0)
+                                .slice(0, 3)
+                                .map((order: any) => (
                                   <div
-                                    key={index}
-                                    className="flex items-center gap-2"
+                                    key={order._id}
+                                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
                                   >
-                                    <CheckCircle className="h-4 w-4 text-green-500" />
-                                    <span className="text-sm">{feature}</span>
+                                    <div className="flex items-center gap-3">
+                                      {getOrderTypeIcon(order.ordertype)}
+                                      <div>
+                                        <p className="font-medium text-sm">
+                                          {order.ordertype === "purchase"
+                                            ? "Credit Purchase"
+                                            : order.ordertype === "credit"
+                                            ? "Free Credit"
+                                            : "Prediction"}
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                          {formatDate(order.paymentDate)}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p
+                                        className={`font-medium text-sm ${
+                                          order.ordertype === "prediction"
+                                            ? "text-red-600"
+                                            : "text-green-600"
+                                        }`}
+                                      >
+                                        {order.ordertype === "prediction"
+                                          ? "-"
+                                          : "+"}
+                                        {order.credits} credits
+                                      </p>
+                                      <Badge
+                                        className={getStatusColor(order.status)}
+                                      >
+                                        {order.status}
+                                      </Badge>
+                                    </div>
                                   </div>
-                                )
-                              )}
+                                ))}
                             </div>
                           </div>
                         </CardContent>
@@ -808,18 +883,16 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
                             <CreditCard className="h-5 w-5 text-blue-600" />
-                            Billing History
+                            Purchase History
                           </CardTitle>
                           <CardDescription>
-                            Your subscription payments
+                            Your credit purchases
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-4">
-                            {userData.orderDetails
-                              .filter(
-                                (o: any) => o.ordertype === "subscription"
-                              )
+                            {orderDetails
+                              .filter((o: any) => o.ordertype === "purchase")
                               .slice(0, 3)
                               .map((order: any) => (
                                 <div
@@ -828,12 +901,10 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                 >
                                   <div>
                                     <p className="font-medium">
-                                      Subscription Renewal
+                                      {order.credits} Credits
                                     </p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                                      {new Date(
-                                        order.paymentDate
-                                      ).toLocaleDateString()}
+                                      {formatDate(order.paymentDate)}
                                     </p>
                                   </div>
                                   <div className="text-right">
@@ -848,9 +919,18 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                   </div>
                                 </div>
                               ))}
+                            {purchaseOrders === 0 && (
+                              <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                                No purchase history
+                              </div>
+                            )}
                           </div>
-                          <Button variant="outline" className="w-full mt-4">
-                            View Full History
+                          <Button
+                            asChild
+                            variant="outline"
+                            className="w-full mt-4"
+                          >
+                            <Link href="/subscription">View All Purchases</Link>
                           </Button>
                         </CardContent>
                       </Card>
@@ -934,18 +1014,44 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                             </div>
                           </div>
 
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Member Since
+                              </label>
+                              <p className="mt-1 text-gray-900 dark:text-white flex items-center gap-2">
+                                <Calendar className="h-4 w-4" />
+                                {formatDate(userData.createdAt)}
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Last Updated
+                              </label>
+                              <p className="mt-1 text-gray-900 dark:text-white flex items-center gap-2">
+                                <Calendar className="h-4 w-4" />
+                                {formatDate(userData.updatedAt)}
+                              </p>
+                            </div>
+                          </div>
+
                           <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Member Since
+                              Terms Agreement
                             </label>
                             <p className="mt-1 text-gray-900 dark:text-white">
-                              {new Date(userData?.createdAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                }
+                              {userData.agreeToTerms ? (
+                                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Agreed
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className="text-red-600"
+                                >
+                                  Not Agreed
+                                </Badge>
                               )}
                             </p>
                           </div>
@@ -964,11 +1070,12 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                             <Button
                               variant="outline"
                               className="w-full justify-between"
+                              onClick={() => setEditOpen(true)}
                             >
                               Edit Profile
                               <ChevronRight className="h-4 w-4" />
                             </Button>
-                            <Button
+                            {/* <Button
                               variant="outline"
                               className="w-full justify-between"
                             >
@@ -995,11 +1102,11 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                             >
                               Logout
                               <LogOut className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
                           </CardContent>
                         </Card>
 
-                        <Card className="border-0 shadow-lg">
+                        {/* <Card className="border-0 shadow-lg">
                           <CardHeader>
                             <CardTitle>Security</CardTitle>
                             <CardDescription>
@@ -1024,19 +1131,18 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                               </Badge>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm">Two-Factor Auth</span>
+                              <span className="text-sm">Account Active</span>
                               <Badge
-                                variant="outline"
-                                className="text-amber-600 border-amber-200"
+                                className={getUserStatusColor(userData.status)}
                               >
-                                Inactive
+                                {userData.isActive ? "Active" : "Inactive"}
                               </Badge>
                             </div>
                             <Button variant="outline" className="w-full">
                               Enable 2FA
                             </Button>
                           </CardContent>
-                        </Card>
+                        </Card> */}
                       </div>
                     </div>
                   </TabsContent>
