@@ -24,10 +24,15 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { setOrderHistory, setPlans } from "@/store/slices/subscriptionSlice";
 import { DailyCreditAd } from "@/components/GetDailyCredit";
-import { PaymentCreate, UserOrderCredit } from "../MainService";
+import {
+  PaymentCreate,
+  SubscriptionList,
+  UserOrderCredit,
+} from "../MainService";
 import { loginSuccess } from "@/store/slices/authSlice";
 import { load } from "@cashfreepayments/cashfree-js";
 import CustomLoader from "@/components/ui/CustomLoader";
+import * as Icons from "lucide-react";
 
 const SubscriptionPage = () => {
   const { isAuthenticated, user } = useSelector(
@@ -41,7 +46,9 @@ const SubscriptionPage = () => {
     message: "",
     isSuccess: null,
   });
+  const [dailyFreeCredit, setDailyFreeCredit] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [tokenPackages, setTokenPackages] = useState([]);
 
   // useEffect(() => {
   //   if (!isAuthenticated) {
@@ -51,80 +58,97 @@ const SubscriptionPage = () => {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
 
-  const tokenPackages = [
-    {
-      id: "free",
-      name: "Free Token",
-      price: 0,
-      tokens: 1,
-      description: "Watch ad to get 1 free token daily",
-      popular: false,
-      features: [
-        "1 Token Daily",
-        "Watch Ad Required",
-        "Basic Predictions",
-        "Lifetime Validity",
-      ],
-      icon: Play,
-      color: "from-green-500 to-emerald-500",
-      bgColor: "bg-gradient-to-br from-green-50 to-emerald-50",
-      borderColor: "border-green-200",
-    },
-    {
-      id: "basic",
-      name: "Starter Pack",
-      price: 299,
-      tokens: 5,
-      description: "Perfect for casual players",
-      popular: true,
-      features: [
-        "5 Tokens",
-        "No Ads Required",
-        "All Predictions",
-        "Lifetime Validity",
-      ],
-      icon: Coins,
-      color: "from-blue-500 to-cyan-500",
-      bgColor: "bg-gradient-to-br from-blue-50 to-cyan-50",
-      borderColor: "border-blue-200",
-    },
-    {
-      id: "pro",
-      name: "Pro Pack",
-      price: 599,
-      tokens: 12,
-      description: "Best value for regular players",
-      popular: false,
-      features: [
-        "12 Tokens",
-        "Save 50₹ per token",
-        "Priority Support",
-        "Lifetime Validity",
-      ],
-      icon: Crown,
-      color: "from-purple-500 to-pink-500",
-      bgColor: "bg-gradient-to-br from-purple-50 to-pink-50",
-      borderColor: "border-purple-200",
-    },
-    {
-      id: "custom",
-      name: "Custom Pack",
-      price: customTokens * 100,
-      tokens: customTokens,
-      description: "Buy exactly what you need",
-      popular: false,
-      features: [
-        "Flexible Tokens",
-        "₹100 per token",
-        "All Features",
-        "Lifetime Validity",
-      ],
-      icon: Sparkles,
-      color: "from-orange-500 to-red-500",
-      bgColor: "bg-gradient-to-br from-orange-50 to-red-50",
-      borderColor: "border-orange-200",
-    },
-  ];
+  useEffect(() => {
+    planList();
+  }, []);
+
+  const planList = () => {
+    setLoading(true);
+    SubscriptionList()
+      .then((res) => {
+        setTokenPackages(res.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        toast.error(error.message || "Failed to get list. Please try again.");
+      });
+  };
+
+  // const tokenPackages = [
+  //   {
+  //     id: "free",
+  //     name: "Free Token",
+  //     price: 0,
+  //     tokens: 1,
+  //     description: "Watch ad to get 1 free token daily",
+  //     popular: false,
+  //     features: [
+  //       "1 Token Daily",
+  //       "Watch Ad Required",
+  //       "Basic Predictions",
+  //       "Lifetime Validity",
+  //     ],
+  //     icon: Play,
+  //     color: "from-green-500 to-emerald-500",
+  //     bgColor: "bg-gradient-to-br from-green-50 to-emerald-50",
+  //     borderColor: "border-green-200",
+  //   },
+  //   {
+  //     id: "basic",
+  //     name: "Starter Pack",
+  //     price: 299,
+  //     tokens: 5,
+  //     description: "Perfect for casual players",
+  //     popular: true,
+  //     features: [
+  //       "5 Tokens",
+  //       "No Ads Required",
+  //       "All Predictions",
+  //       "Lifetime Validity",
+  //     ],
+  //     icon: Coins,
+  //     color: "from-blue-500 to-cyan-500",
+  //     bgColor: "bg-gradient-to-br from-blue-50 to-cyan-50",
+  //     borderColor: "border-blue-200",
+  //   },
+  //   {
+  //     id: "pro",
+  //     name: "Pro Pack",
+  //     price: 599,
+  //     tokens: 12,
+  //     description: "Best value for regular players",
+  //     popular: false,
+  //     features: [
+  //       "12 Tokens",
+  //       "Save 50₹ per token",
+  //       "Priority Support",
+  //       "Lifetime Validity",
+  //     ],
+  //     icon: Crown,
+  //     color: "from-purple-500 to-pink-500",
+  //     bgColor: "bg-gradient-to-br from-purple-50 to-pink-50",
+  //     borderColor: "border-purple-200",
+  //   },
+  //   {
+  //     id: "custom",
+  //     name: "Custom Pack",
+  //     price: customTokens * 100,
+  //     tokens: customTokens,
+  //     description: "Buy exactly what you need",
+  //     popular: false,
+  //     features: [
+  //       "Flexible Tokens",
+  //       "₹100 per token",
+  //       "All Features",
+  //       "Lifetime Validity",
+  //     ],
+  //     icon: Sparkles,
+  //     color: "from-orange-500 to-red-500",
+  //     bgColor: "bg-gradient-to-br from-orange-50 to-red-50",
+  //     borderColor: "border-orange-200",
+  //   },
+  // ];
 
   const handleTokenChange = (value: string) => {
     const tokens = parseInt(value) || 1;
@@ -168,7 +192,9 @@ const SubscriptionPage = () => {
     }
 
     if (packageId === "free") {
+      setDailyFreeCredit(tokens);
       setDailyCredit(true);
+
       return;
     }
 
@@ -177,25 +203,27 @@ const SubscriptionPage = () => {
       return;
     }
 
-    const packageData = tokenPackages.find((pkg) => pkg.id === packageId);
+    const packageData: any = tokenPackages.find(
+      (pkg: any) => pkg.type === packageId
+    );
     if (!packageData) return;
 
-    const actualPrice = packageId === "custom" ? customTokens * 100 : price;
+    const actualPrice = packageId === "custom" ? customTokens * price : price;
 
     // Save chosen plan before redirect and call payment
     const prepareData = {
       ...packageData,
       price: actualPrice,
-      tokens: packageId === "custom" ? customTokens : packageData.tokens,
+      credits: packageId === "custom" ? customTokens : packageData.credits,
     };
     const { icon, ...serializableData }: any = prepareData;
-    console.log(serializableData);
 
     dispatch(setPlans(serializableData));
     initiatePayment({
-      id: packageData.id,
+      _id: packageData._id,
+      type: packageData.type,
       price: actualPrice,
-      tokens: packageId === "custom" ? customTokens : packageData.tokens,
+      credits: packageId === "custom" ? customTokens : packageData.credits,
       name: packageData.name,
     });
   };
@@ -213,7 +241,7 @@ const SubscriptionPage = () => {
     let payload = {
       ordertype: "credit",
       userId: user!.id,
-      credits: 1,
+      credits: Number(dailyFreeCredit ?? 1),
       status: "completed",
       paymentMode: "PROMOTION",
       paymentDate: new Date(),
@@ -275,13 +303,14 @@ const SubscriptionPage = () => {
 
           {/* Token Packages */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto mb-16">
-            {tokenPackages.map((pkg, index) => {
-              const IconComponent = pkg.icon;
-              const savings = calculateSavings(pkg.id);
+            {tokenPackages.map((pkg: any, index) => {
+              const IconComponent =
+                pkg.icon && Icons[pkg.icon as keyof typeof Icons];
+              const savings = calculateSavings(pkg.type);
 
               return (
                 <Card
-                  key={pkg.id}
+                  key={pkg._id}
                   className={`relative group transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
                     pkg.bgColor
                   } border-2 ${pkg.borderColor} ${
@@ -324,7 +353,7 @@ const SubscriptionPage = () => {
                     </p>
 
                     {/* Custom Token Input */}
-                    {pkg.id === "custom" && (
+                    {pkg.type === "custom" && (
                       <div className="mb-4">
                         <label className="text-sm font-medium text-gray-700 mb-2 block">
                           Number of Tokens
@@ -371,11 +400,14 @@ const SubscriptionPage = () => {
                       ) : (
                         <>
                           <div className="text-3xl font-bold text-gray-900">
-                            ₹{pkg.price}
+                            ₹
+                            {pkg.type === "custom"
+                              ? customTokens * pkg.price
+                              : pkg.price}
                           </div>
-                          {pkg.id !== "custom" && (
+                          {pkg.type !== "custom" && (
                             <div className="text-sm text-gray-600">
-                              ₹{Math.round(pkg.price / pkg.tokens)} per token
+                              ₹{Math.round(pkg.price / pkg.credits)} per token
                             </div>
                           )}
                         </>
@@ -385,7 +417,7 @@ const SubscriptionPage = () => {
                     {/* Tokens */}
                     <div className="mb-6">
                       <div className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
-                        {pkg.tokens}
+                        {pkg.type === "custom" ? customTokens : pkg.credits}
                       </div>
                       <div className="text-gray-600 font-medium">
                         PREDICTION TOKENS
@@ -394,7 +426,7 @@ const SubscriptionPage = () => {
 
                     {/* Features */}
                     <ul className="space-y-2 mb-6">
-                      {pkg.features.map((feature, featureIndex) => (
+                      {pkg.features.map((feature: any, featureIndex: any) => (
                         <li
                           key={featureIndex}
                           className="flex items-center justify-center text-sm text-gray-600"
@@ -415,7 +447,7 @@ const SubscriptionPage = () => {
                           : "bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600"
                       } text-white font-semibold py-3`}
                       onClick={() =>
-                        handlePurchase(pkg.id, pkg.tokens, pkg.price)
+                        handlePurchase(pkg.type, pkg.credits, pkg.price)
                       }
                     >
                       {pkg.price === 0 ? (

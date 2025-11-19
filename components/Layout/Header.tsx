@@ -70,16 +70,12 @@ const Header = () => {
     { href: "/home", label: "Home", icon: Home },
     { href: "/about", label: "About", icon: Info },
     { href: "/support", label: "Support", icon: HelpCircle },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/matches", label: "Matches", icon: Calendar },
     { href: "/subscription", label: "Token", icon: CreditCard },
   ];
 
   const menuItems = [
-    {
-      label: "Profile",
-      href: "/dashboard/profile",
-      icon: <User className="mr-2 h-4 w-4" />,
-    },
     {
       label: "Dashboard",
       href: "/dashboard",
@@ -89,11 +85,6 @@ const Header = () => {
       label: "Token",
       href: "/subscription",
       icon: <Settings className="mr-2 h-4 w-4" />,
-    },
-    {
-      label: "Order History",
-      href: "/dashboard/orders",
-      icon: <History className="mr-2 h-4 w-4" />,
     },
   ];
 

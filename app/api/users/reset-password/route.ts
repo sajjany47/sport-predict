@@ -85,6 +85,21 @@ export const POST = async (request: NextRequest) => {
         { status: 200 }
       );
     } else if (reqData.type === "reset-password") {
+      if (reqData.hasOwnProperty("oldPassword")) {
+        const isValidPassword = await bcrypt.compare(
+          reqData.oldPassword,
+          user.password
+        );
+        if (!isValidPassword) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: "Invalid old password.",
+            },
+            { status: 403 }
+          );
+        }
+      }
       const password = await bcrypt.hash(reqData.password, 10);
       const updateUser = await User.updateOne(
         { _id: new mongoose.Types.ObjectId(user._id) },

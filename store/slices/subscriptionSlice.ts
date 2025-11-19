@@ -4,7 +4,7 @@ interface SubscriptionPlan {
   id: string;
   name: string;
   price: number;
-  tokens: number;
+  credits: number;
   description: string;
   popular: boolean;
   features: string[];

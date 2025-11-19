@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
           success: false,
           message: "Invalid password.",
         } as ApiResponse,
-        { status: 401 }
+        { status: 403 }
       );
     }
 

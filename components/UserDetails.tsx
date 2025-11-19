@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
 import {
@@ -57,14 +57,17 @@ import EditUser from "./EditUser";
 import { fetchUserDetails } from "@/app/admin/AdminService";
 import toast from "react-hot-toast";
 import CustomLoader from "./ui/CustomLoader";
+import ResetPassword from "@/app/dashboard/ResetPassword";
 
 export const UserDetails = ({ userId }: { userId: any }) => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [editOpen, setEditOpen] = useState(false);
   const [userData, setUserData] = useState<any>({});
   const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -1075,14 +1078,15 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                               Edit Profile
                               <ChevronRight className="h-4 w-4" />
                             </Button>
-                            {/* <Button
+                            <Button
                               variant="outline"
                               className="w-full justify-between"
+                              onClick={() => setIsOpen(true)}
                             >
                               Change Password
                               <ChevronRight className="h-4 w-4" />
                             </Button>
-                            <Button
+                            {/* <Button
                               variant="outline"
                               className="w-full justify-between"
                             >
@@ -1095,13 +1099,6 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                             >
                               Privacy & Security
                               <ChevronRight className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="w-full justify-between text-red-600 hover:text-red-700"
-                            >
-                              Logout
-                              <LogOut className="h-4 w-4" />
                             </Button> */}
                           </CardContent>
                         </Card>
@@ -1161,6 +1158,15 @@ export const UserDetails = ({ userId }: { userId: any }) => {
           )}
         </div>
       </div>
+      {isOpen && (
+        <ResetPassword
+          modalOpen={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+          }}
+          username={userData.username}
+        />
+      )}
       {editOpen && (
         <EditUser
           data={{
