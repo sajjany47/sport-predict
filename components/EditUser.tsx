@@ -86,12 +86,16 @@ const EditUser = ({ isOpen, onClose, data }: any) => {
         toast.error(err.message || "Failed to save details. Please try again.");
       });
   };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl w-full">
-        <DialogHeader>
-          <DialogTitle>Edit User</DialogTitle>
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto sm:max-h-none sm:overflow-y-visible mx-auto p-4 sm:p-6">
+        <DialogHeader className="pb-4 sm:pb-6">
+          <DialogTitle className="text-lg sm:text-xl font-semibold text-center sm:text-left">
+            Edit User
+          </DialogTitle>
         </DialogHeader>
+
         <Formik
           initialValues={{
             username: data.username || "",
@@ -109,8 +113,9 @@ const EditUser = ({ isOpen, onClose, data }: any) => {
         >
           {({ handleSubmit, setFieldValue, values }) => (
             <Form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
-                <div className="md:col-span-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6">
+                {/* Username */}
+                <div className="sm:col-span-2 lg:col-span-4">
                   <Field
                     label="Username"
                     component={FormikTextInput}
@@ -119,9 +124,12 @@ const EditUser = ({ isOpen, onClose, data }: any) => {
                       <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     }
                     disabled={true}
+                    className="text-sm sm:text-base"
                   />
                 </div>
-                <div className="md:col-span-4">
+
+                {/* Full Name */}
+                <div className="sm:col-span-2 lg:col-span-4">
                   <Field
                     label="Full Name"
                     component={FormikTextInput}
@@ -129,9 +137,12 @@ const EditUser = ({ isOpen, onClose, data }: any) => {
                     icon={
                       <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     }
+                    className="text-sm sm:text-base"
                   />
                 </div>
-                <div className="md:col-span-4">
+
+                {/* Email Address */}
+                <div className="sm:col-span-2 lg:col-span-4">
                   <Field
                     label="Email Address"
                     component={FormikTextInput}
@@ -139,9 +150,12 @@ const EditUser = ({ isOpen, onClose, data }: any) => {
                     icon={
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     }
+                    className="text-sm sm:text-base"
                   />
                 </div>
-                <div className="md:col-span-4">
+
+                {/* Mobile Number */}
+                <div className="sm:col-span-2 lg:col-span-4">
                   <Field
                     label="Mobile Number"
                     component={FormikTextInput}
@@ -149,11 +163,15 @@ const EditUser = ({ isOpen, onClose, data }: any) => {
                     icon={
                       <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     }
+                    className="text-sm sm:text-base"
                   />
                 </div>
+
+                {/* Admin Only Fields */}
                 {user?.role === "admin" && (
                   <>
-                    <div className="md:col-span-12">
+                    {/* Active Status */}
+                    <div className="sm:col-span-2 lg:col-span-12">
                       <Field
                         label="Active"
                         component={FormikRadioGroup}
@@ -163,9 +181,12 @@ const EditUser = ({ isOpen, onClose, data }: any) => {
                           { label: "No", value: "false" },
                         ]}
                         onValueChange={(e: any) => setFieldValue("isActive", e)}
+                        className="text-sm sm:text-base"
                       />
                     </div>
-                    <div className="md:col-span-12">
+
+                    {/* Status */}
+                    <div className="sm:col-span-2 lg:col-span-12">
                       <Field
                         label="Status"
                         component={FormikRadioGroup}
@@ -173,40 +194,49 @@ const EditUser = ({ isOpen, onClose, data }: any) => {
                         options={[
                           { label: "Active", value: "active" },
                           { label: "Suspended", value: "suspended" },
-                          { label: "banned", value: "banned" },
+                          { label: "Banned", value: "banned" },
                         ]}
                         onValueChange={(e: any) => setFieldValue("status", e)}
+                        className="text-sm sm:text-base"
                       />
                     </div>
+
+                    {/* Remarks - Conditionally Rendered */}
                     {(values.isActive === "false" ||
                       values.status !== "active") && (
-                      <div className="md:col-span-12">
+                      <div className="sm:col-span-2 lg:col-span-12">
                         <Field
                           label="Remarks"
                           component={FormikTextArea}
                           name="remarks"
                           size="3"
+                          className="text-sm sm:text-base min-h-[80px]"
                         />
                       </div>
                     )}
                   </>
                 )}
 
-                <div className="col-span-12">
+                {/* Submit Button */}
+                <div className="sm:col-span-2 lg:col-span-12 pt-2 sm:pt-4">
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-2 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 sm:py-2 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Updating Account...
+                        <span className="text-sm sm:text-base">
+                          Updating Account...
+                        </span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center">
-                        <Check className="h-5 w-5 mr-2" />
-                        Update Account
+                        <Check className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                        <span className="text-sm sm:text-base">
+                          Update Account
+                        </span>
                       </div>
                     )}
                   </Button>
