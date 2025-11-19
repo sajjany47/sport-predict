@@ -43,13 +43,13 @@ const SubscriptionPage = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     router.push("/auth/login");
+  //     return;
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   const tokenPackages = [
     {

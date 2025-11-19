@@ -1,9 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import {
-  subscriptionFrontendSchema,
-  subscriptionValidationSchema,
-} from "@/app/api/subscription/AubscriptionSchema";
+import React, { useEffect, useState } from "react";
+import { subscriptionFrontendSchema } from "@/app/api/subscription/AubscriptionSchema";
 import {
   SubscriptionCreate,
   SubscriptionList,
@@ -25,7 +22,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
 import { Field, Form, Formik } from "formik";
 import { Plus, Search, Star, Check, X } from "lucide-react";
 import toast from "react-hot-toast";
@@ -39,14 +35,24 @@ const AdminSubscription = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
 
-  const { data: subscriptionPlans = [], isLoading: loading } = useQuery({
-    queryKey: ["subscription-list"],
-    queryFn: async () => {
-      const response = await SubscriptionList();
-      return response.data;
-    },
-  });
+  useEffect(() => {
+    planList();
+  }, []);
+
+  const planList = () => {
+    setIsLoading(true);
+    SubscriptionList()
+      .then((res) => {
+        setSubscriptionPlans(res.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        toast.error(error.message || "Failed to get list. Please try again.");
+      });
+  };
 
   const activeSubscription = subscriptionPlans.filter(
     (plan: any) => plan.isActive
@@ -71,8 +77,14 @@ const AdminSubscription = () => {
 
   const initialValues = {
     name: selectedPlan?.name || "",
+    type: selectedPlan.type || "",
     price: selectedPlan?.price || 0,
     credits: selectedPlan?.credits || 0,
+    description: selectedPlan.description || "",
+    borderColor: selectedPlan.borderColor || "",
+    bgColor: selectedPlan.bgColor || "",
+    color: selectedPlan.color || "",
+    icon: selectedPlan.icon || "",
     features: selectedPlan?.features?.map((item: any) => ({
       name: item,
     })) || [{ name: "" }],
@@ -89,8 +101,14 @@ const AdminSubscription = () => {
     setIsLoading(true);
     const reqData = {
       name: values.name,
+      type: values.type,
       price: Number(values.price),
       credits: values.credits,
+      description: values.description,
+      borderColor: values.borderColor || "",
+      bgColor: values.bgColor || "",
+      color: values.color || "",
+      icon: values.icon || "",
       features: values.features.map((item: any) => item.name),
       popular: JSON.parse(values.popular),
       isActive: JSON.parse(values.isActive),
@@ -101,6 +119,7 @@ const AdminSubscription = () => {
           setIsLoading(false);
           toast.success(res.message);
           modelClose();
+          planList();
         })
         .catch((err) => {
           setIsLoading(false);
@@ -115,6 +134,8 @@ const AdminSubscription = () => {
           setIsLoading(false);
           toast.success(res.message);
           modelClose();
+          planList();
+          setSelectedPlan({});
         })
         .catch((err) => {
           setIsLoading(false);
@@ -128,7 +149,7 @@ const AdminSubscription = () => {
 
   return (
     <AdminLayout>
-      {(loading || isLoading) && <CustomLoader />}
+      {isLoading && <CustomLoader />}
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
@@ -319,6 +340,7 @@ const AdminSubscription = () => {
         onOpenChange={() => {
           setModalOpen(false);
           setActionType("add");
+          setSelectedPlan({});
         }}
       >
         <DialogContent className="max-w-4xl w-full">
@@ -337,26 +359,67 @@ const AdminSubscription = () => {
             {({ handleSubmit, setFieldValue, values, errors }) => (
               <Form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
-                  <div className="md:col-span-4">
+                  <div className="md:col-span-3">
                     <Field
                       label="Name"
                       component={FormikTextInput}
                       name="name"
                     />
                   </div>
-
-                  <div className="md:col-span-4">
+                  <div className="md:col-span-3">
+                    <Field
+                      label="Type"
+                      component={FormikTextInput}
+                      name="type"
+                    />
+                  </div>
+                  <div className="md:col-span-3">
                     <Field
                       label="Price"
                       component={FormikTextInput}
                       name="price"
                     />
                   </div>
-                  <div className="md:col-span-4">
+                  <div className="md:col-span-3">
                     <Field
                       label="Credits"
                       component={FormikTextInput}
                       name="credits"
+                    />
+                  </div>
+                  <div className="md:col-span-12">
+                    <Field
+                      label="Description"
+                      component={FormikTextInput}
+                      name="description"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <Field
+                      label="Lucide icon"
+                      component={FormikTextInput}
+                      name="icon"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <Field
+                      label="Color(Tailwind CSS)"
+                      component={FormikTextInput}
+                      name="color"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <Field
+                      label="BG Color(Tailwind CSS)"
+                      component={FormikTextInput}
+                      name="bgColor"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <Field
+                      label="Border Color(Tailwind CSS)"
+                      component={FormikTextInput}
+                      name="borderColor"
                     />
                   </div>
                   <div className="md:col-span-12">
