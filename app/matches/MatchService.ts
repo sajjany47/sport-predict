@@ -1,13 +1,11 @@
 import axios from "axios";
 import moment from "moment";
 
-export const FetchMatchDetails = async (matchId: any, venue: any) => {
+export const FetchMatchDetails = async (payload: any) => {
   try {
-    const response = await axios.post(
-      "/api/match-details",
-      { matchId: Number(matchId), venue: venue },
-      { headers: { "Content-Type": "application/json" } }
-    );
+    const response = await axios.post("/api/match-details", payload, {
+      headers: { "Content-Type": "application/json" },
+    });
 
     return response.data;
   } catch (error: any) {
