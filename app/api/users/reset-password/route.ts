@@ -12,7 +12,7 @@ import {
 import { MailSend } from "@/lib/MailSend";
 
 export const POST = async (request: NextRequest) => {
-  dbConnect();
+  await dbConnect();
 
   try {
     const reqData = await request.json();
