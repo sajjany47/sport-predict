@@ -1,5 +1,3 @@
-// scoreCard.ts
-
 import { GetHtml } from "@/lib/utils";
 
 export type ScoreEntry = { team: string; run: string };
@@ -9,26 +7,23 @@ export type ScoreCardResult = {
   result: string | null;
 } | null;
 
-/**
- * ScoreCard(url)
- * - url: full cricbuzz live-match url
- * - returns: { matchName, score: [{team, run}, ...], result } or null on error
- */
 export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
   try {
+    if (!url) return null;
+
     const $ = await GetHtml(url);
+    if (!$) return null;
+
     // --- MATCH NAME ---
-    const matchName = ($("h1").first().text() || "")
-      .trim()
-      .replace(/\s+/g, " ");
+    const matchNameRaw = $("h1").first().text() || "";
+    const matchName = matchNameRaw.trim().replace(/\s+/g, " ") || null;
 
     // container for miniscore areas
     const container = $(
       "#miniscore-branding-container, #sticky-mscore, #sticky-mcomplete"
-    );
+    ).first();
 
-    // ---------------- RESULT / SESSION INFO (improved) ----------------
-    // collect candidates from known selectors, sticky, and container children
+    // ---------------- RESULT / SESSION INFO ----------------
     const quickSelectors = [
       ".text-cbTxtLive",
       ".text-cbLive",
@@ -43,95 +38,92 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
       if (!t) return;
       const s = (t || "").replace(/\s+/g, " ").trim();
       if (!s) return;
-      // ignore long blocks
       if (s.length > 200) return;
       candidatesSet.add(s);
     };
 
-    // add quick selectors
-    quickSelectors.forEach((sel) => addCandidate($(sel).first().text()));
-
-    // scan container children for short result-like texts
-    container.find("*").each((i, el) => {
-      const txt = ($(el).text() || "").replace(/\s+/g, " ").trim();
-      if (!txt) return;
-      if (txt.length > 160) return;
-      addCandidate(txt);
+    // add quick selectors safely
+    quickSelectors.forEach((sel) => {
+      try {
+        addCandidate($(sel).first().text());
+      } catch {
+        /* ignore selector errors */
+      }
     });
 
-    // also add a few small obvious places (header area)
+    // scan container children for short result-like texts
+    try {
+      container.find("*").each((_, el) => {
+        const txt = ($(el).text() || "").replace(/\s+/g, " ").trim();
+        if (!txt) return;
+        if (txt.length > 160) return;
+        addCandidate(txt);
+      });
+    } catch {
+      /* ignore DOM traversal errors */
+    }
+
     addCandidate($(".bg-cbGrnCyn .text-cbTxtLive").first().text());
     addCandidate(container.find(".text-cbTxtLive").first().text());
     addCandidate(container.find(".text-cbTextLink").first().text());
 
-    // fallback: body-wide short matches containing Day or need/won keywords
-    const bodyText = ($("body").text() || "").replace(/\s+/g, " ").trim();
-    const bodyMatches = bodyText.match(
+    // body-wide fallback matches (ke defensive with length)
+    const rawBody = ($("body").text() || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 20000);
+    const bodyMatches = rawBody.match(
       /(Day\s*\d+\s*[:\-–][^\.]{1,120}|[A-Z][a-z]+ (?:need|needs|require|requires|required) [0-9]+ runs|[A-Za-z ]{1,30} (?:need|needs|required|require) [0-9]+|[A-Za-z ]{1,30} (?:won by|lost by|lead by|trail by|lead the match by|lead by))/gi
     );
     if (bodyMatches) bodyMatches.forEach((m) => addCandidate(m));
 
-    // prepare array of unique candidates
     const candidates = Array.from(candidatesSet)
       .map((s) => s.trim())
       .filter(Boolean);
 
-    // scoring / priority rules for candidates
-    // higher number = more likely to be the "result" line
     const priorityScore = (s: string) => {
       const lower = s.toLowerCase();
-
-      // exact high-priority patterns
-      if (/\bneed\s+[0-9]+\s+runs\b/i.test(lower)) return 100; // "West Indies need 260 runs"
-      if (/\breq[:\s]/i.test(s)) return 95; // "REQ: 5.47"
-      if (/\bwon by\b/i.test(lower)) return 90; // "Bangladesh won by..."
-      if (/\blead by\b/i.test(lower)) return 85; // "lead by 63"
+      if (/\bneed\s+[0-9]+\s+runs\b/i.test(lower)) return 100;
+      if (/\breq[:\s]/i.test(s)) return 95;
+      if (/\bwon by\b/i.test(lower)) return 90;
+      if (/\blead by\b/i.test(lower)) return 85;
       if (/\btrail by\b/i.test(lower)) return 85;
       if (/\binnings\b/i.test(lower) && /\bwon by/i.test(lower)) return 92;
-      if (/\bstumps\b/i.test(lower)) return 80; // "Stumps - India trail by..."
-      if (/\bday\s*\d+\b/i.test(lower)) return 80; // Day x
+      if (/\bstumps\b/i.test(lower)) return 80;
+      if (/\bday\s*\d+\b/i.test(lower)) return 80;
       if (/\bsession\b/i.test(lower)) return 70;
       if (/\btargets?\b/i.test(lower)) return 60;
       if (/\bpartnership\b/i.test(lower)) return 40;
-
-      // presence of "REQ" or "CRR" but alone is lower priority
       if (/\bcrr\b/i.test(lower) || /\bsreq\b/i.test(lower)) return 30;
-
-      // short informative lines still OK
       if (lower.length < 40) return 20;
-
-      // everything else fallback
       return 10;
     };
 
-    // choose best candidate: highest priority, then shortest length
     let bestResult: string | null = null;
     if (candidates.length) {
       candidates.sort((a, b) => {
         const pa = priorityScore(a);
         const pb = priorityScore(b);
-        if (pa !== pb) return pb - pa; // descending priority
-        return a.length - b.length; // shorter preferred
+        if (pa !== pb) return pb - pa;
+        return a.length - b.length;
       });
       bestResult = candidates[0];
     }
 
-    // final fallback: try to extract "Team need X runs" from the compact sticky area
     if (!bestResult) {
-      const sticky =
+      const stickyText =
         $("#sticky-mscore, #miniscore-branding-container").text() || "";
-      const m = sticky.match(
+      const m = stickyText.match(
         /([A-Za-z ]{2,40}\s+(?:need|needs)\s+[0-9]+(?:\s*runs)?)/i
       );
       if (m) bestResult = m[1].trim();
     }
 
-    // normalize whitespace and set null if empty
     const result = bestResult ? bestResult.replace(/\s+/g, " ").trim() : null;
 
-    // ---------------- SCORE extraction (kept from previous robust version) ----------------
+    // ---------------- SCORE extraction ----------------
     const scoreCandidates: ScoreEntry[] = [];
-    const norm = (t?: string) =>
+    const normText = (t?: string) =>
       (t || "").toString().trim().replace(/\s+/g, " ");
     const normalizeRunText = (raw?: string) => {
       if (!raw) return "";
@@ -160,135 +152,154 @@ export const ScoreCard = async (url: string): Promise<ScoreCardResult> => {
       "RECENT",
     ]);
 
-    // Primary strategy: when a team token is found, read siblings in same parent row
-    container.find("*").each((i, el) => {
-      const $el = $(el);
-      const text = norm($el.text());
-      if (!text) return;
-      if (/^[A-Z]{2,4}$/.test(text)) {
-        const team = text.toUpperCase();
-        if (scoreCandidates.some((s) => s.team === team)) return;
-        let run: string | null = null;
+    // Primary strategy: look for short uppercase team tokens in the container
+    try {
+      (container.length ? container : $("body")).find("*").each((_, el) => {
+        try {
+          const $el = $(el);
+          const text = normText($el.text());
+          if (!text) return;
+          if (/^[A-Z]{2,4}$/.test(text)) {
+            const team = text.toUpperCase();
+            if (scoreCandidates.some((s) => s.team === team)) return;
 
-        // inspect parent children after token
-        const parent = $el.parent();
-        if (parent && parent.length) {
-          const children = parent.children().toArray();
-          let idx = -1;
-          for (let k = 0; k < children.length; k++) {
-            if (norm($(children[k]).text()) === team) {
-              idx = k;
-              break;
-            }
-          }
-          if (idx === -1) {
-            for (let k = 0; k < children.length; k++) {
-              if (norm($(children[k]).text()).includes(team)) {
-                idx = k;
-                break;
+            let run: string | null = null;
+            const parent = $el.parent();
+            if (parent && parent.length) {
+              const children = parent.children().toArray();
+              let idx = -1;
+              for (let k = 0; k < children.length; k++) {
+                if (normText($(children[k]).text()) === team) {
+                  idx = k;
+                  break;
+                }
+              }
+              if (idx === -1) {
+                for (let k = 0; k < children.length; k++) {
+                  if (normText($(children[k]).text()).includes(team)) {
+                    idx = k;
+                    break;
+                  }
+                }
+              }
+              if (idx >= 0) {
+                const parts: string[] = [];
+                for (let p = idx + 1; p < children.length; p++) {
+                  const part = normText($(children[p]).text());
+                  if (!part) continue;
+                  if (/^[A-Z]{2,6}$/.test(part) && !/^[0-9]/.test(part)) break;
+                  parts.push(part);
+                }
+                const joined = normalizeRunText(parts.join(" "));
+                if (joined && runPattern.test(joined)) run = joined;
+                else {
+                  const numericParts: string[] = [];
+                  for (let p = idx + 1; p < children.length; p++) {
+                    const part = normText($(children[p]).text());
+                    if (!part) continue;
+                    if (/[0-9\&\(\)\/\-dD]/.test(part)) numericParts.push(part);
+                    else break;
+                  }
+                  const combo = normalizeRunText(numericParts.join(" "));
+                  if (combo && runPattern.test(combo)) run = combo;
+                }
               }
             }
-          }
-          if (idx >= 0) {
-            const parts: string[] = [];
-            for (let p = idx + 1; p < children.length; p++) {
-              const part = norm($(children[p]).text());
-              if (!part) continue;
-              if (/^[A-Z]{2,6}$/.test(part) && !/^[0-9]/.test(part)) break;
-              parts.push(part);
-            }
-            const joined = normalizeRunText(parts.join(" "));
-            if (joined && runPattern.test(joined)) run = joined;
-            else {
-              const numericParts: string[] = [];
-              for (let p = idx + 1; p < children.length; p++) {
-                const part = norm($(children[p]).text());
-                if (!part) continue;
-                if (/[0-9\&\(\)\/\-dD]/.test(part)) numericParts.push(part);
-                else break;
+
+            if (!run) {
+              let next = $el.next();
+              const collected: string[] = [];
+              for (
+                let j = 0;
+                j < 10 && next && next.length;
+                j++, next = next.next()
+              ) {
+                const nt = normText(next.text());
+                if (!nt) continue;
+                if (/^[A-Z]{2,6}$/.test(nt) && !/^[0-9]/.test(nt)) break;
+                collected.push(nt);
               }
-              const combo = normalizeRunText(numericParts.join(" "));
-              if (combo && runPattern.test(combo)) run = combo;
+              const candidate = normalizeRunText(collected.join(" "));
+              if (candidate && runPattern.test(candidate)) run = candidate;
+            }
+
+            if (!run) {
+              const big = normalizeRunText(
+                normText(
+                  (container.length ? container.text() : $("body").text()) || ""
+                )
+              );
+              const rx = new RegExp(
+                `${team.replace(
+                  /[-/\\^$*+?.()|[\\]{}]/g,
+                  "\\\\$&"
+                )}[^A-Z0-9\\n]{0,10}([0-9][0-9\\s\\/\\-\\&\\(\\)\\.dD]+)`,
+                "i"
+              );
+              const m = big.match(rx);
+              if (m) {
+                const candidate = normalizeRunText(m[1]);
+                if (candidate && runPattern.test(candidate)) run = candidate;
+              }
+            }
+
+            if (run && !excludeSet.has(team) && runPattern.test(run)) {
+              scoreCandidates.push({ team, run });
             }
           }
+        } catch {
+          /* ignore per-element parse errors */
         }
+      });
+    } catch {
+      /* ignore traversal errors */
+    }
 
-        // fallback: scan next siblings
-        if (!run) {
-          let next = $el.next();
-          const collected: string[] = [];
-          for (
-            let j = 0;
-            j < 10 && next && next.length;
-            j++, next = next.next()
-          ) {
-            const nt = norm(next.text());
-            if (!nt) continue;
-            if (/^[A-Z]{2,6}$/.test(nt) && !/^[0-9]/.test(nt)) break;
-            collected.push(nt);
-          }
-          const candidate = normalizeRunText(collected.join(" "));
-          if (candidate && runPattern.test(candidate)) run = candidate;
-        }
-
-        // final fallback: search container text
-        if (!run) {
-          const big = normalizeRunText(
-            norm(container.text() || $("body").text())
-          );
-          const rx = new RegExp(
-            `${team.replace(
-              /[-/\\^$*+?.()|[\\]{}]/g,
-              "\\\\$&"
-            )}[^A-Z0-9\\n]{0,10}([0-9][0-9\\s\\/\\-\\&\\(\\)\\.dD]+)`,
-            "i"
-          );
-          const m = big.match(rx);
-          if (m) {
-            const candidate = normalizeRunText(m[1]);
-            if (candidate && runPattern.test(candidate)) run = candidate;
-          }
-        }
-
-        if (run && !excludeSet.has(team) && runPattern.test(run)) {
-          scoreCandidates.push({ team, run });
-        }
-      }
-    });
-
-    // fallback scan if needed
+    // fallback scan if needed (global text search)
     if (scoreCandidates.length < 2) {
-      const big = normalizeRunText(norm(container.text() || $("body").text()));
-      const multiRe = new RegExp(
-        `([A-Z]{2,4})[^\\d\\n\\r]{0,8}([0-9][0-9\\s\\/\\-\\&\\(\\)\\.dD]+)`,
-        "gi"
-      );
-      let gm;
-      while ((gm = multiRe.exec(big)) !== null) {
-        const team = (gm[1] || "").toUpperCase();
-        const runRaw = normalizeRunText(gm[2] || "");
-        if (
-          team &&
-          !scoreCandidates.some((s) => s.team === team) &&
-          /^[A-Z]{2,4}$/.test(team) &&
-          runPattern.test(runRaw) &&
-          !excludeSet.has(team)
-        ) {
-          scoreCandidates.push({ team, run: runRaw });
+      try {
+        const big = normalizeRunText(
+          normText(
+            (container.length ? container.text() : $("body").text()) || ""
+          )
+        );
+        const multiRe = new RegExp(
+          `([A-Z]{2,4})[^\\d\\n\\r]{0,8}([0-9][0-9\\s\\/\\-\\&\\(\\)\\.dD]+)`,
+          "gi"
+        );
+        let gm;
+        let guard = 0;
+        while ((gm = multiRe.exec(big)) !== null && guard++ < 8) {
+          const team = (gm[1] || "").toUpperCase();
+          const runRaw = normalizeRunText(gm[2] || "");
+          if (
+            team &&
+            !scoreCandidates.some((s) => s.team === team) &&
+            /^[A-Z]{2,4}$/.test(team) &&
+            runPattern.test(runRaw) &&
+            !excludeSet.has(team)
+          ) {
+            scoreCandidates.push({ team, run: runRaw });
+          }
+          if (scoreCandidates.length >= 4) break;
         }
-        if (scoreCandidates.length >= 4) break;
+      } catch {
+        /* ignore */
       }
     }
 
     const finalScore = scoreCandidates.slice(0, 2);
 
     return {
-      matchName: matchName || null,
+      matchName,
       score: finalScore,
       result,
     };
   } catch (error) {
-    // optional: console.error("ScoreCard error", error);
+    console.error(
+      "ScoreCard unexpected error:",
+      (error as any)?.message || error
+    );
     return null;
   }
 };
