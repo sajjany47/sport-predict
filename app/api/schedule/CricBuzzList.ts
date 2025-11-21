@@ -62,6 +62,7 @@ export const CricBuzzList = async (
                 matchId: match.matchId,
                 matchName: null,
                 matchDescription: match.matchDesc ?? null,
+                 originalStartTime: match.startDate,
                 startTime: formatDate(match.startDate),
                 endTime: formatDate(match.endDate),
                 status: null,
