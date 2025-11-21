@@ -1,5 +1,5 @@
 import { FormatErrorMessage } from "@/lib/utils";
-import moment from "moment";
+import moment from "moment-timezone";
 import { CricBuzzList } from "./CricBuzzList";
 import { ScoreCard } from "./ScoreCard";
 
@@ -46,7 +46,9 @@ export async function POST(request: Request) {
       const obj: any = {
         ...item,
         score: score ?? null,
-        status: moment(item.startTime, "DD MMM YYYY, HH:mm").isAfter(moment())
+        status: moment(item.startTime, "DD MMM YYYY, HH:mm").isAfter(
+          moment().tz(body.timezone)
+        )
           ? "NOT_STARTED"
           : "LIVE",
       };
