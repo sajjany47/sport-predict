@@ -51,7 +51,10 @@ export const CricBuzzList = async (
               });
 
               const formatDate = (ms: string | number | null) =>
-                ms ? moment(Number(ms)).format("DD MMM YYYY, HH:mm") : null;
+                ms
+                  ? moment(Number(ms)).tz(timeZone).format("DD MMM YYYY, HH:mm")
+                  : null;
+
 
               return {
                 tourId: series.seriesId ?? null,
