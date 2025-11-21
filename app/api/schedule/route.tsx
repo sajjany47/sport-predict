@@ -46,9 +46,9 @@ export async function POST(request: Request) {
       const obj: any = {
         ...item,
         score: score ?? null,
-        status: moment(item.startTime, "DD MMM YYYY, HH:mm").isAfter(
-          moment().tz(body.timezone)
-        )
+        status:moment.utc(item.startTime, "DD MMM YYYY, HH:mm")
+  .tz(body.timezone)
+  .isAfter(moment().tz(body.timezone))
           ? "NOT_STARTED"
           : "LIVE",
       };
