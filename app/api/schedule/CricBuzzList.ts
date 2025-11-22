@@ -55,14 +55,13 @@ export const CricBuzzList = async (
                   ? moment(Number(ms)).tz(timeZone).format("DD MMM YYYY, HH:mm")
                   : null;
 
-
               return {
                 tourId: series.seriesId ?? null,
                 tourName: series.seriesName ?? null,
                 matchId: match.matchId,
                 matchName: null,
                 matchDescription: match.matchDesc ?? null,
-                 originalStartTime: match.startDate,
+                originalStartTime: match.startDate,
                 startTime: formatDate(match.startDate),
                 endTime: formatDate(match.endDate),
                 status: null,
@@ -73,7 +72,9 @@ export const CricBuzzList = async (
                   timezone: venue.timezone ?? null,
                 },
                 tour: series.seriesCategory ?? null,
-                format: match.matchFormat ?? null,
+                format: series.seriesName.toLowerCase().includes("t10")
+                  ? "T10"
+                  : match.matchFormat ?? null,
                 sport: "cricket",
                 teams: [makeTeam(match.team1), makeTeam(match.team2)],
               } as Target;

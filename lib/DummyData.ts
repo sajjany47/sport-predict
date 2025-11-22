@@ -137845,7 +137845,7 @@ export const DummyData = {
       },
     },
   },
-  matchDetaisl: {
+  matchInfo: {
     tourId: 10223,
     tourName: "West Indies tour of New Zealand, 2025",
     matchId: 122643,
