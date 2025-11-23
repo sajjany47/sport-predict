@@ -1,17 +1,21 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, Clock, Mail, Phone, MapPin } from "lucide-react";
+import React, { useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
+import { getNewAnalysis } from "../matches/[id]/GetNewAnanlysis";
+import { DummyData } from "@/lib/DummyData";
 
 const SupportPage = () => {
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { user } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    getNewAnalysis(DummyData);
+  }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-10 px-4 md:px-8">
       {/* Customer Support Section */}
