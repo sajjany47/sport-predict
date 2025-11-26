@@ -3,14 +3,14 @@ import moment from "moment";
 export const getNewAnalysis = async (data: any) => {
   const matchOver = (format: any) => {
     return format === "T20"
-      ? 20
+      ? { over: 20, bowlerOverLimit: 4 }
       : format === "ODI"
-      ? 50
+      ? { over: 50, bowlerOverLimit: 10 }
       : format === "T10"
-      ? 10
+      ? { over: 10, bowlerOverLimit: 2 }
       : format === "TEST"
-      ? 90
-      : 16.4;
+      ? { over: 100, bowlerOverLimit: 25 }
+      : { over: 16.4, bowlerOverLimit: 3.28 };
   };
   const playerScoreCalculate = (player: any) => {
     const CalculateFantasy = (fantasy: any[]) => {
@@ -80,11 +80,55 @@ export const getNewAnalysis = async (data: any) => {
       };
     };
 
+    const CalculateBowlingForm = (
+      bowlingStats: any[],
+      matchOverLimit: number
+    ) => {
+      const sortByDate = bowlingStats.sort(
+        (a: any, b: any) =>
+          moment(b.date, "DD/MM/YY").valueOf() -
+          moment(a.date, "DD/MM/YY").valueOf()
+      );
+      const last20BowlingInninsg = sortByDate.slice(0, 20).map((item: any) => {
+        let over = Number(item.o);
+        let avgOver = 0;
+        if (over <= 4) {
+          avgOver = over / 4;
+        } else if (over > 4 && over <= 10) {
+          avgOver = over / 10;
+        } else {
+          avgOver = over / 25;
+        }
+
+        return { ...item, avgOver };
+      });
+      const total = last20BowlingInninsg.reduce(
+        (acc, curr) => {
+          acc.eco += Number(curr.eco);
+          acc.w += Number(curr.w);
+          acc.avgOver += Number(curr.avgOver);
+          return acc;
+        },
+        { eco: 0, w: 0, avgOver: 0 }
+      );
+      const count = last20BowlingInninsg.length;
+      const avgEconmy = total.eco / count || 0;
+      const avgWicket = total.w / count || 0;
+      const avgOver = (total.avgOver / count) * matchOverLimit || 0;
+
+      return { avgEconmy, avgWicket, avgOver };
+    };
+
     const fantasyStats = CalculateFantasy(player.fantasyPoints || []);
     const recentBattingFormStats = CalculateBattingForm(
       player.battingForm || []
     );
-    return recentBattingFormStats;
+    const recentBowlingFormStats = CalculateBowlingForm(
+      player.bowlingForm || [],
+      matchOver(data?.matchInfo?.format).bowlerOverLimit || 0
+    );
+
+    return recentBowlingFormStats;
   };
 
   const team1 = data.squadList[0];
