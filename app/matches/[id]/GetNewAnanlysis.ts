@@ -89,6 +89,7 @@ export const getNewAnalysis = async (data: any) => {
           moment(b.date, "DD/MM/YY").valueOf() -
           moment(a.date, "DD/MM/YY").valueOf()
       );
+
       const last20BowlingInninsg = sortByDate.slice(0, 20).map((item: any) => {
         let over = Number(item.o);
         let avgOver = 0;
@@ -100,17 +101,24 @@ export const getNewAnalysis = async (data: any) => {
           avgOver = over / 25;
         }
 
-        return { ...item, avgOver };
+        return {
+          ...item,
+          eco: Number(item.eco),
+          w: Number(item.w),
+          avgOver: Number(avgOver),
+        };
       });
+
       const total = last20BowlingInninsg.reduce(
         (acc, curr) => {
-          acc.eco += Number(curr.eco);
-          acc.w += Number(curr.w);
-          acc.avgOver += Number(curr.avgOver);
+          acc.eco += Number(curr.eco) || 0;
+          acc.w += Number(curr.w) || 0;
+          acc.avgOver += Number(curr.avgOver) || 0;
           return acc;
         },
         { eco: 0, w: 0, avgOver: 0 }
       );
+
       const count = last20BowlingInninsg.length;
       const avgEconmy = total.eco / count || 0;
       const avgWicket = total.w / count || 0;
