@@ -2,6 +2,7 @@ import { FormatErrorMessage } from "@/lib/utils";
 import moment from "moment-timezone";
 import { CricBuzzList } from "./CricBuzzList";
 import { ScoreCard } from "./ScoreCard";
+import { extractAndTransformSchedule } from "./CricBuzzScarbList";
 
 export async function POST(request: Request) {
   try {
@@ -9,7 +10,18 @@ export async function POST(request: Request) {
 
     const fromDate = body.fromDate ? new Date(body.fromDate) : new Date();
 
-    const advanceCricketList = await CricBuzzList(fromDate, body.timezone);
+    // const advanceCricketList = await CricBuzzList(fromDate, body.timezone);
+
+    const advanceCricketList: any = await extractAndTransformSchedule(
+      fromDate,
+      body.timezone
+    );
+
+    // return Response.json({
+    //   success: true,
+    //   count: matches.length,
+    //   matches: matches,
+    // });
 
     // -------------------------
     // STEP 1: Build URLs FIRST
@@ -35,7 +47,7 @@ export async function POST(request: Request) {
     // STEP 2: Fetch ALL scorecards AT ONCE
     // ---------------------------------------
     const allScores = await Promise.all(
-      scoreUrls.map((url) => ScoreCard(url).catch(() => null))
+      scoreUrls.map((url: any) => ScoreCard(url).catch(() => null))
     );
 
     // ---------------------------------------
