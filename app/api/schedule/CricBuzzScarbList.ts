@@ -84,8 +84,13 @@ const extractKeyObject = (text: any, key: any) => {
   // no match found
   return null;
 };
-export async function extractAndTransformSchedule(html: string): Promise<any> {
-  const $: any = await GetHtml(html);
+export async function extractAndTransformSchedule(
+  fromDate: Date,
+  timeZone: string
+): Promise<any> {
+  const $: any = await GetHtml(
+    "https://www.cricbuzz.com/cricket-schedule/upcoming-series/all"
+  );
   let scheduleData: any = null;
 
   // Robust regex for finding a balanced JSON object after "scheduleData":
@@ -223,34 +228,25 @@ export async function extractAndTransformSchedule(html: string): Promise<any> {
 
       series.matchInfo.forEach((match: any) => {
         const venue = match.venueInfo || {};
-        const timeZone = venue.timezone || "+00:00";
+        // const timeZone = venue.timezone || "+00:00";
 
-        const makeTeam = (team: any): any => ({
-          squadId: team.teamId,
-          teamName: team.teamName,
-          teamShortName: team.teamSName,
+        const makeTeam = (t: any) => ({
+          squadId: t.teamId,
+          teamName: t.teamName,
+          teamShortName: t.teamSName,
           teamFlagUrl: `https://static.cricbuzz.com/a/img/v1/25x18/i1/c${
-            team.imageId
-          }/${team.teamName.toLowerCase().trim().replace(/\s+/g, "-")}.jpg`,
+            t.imageId
+          }/${t.teamName.toLowerCase().trim().replace(/\s+/g, "-")}.jpg`,
           isWinner: null,
           color: null,
           cricketScore: null,
           squadNo: null,
         });
 
-        const formatDate = (ms: string | number | null): string | null => {
-          if (!ms) return null;
-          try {
-            // Use moment.utc() and then tz() to correctly handle the timestamp
-            return moment
-              .utc(Number(ms))
-              .tz(timeZone)
-              .format("DD MMM YYYY, HH:mm");
-          } catch (error) {
-            console.error("Date formatting error:", error);
-            return null;
-          }
-        };
+        const formatDate = (ms: string | number | null) =>
+          ms
+            ? moment(Number(ms)).tz(timeZone).format("DD MMM YYYY, HH:mm")
+            : null;
 
         const targetMatch: any = {
           tourId: series.seriesId ?? null,
@@ -281,5 +277,12 @@ export async function extractAndTransformSchedule(html: string): Promise<any> {
     });
   });
 
-  return matches;
+  const filterData = fromDate
+    ? matches.filter(
+        (item: any) =>
+          moment(item.startTime, "DD MMM YYYY, HH:mm").format("YYYY-MM-DD") ===
+          moment(fromDate).format("YYYY-MM-DD")
+      )
+    : matches;
+  return filterData;
 }

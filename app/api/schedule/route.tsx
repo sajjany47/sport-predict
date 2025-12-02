@@ -10,11 +10,12 @@ export async function POST(request: Request) {
 
     const fromDate = body.fromDate ? new Date(body.fromDate) : new Date();
 
-    const advanceCricketList = await CricBuzzList(fromDate, body.timezone);
+    // const advanceCricketList = await CricBuzzList(fromDate, body.timezone);
 
-    // const matches: any = await extractAndTransformSchedule(
-    //   "https://www.cricbuzz.com/cricket-schedule/upcoming-series/all"
-    // );
+    const advanceCricketList: any = await extractAndTransformSchedule(
+      fromDate,
+      body.timezone
+    );
 
     // return Response.json({
     //   success: true,
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
     // STEP 2: Fetch ALL scorecards AT ONCE
     // ---------------------------------------
     const allScores = await Promise.all(
-      scoreUrls.map((url) => ScoreCard(url).catch(() => null))
+      scoreUrls.map((url: any) => ScoreCard(url).catch(() => null))
     );
 
     // ---------------------------------------

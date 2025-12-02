@@ -50,6 +50,8 @@ import {
   Coins,
   Calendar,
   IndianRupee,
+  MoreVertical,
+  Menu,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -58,6 +60,13 @@ import { fetchUserDetails } from "@/app/admin/AdminService";
 import toast from "react-hot-toast";
 import CustomLoader from "./ui/CustomLoader";
 import ResetPassword from "@/app/dashboard/ResetPassword";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import moment from "moment";
 
 export const UserDetails = ({ userId }: { userId: any }) => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -68,6 +77,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
   const [userData, setUserData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -86,6 +96,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
     fetchUserDetails({ userId: userId })
       .then((res) => {
         setLoading(false);
+
         setUserData(res.data[0]);
       })
       .catch((err) => {
@@ -197,7 +208,11 @@ export const UserDetails = ({ userId }: { userId: any }) => {
   };
 
   // Calculate dashboard stats from real data
-  const orderDetails = userData?.orderDetails || [];
+  const orderDetails =
+    userData?.orderDetails.sort(
+      (a: any, b: any) =>
+        moment(b.paymentDate).valueOf() - moment(a.paymentDate).valueOf()
+    ) || [];
   const totalOrders = orderDetails.length;
   const completedOrders = orderDetails.filter(
     (o: any) => o.status === "completed"
@@ -270,22 +285,42 @@ export const UserDetails = ({ userId }: { userId: any }) => {
     <>
       {loading && <CustomLoader message="Details Loading" />}
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-8">
-          {/* Header with back button */}
-          <div className="flex items-center justify-between mb-6">
+        <div className="container mx-auto px-3 sm:px-4 py-6">
+          {/* Header with back button - Mobile optimized */}
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <Button
               variant="ghost"
+              size="sm"
               onClick={() => router.back()}
-              className="gap-2"
+              className="gap-1 sm:gap-2 px-2 sm:px-3"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Back
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Back</span>
             </Button>
-            <div className="flex items-center gap-2">
-              {/* <Button variant="outline" size="sm" className="gap-2">
-                <Download className="h-4 w-4" />
-                Export
-              </Button> */}
+
+            {/* Mobile dropdown menu */}
+            <div className="sm:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                    <User className="h-4 w-4 mr-2" />
+                    Edit Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setIsOpen(true)}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Change Password
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Desktop buttons */}
+            <div className="hidden sm:flex items-center gap-2">
               <Button
                 size="sm"
                 className="gap-2"
@@ -301,64 +336,77 @@ export const UserDetails = ({ userId }: { userId: any }) => {
 
           {Object.keys(userData).length > 0 ? (
             <>
-              {/* User Profile Header */}
-              <div className="flex flex-col md:flex-row gap-6 mb-8">
-                <Card className="w-full md:w-1/3 border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col items-center text-center">
-                      <Avatar className="h-20 w-20 mb-4 border-4 border-white shadow-md">
+              {/* User Profile Header - Mobile optimized */}
+              <div className="flex flex-col gap-4 mb-6">
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4">
+                      <Avatar className="h-16 w-16 sm:h-20 sm:w-20 border-4 border-white shadow-md">
                         <AvatarImage
                           src={userData.avatar}
                           alt={userData.name}
                         />
-                        <AvatarFallback className="bg-blue-600 text-white text-xl">
+                        <AvatarFallback className="bg-blue-600 text-white text-lg sm:text-xl">
                           {userData.name
                             ?.split(" ")
                             .map((n: any) => n[0])
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {userData.name}
-                      </h2>
-                      <p className="text-gray-600 dark:text-gray-300 mb-3">
-                        {userData.email}
-                      </p>
+                      <div className="flex-1">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                          {userData.name}
+                        </h2>
+                        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-2 truncate">
+                          {userData.email}
+                        </p>
 
-                      <div className="flex gap-2 mb-4">
-                        <Badge className={getUserStatusColor(userData.status)}>
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          {userData?.status?.charAt(0).toUpperCase() +
-                            userData.status.slice(1)}
-                        </Badge>
-                        <Badge className={getRoleColor(userData.role)}>
-                          <Users className="h-3 w-3 mr-1" />
-                          {userData.role.charAt(0).toUpperCase() +
-                            userData.role.slice(1)}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-4 mt-2">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                            {(userData.credits || 0).toLocaleString()}
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            Credits
-                          </div>
+                        <div className="flex flex-wrap gap-1 sm:gap-2 mb-3">
+                          <Badge
+                            className={`text-xs ${getUserStatusColor(
+                              userData.status
+                            )}`}
+                          >
+                            <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
+                            {userData?.status?.charAt(0).toUpperCase() +
+                              userData.status.slice(1)}
+                          </Badge>
+                          <Badge
+                            className={`text-xs ${getRoleColor(userData.role)}`}
+                          >
+                            <Users className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
+                            {userData.role.charAt(0).toUpperCase() +
+                              userData.role.slice(1)}
+                          </Badge>
                         </div>
-                        <Button asChild size="sm" className="gap-2">
-                          <Link href="/subscription">
-                            <Coins className="h-4 w-4" />
-                            Buy Credits
-                          </Link>
-                        </Button>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-3">
+                          <div className="text-center sm:text-left">
+                            <div className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
+                              {(userData.credits || 0).toLocaleString()}
+                            </div>
+                            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                              Credits
+                            </div>
+                          </div>
+                          <Button
+                            asChild
+                            size="sm"
+                            className="gap-2 w-full sm:w-auto"
+                          >
+                            <Link href="/subscription">
+                              <Coins className="h-3 w-3 sm:h-4 sm:w-4" />
+                              Buy Credits
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <div className="w-full md:w-2/3 grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Stats Grid - Mobile optimized */}
+                <div className="grid grid-cols-2 gap-2 sm:gap-4">
                   {dashboardStats.map((stat, index) => {
                     const Icon = stat.icon;
                     return (
@@ -366,21 +414,25 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                         key={index}
                         className="border-0 shadow-lg bg-white dark:bg-gray-800"
                       >
-                        <CardContent className="p-5">
+                        <CardContent className="p-3 sm:p-5">
                           <div className="flex justify-between items-start">
                             <div>
-                              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                                 {stat.title}
                               </p>
-                              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                              <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
                                 {stat.value}
                               </p>
-                              <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
+                              <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1 truncate">
                                 {stat.change}
                               </p>
                             </div>
-                            <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                              <Icon className={`h-5 w-5 ${stat.color}`} />
+                            <div
+                              className={`p-2 sm:p-3 rounded-full ${stat.bgColor}`}
+                            >
+                              <Icon
+                                className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.color}`}
+                              />
                             </div>
                           </div>
                         </CardContent>
@@ -390,109 +442,125 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                 </div>
               </div>
 
-              {/* Tabs Navigation */}
-              <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+              {/* Tabs Navigation - Mobile optimized */}
+              <div className="mb-6">
                 <Tabs
                   value={activeTab}
                   onValueChange={setActiveTab}
-                  className="mb-8"
+                  className="w-full"
                 >
-                  <TabsList className="sm:grid sm:grid-cols-4 lg:grid-cols-6 bg-gray-100 dark:bg-gray-800 p-1">
+                  <TabsList className="grid grid-cols-4 sm:w-auto bg-gray-100 dark:bg-gray-800 p-1 overflow-x-auto">
                     <TabsTrigger
                       value="overview"
-                      className="flex items-center gap-2"
+                      className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 text-xs sm:text-sm"
                     >
-                      <BarChart3 className="h-4 w-4" />
-                      <span className="hidden sm:inline">Overview</span>
+                      <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span>Overview</span>
                     </TabsTrigger>
                     <TabsTrigger
                       value="activity"
-                      className="flex items-center gap-2"
+                      className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 text-xs sm:text-sm"
                     >
-                      <Activity className="h-4 w-4" />
-                      <span className="hidden sm:inline">Activity</span>
+                      <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span>Activity</span>
                     </TabsTrigger>
                     <TabsTrigger
                       value="credits"
-                      className="flex items-center gap-2"
+                      className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 text-xs sm:text-sm"
                     >
-                      <Coins className="h-4 w-4" />
-                      <span className="hidden sm:inline">Credits</span>
+                      <Coins className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span>Credits</span>
                     </TabsTrigger>
                     <TabsTrigger
                       value="profile"
-                      className="flex items-center gap-2"
+                      className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 text-xs sm:text-sm"
                     >
-                      <UserIcon className="h-4 w-4" />
-                      <span className="hidden sm:inline">Profile</span>
+                      <UserIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span>Profile</span>
                     </TabsTrigger>
                   </TabsList>
 
                   {/* Overview Tab */}
-                  <TabsContent value="overview" className="space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <TabsContent
+                    value="overview"
+                    className="space-y-4 sm:space-y-6 mt-4"
+                  >
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                       {/* Order Summary */}
                       <Card className="lg:col-span-2 border-0 shadow-lg">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5 text-blue-600" />
+                        <CardHeader className="p-4 sm:p-6">
+                          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                             Order Summary
                           </CardTitle>
-                          <CardDescription>
+                          <CardDescription className="text-sm sm:text-base">
                             Distribution of your order types
                           </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
+                        <CardContent className="p-4 sm:p-6 pt-0">
+                          <div className="space-y-3 sm:space-y-4">
                             <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
-                                  <Coins className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="p-1.5 sm:p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
+                                  <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400" />
                                 </div>
                                 <div>
-                                  <p className="font-medium">
+                                  <p className="font-medium text-sm sm:text-base">
                                     Credit Purchases
                                   </p>
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                                     Buying credits
                                   </p>
                                 </div>
                               </div>
-                              <Badge variant="outline" className="px-3 py-1">
+                              <Badge
+                                variant="outline"
+                                className="px-2 py-0.5 sm:px-3 sm:py-1 text-xs"
+                              >
                                 {purchaseOrders} orders
                               </Badge>
                             </div>
 
                             <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-                                  <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+                                  <Target className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                                 </div>
                                 <div>
-                                  <p className="font-medium">Predictions</p>
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  <p className="font-medium text-sm sm:text-base">
+                                    Predictions
+                                  </p>
+                                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                                     Match forecasts
                                   </p>
                                 </div>
                               </div>
-                              <Badge variant="outline" className="px-3 py-1">
+                              <Badge
+                                variant="outline"
+                                className="px-2 py-0.5 sm:px-3 sm:py-1 text-xs"
+                              >
                                 {predictionOrders} orders
                               </Badge>
                             </div>
 
                             <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 bg-green-100 dark:bg-green-800 rounded-lg">
-                                  <Gift className="h-5 w-5 text-green-600 dark:text-green-400" />
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="p-1.5 sm:p-2 bg-green-100 dark:bg-green-800 rounded-lg">
+                                  <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
                                 </div>
                                 <div>
-                                  <p className="font-medium">Free Credits</p>
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  <p className="font-medium text-sm sm:text-base">
+                                    Free Credits
+                                  </p>
+                                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                                     Promotional credits
                                   </p>
                                 </div>
                               </div>
-                              <Badge variant="outline" className="px-3 py-1">
+                              <Badge
+                                variant="outline"
+                                className="px-2 py-0.5 sm:px-3 sm:py-1 text-xs"
+                              >
                                 {creditOrders} orders
                               </Badge>
                             </div>
@@ -502,66 +570,70 @@ export const UserDetails = ({ userId }: { userId: any }) => {
 
                       {/* Quick Stats */}
                       <Card className="border-0 shadow-lg">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Award className="h-5 w-5 text-amber-600" />
+                        <CardHeader className="p-4 sm:p-6">
+                          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                            <Award className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
                             Achievement
                           </CardTitle>
-                          <CardDescription>
+                          <CardDescription className="text-sm sm:text-base">
                             Your performance summary
                           </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium">
-                              Success Rate
-                            </span>
-                            <span className="text-lg font-bold text-green-600">
-                              {totalOrders > 0
-                                ? Math.round(
-                                    (completedOrders / totalOrders) * 100
-                                  )
-                                : 0}
-                              %
-                            </span>
+                        <CardContent className="p-4 sm:p-6 pt-0 space-y-3 sm:space-y-4">
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-medium">
+                                Success Rate
+                              </span>
+                              <span className="text-base sm:text-lg font-bold text-green-600">
+                                {totalOrders > 0
+                                  ? Math.round(
+                                      (completedOrders / totalOrders) * 100
+                                    )
+                                  : 0}
+                                %
+                              </span>
+                            </div>
+                            <Progress
+                              value={
+                                totalOrders > 0
+                                  ? (completedOrders / totalOrders) * 100
+                                  : 0
+                              }
+                              className="h-1.5 sm:h-2"
+                            />
                           </div>
-                          <Progress
-                            value={
-                              totalOrders > 0
-                                ? (completedOrders / totalOrders) * 100
-                                : 0
-                            }
-                            className="h-2"
-                          />
 
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium">
-                              Completion
-                            </span>
-                            <span className="text-lg font-bold text-blue-600">
-                              {completedOrders}/{totalOrders}
-                            </span>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-medium">
+                                Completion
+                              </span>
+                              <span className="text-base sm:text-lg font-bold text-blue-600">
+                                {completedOrders}/{totalOrders}
+                              </span>
+                            </div>
+                            <Progress
+                              value={
+                                totalOrders > 0
+                                  ? (completedOrders / totalOrders) * 100
+                                  : 0
+                              }
+                              className="h-1.5 sm:h-2"
+                            />
                           </div>
-                          <Progress
-                            value={
-                              totalOrders > 0
-                                ? (completedOrders / totalOrders) * 100
-                                : 0
-                            }
-                            className="h-2"
-                          />
 
-                          <div className="flex justify-between items-center">
+                          <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
                             <span className="text-sm font-medium">
                               Member Since
                             </span>
-                            <span className="text-sm font-bold text-purple-600">
+                            <span className="text-xs sm:text-sm font-bold text-purple-600">
                               {formatDate(userData.createdAt).split(",")[0]}
                             </span>
                           </div>
 
-                          <Button className="w-full mt-4 gap-2">
-                            <Sparkles className="h-4 w-4" />
+                          <Button className="w-full mt-2 sm:mt-4 gap-2 text-sm">
+                            <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
                             View All Achievements
                           </Button>
                         </CardContent>
@@ -570,13 +642,13 @@ export const UserDetails = ({ userId }: { userId: any }) => {
 
                     {/* Recent Activity Preview */}
                     <Card className="border-0 shadow-lg">
-                      <CardHeader className="flex flex-row items-center justify-between">
+                      <CardHeader className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div>
-                          <CardTitle className="flex items-center gap-2">
-                            <Activity className="h-5 w-5 text-green-600" />
+                          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                            <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                             Recent Activity
                           </CardTitle>
-                          <CardDescription>
+                          <CardDescription className="text-sm sm:text-base">
                             Your most recent transactions
                           </CardDescription>
                         </div>
@@ -584,24 +656,25 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                           variant="outline"
                           size="sm"
                           onClick={() => setActiveTab("activity")}
+                          className="w-full sm:w-auto"
                         >
                           View All
                         </Button>
                       </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
+                      <CardContent className="p-4 sm:p-6 pt-0">
+                        <div className="space-y-3 sm:space-y-4">
                           {orderDetails.slice(0, 3).map((order: any) => (
                             <div
                               key={order._id}
-                              className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                              className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg gap-3 sm:gap-4"
                             >
-                              <div className="flex items-center gap-4">
-                                <div className="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                              <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                                <div className="p-1.5 sm:p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm flex-shrink-0">
                                   {getOrderTypeIcon(order.ordertype)}
                                 </div>
-                                <div>
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <p className="font-medium text-gray-900 dark:text-white">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+                                    <p className="font-medium text-gray-900 dark:text-white text-sm sm:text-base truncate">
                                       {order.ordertype === "purchase"
                                         ? "Credit Purchase"
                                         : order.ordertype === "prediction"
@@ -609,26 +682,32 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                         : "Free Credit"}
                                     </p>
                                     <Badge
-                                      className={getOrderTypeColor(
+                                      className={`text-xs ${getOrderTypeColor(
                                         order.ordertype
-                                      )}
+                                      )}`}
                                     >
                                       {order.ordertype}
                                     </Badge>
                                   </div>
-                                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                                    <span>#{order.orderNumber}</span>
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                                    <span className="truncate">
+                                      #{order.orderNumber}
+                                    </span>
                                     <div className="flex items-center gap-1">
                                       {getPaymentModeIcon(order.paymentMode)}
-                                      <span>{order.paymentMode || "N/A"}</span>
+                                      <span className="truncate">
+                                        {order.paymentMode || "N/A"}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <div className="flex items-center gap-2 mb-1 justify-end">
+                              <div className="text-left sm:text-right w-full sm:w-auto">
+                                <div className="flex items-center gap-2 mb-1 sm:justify-end">
                                   <Badge
-                                    className={getStatusColor(order.status)}
+                                    className={`text-xs ${getStatusColor(
+                                      order.status
+                                    )}`}
                                   >
                                     <div className="flex items-center gap-1">
                                       {getStatusIcon(order.status)}
@@ -636,7 +715,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                     </div>
                                   </Badge>
                                 </div>
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                <div className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
                                   {order.price
                                     ? `₹${order.price}`
                                     : `${order.credits} credits`}
@@ -653,32 +732,32 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                   </TabsContent>
 
                   {/* Activity Tab */}
-                  <TabsContent value="activity">
+                  <TabsContent value="activity" className="mt-4">
                     <Card className="border-0 shadow-lg">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Activity className="h-5 w-5 text-green-600" />
+                      <CardHeader className="p-4 sm:p-6">
+                        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                          <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                           All Activity
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-sm sm:text-base">
                           Your complete order history
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
+                      <CardContent className="p-4 sm:p-6 pt-0">
+                        <div className="space-y-3 sm:space-y-4">
                           {orderDetails.length > 0 ? (
                             orderDetails.map((order: any) => (
                               <div
                                 key={order._id}
-                                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg gap-3 sm:gap-4"
                               >
-                                <div className="flex items-center gap-4">
-                                  <div className="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                                  <div className="p-1.5 sm:p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm flex-shrink-0">
                                     {getOrderTypeIcon(order.ordertype)}
                                   </div>
-                                  <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <p className="font-medium text-gray-900 dark:text-white">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+                                      <p className="font-medium text-gray-900 dark:text-white text-sm sm:text-base truncate">
                                         {order.ordertype === "purchase"
                                           ? "Credit Purchase"
                                           : order.ordertype === "prediction"
@@ -686,31 +765,37 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                           : "Free Credit"}
                                       </p>
                                       <Badge
-                                        className={getOrderTypeColor(
+                                        className={`text-xs ${getOrderTypeColor(
                                           order.ordertype
-                                        )}
+                                        )}`}
                                       >
                                         {order.ordertype}
                                       </Badge>
                                     </div>
-                                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                                      <span>#{order.orderNumber}</span>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                                      <span className="truncate">
+                                        #{order.orderNumber}
+                                      </span>
                                       <div className="flex items-center gap-1">
                                         {getPaymentModeIcon(order.paymentMode)}
-                                        <span>
+                                        <span className="truncate">
                                           {order.paymentMode || "N/A"}
                                         </span>
                                       </div>
                                       {order.matchId && (
-                                        <span>Match: {order.matchId}</span>
+                                        <span className="truncate">
+                                          Match: {order.matchId}
+                                        </span>
                                       )}
                                     </div>
                                   </div>
                                 </div>
-                                <div className="text-right">
-                                  <div className="flex items-center gap-2 mb-1 justify-end">
+                                <div className="text-left sm:text-right w-full sm:w-auto">
+                                  <div className="flex items-center gap-2 mb-1 sm:justify-end">
                                     <Badge
-                                      className={getStatusColor(order.status)}
+                                      className={`text-xs ${getStatusColor(
+                                        order.status
+                                      )}`}
                                     >
                                       <div className="flex items-center gap-1">
                                         {getStatusIcon(order.status)}
@@ -718,7 +803,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                       </div>
                                     </Badge>
                                   </div>
-                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  <div className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
                                     {order.price
                                       ? `₹${order.price}`
                                       : `${order.credits} credits`}
@@ -730,7 +815,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                               </div>
                             ))
                           ) : (
-                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                            <div className="text-center py-6 sm:py-8 text-gray-500 dark:text-gray-400">
                               No activity found
                             </div>
                           )}
@@ -740,39 +825,39 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                   </TabsContent>
 
                   {/* Credits Tab */}
-                  <TabsContent value="credits">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <TabsContent value="credits" className="mt-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                       <Card className="lg:col-span-2 border-0 shadow-lg">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Coins className="h-5 w-5 text-yellow-600" />
+                        <CardHeader className="p-4 sm:p-6">
+                          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                            <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
                             Credit History
                           </CardTitle>
-                          <CardDescription>
+                          <CardDescription className="text-sm sm:text-base">
                             Your credit transactions and balance
                           </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                          <div className="flex flex-col md:flex-row gap-6">
-                            <div className="flex-1 space-y-6">
+                        <CardContent className="p-4 sm:p-6 pt-0">
+                          <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
+                            <div className="flex-1 space-y-4 sm:space-y-6">
                               <div>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
                                   Current Balance
                                 </h3>
-                                <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                                <p className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
                                   {userData.credits?.toLocaleString()} credits
                                 </p>
-                                <p className="text-gray-600 dark:text-gray-400">
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                   Last updated: {formatDate(userData.updatedAt)}
                                 </p>
                               </div>
 
                               <div className="space-y-2">
                                 <div className="flex justify-between">
-                                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                                  <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                     Total Credits Earned
                                   </span>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-xs sm:text-sm font-medium">
                                     {creditsEarned} credits
                                   </span>
                                 </div>
@@ -786,16 +871,16 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                         )
                                       : 0
                                   }
-                                  className="h-2"
+                                  className="h-1.5 sm:h-2"
                                 />
                               </div>
 
                               <div className="space-y-2">
                                 <div className="flex justify-between">
-                                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                                  <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                     Last Credit Purchase
                                   </span>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-xs sm:text-sm font-medium">
                                     {purchaseOrders > 0
                                       ? formatDate(
                                           orderDetails.find(
@@ -810,41 +895,44 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                             </div>
 
                             <div className="md:w-1/3 flex flex-col justify-between">
-                              <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                                <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                              <div className="text-center p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                                <p className="text-2xl sm:text-3xl font-bold text-yellow-600 dark:text-yellow-400">
                                   {purchaseOrders}
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                   Credit Purchases
                                 </p>
                               </div>
 
-                              <Button asChild className="w-full mt-4 gap-2">
+                              <Button
+                                asChild
+                                className="w-full mt-3 sm:mt-4 gap-2 text-sm"
+                              >
                                 <Link href="/subscription">
-                                  <Zap className="h-4 w-4" />
+                                  <Zap className="h-3 w-3 sm:h-4 sm:w-4" />
                                   Buy More Credits
                                 </Link>
                               </Button>
                             </div>
                           </div>
 
-                          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <h4 className="font-medium text-gray-900 dark:text-white mb-3">
+                          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-3 text-sm sm:text-base">
                               Recent Credit Transactions
                             </h4>
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                               {orderDetails
                                 .filter((o: any) => o.credits && o.credits > 0)
                                 .slice(0, 3)
                                 .map((order: any) => (
                                   <div
                                     key={order._id}
-                                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                                    className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
                                   >
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                                       {getOrderTypeIcon(order.ordertype)}
-                                      <div>
-                                        <p className="font-medium text-sm">
+                                      <div className="min-w-0">
+                                        <p className="font-medium text-xs sm:text-sm truncate">
                                           {order.ordertype === "purchase"
                                             ? "Credit Purchase"
                                             : order.ordertype === "credit"
@@ -856,9 +944,9 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                         </p>
                                       </div>
                                     </div>
-                                    <div className="text-right">
+                                    <div className="text-right flex-shrink-0">
                                       <p
-                                        className={`font-medium text-sm ${
+                                        className={`font-medium text-xs sm:text-sm ${
                                           order.ordertype === "prediction"
                                             ? "text-red-600"
                                             : "text-green-600"
@@ -870,7 +958,9 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                         {order.credits} credits
                                       </p>
                                       <Badge
-                                        className={getStatusColor(order.status)}
+                                        className={`text-xs ${getStatusColor(
+                                          order.status
+                                        )}`}
                                       >
                                         {order.status}
                                       </Badge>
@@ -883,39 +973,41 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                       </Card>
 
                       <Card className="border-0 shadow-lg">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <CreditCard className="h-5 w-5 text-blue-600" />
+                        <CardHeader className="p-4 sm:p-6">
+                          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                            <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                             Purchase History
                           </CardTitle>
-                          <CardDescription>
+                          <CardDescription className="text-sm sm:text-base">
                             Your credit purchases
                           </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
+                        <CardContent className="p-4 sm:p-6 pt-0">
+                          <div className="space-y-3 sm:space-y-4">
                             {orderDetails
                               .filter((o: any) => o.ordertype === "purchase")
                               .slice(0, 3)
                               .map((order: any) => (
                                 <div
                                   key={order._id}
-                                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                                  className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
                                 >
-                                  <div>
-                                    <p className="font-medium">
+                                  <div className="min-w-0">
+                                    <p className="font-medium text-sm sm:text-base truncate">
                                       {order.credits} Credits
                                     </p>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                                       {formatDate(order.paymentDate)}
                                     </p>
                                   </div>
-                                  <div className="text-right">
-                                    <p className="font-medium">
+                                  <div className="text-right flex-shrink-0">
+                                    <p className="font-medium text-sm sm:text-base">
                                       ₹{order.price}
                                     </p>
                                     <Badge
-                                      className={getStatusColor(order.status)}
+                                      className={`text-xs ${getStatusColor(
+                                        order.status
+                                      )}`}
                                     >
                                       {order.status}
                                     </Badge>
@@ -931,7 +1023,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                           <Button
                             asChild
                             variant="outline"
-                            className="w-full mt-4"
+                            className="w-full mt-3 sm:mt-4 text-sm"
                           >
                             <Link href="/subscription">View All Purchases</Link>
                           </Button>
@@ -941,63 +1033,63 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                   </TabsContent>
 
                   {/* Profile Tab */}
-                  <TabsContent value="profile">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <TabsContent value="profile" className="mt-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                       <Card className="lg:col-span-2 border-0 shadow-lg">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <UserIcon className="h-5 w-5 text-blue-600" />
+                        <CardHeader className="p-4 sm:p-6">
+                          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                            <UserIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                             Personal Information
                           </CardTitle>
-                          <CardDescription>
+                          <CardDescription className="text-sm sm:text-base">
                             Your account details and preferences
                           </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-6">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <CardContent className="p-4 sm:p-6 pt-0 space-y-4 sm:space-y-6">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                             <div>
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Full Name
                               </label>
-                              <p className="mt-1 text-gray-900 dark:text-white">
+                              <p className="mt-1 text-sm sm:text-base text-gray-900 dark:text-white truncate">
                                 {userData.name}
                               </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Username
                               </label>
-                              <p className="mt-1 text-gray-900 dark:text-white">
+                              <p className="mt-1 text-sm sm:text-base text-gray-900 dark:text-white truncate">
                                 {userData.username}
                               </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Email Address
                               </label>
-                              <p className="mt-1 text-gray-900 dark:text-white flex items-center gap-2">
-                                <Mail className="h-4 w-4" />
+                              <p className="mt-1 text-sm sm:text-base text-gray-900 dark:text-white flex items-center gap-2 truncate">
+                                <Mail className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                                 {userData.email}
                               </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Phone Number
                               </label>
-                              <p className="mt-1 text-gray-900 dark:text-white flex items-center gap-2">
-                                <Phone className="h-4 w-4" />
+                              <p className="mt-1 text-sm sm:text-base text-gray-900 dark:text-white flex items-center gap-2">
+                                <Phone className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                                 {userData.mobileNumber}
                               </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Account Status
                               </label>
                               <div className="mt-1">
                                 <Badge
-                                  className={getUserStatusColor(
+                                  className={`text-xs ${getUserStatusColor(
                                     userData.status
-                                  )}
+                                  )}`}
                                 >
                                   {userData.status.charAt(0).toUpperCase() +
                                     userData.status.slice(1)}
@@ -1005,11 +1097,15 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                               </div>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                 User Role
                               </label>
                               <div className="mt-1">
-                                <Badge className={getRoleColor(userData.role)}>
+                                <Badge
+                                  className={`text-xs ${getRoleColor(
+                                    userData.role
+                                  )}`}
+                                >
                                   {userData.role.charAt(0).toUpperCase() +
                                     userData.role.slice(1)}
                                 </Badge>
@@ -1017,41 +1113,41 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
                             <div>
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Member Since
                               </label>
-                              <p className="mt-1 text-gray-900 dark:text-white flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
+                              <p className="mt-1 text-sm sm:text-base text-gray-900 dark:text-white flex items-center gap-2 truncate">
+                                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                                 {formatDate(userData.createdAt)}
                               </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Last Updated
                               </label>
-                              <p className="mt-1 text-gray-900 dark:text-white flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
+                              <p className="mt-1 text-sm sm:text-base text-gray-900 dark:text-white flex items-center gap-2 truncate">
+                                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                                 {formatDate(userData.updatedAt)}
                               </p>
                             </div>
                           </div>
 
-                          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          <div className="pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                               Terms Agreement
                             </label>
-                            <p className="mt-1 text-gray-900 dark:text-white">
+                            <p className="mt-1">
                               {userData.agreeToTerms ? (
-                                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                  <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                                   Agreed
                                 </Badge>
                               ) : (
                                 <Badge
                                   variant="outline"
-                                  className="text-red-600"
+                                  className="text-xs text-red-600"
                                 >
                                   Not Agreed
                                 </Badge>
@@ -1061,85 +1157,33 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                         </CardContent>
                       </Card>
 
-                      <div className="space-y-6">
+                      <div className="space-y-4 sm:space-y-6">
                         <Card className="border-0 shadow-lg">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <Settings className="h-5 w-5 text-gray-600" />
+                          <CardHeader className="p-4 sm:p-6">
+                            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                              <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
                               Quick Actions
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-4">
+                          <CardContent className="p-4 sm:p-6 pt-0 space-y-3">
                             <Button
                               variant="outline"
-                              className="w-full justify-between"
+                              className="w-full justify-between text-sm"
                               onClick={() => setEditOpen(true)}
                             >
                               Edit Profile
-                              <ChevronRight className="h-4 w-4" />
+                              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                             <Button
                               variant="outline"
-                              className="w-full justify-between"
+                              className="w-full justify-between text-sm"
                               onClick={() => setIsOpen(true)}
                             >
                               Change Password
-                              <ChevronRight className="h-4 w-4" />
+                              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
-                            {/* <Button
-                              variant="outline"
-                              className="w-full justify-between"
-                            >
-                              Notification Settings
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="w-full justify-between"
-                            >
-                              Privacy & Security
-                              <ChevronRight className="h-4 w-4" />
-                            </Button> */}
                           </CardContent>
                         </Card>
-
-                        {/* <Card className="border-0 shadow-lg">
-                          <CardHeader>
-                            <CardTitle>Security</CardTitle>
-                            <CardDescription>
-                              Your account security status
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">
-                                Email Verification
-                              </span>
-                              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                Verified
-                              </Badge>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">
-                                Phone Verification
-                              </span>
-                              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                Verified
-                              </Badge>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">Account Active</span>
-                              <Badge
-                                className={getUserStatusColor(userData.status)}
-                              >
-                                {userData.isActive ? "Active" : "Inactive"}
-                              </Badge>
-                            </div>
-                            <Button variant="outline" className="w-full">
-                              Enable 2FA
-                            </Button>
-                          </CardContent>
-                        </Card> */}
                       </div>
                     </div>
                   </TabsContent>
