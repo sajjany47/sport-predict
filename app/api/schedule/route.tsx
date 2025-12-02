@@ -2,6 +2,7 @@ import { FormatErrorMessage } from "@/lib/utils";
 import moment from "moment-timezone";
 import { CricBuzzList } from "./CricBuzzList";
 import { ScoreCard } from "./ScoreCard";
+import { extractAndTransformSchedule } from "./CricBuzzScarbList";
 
 export async function POST(request: Request) {
   try {
@@ -10,6 +11,16 @@ export async function POST(request: Request) {
     const fromDate = body.fromDate ? new Date(body.fromDate) : new Date();
 
     const advanceCricketList = await CricBuzzList(fromDate, body.timezone);
+
+    // const matches: any = await extractAndTransformSchedule(
+    //   "https://www.cricbuzz.com/cricket-schedule/upcoming-series/all"
+    // );
+
+    // return Response.json({
+    //   success: true,
+    //   count: matches.length,
+    //   matches: matches,
+    // });
 
     // -------------------------
     // STEP 1: Build URLs FIRST
