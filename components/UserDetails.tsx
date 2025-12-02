@@ -209,7 +209,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
 
   // Calculate dashboard stats from real data
   const orderDetails =
-    userData?.orderDetails.sort(
+    userData?.orderDetails?.sort(
       (a: any, b: any) =>
         moment(b.paymentDate).valueOf() - moment(a.paymentDate).valueOf()
     ) || [];
