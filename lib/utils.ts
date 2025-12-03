@@ -403,3 +403,15 @@ export const FindWinner = (team: any, selectedMatch: any, teamName: any) => {
 
   return prepareData;
 };
+
+export const ToFixed = (num: string | number, digit?: number | string) => {
+  const digitValue = digit ? Number(digit) : 2;
+  return Number(Number(num).toFixed(digitValue));
+};
+
+export const checkIntValue = (num: any, digit?: number | string) => {
+  const digitValue = digit ? Number(digit) : 2;
+  return typeof Number(num) !== "number"
+    ? 0
+    : Number(Number(num).toFixed(digitValue));
+};
