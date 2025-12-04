@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { load } from "cheerio";
 import axios from "axios";
+import moment from "moment";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -409,9 +410,26 @@ export const ToFixed = (num: string | number, digit?: number | string) => {
   return Number(Number(num).toFixed(digitValue));
 };
 
-export const checkIntValue = (num: any, digit?: number | string) => {
+export const CheckIntValue = (num: any, digit?: number | string) => {
   const digitValue = digit ? Number(digit) : 2;
-  return typeof Number(num) !== "number"
-    ? 0
-    : Number(Number(num).toFixed(digitValue));
+  const n = Number(num);
+
+  if (Number.isNaN(n)) return 0;
+  return Number(n.toFixed(digitValue));
+};
+
+// safe divide helper to avoid division by 0 / NaN
+export const SafeDivide = (a: number, b: number) => {
+  if (!Number.isFinite(a)) return 0;
+  if (!b || !Number.isFinite(b)) return 0;
+
+  return a / b;
+};
+
+export const SortArray = (arr: any[]) => {
+  return arr.sort(
+    (a: any, b: any) =>
+      moment(b.date, "DD/MM/YY").valueOf() -
+      moment(a.date, "DD/MM/YY").valueOf()
+  );
 };
