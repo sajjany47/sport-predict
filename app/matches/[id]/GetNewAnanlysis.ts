@@ -262,25 +262,28 @@ export const getNewAnalysis = async (data: any) => {
 
     const prepareBowlingStats = (player.bowlingStats || []).map((item: any) => {
       const modeOver = findModeOver(item.mode.toLowerCase());
-      const totalOversBowled = SafeDivide(Number(item.balls), 6); // 5813/6 = 968.83
+      const matches = CheckIntValue(item.matches);
+      const balls = CheckIntValue(item.balls);
+      const runs = CheckIntValue(item.runs);
+      const wicket = CheckIntValue(item.wicket);
+      const maxOversPerMatch = modeOver.over;
 
-      const totalMatchOvers = CheckIntValue(item.matches) * modeOver.over; // 121*50
+      const totalOversBowled = balls / 6;
+      const avgOversPerMatch = matches ? totalOversBowled / matches : 0;
 
-      const overPercentage = SafeDivide(totalOversBowled, totalMatchOvers); // 0.16014
-      const avgRuns = SafeDivide(
-        SafeDivide(CheckIntValue(item.runs), totalOversBowled),
-        CheckIntValue(item.matches)
-      );
-      const avgWickets = SafeDivide(
-        SafeDivide(CheckIntValue(item.wicket), totalOversBowled),
-        CheckIntValue(item.matches)
-      );
+      // percentage value (0–100)
+      const avgOverPercentage =
+        maxOversPerMatch > 0 ? (avgOversPerMatch / maxOversPerMatch) * 100 : 0;
+
+      // your required calculation
+      const avgRunsPerOver = (runs / balls) * 6;
+      const avgWicketsPerOver = (wicket / balls) * 6;
 
       return {
-        run: CheckIntValue(avgRuns),
-        wicket: CheckIntValue(avgWickets),
+        run: avgRunsPerOver,
+        wicket: avgWicketsPerOver,
         eco: CheckIntValue(item.economy),
-        avgOverPercentage: overPercentage,
+        avgOverPercentage: CheckIntValue(avgOverPercentage), // **percentage**
       };
     });
     console.log(prepareBowlingStats);
