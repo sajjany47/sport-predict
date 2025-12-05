@@ -520,3 +520,155 @@ export const CalculateBowlingG = (bowlingStats: any[]) => {
 
   return { avgEconmy, avgWicket, avgOverPercentage };
 };
+
+export const CalculateBattingG = (battingStats: any[]) => {
+  const prepareBattingStats = (battingStats || []).map((item: any) => {
+    const modeOver = findModeOver(item.mode.toLowerCase());
+    const matches = CheckIntValue(item.matches);
+    const balls = CheckIntValue(item.balls);
+    const runs = CheckIntValue(item.runs);
+    const strikeRate = CheckIntValue(item.strikeRate);
+    const maxBallsPerMatch = modeOver.over * 6;
+
+    const avgBallsPerMatch = matches ? balls / matches : 0;
+
+    // percentage value (0–100)
+    const avgBallsPercentage =
+      maxBallsPerMatch > 0 ? (avgBallsPerMatch / maxBallsPerMatch) * 100 : 0;
+
+    // your required calculation
+    const avgRunsPerBalls = runs / balls;
+
+    return {
+      run: avgRunsPerBalls,
+      strikeRate: strikeRate,
+      avgBallPercentage: CheckIntValue(avgBallsPercentage), // **percentage**
+    };
+  });
+
+  const total = prepareBattingStats.reduce(
+    (acc, curr) => {
+      acc.run += CheckIntValue(curr.run);
+      acc.strikeRate += CheckIntValue(curr.strikeRate);
+      acc.avgBallPercentage += CheckIntValue(curr.avgBallPercentage);
+
+      return acc;
+    },
+    {
+      run: 0,
+      strikeRate: 0,
+      avgBallPercentage: 0,
+    }
+  );
+
+  const count = battingStats.length;
+  const avgStrikeRate = CheckIntValue(SafeDivide(total.strikeRate, count));
+  const avgBallPercentage = CheckIntValue(
+    SafeDivide(total.avgBallPercentage, count)
+  );
+  const run = CheckIntValue(SafeDivide(total.run, count));
+
+  return { run, avgStrikeRate, avgBallPercentage };
+};
+
+export const CalculateFantasy = (fantasy: any[]) => {
+  const sortLatestDate = SortArray(fantasy).slice(0, 20);
+
+  const result = sortLatestDate.reduce(
+    (acc, curr) => {
+      acc.bat += CheckIntValue(curr.bat);
+      acc.bowl += CheckIntValue(curr.bowl);
+      return acc;
+    },
+    { bat: 0, bowl: 0 }
+  );
+  const count = sortLatestDate.length;
+
+  const avgRunsPoint = CheckIntValue(result.bat / count);
+  const avgBowlPoint = CheckIntValue(result.bowl / count);
+
+  return { avgRunsPoint, avgBowlPoint };
+};
+
+export const CalculateBatting = (battingForm: any[]) => {
+  const sortBattingFormLatestData = SortArray(battingForm || [])
+    .slice(0, 20)
+    .map((innings: any) => {
+      const runStr = innings.run;
+      let runs = 0;
+      let balls = 0;
+      if (runStr && runStr.includes("(")) {
+        const [r, b] = runStr.replace(")", "").split("(");
+        runs = Number(r.trim());
+        balls = Number(b.trim());
+      }
+      return {
+        runs,
+        ballFaced: balls,
+        strikeRate: innings.sr === "DNB" ? 0 : Number(innings.sr),
+      };
+    });
+  const result = sortBattingFormLatestData.reduce(
+    (acc, curr) => {
+      acc.runs += CheckIntValue(curr.runs);
+      acc.ballFaced += CheckIntValue(curr.ballFaced);
+      acc.strikeRate += CheckIntValue(curr.strikeRate);
+      return acc;
+    },
+    { runs: 0, ballFaced: 0, strikeRate: 0 }
+  );
+
+  const count = sortBattingFormLatestData.length || 1;
+
+  return {
+    averageRuns: CheckIntValue(SafeDivide(result.runs, count)),
+    averageBalls: CheckIntValue(SafeDivide(result.ballFaced, count)),
+    averageStrikeRate: CheckIntValue(SafeDivide(result.strikeRate, count)),
+  };
+};
+
+export const CalculateBowling = (bowlingForm: any[]) => {
+  const sortBowlingFormLatestData = SortArray(bowlingForm || [])
+    .slice(0, 20)
+    .map((item: any) => {
+      let over = CheckIntValue(item.o);
+      let avgOver = 0;
+      if (over <= 4) {
+        avgOver = over / 4;
+      } else if (over > 4 && over <= 10) {
+        avgOver = over / 10;
+      } else {
+        avgOver = over / 25;
+      }
+
+      return {
+        over: CheckIntValue(item.o),
+        run: CheckIntValue(item.r),
+        wicket: CheckIntValue(item.w),
+        eco: CheckIntValue(item.eco),
+        avgOver: CheckIntValue(avgOver),
+      };
+    });
+  const total = sortBowlingFormLatestData.reduce(
+    (acc, curr) => {
+      acc.run += CheckIntValue(curr.run);
+      acc.wicket += CheckIntValue(curr.wicket);
+      acc.eco += CheckIntValue(curr.eco);
+      acc.avgOver += CheckIntValue(curr.avgOver);
+      return acc;
+    },
+    {
+      run: 0,
+      wicket: 0,
+      eco: 0,
+      avgOver: 0,
+    }
+  );
+
+  const count = sortBowlingFormLatestData.length;
+  const avgEconmy = CheckIntValue(SafeDivide(total.eco, count));
+  const avgWicket = CheckIntValue(SafeDivide(total.wicket, count));
+  const avgOver = CheckIntValue(SafeDivide(total.avgOver, count));
+
+  return { avgEconmy, avgWicket, avgOver };
+};

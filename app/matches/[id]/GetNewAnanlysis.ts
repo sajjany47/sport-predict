@@ -1,10 +1,12 @@
 import {
+  CalculateBatting,
+  CalculateBattingG,
+  CalculateBowling,
   CalculateBowlingG,
+  CalculateFantasy,
   CheckIntValue,
-  SafeDivide,
   SortArray,
 } from "@/lib/utils";
-import moment from "moment";
 
 export const getNewAnalysis = async (data: any) => {
   const matchOver = (format: any) => {
@@ -19,163 +21,41 @@ export const getNewAnalysis = async (data: any) => {
       : { over: 16.4, bowlerOverLimit: 3.28 };
   };
   const playerScoreCalculate = (player: any) => {
-    const CalculateFantasy = (fantasy: any[]) => {
-      const sortLatestDate = SortArray(fantasy).slice(0, 20);
-
-      const result = sortLatestDate.reduce(
-        (acc, curr) => {
-          acc.bat += CheckIntValue(curr.bat);
-          acc.bowl += CheckIntValue(curr.bowl);
-          return acc;
-        },
-        { bat: 0, bowl: 0 }
-      );
-      const count = sortLatestDate.length;
-
-      const avgRunsPoint = CheckIntValue((result.bat / count) * 0.9);
-      const avgBowlPoint = CheckIntValue((result.bowl / count) * 0.9);
-
-      return { avgRunsPoint, avgBowlPoint };
-    };
-
-    const CalculateBatting = (stats: any[], isIninngs?: any) => {
-      const result = stats.reduce(
-        (acc, curr) => {
-          const runs = CheckIntValue(curr.runs);
-          const balls = CheckIntValue(curr.ballFaced);
-          const sr = CheckIntValue(curr.strikeRate);
-          const innings = isIninngs ? Number(curr.innings) : 1;
-          acc.runs += SafeDivide(runs, innings);
-          acc.ballFaced += SafeDivide(balls, innings);
-          acc.strikeRate += sr;
-          return acc;
-        },
-        { runs: 0, ballFaced: 0, strikeRate: 0 }
-      );
-
-      const count = stats.length || 1;
-
-      return {
-        averageRuns: CheckIntValue(SafeDivide(result.runs, count)),
-        averageBalls: CheckIntValue(SafeDivide(result.ballFaced, count)),
-        averageStrikeRate: CheckIntValue(SafeDivide(result.strikeRate, count)),
-      };
-    };
-
-    const CalculateBowling = (bowlingStats: any[], matchOverLimit: number) => {
-      const total = bowlingStats.reduce(
-        (acc, curr) => {
-          acc.run += CheckIntValue(curr.run);
-          acc.wicket += CheckIntValue(curr.wicket);
-          acc.eco += CheckIntValue(curr.eco);
-          acc.avgOver += CheckIntValue(curr.avgOver);
-          return acc;
-        },
-        {
-          run: 0,
-          wicket: 0,
-          eco: 0,
-          avgOver: 0,
-        }
-      );
-
-      const count = bowlingStats.length;
-      const avgEconmy = CheckIntValue(SafeDivide(total.eco, count));
-      const avgWicket = CheckIntValue(SafeDivide(total.wicket, count));
-      const avgOver = CheckIntValue(
-        SafeDivide(total.avgOver, count) * matchOverLimit
-      );
-
-      return { avgEconmy, avgWicket, avgOver };
-    };
-
     const fantasyStats = CalculateFantasy(player.fantasyPoints || []);
 
     //---------------------------Recent batting & Bowling form stats------------------------
-    const sortBattingFormLatestData = SortArray(player.battingForm || [])
-      .slice(0, 20)
-      .map((innings: any) => {
-        const runStr = innings.run;
-        let runs = 0;
-        let balls = 0;
-        if (runStr && runStr.includes("(")) {
-          const [r, b] = runStr.replace(")", "").split("(");
-          runs = Number(r.trim());
-          balls = Number(b.trim());
-        }
-        return {
-          runs,
-          ballFaced: balls,
-          strikeRate: innings.sr === "DNB" ? 0 : Number(innings.sr),
-        };
-      });
 
-    const recentBattingFormStats = CalculateBatting(
-      sortBattingFormLatestData || []
-    );
+    const recentBattingFormStats = CalculateBatting(player.battingForm);
 
-    const sortBowlingFormLatestData = SortArray(player.bowlingForm || [])
-      .slice(0, 20)
-      .map((item: any) => {
-        let over = CheckIntValue(item.o);
-        let avgOver = 0;
-        if (over <= 4) {
-          avgOver = over / 4;
-        } else if (over > 4 && over <= 10) {
-          avgOver = over / 10;
-        } else {
-          avgOver = over / 25;
-        }
+    const recentBowlingFormStats = CalculateBowling(player.bowlingForm || []);
 
-        return {
-          over: CheckIntValue(item.o),
-          run: CheckIntValue(item.r),
-          wicket: CheckIntValue(item.w),
-          eco: CheckIntValue(item.eco),
-          avgOver: CheckIntValue(avgOver),
-        };
-      });
-
-    const recentBowlingFormStats = CalculateBowling(
-      sortBowlingFormLatestData || [],
-      matchOver(data?.matchInfo?.format).bowlerOverLimit || 0
-    );
     //----------------Finish Recent Batting & Bowling Form Stats-----------------------
 
     //--------------------------- batting & bowling  stats------------------------
-    const prepareBattingStats = (player.battingStats || []).map(
-      (item: any) => ({
-        runs: CheckIntValue(item.runs),
-        ballFaced: CheckIntValue(item.balls),
-        strikeRate: CheckIntValue(item.strikeRate),
-        innings: CheckIntValue(item.innings),
-      })
-    );
 
-    const battingStats = CalculateBatting(prepareBattingStats || [], true);
+    const battingStats = CalculateBattingG(player.battingStats || []);
 
     const bowlingStats = CalculateBowlingG(player.bowlingStats || []);
+
     //----------------Finish Batting & bowling Stats-----------------------
 
     //---------------------------statdium batting  stats------------------------
     const prepareStadiumBattingStats = (
       player.stadiumStats.battingStats || []
     ).map((item: any) => ({
-      runs: CheckIntValue(item.runs),
-      ballFaced: CheckIntValue(item.balls),
+      ...item,
       strikeRate: CheckIntValue(item.sr),
-      innings: CheckIntValue(item.innings),
     }));
 
-    const statdiumBattingStats = CalculateBatting(
-      prepareStadiumBattingStats || [],
-      true
+    const statdiumBattingStats = CalculateBattingG(
+      prepareStadiumBattingStats || []
     );
 
     const prepareStadiumBowlingStats = (
       player.stadiumStats.bowlingStats || []
-    ).map((item: any) => ({ ...item, economy: item.econ }));
+    ).map((item: any) => ({ ...item, economy: CheckIntValue(item.econ) }));
     const statdiumBowlingStats = CalculateBowlingG(prepareStadiumBowlingStats);
+
     //----------------Finish statdium Batting Stats-----------------------
 
     return {
