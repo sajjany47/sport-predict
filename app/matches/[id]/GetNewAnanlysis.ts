@@ -1,52 +1,10 @@
-import { CheckIntValue, SafeDivide, SortArray } from "@/lib/utils";
+import {
+  CalculateBowlingG,
+  CheckIntValue,
+  SafeDivide,
+  SortArray,
+} from "@/lib/utils";
 import moment from "moment";
-
-const commonCricketLeagues = [
-  { mode: "ODI", name: "One Day International", over: 50 },
-  { mode: "T20I", name: "Twenty20 International", over: 20 },
-  { mode: "Test", name: "Test Cricket", over: 90 },
-  { mode: "IPL", name: "Indian Premier League", over: 20 },
-  { mode: "CPL", name: "Caribbean Premier League", over: 20 },
-  { mode: "BBL", name: "Big Bash League", over: 20 },
-  { mode: "PSL", name: "Pakistan Super League", over: 20 },
-  { mode: "BPL", name: "Bangladesh Premier League", over: 20 },
-  { mode: "LPL", name: "Lanka Premier League", over: 20 },
-  { mode: "Hundred", name: "The Hundred", over: 16.4 }, // 100 balls = 16.4 overs (100/6)
-  { mode: "SA20", name: "SA20 League", over: 20 },
-  { mode: "ILT20", name: "International League T20", over: 20 },
-  { mode: "MLC", name: "Major League Cricket", over: 20 },
-  { mode: "SMASH", name: "Super Smash", over: 20 },
-  { mode: "DODI", name: "Domestic One Day", over: 50 },
-  { mode: "DT20", name: "Domestic T20", over: 20 },
-  { mode: "T10", name: "T10 League", over: 10 },
-  { mode: "WBBL", name: "Women's Big Bash League", over: 20 },
-  { mode: "WPL", name: "Women's Premier League", over: 20 },
-  { mode: "BLAST", name: "Vitality Blast", over: 20 },
-];
-
-const findModeOver = (format: any) => {
-  switch (format) {
-    case "t20":
-    case "dt20":
-      return { over: 20, bowlerOverLimit: 4 };
-
-    case "odi":
-    case "dodi":
-      return { over: 50, bowlerOverLimit: 10 };
-
-    case "t10":
-      return { over: 10, bowlerOverLimit: 2 };
-
-    case "test":
-      return { over: 100, bowlerOverLimit: 25 };
-
-    case "hundred":
-      return { over: 16.4, bowlerOverLimit: 3.28 };
-
-    default:
-      return { over: 20, bowlerOverLimit: 4 };
-  }
-};
 
 export const getNewAnalysis = async (data: any) => {
   const matchOver = (format: any) => {
@@ -131,70 +89,6 @@ export const getNewAnalysis = async (data: any) => {
       return { avgEconmy, avgWicket, avgOver };
     };
 
-    const CalculateBowlingStats = (stats: any[]) => {
-      const bowlingStats = stats.reduce(
-        (acc, curr) => {
-          acc.innings += Number(curr.innings) || 0;
-          acc.balls += Number(curr.balls) || 0;
-          acc.runs += Number(curr.runs) || 0;
-          acc.wicket += Number(curr.wicket) || 0;
-          acc.economy += Number(curr.economy) || 0;
-          acc.average += Number(curr.average) || 0;
-          return acc;
-        },
-        { innings: 0, balls: 0, runs: 0, wicket: 0, economy: 0, average: 0 }
-      );
-
-      const count = stats.length;
-      const avgInnings = bowlingStats.innings / count || 0;
-      const avgBowled = bowlingStats.balls / count || 0;
-      const avgConsumedRuns = bowlingStats.runs / count || 0;
-      const avgWicket = bowlingStats.wicket / count || 0;
-      const avgEconomy = bowlingStats.economy / count || 0;
-      const average = bowlingStats.average / count || 0;
-
-      return {
-        avgInnings,
-        avgBowled,
-        avgConsumedRuns,
-        avgWicket,
-        avgEconomy,
-        average,
-      };
-    };
-
-    const CalculateStadiumBowlingStats = (stats: any[]) => {
-      const bowlingStats = stats.reduce(
-        (acc, curr) => {
-          acc.innings += Number(curr.innings) || 0;
-          acc.balls += Number(curr.balls) || 0;
-          acc.runs += Number(curr.runs) || 0;
-          acc.wickets += Number(curr.wickets) || 0;
-          acc.econ += Number(curr.econ) || 0;
-          acc.avg += Number(curr.avg) || 0;
-          return acc;
-        },
-        { innings: 0, balls: 0, runs: 0, wickets: 0, econ: 0, avg: 0 }
-      );
-
-      const count = stats.length;
-      const avgInnings = bowlingStats.innings / count || 0;
-      const avgBowled = bowlingStats.balls / count || 0;
-      const avgConsumedRuns = bowlingStats.runs / count || 0;
-      const avgWicket = bowlingStats.wickets / count || 0; // Fixed: wickets not wicket
-      const avgEconomy = bowlingStats.econ / count || 0; // Fixed: econ not economy
-      const average = bowlingStats.avg / count || 0;
-
-      return {
-        avgInnings,
-        avgBowled,
-        avgConsumedRuns,
-        avgWicket,
-        avgEconomy,
-        average,
-      };
-    };
-
     const fantasyStats = CalculateFantasy(player.fantasyPoints || []);
 
     //---------------------------Recent batting & Bowling form stats------------------------
@@ -260,34 +154,7 @@ export const getNewAnalysis = async (data: any) => {
 
     const battingStats = CalculateBatting(prepareBattingStats || [], true);
 
-    const prepareBowlingStats = (player.bowlingStats || []).map((item: any) => {
-      const modeOver = findModeOver(item.mode.toLowerCase());
-      const matches = CheckIntValue(item.matches);
-      const balls = CheckIntValue(item.balls);
-      const runs = CheckIntValue(item.runs);
-      const wicket = CheckIntValue(item.wicket);
-      const maxOversPerMatch = modeOver.over;
-
-      const totalOversBowled = balls / 6;
-      const avgOversPerMatch = matches ? totalOversBowled / matches : 0;
-
-      // percentage value (0–100)
-      const avgOverPercentage =
-        maxOversPerMatch > 0 ? (avgOversPerMatch / maxOversPerMatch) * 100 : 0;
-
-      // your required calculation
-      const avgRunsPerOver = (runs / balls) * 6;
-      const avgWicketsPerOver = (wicket / balls) * 6;
-
-      return {
-        run: avgRunsPerOver,
-        wicket: avgWicketsPerOver,
-        eco: CheckIntValue(item.economy),
-        avgOverPercentage: CheckIntValue(avgOverPercentage), // **percentage**
-      };
-    });
-    console.log(prepareBowlingStats);
-    const bowlingStats = CalculateBowlingStats(player.bowlingStats || []);
+    const bowlingStats = CalculateBowlingG(player.bowlingStats || []);
     //----------------Finish Batting & bowling Stats-----------------------
 
     //---------------------------statdium batting  stats------------------------
@@ -304,10 +171,12 @@ export const getNewAnalysis = async (data: any) => {
       prepareStadiumBattingStats || [],
       true
     );
-    //----------------Finish statdium Batting Stats-----------------------
-    const statdiumBowlingStats = CalculateStadiumBowlingStats(
+
+    const prepareStadiumBowlingStats = (
       player.stadiumStats.bowlingStats || []
-    );
+    ).map((item: any) => ({ ...item, economy: item.econ }));
+    const statdiumBowlingStats = CalculateBowlingG(prepareStadiumBowlingStats);
+    //----------------Finish statdium Batting Stats-----------------------
 
     return {
       fantasyStats,

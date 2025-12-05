@@ -433,3 +433,90 @@ export const SortArray = (arr: any[]) => {
       moment(a.date, "DD/MM/YY").valueOf()
   );
 };
+export const findModeOver = (format: any) => {
+  switch (format) {
+    case "t20":
+    case "dt20":
+      return { over: 20, bowlerOverLimit: 4 };
+
+    case "odi":
+    case "dodi":
+      return { over: 50, bowlerOverLimit: 10 };
+
+    case "t10":
+      return { over: 10, bowlerOverLimit: 2 };
+
+    case "test":
+      return { over: 100, bowlerOverLimit: 25 };
+
+    case "hundred":
+      return { over: 16.4, bowlerOverLimit: 3.28 };
+
+    default:
+      return { over: 20, bowlerOverLimit: 4 };
+  }
+};
+export const matchOver = (format: any) => {
+  return format === "T20"
+    ? { over: 20, bowlerOverLimit: 4 }
+    : format === "ODI"
+    ? { over: 50, bowlerOverLimit: 10 }
+    : format === "T10"
+    ? { over: 10, bowlerOverLimit: 2 }
+    : format === "TEST"
+    ? { over: 100, bowlerOverLimit: 25 }
+    : { over: 16.4, bowlerOverLimit: 3.28 };
+};
+export const CalculateBowlingG = (bowlingStats: any[]) => {
+  const prepareBowlingStats = (bowlingStats || []).map((item: any) => {
+    const modeOver = findModeOver(item.mode.toLowerCase());
+    const matches = CheckIntValue(item.matches);
+    const balls = CheckIntValue(item.balls);
+    const runs = CheckIntValue(item.runs);
+    const wicket = CheckIntValue(item.wicket);
+    const maxOversPerMatch = modeOver.over;
+
+    const totalOversBowled = balls / 6;
+    const avgOversPerMatch = matches ? totalOversBowled / matches : 0;
+
+    // percentage value (0–100)
+    const avgOverPercentage =
+      maxOversPerMatch > 0 ? (avgOversPerMatch / maxOversPerMatch) * 100 : 0;
+
+    // your required calculation
+    const avgRunsPerOver = (runs / balls) * 6;
+    const avgWicketsPerOver = (wicket / balls) * 6;
+
+    return {
+      run: avgRunsPerOver,
+      wicket: avgWicketsPerOver,
+      eco: CheckIntValue(item.economy),
+      avgOverPercentage: CheckIntValue(avgOverPercentage), // **percentage**
+    };
+  });
+
+  const total = prepareBowlingStats.reduce(
+    (acc, curr) => {
+      acc.run += CheckIntValue(curr.run);
+      acc.wicket += CheckIntValue(curr.wicket);
+      acc.eco += CheckIntValue(curr.eco);
+      acc.avgOverPercentage += CheckIntValue(curr.avgOverPercentage);
+      return acc;
+    },
+    {
+      run: 0,
+      wicket: 0,
+      eco: 0,
+      avgOverPercentage: 0,
+    }
+  );
+
+  const count = bowlingStats.length;
+  const avgEconmy = CheckIntValue(SafeDivide(total.eco, count));
+  const avgWicket = CheckIntValue(SafeDivide(total.wicket, count));
+  const avgOverPercentage = CheckIntValue(
+    SafeDivide(total.avgOverPercentage, count)
+  );
+
+  return { avgEconmy, avgWicket, avgOverPercentage };
+};
