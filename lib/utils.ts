@@ -467,40 +467,50 @@ export const matchOver = (format: any) => {
     ? { over: 100, bowlerOverLimit: 25 }
     : { over: 16.4, bowlerOverLimit: 3.28 };
 };
+// ---------- Helpers (assumed to exist) ----------
+// findModeOver(mode: string) => { over: number }
+// SortArray<T>(arr: T[]): T[]
+// CheckIntValue(num: any, digit?: number | string): number
+// SafeDivide(a: number, b: number): number
+
+// ---------- 1. Career Bowling (all formats combined, by rows) ----------
+
 export const CalculateBowlingG = (bowlingStats: any[]) => {
-  const prepareBowlingStats = (bowlingStats || []).map((item: any) => {
-    const modeOver = findModeOver(item.mode.toLowerCase());
+  const rows = bowlingStats || [];
+
+  const prepared = rows.map((item: any) => {
+    const modeOver = findModeOver(String(item.mode || "").toLowerCase());
     const matches = CheckIntValue(item.matches);
     const balls = CheckIntValue(item.balls);
     const runs = CheckIntValue(item.runs);
-    const wicket = CheckIntValue(item.wicket);
-    const maxOversPerMatch = modeOver.over;
+    const wickets = CheckIntValue(item.wicket);
+    const maxOversPerMatch = modeOver?.over || 0;
 
-    const totalOversBowled = balls / 6;
-    const avgOversPerMatch = matches ? totalOversBowled / matches : 0;
+    const totalOversBowled = SafeDivide(balls, 6);
+    const avgOversPerMatch = SafeDivide(totalOversBowled, matches);
 
-    // percentage value (0–100)
+    // 0–100: how much of the maximum spell he bowls on average
     const avgOverPercentage =
       maxOversPerMatch > 0 ? (avgOversPerMatch / maxOversPerMatch) * 100 : 0;
 
-    // your required calculation
-    const avgRunsPerOver = (runs / balls) * 6;
-    const avgWicketsPerOver = (wicket / balls) * 6;
+    // runs/over & wickets/over for this row
+    const avgRunsPerOver = SafeDivide(runs, balls) * 6;
+    const avgWicketsPerOver = SafeDivide(wickets, balls) * 6;
 
     return {
       run: avgRunsPerOver,
       wicket: avgWicketsPerOver,
       eco: CheckIntValue(item.economy),
-      avgOverPercentage: CheckIntValue(avgOverPercentage), // **percentage**
+      avgOverPercentage: CheckIntValue(avgOverPercentage),
     };
   });
 
-  const total = prepareBowlingStats.reduce(
+  const total = prepared.reduce(
     (acc, curr) => {
-      acc.run += CheckIntValue(curr.run);
-      acc.wicket += CheckIntValue(curr.wicket);
-      acc.eco += CheckIntValue(curr.eco);
-      acc.avgOverPercentage += CheckIntValue(curr.avgOverPercentage);
+      acc.run += curr.run;
+      acc.wicket += curr.wicket;
+      acc.eco += curr.eco;
+      acc.avgOverPercentage += curr.avgOverPercentage;
       return acc;
     },
     {
@@ -511,7 +521,8 @@ export const CalculateBowlingG = (bowlingStats: any[]) => {
     }
   );
 
-  const count = bowlingStats.length;
+  const count = prepared.length;
+
   const avgEconmy = CheckIntValue(SafeDivide(total.eco, count));
   const avgWicket = CheckIntValue(SafeDivide(total.wicket, count));
   const avgOverPercentage = CheckIntValue(
@@ -521,37 +532,40 @@ export const CalculateBowlingG = (bowlingStats: any[]) => {
   return { avgEconmy, avgWicket, avgOverPercentage };
 };
 
+// ---------- 2. Career Batting (all formats combined, by rows) ----------
+
 export const CalculateBattingG = (battingStats: any[]) => {
-  const prepareBattingStats = (battingStats || []).map((item: any) => {
-    const modeOver = findModeOver(item.mode.toLowerCase());
+  const rows = battingStats || [];
+
+  const prepared = rows.map((item: any) => {
+    const modeOver = findModeOver(String(item.mode || "").toLowerCase());
     const matches = CheckIntValue(item.matches);
     const balls = CheckIntValue(item.balls);
     const runs = CheckIntValue(item.runs);
     const strikeRate = CheckIntValue(item.strikeRate);
-    const maxBallsPerMatch = modeOver.over * 6;
+    const maxBallsPerMatch = (modeOver?.over || 0) * 6;
 
-    const avgBallsPerMatch = matches ? balls / matches : 0;
+    const avgBallsPerMatch = SafeDivide(balls, matches);
 
-    // percentage value (0–100)
+    // 0–100: how many of the team's balls he faces on avg
     const avgBallsPercentage =
       maxBallsPerMatch > 0 ? (avgBallsPerMatch / maxBallsPerMatch) * 100 : 0;
 
-    // your required calculation
-    const avgRunsPerBalls = runs / balls;
+    // runs per ball for this row
+    const avgRunsPerBall = SafeDivide(runs, balls);
 
     return {
-      run: avgRunsPerBalls,
-      strikeRate: strikeRate,
-      avgBallPercentage: CheckIntValue(avgBallsPercentage), // **percentage**
+      run: avgRunsPerBall,
+      strikeRate,
+      avgBallPercentage: CheckIntValue(avgBallsPercentage),
     };
   });
 
-  const total = prepareBattingStats.reduce(
+  const total = prepared.reduce(
     (acc, curr) => {
-      acc.run += CheckIntValue(curr.run);
-      acc.strikeRate += CheckIntValue(curr.strikeRate);
-      acc.avgBallPercentage += CheckIntValue(curr.avgBallPercentage);
-
+      acc.run += curr.run;
+      acc.strikeRate += curr.strikeRate;
+      acc.avgBallPercentage += curr.avgBallPercentage;
       return acc;
     },
     {
@@ -561,100 +575,120 @@ export const CalculateBattingG = (battingStats: any[]) => {
     }
   );
 
-  const count = battingStats.length;
+  const count = prepared.length;
+
+  const run = CheckIntValue(SafeDivide(total.run, count)); // average runs per ball across rows
   const avgStrikeRate = CheckIntValue(SafeDivide(total.strikeRate, count));
   const avgBallPercentage = CheckIntValue(
     SafeDivide(total.avgBallPercentage, count)
   );
-  const run = CheckIntValue(SafeDivide(total.run, count));
 
   return { run, avgStrikeRate, avgBallPercentage };
 };
 
-export const CalculateFantasy = (fantasy: any[]) => {
-  const sortLatestDate = SortArray(fantasy).slice(0, 20);
+// ---------- 3. Fantasy (last 20 games) ----------
 
-  const result = sortLatestDate.reduce(
+export const CalculateFantasy = (fantasy: any[]) => {
+  const sorted = SortArray(fantasy || []).slice(0, 20);
+
+  const result = sorted.reduce(
     (acc, curr) => {
-      acc.bat += CheckIntValue(curr.bat);
-      acc.bowl += CheckIntValue(curr.bowl);
+      const bat = CheckIntValue(curr.bat);
+      const bowl = CheckIntValue(curr.bowl);
+      acc.bat += bat;
+      acc.bowl += bowl;
       return acc;
     },
     { bat: 0, bowl: 0 }
   );
-  const count = sortLatestDate.length;
 
-  const avgRunsPoint = CheckIntValue(result.bat / count);
-  const avgBowlPoint = CheckIntValue(result.bowl / count);
+  const count = sorted.length;
+
+  const avgRunsPoint = CheckIntValue(SafeDivide(result.bat, count));
+  const avgBowlPoint = CheckIntValue(SafeDivide(result.bowl, count));
 
   return { avgRunsPoint, avgBowlPoint };
 };
 
+// ---------- 4. Recent Batting Form (last 20 innings) ----------
+
 export const CalculateBatting = (battingForm: any[]) => {
-  const sortBattingFormLatestData = SortArray(battingForm || [])
-    .slice(0, 20)
-    .map((innings: any) => {
-      const runStr = innings.run;
-      let runs = 0;
-      let balls = 0;
-      if (runStr && runStr.includes("(")) {
-        const [r, b] = runStr.replace(")", "").split("(");
-        runs = Number(r.trim());
-        balls = Number(b.trim());
-      }
-      return {
-        runs,
-        ballFaced: balls,
-        strikeRate: innings.sr === "DNB" ? 0 : Number(innings.sr),
-      };
-    });
-  const result = sortBattingFormLatestData.reduce(
+  const sorted = SortArray(battingForm || []).slice(0, 20);
+
+  const mapped = sorted.map((innings: any) => {
+    const runStr = innings.run;
+    let runs = 0;
+    let balls = 0;
+
+    if (runStr && typeof runStr === "string" && runStr.includes("(")) {
+      const [r, b] = runStr.replace(")", "").split("(");
+      runs = Number(r.trim()) || 0;
+      balls = Number(b.trim()) || 0;
+    }
+
+    const strikeRate =
+      innings.sr === "DNB" || innings.sr === "" || innings.sr == null
+        ? 0
+        : Number(innings.sr);
+
+    return {
+      runs,
+      ballFaced: balls,
+      strikeRate: CheckIntValue(strikeRate),
+    };
+  });
+
+  const total = mapped.reduce(
     (acc, curr) => {
-      acc.runs += CheckIntValue(curr.runs);
-      acc.ballFaced += CheckIntValue(curr.ballFaced);
-      acc.strikeRate += CheckIntValue(curr.strikeRate);
+      acc.runs += curr.runs;
+      acc.ballFaced += curr.ballFaced;
+      acc.strikeRate += curr.strikeRate;
       return acc;
     },
     { runs: 0, ballFaced: 0, strikeRate: 0 }
   );
 
-  const count = sortBattingFormLatestData.length || 1;
+  const count = mapped.length;
 
-  return {
-    averageRuns: CheckIntValue(SafeDivide(result.runs, count)),
-    averageBallsFaced: CheckIntValue(SafeDivide(result.ballFaced, count)),
-    averageStrikeRate: CheckIntValue(SafeDivide(result.strikeRate, count)),
-  };
+  const averageRuns = CheckIntValue(SafeDivide(total.runs, count));
+  const averageBallsFaced = CheckIntValue(SafeDivide(total.ballFaced, count));
+  const averageStrikeRate = CheckIntValue(SafeDivide(total.strikeRate, count));
+
+  return { averageRuns, averageBallsFaced, averageStrikeRate };
 };
 
-export const CalculateBowling = (bowlingForm: any[]) => {
-  const sortBowlingFormLatestData = SortArray(bowlingForm || [])
-    .slice(0, 20)
-    .map((item: any) => {
-      let over = CheckIntValue(item.o);
-      let avgOver = 0;
-      if (over <= 4) {
-        avgOver = over / 4;
-      } else if (over > 4 && over <= 10) {
-        avgOver = over / 10;
-      } else {
-        avgOver = over / 25;
-      }
+// ---------- 5. Recent Bowling Form (last 20 matches) ----------
 
-      return {
-        over: CheckIntValue(item.o),
-        run: CheckIntValue(item.r),
-        wicket: CheckIntValue(item.w),
-        eco: CheckIntValue(item.eco),
-        avgOver: CheckIntValue(avgOver),
-      };
-    });
-  const total = sortBowlingFormLatestData.reduce(
+export const CalculateBowling = (bowlingForm: any[]) => {
+  const sorted = SortArray(bowlingForm || []).slice(0, 20);
+
+  const mapped = sorted.map((item: any) => {
+    const overRaw = CheckIntValue(item.o); // "6.2", "4.0", "DNB" -> 0
+    let avgOverFactor = 0;
+
+    if (overRaw > 0 && overRaw <= 4) {
+      avgOverFactor = overRaw / 4;
+    } else if (overRaw > 4 && overRaw <= 10) {
+      avgOverFactor = overRaw / 10;
+    } else if (overRaw > 10) {
+      avgOverFactor = overRaw / 25;
+    }
+
+    return {
+      over: overRaw,
+      run: CheckIntValue(item.r),
+      wicket: CheckIntValue(item.w),
+      eco: CheckIntValue(item.eco),
+      avgOver: CheckIntValue(avgOverFactor),
+    };
+  });
+
+  const total = mapped.reduce(
     (acc, curr) => {
-      acc.run += CheckIntValue(curr.run);
-      acc.wicket += CheckIntValue(curr.wicket);
-      acc.eco += CheckIntValue(curr.eco);
-      acc.avgOver += CheckIntValue(curr.avgOver);
+      acc.run += curr.run;
+      acc.wicket += curr.wicket;
+      acc.eco += curr.eco;
+      acc.avgOver += curr.avgOver;
       return acc;
     },
     {
@@ -665,7 +699,8 @@ export const CalculateBowling = (bowlingForm: any[]) => {
     }
   );
 
-  const count = sortBowlingFormLatestData.length;
+  const count = mapped.length;
+
   const avgEconmy = CheckIntValue(SafeDivide(total.eco, count));
   const avgWicket = CheckIntValue(SafeDivide(total.wicket, count));
   const avgOver = CheckIntValue(SafeDivide(total.avgOver, count));

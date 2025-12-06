@@ -5,7 +5,6 @@ import {
   CalculateBowlingG,
   CalculateFantasy,
   CheckIntValue,
-  SortArray,
 } from "@/lib/utils";
 
 export const getNewAnalysis = async (data: any) => {
@@ -42,7 +41,11 @@ export const getNewAnalysis = async (data: any) => {
 
     const prepareStadiumBowlingStats = (
       player.stadiumStats.bowlingStats || []
-    ).map((item: any) => ({ ...item, economy: CheckIntValue(item.econ) }));
+    ).map((item: any) => ({
+      ...item,
+      wicket: CheckIntValue(item.wickets),
+      economy: CheckIntValue(item.econ),
+    }));
     const statdiumBowlingStats = CalculateBowlingG(prepareStadiumBowlingStats);
 
     //----------------Finish statdium Batting Stats-----------------------
@@ -58,52 +61,65 @@ export const getNewAnalysis = async (data: any) => {
     };
   };
 
-  const team1 = data.squadList[0];
-  const team2 = data.squadList[2];
+  const prepareTeamSquad = data.squadList.map((item: any) => {
+    const playingPlayer = item.playingPlayer.map((p: any) => {
+      const playerData = playerScoreCalculate(p);
+      return {
+        name: p.name,
+        image: p.image,
+        role: p.role,
+        ...playerData,
+      };
+    });
+    const benchPlayer = item.benchPlayer.map((p: any) => {
+      const playerData = playerScoreCalculate(p);
+      return {
+        name: p.name,
+        image: p.image,
+        role: p.role,
+        ...playerData,
+      };
+    });
 
-  const team1Players = playerScoreCalculate(team1.benchPlayer[1]);
+    return { ...item, playingPlayer, benchPlayer };
+  });
 
   const response1 = {
     fantasyStats: {
-      avgRunsPoint: 13.32,
-      avgBowlPoint: 29.43,
+      avgRunsPoint: 14.8,
+      avgBowlPoint: 32.7,
     },
     recentBattingFormStats: {
       averageRuns: 14.65,
-      averageBalls: 9.45,
-      averageStrikeRate: 106.2405,
+      averageBallsFaced: 9.45,
+      averageStrikeRate: 106.24,
     },
     recentBowlingFormStats: {
       avgEconmy: 6.51,
       avgWicket: 0.85,
-      avgOver: 8.545,
+      avgOver: 0.85,
+      avgRunsConsumed: 29.25,
     },
     battingStats: {
-      avgRuns: 16.911055172897278,
-      avgBallFaced: 13.84442808653335,
-      avgStrikeRate: 118.4625,
+      run: 1.18,
+      avgStrikeRate: 118.46,
+      avgBallPercentage: 7.16,
     },
     statdiumBowlingStats: {
-      avgInnings: 1.7333333333333334,
-      avgBowled: 51.6,
-      avgConsumedRuns: 54.733333333333334,
-      avgWicket: 1.6666666666666667,
-      avgEconomy: 6.978666666666666,
-      average: 22.40666666666667,
+      avgEconmy: 6.98,
+      avgWicket: 0.18,
+      avgOverPercentage: 16.49,
     },
     bowlingStats: {
-      avgInnings: 41.375,
-      avgBowled: 1306,
-      avgConsumedRuns: 1273.75,
-      avgWicket: 44.375,
-      avgEconomy: 6.831249999999999,
-      average: 29.355,
+      avgEconmy: 6.83,
+      avgWicket: 0.24,
+      avgOverPercentage: 17.18,
     },
     statdiumBattingStats: {
-      avgRuns: 22.58888888888889,
-      avgBallFaced: 16.644444444444446,
-      avgStrikeRate: 118.60666666666665,
+      run: 1.19,
+      avgStrikeRate: 118.61,
+      avgBallPercentage: 9.2,
     },
   };
-  console.log(team1Players);
+  console.log(prepareTeamSquad);
 };
