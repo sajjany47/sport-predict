@@ -70,10 +70,10 @@ export const getNewAnalysis = async (data: any) => {
 
   // console.log(playerScoreCalculate(data.squadList[0].benchPlayer[1]));
   const prepareTeamSquad = data.squadList.map((item: any) => {
-    let battingRuns = 0;
-    let wicketsTaken = 0;
-    let oversBowled = 0;
-    let runsConceded = 0;
+    let battingRunsTotal = 0;
+    let wicketsTotal = 0;
+    let oversTotal = 0;
+    let runsConcededTotal = 0;
 
     const processPlayer = (p: any) => {
       const playerData = playerScoreCalculate(p);
@@ -85,60 +85,71 @@ export const getNewAnalysis = async (data: any) => {
       const batting = playerPredictScore?.batting || {};
       const bowling = playerPredictScore?.bowling || {};
 
-      const hasBatting = batting.totalRuns !== 0 && !!batting.totalRuns;
-      const hasBowling =
-        bowling.totalAvgWickets !== 0 && !!bowling.totalAvgWickets;
+      const def = GetDefaultRolePrediction(p.role, data.matchInfo.format);
 
-      if (hasBatting && hasBowling) {
-        // use predicted values
-        battingRuns += batting.totalRuns || 0;
-        wicketsTaken += bowling.totalAvgWickets || 0;
-        oversBowled += bowling.totalAvgOvers || 0;
-        runsConceded += bowling.totalAvgRunsConceded || 0;
-      } else {
-        // fallback: default by role + format
-        const def = GetDefaultRolePrediction(p.role, data.matchInfo.format);
-        battingRuns += def.runs || 0;
-        wicketsTaken += def.wkts || 0;
-        oversBowled += def.overs || 0;
-        runsConceded += def.runsConceded || 0;
-      }
+      // -------------------------------
+      // 1️⃣ Check if BATTING BLOCK is fully zero
+      // -------------------------------
+      const battingIsZero =
+        (!batting.totalRuns || batting.totalRuns === 0) &&
+        (!batting.totalAvgBallFaced || batting.totalAvgBallFaced === 0) &&
+        (!batting.totalAvgStrikeRate || batting.totalAvgStrikeRate === 0);
+
+      // -------------------------------
+      // 2️⃣ Check if BOWLING BLOCK is fully zero
+      // -------------------------------
+      const bowlingIsZero =
+        (!bowling.totalAvgOvers || bowling.totalAvgOvers === 0) &&
+        (!bowling.totalAvgWickets || bowling.totalAvgWickets === 0) &&
+        (!bowling.totalAvgRunsConceded || bowling.totalAvgRunsConceded === 0);
+
+      // -------------------------------
+      // 3️⃣ Final values (Predicted OR Default)
+      // -------------------------------
+      const finalBattingRuns =
+        battingIsZero && bowlingIsZero ? def.runs : batting.totalRuns || 0;
+
+      const finalWickets =
+        battingIsZero && bowlingIsZero
+          ? def.wkts
+          : bowling.totalAvgWickets || 0;
+
+      const finalOvers =
+        battingIsZero && bowlingIsZero ? def.overs : bowling.totalAvgOvers || 0;
+
+      const finalRunsConceded =
+        battingIsZero && bowlingIsZero
+          ? def.runsConceded
+          : bowling.totalAvgRunsConceded || 0;
+
+      // -------------------------------
+      // 4️⃣ Add to team totals
+      // -------------------------------
+      battingRunsTotal += finalBattingRuns;
+      wicketsTotal += finalWickets;
+      oversTotal += finalOvers;
+      runsConcededTotal += finalRunsConceded;
 
       return {
         name: p.name,
         image: p.image,
         role: p.role,
-        ...playerPredictScore, // { batting: {...}, bowling: {...} }
+        ...playerPredictScore,
       };
     };
 
     const playingPlayer = (item.playingPlayer || []).map(processPlayer);
     const benchPlayer = (item.benchPlayer || []).map(processPlayer);
 
-    const playerCount = playingPlayer.length + benchPlayer.length || 1;
-
-    const overallTotalBattingRuns = CheckIntValue(
-      SafeDivide(battingRuns, playerCount)
-    );
-    const overallTotalWickets = CheckIntValue(
-      SafeDivide(wicketsTaken, playerCount)
-    );
-    const overallTotalOvers = CheckIntValue(
-      SafeDivide(oversBowled, playerCount)
-    );
-    const overallTotalRunsConceded = CheckIntValue(
-      SafeDivide(runsConceded, playerCount)
-    );
-
     return {
       ...item,
       playingPlayer,
       benchPlayer,
       predict: {
-        overallTotalBattingRuns,
-        overallTotalOvers,
-        overallTotalRunsConceded,
-        overallTotalWickets,
+        totalBattingRuns: CheckIntValue(battingRunsTotal),
+        totalOvers: CheckIntValue(oversTotal),
+        totalRunsConceded: CheckIntValue(runsConcededTotal),
+        totalWickets: CheckIntValue(wicketsTotal),
       },
     };
   });
