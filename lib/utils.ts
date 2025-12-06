@@ -622,7 +622,7 @@ export const CalculateBatting = (battingForm: any[]) => {
 
   return {
     averageRuns: CheckIntValue(SafeDivide(result.runs, count)),
-    averageBalls: CheckIntValue(SafeDivide(result.ballFaced, count)),
+    averageBallsFaced: CheckIntValue(SafeDivide(result.ballFaced, count)),
     averageStrikeRate: CheckIntValue(SafeDivide(result.strikeRate, count)),
   };
 };
@@ -669,6 +669,7 @@ export const CalculateBowling = (bowlingForm: any[]) => {
   const avgEconmy = CheckIntValue(SafeDivide(total.eco, count));
   const avgWicket = CheckIntValue(SafeDivide(total.wicket, count));
   const avgOver = CheckIntValue(SafeDivide(total.avgOver, count));
+  const avgRunsConsumed = CheckIntValue(SafeDivide(total.run, count));
 
-  return { avgEconmy, avgWicket, avgOver };
+  return { avgEconmy, avgWicket, avgOver, avgRunsConsumed };
 };

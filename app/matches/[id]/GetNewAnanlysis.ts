@@ -9,17 +9,6 @@ import {
 } from "@/lib/utils";
 
 export const getNewAnalysis = async (data: any) => {
-  const matchOver = (format: any) => {
-    return format === "T20"
-      ? { over: 20, bowlerOverLimit: 4 }
-      : format === "ODI"
-      ? { over: 50, bowlerOverLimit: 10 }
-      : format === "T10"
-      ? { over: 10, bowlerOverLimit: 2 }
-      : format === "TEST"
-      ? { over: 100, bowlerOverLimit: 25 }
-      : { over: 16.4, bowlerOverLimit: 3.28 };
-  };
   const playerScoreCalculate = (player: any) => {
     const fantasyStats = CalculateFantasy(player.fantasyPoints || []);
 
