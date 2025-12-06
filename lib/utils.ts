@@ -456,7 +456,7 @@ export const findModeOver = (format: any) => {
       return { over: 20, bowlerOverLimit: 4 };
   }
 };
-export const matchOver = (format: any) => {
+export const FindMatchOver = (format: any) => {
   return format === "T20"
     ? { over: 20, bowlerOverLimit: 4 }
     : format === "ODI"
@@ -467,6 +467,63 @@ export const matchOver = (format: any) => {
     ? { over: 100, bowlerOverLimit: 25 }
     : { over: 16.4, bowlerOverLimit: 3.28 };
 };
+
+export const GetDefaultRolePrediction = (role: any, format: any) => {
+  const getRoleCategory = (role = "") => {
+    const r = role.toLowerCase();
+
+    if (r.includes("bowling allrounder")) return "BOWL_AR";
+    if (r.includes("batting allrounder")) return "BAT_AR";
+    if (r.includes("allrounder")) return "BAT_AR"; // generic allrounder
+
+    if (r.includes("bowler")) return "BOWLER";
+
+    // wk, wk-batter, batter etc.
+    return "BATTER";
+  };
+  const DEFAULT_ROLE_VALUES: any = {
+    t20: {
+      BATTER: { runs: 16, wkts: 0, overs: 0, runsConceded: 0 },
+      BOWLER: { runs: 4, wkts: 0.67, overs: 4, runsConceded: 26 },
+      BAT_AR: { runs: 18, wkts: 0.4, overs: 2.5, runsConceded: 24 },
+      BOWL_AR: { runs: 12, wkts: 0.5, overs: 3, runsConceded: 25 },
+    },
+
+    t10: {
+      BATTER: { runs: 12, wkts: 0, overs: 0, runsConceded: 0 },
+      BOWLER: { runs: 3, wkts: 0.5, overs: 2, runsConceded: 17 },
+      BAT_AR: { runs: 14, wkts: 0.35, overs: 1.2, runsConceded: 15 },
+      BOWL_AR: { runs: 10, wkts: 0.4, overs: 1.5, runsConceded: 16 },
+    },
+
+    hundred: {
+      BATTER: { runs: 20, wkts: 0, overs: 0, runsConceded: 0 },
+      BOWLER: { runs: 6, wkts: 0.7, overs: 3.3, runsConceded: 30 }, // 20 balls
+      BAT_AR: { runs: 22, wkts: 0.45, overs: 2, runsConceded: 28 },
+      BOWL_AR: { runs: 16, wkts: 0.55, overs: 2.5, runsConceded: 29 },
+    },
+
+    odi: {
+      BATTER: { runs: 35, wkts: 0, overs: 0, runsConceded: 0 },
+      BOWLER: { runs: 8, wkts: 1.3, overs: 10, runsConceded: 52 },
+      BAT_AR: { runs: 32, wkts: 0.8, overs: 6, runsConceded: 48 },
+      BOWL_AR: { runs: 25, wkts: 1.0, overs: 8, runsConceded: 50 },
+    },
+
+    test: {
+      BATTER: { runs: 40, wkts: 0, overs: 0, runsConceded: 0 },
+      BOWLER: { runs: 10, wkts: 2.0, overs: 20, runsConceded: 60 }, // avg spell per innings
+      BAT_AR: { runs: 38, wkts: 1.5, overs: 12, runsConceded: 55 },
+      BOWL_AR: { runs: 30, wkts: 1.8, overs: 15, runsConceded: 58 },
+    },
+  };
+
+  const roleKey = getRoleCategory(role); // BATTER / BOWLER / BAT_AR / BOWL_AR
+  const formatConfig =
+    DEFAULT_ROLE_VALUES[format.toLowerCase()] || DEFAULT_ROLE_VALUES.t20;
+  return formatConfig[roleKey] || formatConfig.BATTER;
+};
+
 // ---------- Helpers (assumed to exist) ----------
 // findModeOver(mode: string) => { over: number }
 // SortArray<T>(arr: T[]): T[]

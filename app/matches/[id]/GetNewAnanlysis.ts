@@ -1,4 +1,9 @@
 import {
+  FindMatchOver,
+  GetDefaultRolePrediction,
+  SafeDivide,
+} from "./../../../lib/utils";
+import {
   CalculateBatting,
   CalculateBattingG,
   CalculateBowling,
@@ -61,30 +66,84 @@ export const getNewAnalysis = async (data: any) => {
       statdiumBattingStats,
     };
   };
+  const matchOverInfo = FindMatchOver(data.matchInfo.format);
+
   // console.log(playerScoreCalculate(data.squadList[0].benchPlayer[1]));
   const prepareTeamSquad = data.squadList.map((item: any) => {
-    const playingPlayer = item.playingPlayer.map((p: any) => {
-      const playerData = playerScoreCalculate(p);
-      return {
-        name: p.name,
-        image: p.image,
-        role: p.role,
-        ...playerData,
-      };
-    });
-    const benchPlayer = item.benchPlayer.map((p: any) => {
-      const playerData = playerScoreCalculate(p);
-      return {
-        name: p.name,
-        image: p.image,
-        role: p.role,
-        ...playerData,
-      };
-    });
+    let battingRuns = 0;
+    let wicketsTaken = 0;
+    let oversBowled = 0;
+    let runsConceded = 0;
 
-    return { ...item, playingPlayer, benchPlayer };
+    const processPlayer = (p: any) => {
+      const playerData = playerScoreCalculate(p);
+      const playerPredictScore = playerPredictionScoreCalculate(
+        playerData,
+        matchOverInfo.over
+      );
+
+      const batting = playerPredictScore?.batting || {};
+      const bowling = playerPredictScore?.bowling || {};
+
+      const hasBatting = batting.totalRuns !== 0 && !!batting.totalRuns;
+      const hasBowling =
+        bowling.totalAvgWickets !== 0 && !!bowling.totalAvgWickets;
+
+      if (hasBatting && hasBowling) {
+        // use predicted values
+        battingRuns += batting.totalRuns || 0;
+        wicketsTaken += bowling.totalAvgWickets || 0;
+        oversBowled += bowling.totalAvgOvers || 0;
+        runsConceded += bowling.totalAvgRunsConceded || 0;
+      } else {
+        // fallback: default by role + format
+        const def = GetDefaultRolePrediction(p.role, data.matchInfo.format);
+        battingRuns += def.runs || 0;
+        wicketsTaken += def.wkts || 0;
+        oversBowled += def.overs || 0;
+        runsConceded += def.runsConceded || 0;
+      }
+
+      return {
+        name: p.name,
+        image: p.image,
+        role: p.role,
+        ...playerPredictScore, // { batting: {...}, bowling: {...} }
+      };
+    };
+
+    const playingPlayer = (item.playingPlayer || []).map(processPlayer);
+    const benchPlayer = (item.benchPlayer || []).map(processPlayer);
+
+    const playerCount = playingPlayer.length + benchPlayer.length || 1;
+
+    const overallTotalBattingRuns = CheckIntValue(
+      SafeDivide(battingRuns, playerCount)
+    );
+    const overallTotalWickets = CheckIntValue(
+      SafeDivide(wicketsTaken, playerCount)
+    );
+    const overallTotalOvers = CheckIntValue(
+      SafeDivide(oversBowled, playerCount)
+    );
+    const overallTotalRunsConceded = CheckIntValue(
+      SafeDivide(runsConceded, playerCount)
+    );
+
+    return {
+      ...item,
+      playingPlayer,
+      benchPlayer,
+      predict: {
+        overallTotalBattingRuns,
+        overallTotalOvers,
+        overallTotalRunsConceded,
+        overallTotalWickets,
+      },
+    };
   });
 
+  console.log(prepareTeamSquad);
   const response1 = {
     fantasyStats: {
       avgRunsPoint: 14.8,
@@ -124,6 +183,6 @@ export const getNewAnalysis = async (data: any) => {
       avgBallPercentage: 9.2,
     },
   };
-  const a = playerPredictionScoreCalculate(response1, 20);
-  console.log(a);
+  // const a = playerPredictionScoreCalculate(response1, 20);
+  // console.log(a);
 };
