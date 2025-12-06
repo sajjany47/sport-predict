@@ -5,6 +5,7 @@ import {
   CalculateBowlingG,
   CalculateFantasy,
   CheckIntValue,
+  playerPredictionScoreCalculate,
 } from "@/lib/utils";
 
 export const getNewAnalysis = async (data: any) => {
@@ -60,7 +61,7 @@ export const getNewAnalysis = async (data: any) => {
       statdiumBattingStats,
     };
   };
-
+  // console.log(playerScoreCalculate(data.squadList[0].benchPlayer[1]));
   const prepareTeamSquad = data.squadList.map((item: any) => {
     const playingPlayer = item.playingPlayer.map((p: any) => {
       const playerData = playerScoreCalculate(p);
@@ -97,11 +98,11 @@ export const getNewAnalysis = async (data: any) => {
     recentBowlingFormStats: {
       avgEconmy: 6.51,
       avgWicket: 0.85,
-      avgOver: 0.85,
+      avgOver: 0.17,
       avgRunsConsumed: 29.25,
     },
     battingStats: {
-      run: 1.18,
+      run: 1.19,
       avgStrikeRate: 118.46,
       avgBallPercentage: 7.16,
     },
@@ -109,11 +110,13 @@ export const getNewAnalysis = async (data: any) => {
       avgEconmy: 6.98,
       avgWicket: 0.18,
       avgOverPercentage: 16.49,
+      avgRunsPerOver: 6.98,
     },
     bowlingStats: {
       avgEconmy: 6.83,
       avgWicket: 0.24,
       avgOverPercentage: 17.18,
+      avgRunsPerOver: 6.84,
     },
     statdiumBattingStats: {
       run: 1.19,
@@ -121,5 +124,6 @@ export const getNewAnalysis = async (data: any) => {
       avgBallPercentage: 9.2,
     },
   };
-  console.log(prepareTeamSquad);
+  const a = playerPredictionScoreCalculate(response1, 20);
+  console.log(a);
 };

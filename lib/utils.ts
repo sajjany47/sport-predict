@@ -524,12 +524,13 @@ export const CalculateBowlingG = (bowlingStats: any[]) => {
   const count = prepared.length;
 
   const avgEconmy = CheckIntValue(SafeDivide(total.eco, count));
+  const avgRunsPerOver = CheckIntValue(SafeDivide(total.run, count));
   const avgWicket = CheckIntValue(SafeDivide(total.wicket, count));
   const avgOverPercentage = CheckIntValue(
     SafeDivide(total.avgOverPercentage, count)
   );
 
-  return { avgEconmy, avgWicket, avgOverPercentage };
+  return { avgEconmy, avgWicket, avgOverPercentage, avgRunsPerOver };
 };
 
 // ---------- 2. Career Batting (all formats combined, by rows) ----------
@@ -667,11 +668,11 @@ export const CalculateBowling = (bowlingForm: any[]) => {
     let avgOverFactor = 0;
 
     if (overRaw > 0 && overRaw <= 4) {
-      avgOverFactor = overRaw / 4;
+      avgOverFactor = overRaw / 20;
     } else if (overRaw > 4 && overRaw <= 10) {
-      avgOverFactor = overRaw / 10;
+      avgOverFactor = overRaw / 50;
     } else if (overRaw > 10) {
-      avgOverFactor = overRaw / 25;
+      avgOverFactor = overRaw / 100;
     }
 
     return {
@@ -707,4 +708,160 @@ export const CalculateBowling = (bowlingForm: any[]) => {
   const avgRunsConsumed = CheckIntValue(SafeDivide(total.run, count));
 
   return { avgEconmy, avgWicket, avgOver, avgRunsConsumed };
+};
+
+export const PercentageToValue = (percentage: any, total: any) => {
+  if (!percentage || !total) return 0;
+  return Number(((percentage / 100) * total).toFixed(2));
+};
+
+export const playerPredictionScoreCalculate = (
+  data: any,
+  matchOver: number
+) => {
+  // --------------------------------
+  // 1) Batting prediction
+  // --------------------------------
+
+  const fantasyBattingRuns = data.fantasyStats?.avgRunsPoint || 0;
+
+  // Recent form (last 20 innings)
+  const recentBattingFormAvgBallFaced =
+    data.recentBattingFormStats?.averageBallsFaced || 0;
+  const recentBattingFormAvgStrikeRate =
+    data.recentBattingFormStats?.averageStrikeRate || 0;
+  const recentBattingFormRuns = data.recentBattingFormStats?.averageRuns || 0;
+
+  // Career / overall batting (all formats)
+  const battingStatsAvgBallFaced =
+    PercentageToValue(
+      data.battingStats?.avgBallPercentage || 0,
+      matchOver * 6
+    ) || 0;
+  const battingStatsAvgStrikeRate = data.battingStats?.avgStrikeRate || 0;
+  const battingStatsRuns =
+    CheckIntValue((data.battingStats?.run || 0) * battingStatsAvgBallFaced) ||
+    0;
+
+  // Stadium batting
+  const stadiumBattingStatsAvgBallFaced =
+    PercentageToValue(
+      data.statdiumBattingStats?.avgBallPercentage || 0,
+      matchOver * 6
+    ) || 0;
+  const stadiumBattingStatsAvgStrikeRate =
+    data.statdiumBattingStats?.avgStrikeRate || 0;
+  const stadiumBattingStatsRuns =
+    CheckIntValue(
+      (data.statdiumBattingStats?.run || 0) * stadiumBattingStatsAvgBallFaced
+    ) || 0;
+
+  // Final combined batting prediction (simple equal weight: recent + career + stadium)
+  const totalRuns = CheckIntValue(
+    SafeDivide(
+      recentBattingFormRuns + battingStatsRuns + stadiumBattingStatsRuns,
+      3
+    )
+  );
+
+  const totalAvgStrikeRate = CheckIntValue(
+    SafeDivide(
+      recentBattingFormAvgStrikeRate +
+        battingStatsAvgStrikeRate +
+        stadiumBattingStatsAvgStrikeRate,
+      3
+    )
+  );
+
+  const totalAvgBallFaced = CheckIntValue(
+    SafeDivide(
+      recentBattingFormAvgBallFaced +
+        battingStatsAvgBallFaced +
+        stadiumBattingStatsAvgBallFaced,
+      3
+    )
+  );
+
+  // --------------------------------
+  // 2) Bowling prediction (same style)
+  // --------------------------------
+
+  const fantasyBowlingPoints = data.fantasyStats?.avgBowlPoint || 0;
+
+  // Recent bowling form (last 20 matches)
+  const recentBowlingAvgEcon = data.recentBowlingFormStats?.avgEconmy || 0;
+  const recentBowlingAvgWicket = data.recentBowlingFormStats?.avgWicket || 0;
+  // const recentBowlingOverFactor = data.recentBowlingFormStats?.avgOver || 0; // 0–1
+  const recentBowlingAvgOvers = CheckIntValue(
+    PercentageToValue(data.recentBowlingFormStats?.avgOver || 0, matchOver)
+  ); // convert factor to overs in this match
+  const recentBowlingAvgRuns =
+    data.recentBowlingFormStats?.avgRunsConsumed || 0;
+
+  // Career / overall bowling (all formats)
+  // avgOverPercentage: how much of max spell he usually bowls -> convert to overs for this match
+  const careerAvgOvers = CheckIntValue(
+    PercentageToValue(data.bowlingStats?.avgOverPercentage || 0, matchOver)
+  );
+  const careerAvgEcon = data.bowlingStats?.avgEconmy || 0;
+  const careerWicketsPerOver = data.bowlingStats?.avgWicket || 0;
+
+  const careerAvgWickets = CheckIntValue(careerWicketsPerOver * careerAvgOvers);
+  const careerAvgRuns = CheckIntValue(
+    careerAvgOvers * data.bowlingStats?.avgRunsPerOver
+  );
+
+  // Stadium bowling stats
+  const stadiumAvgOvers = CheckIntValue(
+    PercentageToValue(
+      data.statdiumBowlingStats?.avgOverPercentage || 0,
+      matchOver
+    )
+  );
+  const stadiumAvgEcon = data.statdiumBowlingStats?.avgEconmy || 0;
+  const stadiumWicketsPerOver = data.statdiumBowlingStats?.avgWicket || 0;
+
+  const stadiumAvgWickets = CheckIntValue(
+    stadiumWicketsPerOver * stadiumAvgOvers
+  );
+  const stadiumAvgRuns = CheckIntValue(
+    data.statdiumBowlingStats?.avgRunsPerOver * stadiumAvgOvers
+  );
+
+  // Final combined bowling prediction (equal weight: recent + career + stadium)
+  const totalAvgOvers = CheckIntValue(
+    SafeDivide(recentBowlingAvgOvers + careerAvgOvers + stadiumAvgOvers, 3)
+  );
+
+  const totalAvgWickets = CheckIntValue(
+    SafeDivide(recentBowlingAvgWicket + careerAvgWickets + stadiumAvgWickets, 3)
+  );
+
+  const totalAvgRunsConceded = CheckIntValue(
+    SafeDivide(recentBowlingAvgRuns + careerAvgRuns + stadiumAvgRuns, 3)
+  );
+
+  const totalAvgEconomy = totalAvgOvers
+    ? CheckIntValue(SafeDivide(totalAvgRunsConceded, totalAvgOvers))
+    : 0;
+
+  // --------------------------------
+  // 3) Return result (instead of only console.log)
+  // --------------------------------
+
+  return {
+    batting: {
+      fantasyBattingRuns,
+      totalRuns,
+      totalAvgStrikeRate,
+      totalAvgBallFaced,
+    },
+    bowling: {
+      fantasyBowlingPoints,
+      totalAvgOvers,
+      totalAvgWickets,
+      totalAvgRunsConceded,
+      totalAvgEconomy,
+    },
+  };
 };
