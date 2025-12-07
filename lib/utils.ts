@@ -922,3 +922,140 @@ export const playerPredictionScoreCalculate = (
     },
   };
 };
+
+export const GetConfidence = (chance: number) => {
+  switch (true) {
+    case chance < 30:
+      return "Low";
+    case chance >= 30 && chance <= 55:
+      return "Medium";
+    case chance > 55:
+      return "High";
+    default:
+      return "Unknown";
+  }
+};
+
+export const GetHint = (team1Chance: number, team2Chance: number) => {
+  switch (true) {
+    // Team 2 is strong favorite
+    case team1Chance < 30 && team2Chance >= 70:
+      return {
+        team1: {
+          message: "❌ Never take chance - Avoid betting on this team",
+          color: "text-red-600 bg-red-50 border-red-200",
+          badgeColor: "bg-red-100 text-red-800",
+        },
+        team2: {
+          message: "✅ Safe bet - Take chance when odds above 1.6",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+      };
+
+    // Team 1 is strong favorite
+    case team2Chance < 30 && team1Chance >= 70:
+      return {
+        team1: {
+          message: "✅ Safe bet - Take chance when odds above 1.7",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+        team2: {
+          message: "❌ Never take chance - Avoid betting on this team",
+          color: "text-red-600 bg-red-50 border-red-200",
+          badgeColor: "bg-red-100 text-red-800",
+        },
+      };
+
+    // Team 2 is moderate favorite
+    case team1Chance >= 30 && team1Chance <= 45 && team2Chance >= 55:
+      return {
+        team1: {
+          message: "⚠️ Risky bet - Only if odds above 3.0",
+          color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+          badgeColor: "bg-yellow-100 text-yellow-800",
+        },
+        team2: {
+          message: "🟢 Good bet - Take chance when odds above 2.5",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+      };
+
+    // Team 1 is moderate favorite
+    case team2Chance >= 30 && team2Chance <= 45 && team1Chance >= 55:
+      return {
+        team1: {
+          message: "🟢 Good bet - Take chance when odds above 2.5",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+        team2: {
+          message: "⚠️ Risky bet - Only if odds above 3.0",
+          color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+          badgeColor: "bg-yellow-100 text-yellow-800",
+        },
+      };
+
+    // Balanced match - both teams competitive
+    case team1Chance >= 45 && team2Chance >= 50:
+      return {
+        team1: {
+          message: "🟡 Consider betting - Wait for odds above 2.5",
+          color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+          badgeColor: "bg-yellow-100 text-yellow-800",
+        },
+        team2: {
+          message: "🟢 Better option - Take chance when odds above 2.5",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+      };
+
+    // Balanced match - both teams competitive (reverse)
+    case team2Chance >= 45 && team1Chance >= 50:
+      return {
+        team1: {
+          message: "🟢 Better option - Take chance when odds above 2.5",
+          color: "text-green-600 bg-green-50 border-green-200",
+          badgeColor: "bg-green-100 text-green-800",
+        },
+        team2: {
+          message: "🟡 Consider betting - Wait for odds above 2.5",
+          color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+          badgeColor: "bg-yellow-100 text-yellow-800",
+        },
+      };
+
+    // Very close match
+    case Math.abs(team1Chance - team2Chance) <= 5:
+      return {
+        team1: {
+          message: "⚖️ Balanced match - Wait for odds above 2.8",
+          color: "text-blue-600 bg-blue-50 border-blue-200",
+          badgeColor: "bg-blue-100 text-blue-800",
+        },
+        team2: {
+          message: "⚖️ Balanced match - Wait for odds above 2.8",
+          color: "text-blue-600 bg-blue-50 border-blue-200",
+          badgeColor: "bg-blue-100 text-blue-800",
+        },
+      };
+
+    // Default case for unknown scenarios
+    default:
+      return {
+        team1: {
+          message: "🔍 Analyze match conditions before betting",
+          color: "text-gray-600 bg-gray-50 border-gray-200",
+          badgeColor: "bg-gray-100 text-gray-800",
+        },
+        team2: {
+          message: "🔍 Analyze match conditions before betting",
+          color: "text-gray-600 bg-gray-50 border-gray-200",
+          badgeColor: "bg-gray-100 text-gray-800",
+        },
+      };
+  }
+};
