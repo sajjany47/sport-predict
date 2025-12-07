@@ -72,11 +72,6 @@ export const GetNewAnalysis = async (data: any) => {
 
   // console.log(playerScoreCalculate(data.squadList[0].benchPlayer[1]));
   const prepareTeamSquad = data.squadList.map((item: any) => {
-    let battingRunsTotal = 0;
-    let wicketsTotal = 0;
-    let oversTotal = 0;
-    let runsConcededTotal = 0;
-
     const processPlayer = (p: any) => {
       const playerData = playerScoreCalculate(p);
       const playerPredictScore = playerPredictionScoreCalculate(
@@ -86,8 +81,6 @@ export const GetNewAnalysis = async (data: any) => {
 
       const batting = playerPredictScore?.batting || {};
       const bowling = playerPredictScore?.bowling || {};
-
-      const def = GetDefaultRolePrediction(p.role, data.matchInfo.format);
 
       // -------------------------------
       // 1️⃣ Check if BATTING BLOCK is fully zero
@@ -101,40 +94,74 @@ export const GetNewAnalysis = async (data: any) => {
         (!bowling.totalAvgRunsConceded || bowling.totalAvgRunsConceded === 0);
 
       // -------------------------------
+      let a = {
+        batting: {
+          fantasyBattingRuns: 0,
+          totalRuns: 0,
+          totalAvgStrikeRate: 0,
+          totalAvgBallFaced: 0,
+        },
+        bowling: {
+          fantasyBowlingPoints: 0,
+          totalAvgOvers: 0,
+          totalAvgWickets: 0,
+          totalAvgRunsConceded: 0,
+          totalAvgEconomy: 0,
+        },
+      };
 
-      // -------------------------------
-      // 3️⃣ Final values (Predicted OR Default)
-      // -------------------------------
-      const finalBattingRuns = isZero ? def.runs : batting.totalRuns || 0;
-
-      const finalWickets = isZero ? def.wkts : bowling.totalAvgWickets || 0;
-
-      const finalOvers = isZero ? def.overs : bowling.totalAvgOvers || 0;
-
-      const finalRunsConceded = isZero
-        ? def.runsConceded
-        : bowling.totalAvgRunsConceded || 0;
-
-      // -------------------------------
-      // 4️⃣ Add to team totals
-      // -------------------------------
-      battingRunsTotal += finalBattingRuns;
-      wicketsTotal += finalWickets;
-      oversTotal += finalOvers;
-      runsConcededTotal += finalRunsConceded;
+      if (isZero) {
+        const def = GetDefaultRolePrediction(p.role, data.matchInfo.format);
+        a = {
+          batting: {
+            fantasyBattingRuns: 0,
+            totalRuns: def.runs || 0,
+            totalAvgStrikeRate: def.strikeRate || 0,
+            totalAvgBallFaced: def.totalBallsFaced || 0,
+          },
+          bowling: {
+            fantasyBowlingPoints: 0,
+            totalAvgOvers: def.overs || 0,
+            totalAvgWickets: def.wkts || 0,
+            totalAvgRunsConceded: def.runsConceded || 0,
+            totalAvgEconomy: def.economy || 0,
+          },
+        };
+      } else {
+        a = { ...playerPredictScore };
+      }
 
       return {
         name: p.name,
         image: p.image,
         role: p.role,
-        ...playerPredictScore,
+        ...a,
       };
     };
 
     const playingPlayer = (item.playingPlayer || []).map(processPlayer);
     const benchPlayer = (item.benchPlayer || []).map(processPlayer);
 
-    const count = playingPlayer.length + benchPlayer.length;
+    const selectPlayeList =
+      item.playingPlayer.length > 0 ? playingPlayer : benchPlayer;
+
+    const count = selectPlayeList.length;
+
+    const totals = selectPlayeList.reduce(
+      (acc: any, p: any) => {
+        acc.battingRunsTotal += p.batting.totalRuns || 0;
+        acc.wicketsTotal += p.bowling.totalAvgWickets || 0;
+        acc.oversTotal += p.bowling.totalAvgOvers || 0;
+        acc.runsConcededTotal += p.bowling.totalAvgRunsConceded || 0;
+        return acc;
+      },
+      {
+        battingRunsTotal: 0,
+        wicketsTotal: 0,
+        oversTotal: 0,
+        runsConcededTotal: 0,
+      }
+    );
 
     return {
       ...item,
@@ -142,37 +169,44 @@ export const GetNewAnalysis = async (data: any) => {
       benchPlayer,
       predict: {
         totalBattingRuns: CheckIntValue(
-          SafeDivide(battingRunsTotal, count) * 11
+          SafeDivide(totals.battingRunsTotal, count) * selectPlayeList.length
         ),
-        totalOvers: CheckIntValue(SafeDivide(oversTotal, count) * 11),
+        totalOvers: CheckIntValue(
+          SafeDivide(totals.oversTotal, count) * selectPlayeList.length
+        ),
         totalRunsConceded: CheckIntValue(
-          SafeDivide(runsConcededTotal, count) * 11
+          SafeDivide(totals.runsConcededTotal, count) * selectPlayeList.length
         ),
         totalWickets:
-          CheckIntValue(SafeDivide(wicketsTotal, count) * 11) > 10
+          CheckIntValue(
+            SafeDivide(totals.wicketsTotal, count) * selectPlayeList.length
+          ) > 10
             ? 10
-            : CheckIntValue(SafeDivide(wicketsTotal, count) * 11),
+            : CheckIntValue(
+                SafeDivide(totals.wicketsTotal, count) * selectPlayeList.length
+              ),
       },
     };
   });
+
   const team1 = prepareTeamSquad[0];
   const team2 = prepareTeamSquad[1];
 
-  const team1FirstInningScore = CheckIntValue(
-    SafeDivide(
-      team1.predict.totalBattingRuns + team2.predict.totalRunsConceded,
-      2
-    )
-  );
-  const team2FirstInningScore = CheckIntValue(
-    SafeDivide(
-      team2.predict.totalBattingRuns + team1.predict.totalRunsConceded,
-      2
-    )
-  );
+  // const team1FirstInningScore = CheckIntValue(
+  //   SafeDivide(
+  //     team1.predict.totalBattingRuns + team2.predict.totalRunsConceded,
+  //     2
+  //   )
+  // );
+  // const team2FirstInningScore = CheckIntValue(
+  //   SafeDivide(
+  //     team2.predict.totalBattingRuns + team1.predict.totalRunsConceded,
+  //     2
+  //   )
+  // );
 
-  // const team1FirstInningScore = CheckIntValue(team1.predict.totalBattingRuns);
-  // const team2FirstInningScore = CheckIntValue(team2.predict.totalBattingRuns);
+  const team1FirstInningScore = CheckIntValue(team1.predict.totalBattingRuns);
+  const team2FirstInningScore = CheckIntValue(team2.predict.totalBattingRuns);
 
   const totalScore = team1FirstInningScore + team2FirstInningScore;
 
@@ -186,32 +220,32 @@ export const GetNewAnalysis = async (data: any) => {
       : Number("50.00");
 
   const hintData = GetHint(team1Chance, team2Chance);
+
+  const team1PlayerList = team1.playingPlayer.length
+    ? team1.playingPlayer
+    : team1.benchPlayer;
+  const team2PlayerList = team2.playingPlayer.length
+    ? team2.playingPlayer
+    : team2.benchPlayer;
+
   const team1TopBatsman =
-    team1.playingPlayer
-      .concat(team1.benchPlayer)
-      .sort((a: any, b: any) => b.batting.totalRuns - a.batting.totalRuns)[0] ||
-    null;
+    team1PlayerList.sort(
+      (a: any, b: any) => b.batting.totalRuns - a.batting.totalRuns
+    )[0] || null;
   const team2TopBatsman =
-    team2.playingPlayer
-      .concat(team2.benchPlayer)
-      .sort((a: any, b: any) => b.batting.totalRuns - a.batting.totalRuns)[0] ||
-    null;
+    team2PlayerList.sort(
+      (a: any, b: any) => b.batting.totalRuns - a.batting.totalRuns
+    )[0] || null;
 
   const team1TopBowler =
-    team1.playingPlayer
-      .concat(team1.benchPlayer)
-      .sort(
-        (a: any, b: any) =>
-          b.bowling.totalAvgWickets - a.bowling.totalAvgWickets
-      )[0] || null;
+    team1PlayerList.sort(
+      (a: any, b: any) => b.bowling.totalAvgWickets - a.bowling.totalAvgWickets
+    )[0] || null;
 
   const team2TopBowler =
-    team2.playingPlayer
-      .concat(team2.benchPlayer)
-      .sort(
-        (a: any, b: any) =>
-          b.bowling.totalAvgWickets - a.bowling.totalAvgWickets
-      )[0] || null;
+    team2PlayerList.sort(
+      (a: any, b: any) => b.bowling.totalAvgWickets - a.bowling.totalAvgWickets
+    )[0] || null;
   const response = {
     team1: {
       name: team1.name,
@@ -326,7 +360,7 @@ export const GetNewAnalysis = async (data: any) => {
   };
 
   return response;
-  console.log(response);
+
   // const a = playerPredictionScoreCalculate(response1, 20);
   // console.log(a);
 };
