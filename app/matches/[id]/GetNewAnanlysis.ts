@@ -215,21 +215,21 @@ export const GetNewAnalysis = async (data: any) => {
   const team1 = prepareTeamSquad[0];
   const team2 = prepareTeamSquad[1];
 
-  // const team1FirstInningScore = CheckIntValue(
-  //   SafeDivide(
-  //     team1.predict.totalBattingRuns + team2.predict.totalRunsConceded,
-  //     2
-  //   )
-  // );
-  // const team2FirstInningScore = CheckIntValue(
-  //   SafeDivide(
-  //     team2.predict.totalBattingRuns + team1.predict.totalRunsConceded,
-  //     2
-  //   )
-  // );
+  const team1FirstInningScore = CheckIntValue(
+    SafeDivide(
+      team1.predict.totalBattingRuns + team2.predict.totalRunsConceded,
+      2
+    )
+  );
+  const team2FirstInningScore = CheckIntValue(
+    SafeDivide(
+      team2.predict.totalBattingRuns + team1.predict.totalRunsConceded,
+      2
+    )
+  );
 
-  const team1FirstInningScore = CheckIntValue(team1.predict.totalBattingRuns);
-  const team2FirstInningScore = CheckIntValue(team2.predict.totalBattingRuns);
+  // const team1FirstInningScore = CheckIntValue(team1.predict.totalBattingRuns);
+  // const team2FirstInningScore = CheckIntValue(team2.predict.totalBattingRuns);
 
   const totalScore = team1FirstInningScore + team2FirstInningScore;
 
