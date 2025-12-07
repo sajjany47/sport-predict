@@ -7,14 +7,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { getNewAnalysis } from "../matches/[id]/GetNewAnanlysis";
+
 import { DummyData } from "@/lib/DummyData";
+import { GetNewAnalysis } from "../matches/[id]/GetNewAnanlysis";
 
 const SupportPage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    getNewAnalysis(DummyData);
+    GetNewAnalysis(DummyData);
   }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-10 px-4 md:px-8">

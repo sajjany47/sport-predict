@@ -13,12 +13,13 @@ import {
   Award,
   Sparkles,
   Brain,
-  X,
   InfoIcon,
   Shield,
   Target,
-  AlertTriangle,
+  Wifi,
   TrendingUp,
+  AlertTriangle,
+  CheckCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,89 +37,53 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserOrderCredit } from "@/app/MainService";
+import { GetNewAnalysis } from "./GetNewAnanlysis";
 
-interface Team {
-  flag: string;
-  color: string;
-  shortName: string;
-}
-
-interface Player {
-  id: number;
+interface TeamData {
   name: string;
   shortName: string;
-  batStyle: string;
-  bowlStyle: string;
-  imageUrl: string;
-  type: string;
-  battingAvg: {
-    averageRuns: string;
-    averageBalls: string;
-    averageSR: string;
-  };
-  bowlingAvg: {
-    averageRuns: string;
-    averageWickets: string;
-    averageOvers: string;
-    averageEconomy: string;
-  } | null;
-  fantasyAvg: {
-    averageBatting: string;
-    averageBowling: string;
-    averageFielding: string;
-  };
-  teamFlag: string;
-  teamShortName: string;
-  teamColor: string;
-  totalPoint?: number;
-  points?: number;
-  form?: string;
-  impact?: string;
-}
-
-interface PredictionData {
-  team1: Team;
-  team2: Team;
+  flag: string;
   firstInningScore: {
-    team1: {
-      min: number;
-      max: number;
-      predicted: number;
-    };
-    team2: {
-      min: number;
-      max: number;
-      predicted: number;
-    };
+    min: number;
+    max: number;
+    predicted: number;
+    wickets: number;
   };
   winnerPrediction: {
-    team1: {
-      probability: string;
-      confidence: string;
-      hint: {
-        hintMessage: string;
-        badgeColor: string;
-        color: string;
-      };
-    };
-    team2: {
-      probability: string;
-      confidence: string;
-      hint: {
-        hintMessage: string;
-        badgeColor: string;
-        color: string;
-      };
+    probability: number;
+    confidence: string;
+    hint: {
+      hintMessage: string;
+      badgeColor: string;
+      color: string;
     };
   };
   topBatsman: {
-    team1: Player;
-    team2: Player;
+    name: string;
+    image: string;
+    role: string;
+    batting: {
+      totalRuns: number;
+      totalAvgStrikeRate: number;
+      totalAvgBallFaced: number;
+    };
   };
   topBowler: {
-    team1: Player;
-    team2: Player;
+    name: string;
+    image: string;
+    role: string;
+    bowling: {
+      totalAvgEconomy: number;
+      totalAvgOvers: number;
+      totalAvgWickets: number;
+      totalAvgRunsConceded: number;
+    };
   };
+}
+
+interface PredictionData {
+  team1: TeamData;
+  team2: TeamData;
 }
 
 const AIPredictionModal: React.FC<{
@@ -149,9 +114,15 @@ const AIPredictionModal: React.FC<{
       return;
     }
 
-    const data: any = GetAIPrediction(match);
-
-    setPredictionData(data);
+    try {
+      const data: any = await GetNewAnalysis(match);
+      console.log(data);
+      setPredictionData(data);
+    } catch (error) {
+      toast.error("Failed to generate prediction data.");
+      setIsLoading(false);
+      return;
+    }
 
     let payload = {
       ordertype: "prediction",
@@ -176,54 +147,89 @@ const AIPredictionModal: React.FC<{
       });
   };
 
-  const getRoleIcon = (type: string) => {
-    switch (type) {
-      case "BAT":
-        return <Target className="h-4 w-4" />;
-      case "BOWL":
-        return <Zap className="h-4 w-4" />;
-      case "AR":
-        return <Star className="h-4 w-4" />;
-      case "WK":
-        return <Award className="h-4 w-4" />;
-      default:
-        return <Users className="h-4 w-4" />;
-    }
+  const getRoleIcon = (role: string) => {
+    if (!role) return <Users className="h-4 w-4" />;
+    if (role.includes("WK")) return <Award className="h-4 w-4" />;
+    if (role.includes("Batter")) return <Target className="h-4 w-4" />;
+    if (role.includes("Bowler")) return <Zap className="h-4 w-4" />;
+    if (role.includes("Allrounder")) return <Star className="h-4 w-4" />;
+    return <Users className="h-4 w-4" />;
   };
 
-  const getRoleColor = (type: string) => {
-    switch (type) {
-      case "BAT":
-        return "bg-blue-100 text-blue-800";
-      case "BOWL":
-        return "bg-red-100 text-red-800";
-      case "AR":
-        return "bg-purple-100 text-purple-800";
-      case "WK":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  const getRoleColor = (role: string) => {
+    if (!role) return "bg-gray-100 text-gray-800";
+    if (role.includes("WK")) return "bg-green-100 text-green-800";
+    if (role.includes("Batter")) return "bg-blue-100 text-blue-800";
+    if (role.includes("Bowler")) return "bg-red-100 text-red-800";
+    if (role.includes("Allrounder")) return "bg-purple-100 text-purple-800";
+    return "bg-gray-100 text-gray-800";
   };
 
-  const getConfidenceClass = (confidence: any) => {
+  const getConfidenceClass = (confidence: string) => {
+    if (!confidence) return "bg-gray-100 text-gray-800 border-gray-300";
     switch (confidence) {
       case "High":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800 border-green-300";
       case "Medium":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
       case "Low":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-800 border-red-300";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800 border-gray-300";
     }
+  };
+
+  const getConfidenceIcon = (confidence: string) => {
+    if (!confidence) return <Wifi className="h-4 w-4 text-gray-600" />;
+    switch (confidence) {
+      case "High":
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case "Medium":
+        return <TrendingUp className="h-4 w-4 text-yellow-600" />;
+      case "Low":
+        return <AlertTriangle className="h-4 w-4 text-red-600" />;
+      default:
+        return <Wifi className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  const getTeamColor = (teamNumber: number) => {
+    return teamNumber === 1
+      ? "from-blue-600 to-indigo-600"
+      : "from-purple-600 to-pink-600";
+  };
+
+  const getTeamBgColor = (teamNumber: number) => {
+    return teamNumber === 1
+      ? "from-blue-50 to-indigo-50"
+      : "from-purple-50 to-pink-50";
+  };
+
+  const getTeamBorderColor = (teamNumber: number) => {
+    return teamNumber === 1 ? "border-blue-200" : "border-purple-200";
+  };
+
+  const getTeamTextColor = (teamNumber: number) => {
+    return teamNumber === 1 ? "text-blue-600" : "text-purple-600";
+  };
+
+  const getBattingPrediction = (runs: number) => {
+    const predictedMin = Math.round((runs || 0) * 0.8);
+    const predictedMax = Math.round((runs || 0) * 1.2);
+    return `${predictedMin}-${predictedMax} runs`;
+  };
+
+  const getBowlingPrediction = (wickets: number) => {
+    const predictedMin = Math.max(1, Math.round((wickets || 0) * 0.8));
+    const predictedMax = Math.round((wickets || 0) * 1.2);
+    return `${predictedMin}-${predictedMax} wickets`;
   };
 
   const checkSquad =
-    (match.squadList[0].benchPlayer.length === 0 &&
-      match.squadList[0].playingPlayer.length === 0) ||
-    (match.squadList[1].benchPlayer.length === 0 &&
-      match.squadList[1].playingPlayer.length === 0);
+    match?.squadList?.[0]?.benchPlayer?.length === 0 &&
+    match?.squadList?.[0]?.playingPlayer?.length === 0 &&
+    match?.squadList?.[1]?.benchPlayer?.length === 0 &&
+    match?.squadList?.[1]?.playingPlayer?.length === 0;
 
   if (!predictionData) {
     return (
@@ -311,23 +317,23 @@ const AIPredictionModal: React.FC<{
           <div className="flex items-center space-x-4 text-sm text-gray-600 mt-2">
             <div className="flex items-center space-x-2">
               <img
-                src={predictionData.team1.flag}
-                alt={predictionData.team1.shortName}
+                src={predictionData?.team1?.flag}
+                alt={predictionData?.team1?.shortName || "Team 1"}
                 className="w-6 h-6 rounded"
               />
               <span className="font-medium">
-                {predictionData.team1.shortName}
+                {predictionData?.team1?.shortName || "Team 1"}
               </span>
             </div>
             <span className="text-gray-400">vs</span>
             <div className="flex items-center space-x-2">
               <img
-                src={predictionData.team2.flag}
-                alt={predictionData.team2.shortName}
+                src={predictionData?.team2?.flag}
+                alt={predictionData?.team2?.shortName || "Team 2"}
                 className="w-6 h-6 rounded"
               />
               <span className="font-medium">
-                {predictionData.team2.shortName}
+                {predictionData?.team2?.shortName || "Team 2"}
               </span>
             </div>
           </div>
@@ -345,93 +351,147 @@ const AIPredictionModal: React.FC<{
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                 {/* Team 1 */}
-                <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-100">
+                <div
+                  className={`text-center p-6 bg-gradient-to-br ${getTeamBgColor(
+                    1
+                  )} rounded-xl border ${getTeamBorderColor(1)}`}
+                >
                   <div className="flex items-center justify-center space-x-2 mb-4">
                     <img
-                      src={predictionData.team1.flag}
-                      alt={predictionData.team1.shortName}
+                      src={predictionData?.team1?.flag}
+                      alt={predictionData?.team1?.shortName || "Team 1"}
                       className="w-10 h-10 rounded-lg shadow-sm"
                     />
-                    <h3 className="text-xl font-bold text-gray-900">
-                      {predictionData.team1.shortName}
-                    </h3>
+                    <div className="flex flex-col items-start">
+                      <h3 className="text-xl font-bold text-gray-900">
+                        {predictionData?.team1?.shortName || "Team 1"}
+                      </h3>
+                      <p className="text-sm text-gray-600 font-medium">
+                        {predictionData?.team1?.name || "Full Team Name"}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="text-4xl font-bold text-green-600 mb-3">
-                    {predictionData.winnerPrediction.team1.probability}%
+                  <div
+                    className={`text-4xl font-bold ${getTeamTextColor(1)} mb-3`}
+                  >
+                    {predictionData?.team1?.winnerPrediction?.probability?.toFixed?.(
+                      2
+                    ) || "0.00"}
+                    %
                   </div>
 
                   <div className="w-full bg-gray-200 rounded-full h-4 mb-3">
                     <div
-                      className="bg-green-600 h-4 rounded-full transition-all duration-500"
+                      className={`h-4 rounded-full transition-all duration-500 bg-gradient-to-r ${getTeamColor(
+                        1
+                      )}`}
                       style={{
-                        width: `${predictionData.winnerPrediction.team1.probability}%`,
+                        width: `${
+                          predictionData?.team1?.winnerPrediction
+                            ?.probability || 0
+                        }%`,
                       }}
                     ></div>
                   </div>
 
                   <Badge
+                    variant="outline"
                     className={`${getConfidenceClass(
-                      predictionData.winnerPrediction.team1.confidence
-                    )} text-sm px-3 py-1 mb-3`}
+                      predictionData?.team1?.winnerPrediction?.confidence || ""
+                    )} text-sm px-3 py-1 mb-3 flex items-center space-x-2 mx-auto`}
                   >
-                    {predictionData.winnerPrediction.team1.confidence}{" "}
-                    Confidence
+                    {getConfidenceIcon(
+                      predictionData?.team1?.winnerPrediction?.confidence || ""
+                    )}
+                    <span>
+                      {predictionData?.team1?.winnerPrediction?.confidence ||
+                        "Unknown"}{" "}
+                      Confidence
+                    </span>
                   </Badge>
 
-                  {/* Confidence based advice */}
-                  {
-                    <div
-                      className={`mt-4 p-3 ${predictionData.winnerPrediction.team1.hint.color} border border-blue-200 rounded-lg text-sm text-blue-700`}
-                    >
-                      {predictionData.winnerPrediction.team1.hint.hintMessage}
-                    </div>
-                  }
+                  <div
+                    className={`mt-4 p-3 ${
+                      predictionData?.team1?.winnerPrediction?.hint?.color ||
+                      "text-gray-600 bg-gray-50 border-gray-200"
+                    } rounded-lg border text-sm`}
+                  >
+                    {predictionData?.team1?.winnerPrediction?.hint
+                      ?.hintMessage || "No betting hint available"}
+                  </div>
                 </div>
 
                 {/* Team 2 */}
-                <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
+                <div
+                  className={`text-center p-6 bg-gradient-to-br ${getTeamBgColor(
+                    2
+                  )} rounded-xl border ${getTeamBorderColor(2)}`}
+                >
                   <div className="flex items-center justify-center space-x-2 mb-4">
                     <img
-                      src={predictionData.team2.flag}
-                      alt={predictionData.team2.shortName}
+                      src={predictionData?.team2?.flag}
+                      alt={predictionData?.team2?.shortName || "Team 2"}
                       className="w-10 h-10 rounded-lg shadow-sm"
                     />
-                    <h3 className="text-xl font-bold text-gray-900">
-                      {predictionData.team2.shortName}
-                    </h3>
+                    <div className="flex flex-col items-start">
+                      <h3 className="text-xl font-bold text-gray-900">
+                        {predictionData?.team2?.shortName || "Team 2"}
+                      </h3>
+                      <p className="text-sm text-gray-600 font-medium">
+                        {predictionData?.team2?.name || "Full Team Name"}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="text-4xl font-bold text-blue-600 mb-3">
-                    {predictionData.winnerPrediction.team2.probability}%
+                  <div
+                    className={`text-4xl font-bold ${getTeamTextColor(2)} mb-3`}
+                  >
+                    {predictionData?.team2?.winnerPrediction?.probability?.toFixed?.(
+                      2
+                    ) || "0.00"}
+                    %
                   </div>
 
                   <div className="w-full bg-gray-200 rounded-full h-4 mb-3">
                     <div
-                      className="bg-blue-600 h-4 rounded-full transition-all duration-500"
+                      className={`h-4 rounded-full transition-all duration-500 bg-gradient-to-r ${getTeamColor(
+                        2
+                      )}`}
                       style={{
-                        width: `${predictionData.winnerPrediction.team2.probability}%`,
+                        width: `${
+                          predictionData?.team2?.winnerPrediction
+                            ?.probability || 0
+                        }%`,
                       }}
                     ></div>
                   </div>
 
                   <Badge
+                    variant="outline"
                     className={`${getConfidenceClass(
-                      predictionData.winnerPrediction.team2.confidence
-                    )} text-sm px-3 py-1 mb-3`}
+                      predictionData?.team2?.winnerPrediction?.confidence || ""
+                    )} text-sm px-3 py-1 mb-3 flex items-center space-x-2 mx-auto`}
                   >
-                    {predictionData.winnerPrediction.team2.confidence}{" "}
-                    Confidence
+                    {getConfidenceIcon(
+                      predictionData?.team2?.winnerPrediction?.confidence || ""
+                    )}
+                    <span>
+                      {predictionData?.team2?.winnerPrediction?.confidence ||
+                        "Unknown"}{" "}
+                      Confidence
+                    </span>
                   </Badge>
 
-                  {/* Confidence based advice */}
-                  {
-                    <div
-                      className={`mt-4 p-3 ${predictionData.winnerPrediction.team2.hint.color} border border-blue-200 rounded-lg text-sm text-blue-700`}
-                    >
-                      {predictionData.winnerPrediction.team2.hint.hintMessage}
-                    </div>
-                  }
+                  <div
+                    className={`mt-4 p-3 ${
+                      predictionData?.team2?.winnerPrediction?.hint?.color ||
+                      "text-gray-600 bg-gray-50 border-gray-200"
+                    } rounded-lg border text-sm`}
+                  >
+                    {predictionData?.team2?.winnerPrediction?.hint
+                      ?.hintMessage || "No betting hint available"}
+                  </div>
                 </div>
               </div>
 
@@ -459,47 +519,90 @@ const AIPredictionModal: React.FC<{
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-                <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl border border-blue-200">
-                  <div className="flex items-center justify-center space-x-2 mb-4">
-                    <img
-                      src={predictionData.team1.flag}
-                      alt={predictionData.team1.shortName}
-                      className="w-8 h-8 rounded"
-                    />
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {predictionData.team1.shortName}
-                    </h3>
+                {/* Team 1 */}
+                <div
+                  className={`text-center p-6 bg-gradient-to-br ${getTeamBgColor(
+                    1
+                  )} rounded-xl border ${getTeamBorderColor(1)}`}
+                >
+                  <div className="flex flex-col items-center mb-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <img
+                        src={predictionData?.team1?.flag}
+                        alt={predictionData?.team1?.shortName || "Team 1"}
+                        className="w-8 h-8 rounded"
+                      />
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {predictionData?.team1?.shortName || "Team 1"}
+                      </h3>
+                    </div>
+                    <p className="text-sm text-gray-600 font-medium">
+                      {predictionData?.team1?.name || "Full Team Name"}
+                    </p>
                   </div>
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {predictionData.firstInningScore.team1.predicted.toFixed(0)}
+
+                  <div
+                    className={`text-3xl font-bold ${getTeamTextColor(1)} mb-2`}
+                  >
+                    {predictionData?.team1?.firstInningScore?.predicted || 0}
                   </div>
-                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border">
+
+                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border mb-2">
                     Range:{" "}
                     <span className="font-semibold">
-                      {predictionData.firstInningScore.team1.min.toFixed(0)} -{" "}
-                      {predictionData.firstInningScore.team1.max.toFixed(0)}
+                      {predictionData?.team1?.firstInningScore?.min || 0} -{" "}
+                      {predictionData?.team1?.firstInningScore?.max || 0}
+                    </span>
+                  </div>
+
+                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border">
+                    Predicted Wickets:{" "}
+                    <span className="font-semibold text-red-600">
+                      {predictionData?.team1?.firstInningScore?.wickets || 0}
                     </span>
                   </div>
                 </div>
-                <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-100 rounded-xl border border-purple-200">
-                  <div className="flex items-center justify-center space-x-2 mb-4">
-                    <img
-                      src={predictionData.team2.flag}
-                      alt={predictionData.team2.shortName}
-                      className="w-8 h-8 rounded"
-                    />
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {predictionData.team2.shortName}
-                    </h3>
+
+                {/* Team 2 */}
+                <div
+                  className={`text-center p-6 bg-gradient-to-br ${getTeamBgColor(
+                    2
+                  )} rounded-xl border ${getTeamBorderColor(2)}`}
+                >
+                  <div className="flex flex-col items-center mb-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <img
+                        src={predictionData?.team2?.flag}
+                        alt={predictionData?.team2?.shortName || "Team 2"}
+                        className="w-8 h-8 rounded"
+                      />
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {predictionData?.team2?.shortName || "Team 2"}
+                      </h3>
+                    </div>
+                    <p className="text-sm text-gray-600 font-medium">
+                      {predictionData?.team2?.name || "Full Team Name"}
+                    </p>
                   </div>
-                  <div className="text-3xl font-bold text-purple-600 mb-2">
-                    {predictionData.firstInningScore.team2.predicted.toFixed(0)}
+
+                  <div
+                    className={`text-3xl font-bold ${getTeamTextColor(2)} mb-2`}
+                  >
+                    {predictionData?.team2?.firstInningScore?.predicted || 0}
                   </div>
-                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border">
+
+                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border mb-2">
                     Range:{" "}
                     <span className="font-semibold">
-                      {predictionData.firstInningScore.team2.min.toFixed(0)} -{" "}
-                      {predictionData.firstInningScore.team2.max.toFixed(0)}
+                      {predictionData?.team2?.firstInningScore?.min || 0} -{" "}
+                      {predictionData?.team2?.firstInningScore?.max || 0}
+                    </span>
+                  </div>
+
+                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border">
+                    Predicted Wickets:{" "}
+                    <span className="font-semibold text-red-600">
+                      {predictionData?.team2?.firstInningScore?.wickets || 0}
                     </span>
                   </div>
                 </div>
@@ -520,40 +623,54 @@ const AIPredictionModal: React.FC<{
               <CardContent>
                 <div className="space-y-6">
                   {/* Team 1 Batsman */}
-                  <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-100">
+                  <div
+                    className={`flex items-center space-x-4 p-4 bg-gradient-to-r ${getTeamBgColor(
+                      1
+                    )} rounded-lg border ${getTeamBorderColor(1)}`}
+                  >
                     <img
-                      src={predictionData.topBatsman.team1.imageUrl}
-                      alt={predictionData.topBatsman.team1.shortName}
+                      src={
+                        predictionData?.team1?.topBatsman?.image ||
+                        "/placeholder-player.png"
+                      }
+                      alt={predictionData?.team1?.topBatsman?.name || "Player"}
                       className="w-16 h-16 rounded-lg shadow-sm"
                     />
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">
-                        {predictionData.topBatsman.team1.name}
-                      </h3>
-                      <div className="text-sm text-gray-600 mb-2">
-                        {predictionData.topBatsman.team1.batStyle} |{" "}
-                        {predictionData.topBatsman.team1.teamShortName}
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-lg font-bold text-gray-900">
+                          {predictionData?.team1?.topBatsman?.name ||
+                            "Unknown Player"}
+                        </h3>
+                        <Badge
+                          className={getRoleColor(
+                            predictionData?.team1?.topBatsman?.role || ""
+                          )}
+                        >
+                          {getRoleIcon(
+                            predictionData?.team1?.topBatsman?.role || ""
+                          )}
+                          <span className="ml-1">
+                            {predictionData?.team1?.topBatsman?.role?.split(
+                              " "
+                            )[0] || "Player"}
+                          </span>
+                        </Badge>
                       </div>
-                      <Badge
-                        className={getRoleColor(
-                          predictionData.topBatsman.team1.type
-                        )}
-                      >
-                        {getRoleIcon(predictionData.topBatsman.team1.type)}
-                        <span className="ml-1">
-                          {predictionData.topBatsman.team1.type}
-                        </span>
-                      </Badge>
+
+                      <div className="text-sm text-gray-600 mb-3">
+                        {predictionData?.team1?.name || "Team 1"}
+                      </div>
 
                       {/* Batting Stats */}
-                      <div className="grid grid-cols-3 gap-2 mt-3 p-2 bg-white rounded-lg border">
+                      <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-white rounded-lg border">
                         <div className="text-center">
-                          <div className="text-xs text-gray-500">Avg Runs</div>
+                          <div className="text-xs text-gray-500">
+                            Total Runs
+                          </div>
                           <div className="text-sm font-bold text-green-600">
-                            {Number(
-                              predictionData.topBatsman.team1.battingAvg
-                                .averageRuns || 0
-                            ).toFixed(0)}
+                            {predictionData?.team1?.topBatsman?.batting
+                              ?.totalRuns || 0}
                           </div>
                         </div>
                         <div className="text-center">
@@ -561,44 +678,31 @@ const AIPredictionModal: React.FC<{
                             Strike Rate
                           </div>
                           <div className="text-sm font-bold text-blue-600">
-                            {Number(
-                              predictionData.topBatsman.team1.battingAvg
-                                .averageSR || 0
-                            ).toFixed(0)}
+                            {predictionData?.team1?.topBatsman?.batting?.totalAvgStrikeRate?.toFixed?.(
+                              2
+                            ) || "0.00"}
                           </div>
                         </div>
                         <div className="text-center">
                           <div className="text-xs text-gray-500">Avg Balls</div>
                           <div className="text-sm font-bold text-purple-600">
-                            {Number(
-                              predictionData.topBatsman.team1.battingAvg
-                                .averageBalls || 0
-                            ).toFixed(0)}
+                            {predictionData?.team1?.topBatsman?.batting
+                              ?.totalAvgBallFaced || 0}
                           </div>
                         </div>
                       </div>
 
                       {/* Predicted Score */}
-                      <div className="mt-3 p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                      <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-semibold text-green-800">
                             Predicted Score:
                           </span>
                           <span className="text-lg font-bold text-green-600">
-                            {Math.round(
-                              parseFloat(
-                                predictionData.topBatsman.team1.battingAvg
-                                  .averageRuns
-                              ) * 1.2
+                            {getBattingPrediction(
+                              predictionData?.team1?.topBatsman?.batting
+                                ?.totalRuns || 0
                             )}
-                            -
-                            {Math.round(
-                              parseFloat(
-                                predictionData.topBatsman.team1.battingAvg
-                                  .averageRuns
-                              ) * 1.5
-                            )}{" "}
-                            runs
                           </span>
                         </div>
                       </div>
@@ -606,40 +710,54 @@ const AIPredictionModal: React.FC<{
                   </div>
 
                   {/* Team 2 Batsman */}
-                  <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+                  <div
+                    className={`flex items-center space-x-4 p-4 bg-gradient-to-r ${getTeamBgColor(
+                      2
+                    )} rounded-lg border ${getTeamBorderColor(2)}`}
+                  >
                     <img
-                      src={predictionData.topBatsman.team2.imageUrl}
-                      alt={predictionData.topBatsman.team2.shortName}
+                      src={
+                        predictionData?.team2?.topBatsman?.image ||
+                        "/placeholder-player.png"
+                      }
+                      alt={predictionData?.team2?.topBatsman?.name || "Player"}
                       className="w-16 h-16 rounded-lg shadow-sm"
                     />
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">
-                        {predictionData.topBatsman.team2.name}
-                      </h3>
-                      <div className="text-sm text-gray-600 mb-2">
-                        {predictionData.topBatsman.team2.batStyle} |{" "}
-                        {predictionData.topBatsman.team2.teamShortName}
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-lg font-bold text-gray-900">
+                          {predictionData?.team2?.topBatsman?.name ||
+                            "Unknown Player"}
+                        </h3>
+                        <Badge
+                          className={getRoleColor(
+                            predictionData?.team2?.topBatsman?.role || ""
+                          )}
+                        >
+                          {getRoleIcon(
+                            predictionData?.team2?.topBatsman?.role || ""
+                          )}
+                          <span className="ml-1">
+                            {predictionData?.team2?.topBatsman?.role?.split(
+                              " "
+                            )[0] || "Player"}
+                          </span>
+                        </Badge>
                       </div>
-                      <Badge
-                        className={getRoleColor(
-                          predictionData.topBatsman.team2.type
-                        )}
-                      >
-                        {getRoleIcon(predictionData.topBatsman.team2.type)}
-                        <span className="ml-1">
-                          {predictionData.topBatsman.team2.type}
-                        </span>
-                      </Badge>
+
+                      <div className="text-sm text-gray-600 mb-3">
+                        {predictionData?.team2?.name || "Team 2"}
+                      </div>
 
                       {/* Batting Stats */}
-                      <div className="grid grid-cols-3 gap-2 mt-3 p-2 bg-white rounded-lg border">
+                      <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-white rounded-lg border">
                         <div className="text-center">
-                          <div className="text-xs text-gray-500">Avg Runs</div>
+                          <div className="text-xs text-gray-500">
+                            Total Runs
+                          </div>
                           <div className="text-sm font-bold text-green-600">
-                            {Number(
-                              predictionData.topBatsman.team2.battingAvg
-                                .averageRuns || 0
-                            ).toFixed(0)}
+                            {predictionData?.team2?.topBatsman?.batting
+                              ?.totalRuns || 0}
                           </div>
                         </div>
                         <div className="text-center">
@@ -647,44 +765,31 @@ const AIPredictionModal: React.FC<{
                             Strike Rate
                           </div>
                           <div className="text-sm font-bold text-blue-600">
-                            {Number(
-                              predictionData.topBatsman.team2.battingAvg
-                                .averageSR || 0
-                            ).toFixed(0)}
+                            {predictionData?.team2?.topBatsman?.batting?.totalAvgStrikeRate?.toFixed?.(
+                              2
+                            ) || "0.00"}
                           </div>
                         </div>
                         <div className="text-center">
                           <div className="text-xs text-gray-500">Avg Balls</div>
                           <div className="text-sm font-bold text-purple-600">
-                            {Number(
-                              predictionData.topBatsman.team2.battingAvg
-                                .averageBalls || 0
-                            ).toFixed(0)}
+                            {predictionData?.team2?.topBatsman?.batting
+                              ?.totalAvgBallFaced || 0}
                           </div>
                         </div>
                       </div>
 
                       {/* Predicted Score */}
-                      <div className="mt-3 p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                      <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-semibold text-green-800">
                             Predicted Score:
                           </span>
                           <span className="text-lg font-bold text-green-600">
-                            {Math.round(
-                              parseFloat(
-                                predictionData.topBatsman.team2.battingAvg
-                                  .averageRuns
-                              ) * 1.2
+                            {getBattingPrediction(
+                              predictionData?.team2?.topBatsman?.batting
+                                ?.totalRuns || 0
                             )}
-                            -
-                            {Math.round(
-                              parseFloat(
-                                predictionData.topBatsman.team2.battingAvg
-                                  .averageRuns
-                              ) * 1.5
-                            )}{" "}
-                            runs
                           </span>
                         </div>
                       </div>
@@ -705,85 +810,92 @@ const AIPredictionModal: React.FC<{
               <CardContent>
                 <div className="space-y-6">
                   {/* Team 1 Bowler */}
-                  <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-100">
+                  <div
+                    className={`flex items-center space-x-4 p-4 bg-gradient-to-r ${getTeamBgColor(
+                      1
+                    )} rounded-lg border ${getTeamBorderColor(1)}`}
+                  >
                     <img
-                      src={predictionData.topBowler.team1.imageUrl}
-                      alt={predictionData.topBowler.team1.shortName}
+                      src={
+                        predictionData?.team1?.topBowler?.image ||
+                        "/placeholder-player.png"
+                      }
+                      alt={predictionData?.team1?.topBowler?.name || "Player"}
                       className="w-16 h-16 rounded-lg shadow-sm"
                     />
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">
-                        {predictionData.topBowler.team1.name}
-                      </h3>
-                      <div className="text-sm text-gray-600 mb-2">
-                        {predictionData.topBowler.team1.bowlStyle} |{" "}
-                        {predictionData.topBowler.team1.teamShortName}
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-lg font-bold text-gray-900">
+                          {predictionData?.team1?.topBowler?.name ||
+                            "Unknown Player"}
+                        </h3>
+                        <Badge
+                          className={getRoleColor(
+                            predictionData?.team1?.topBowler?.role || ""
+                          )}
+                        >
+                          {getRoleIcon(
+                            predictionData?.team1?.topBowler?.role || ""
+                          )}
+                          <span className="ml-1">
+                            {predictionData?.team1?.topBowler?.role?.split(
+                              " "
+                            )[0] || "Player"}
+                          </span>
+                        </Badge>
                       </div>
-                      <Badge
-                        className={getRoleColor(
-                          predictionData.topBowler.team1.type
-                        )}
-                      >
-                        {getRoleIcon(predictionData.topBowler.team1.type)}
-                        <span className="ml-1">
-                          {predictionData.topBowler.team1.type}
-                        </span>
-                      </Badge>
+
+                      <div className="text-sm text-gray-600 mb-3">
+                        {predictionData?.team1?.name || "Team 1"}
+                      </div>
 
                       {/* Bowling Stats */}
-                      <div className="grid grid-cols-3 gap-2 mt-3 p-2 bg-white rounded-lg border">
+                      <div className="grid grid-cols-4 gap-2 mb-3 p-2 bg-white rounded-lg border">
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Avg Overs</div>
+                          <div className="text-sm font-bold text-orange-600">
+                            {predictionData?.team1?.topBowler?.bowling
+                              ?.totalAvgOvers || 0}
+                          </div>
+                        </div>
+
                         <div className="text-center">
                           <div className="text-xs text-gray-500">
                             Avg Wickets
                           </div>
-                          <div className="text-sm font-bold text-red-600">
-                            {Number(
-                              predictionData.topBowler.team1.bowlingAvg
-                                ?.averageWickets || 0
-                            ).toFixed(0)}
+                          <div className="text-sm font-bold text-purple-600">
+                            {predictionData?.team1?.topBowler?.bowling
+                              ?.totalAvgWickets || 0}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Avg Runs</div>
+                          <div className="text-sm font-bold text-blue-600">
+                            {predictionData?.team1?.topBowler?.bowling
+                              ?.totalAvgRunsConceded || 0}
                           </div>
                         </div>
                         <div className="text-center">
                           <div className="text-xs text-gray-500">Economy</div>
-                          <div className="text-sm font-bold text-orange-600">
-                            {Number(
-                              predictionData.topBowler.team1.bowlingAvg
-                                ?.averageEconomy || 0
-                            ).toFixed(0)}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">Avg Overs</div>
-                          <div className="text-sm font-bold text-purple-600">
-                            {Number(
-                              predictionData.topBowler.team1.bowlingAvg
-                                ?.averageOvers || 0
-                            ).toFixed(0)}
+                          <div className="text-sm font-bold text-red-600">
+                            {predictionData?.team1?.topBowler?.bowling?.totalAvgEconomy?.toFixed?.(
+                              2
+                            ) || "0.00"}
                           </div>
                         </div>
                       </div>
 
                       {/* Predicted Wickets */}
-                      <div className="mt-3 p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
+                      <div className="p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-semibold text-red-800">
                             Predicted Wickets:
                           </span>
                           <span className="text-lg font-bold text-red-600">
-                            {predictionData.topBowler.team1.bowlingAvg
-                              ?.averageWickets
-                              ? `${Math.round(
-                                  parseFloat(
-                                    predictionData.topBowler.team1.bowlingAvg
-                                      .averageWickets
-                                  )
-                                )}-${Math.round(
-                                  parseFloat(
-                                    predictionData.topBowler.team1.bowlingAvg
-                                      .averageWickets
-                                  ) + 1
-                                )} wickets`
-                              : "2-3 wickets"}
+                            {
+                              predictionData?.team1?.topBowler?.bowling
+                                ?.totalAvgWickets
+                            }
                           </span>
                         </div>
                       </div>
@@ -791,85 +903,91 @@ const AIPredictionModal: React.FC<{
                   </div>
 
                   {/* Team 2 Bowler */}
-                  <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
+                  <div
+                    className={`flex items-center space-x-4 p-4 bg-gradient-to-r ${getTeamBgColor(
+                      2
+                    )} rounded-lg border ${getTeamBorderColor(2)}`}
+                  >
                     <img
-                      src={predictionData.topBowler.team2.imageUrl}
-                      alt={predictionData.topBowler.team2.shortName}
+                      src={
+                        predictionData?.team2?.topBowler?.image ||
+                        "/placeholder-player.png"
+                      }
+                      alt={predictionData?.team2?.topBowler?.name || "Player"}
                       className="w-16 h-16 rounded-lg shadow-sm"
                     />
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">
-                        {predictionData.topBowler.team2.name}
-                      </h3>
-                      <div className="text-sm text-gray-600 mb-2">
-                        {predictionData.topBowler.team2.bowlStyle} |{" "}
-                        {predictionData.topBowler.team2.teamShortName}
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-lg font-bold text-gray-900">
+                          {predictionData?.team2?.topBowler?.name ||
+                            "Unknown Player"}
+                        </h3>
+                        <Badge
+                          className={getRoleColor(
+                            predictionData?.team2?.topBowler?.role || ""
+                          )}
+                        >
+                          {getRoleIcon(
+                            predictionData?.team2?.topBowler?.role || ""
+                          )}
+                          <span className="ml-1">
+                            {predictionData?.team2?.topBowler?.role?.split(
+                              " "
+                            )[0] || "Player"}
+                          </span>
+                        </Badge>
                       </div>
-                      <Badge
-                        className={getRoleColor(
-                          predictionData.topBowler.team2.type
-                        )}
-                      >
-                        {getRoleIcon(predictionData.topBowler.team2.type)}
-                        <span className="ml-1">
-                          {predictionData.topBowler.team2.type}
-                        </span>
-                      </Badge>
+
+                      <div className="text-sm text-gray-600 mb-3">
+                        {predictionData?.team2?.name || "Team 2"}
+                      </div>
 
                       {/* Bowling Stats */}
-                      <div className="grid grid-cols-3 gap-2 mt-3 p-2 bg-white rounded-lg border">
+                      <div className="grid grid-cols-4 gap-2 mb-3 p-2 bg-white rounded-lg border">
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Avg Overs</div>
+                          <div className="text-sm font-bold text-orange-600">
+                            {predictionData?.team2?.topBowler?.bowling
+                              ?.totalAvgOvers || 0}
+                          </div>
+                        </div>
                         <div className="text-center">
                           <div className="text-xs text-gray-500">
                             Avg Wickets
                           </div>
-                          <div className="text-sm font-bold text-red-600">
-                            {Number(
-                              predictionData.topBowler.team2.bowlingAvg
-                                ?.averageWickets || 0
-                            ).toFixed(0)}
+                          <div className="text-sm font-bold text-purple-600">
+                            {predictionData?.team2?.topBowler?.bowling
+                              ?.totalAvgWickets || 0}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500">Avg Runs</div>
+                          <div className="text-sm font-bold text-blue-600">
+                            {predictionData?.team2?.topBowler?.bowling
+                              ?.totalAvgRunsConceded || 0}
                           </div>
                         </div>
                         <div className="text-center">
                           <div className="text-xs text-gray-500">Economy</div>
-                          <div className="text-sm font-bold text-orange-600">
-                            {Number(
-                              predictionData.topBowler.team2.bowlingAvg
-                                ?.averageEconomy || 0
-                            ).toFixed(0)}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">Avg Overs</div>
-                          <div className="text-sm font-bold text-purple-600">
-                            {Number(
-                              predictionData.topBowler.team2.bowlingAvg
-                                ?.averageOvers || 0
-                            ).toFixed(0)}
+                          <div className="text-sm font-bold text-red-600">
+                            {predictionData?.team2?.topBowler?.bowling?.totalAvgEconomy?.toFixed?.(
+                              2
+                            ) || "0.00"}
                           </div>
                         </div>
                       </div>
 
                       {/* Predicted Wickets */}
-                      <div className="mt-3 p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
+                      <div className="p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-semibold text-red-800">
                             Predicted Wickets:
                           </span>
                           <span className="text-lg font-bold text-red-600">
-                            {predictionData.topBowler.team2.bowlingAvg
-                              ?.averageWickets
-                              ? `${Math.round(
-                                  parseFloat(
-                                    predictionData.topBowler.team2.bowlingAvg
-                                      .averageWickets
-                                  )
-                                )}-${Math.round(
-                                  parseFloat(
-                                    predictionData.topBowler.team2.bowlingAvg
-                                      .averageWickets
-                                  ) + 1
-                                )} wickets`
-                              : "2-3 wickets"}
+                            {
+                              predictionData?.team2?.topBowler?.bowling
+                                ?.totalAvgWickets
+                            }
                           </span>
                         </div>
                       </div>
