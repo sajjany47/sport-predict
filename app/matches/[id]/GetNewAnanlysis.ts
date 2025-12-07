@@ -112,15 +112,16 @@ export const GetNewAnalysis = async (data: any) => {
 
       if (isZero) {
         const def = GetDefaultRolePrediction(p.role, data.matchInfo.format);
+
         a = {
           batting: {
-            fantasyBattingRuns: 0,
+            fantasyBattingRuns: def.battingPoint || 0,
             totalRuns: def.runs || 0,
             totalAvgStrikeRate: def.strikeRate || 0,
             totalAvgBallFaced: def.totalBallsFaced || 0,
           },
           bowling: {
-            fantasyBowlingPoints: 0,
+            fantasyBowlingPoints: def.bowlingPoint || 0,
             totalAvgOvers: def.overs || 0,
             totalAvgWickets: def.wkts || 0,
             totalAvgRunsConceded: def.runsConceded || 0,
@@ -128,7 +129,29 @@ export const GetNewAnalysis = async (data: any) => {
           },
         };
       } else {
-        a = { ...playerPredictScore };
+        const addFantasyRuns = CheckIntValue(
+          SafeDivide(
+            playerPredictScore.batting.fantasyBattingRuns +
+              playerPredictScore.batting.totalRuns,
+            2
+          )
+        );
+        const extraBalls = SafeDivide(
+          playerPredictScore.batting.fantasyBattingRuns,
+          playerPredictScore.batting.totalAvgStrikeRate
+        );
+        a = {
+          ...playerPredictScore,
+          batting: {
+            ...playerPredictScore.batting,
+            totalRuns: CheckIntValue(addFantasyRuns.toFixed(0)),
+            totalAvgBallFaced: CheckIntValue(
+              (
+                playerPredictScore.batting.totalAvgBallFaced + extraBalls
+              ).toFixed(0)
+            ),
+          },
+        };
       }
 
       return {
@@ -275,7 +298,12 @@ export const GetNewAnalysis = async (data: any) => {
               totalRuns: CheckIntValue(
                 team1TopBatsman.batting.totalRuns.toFixed(0)
               ),
-              totalAvgStrikeRate: team1TopBatsman.batting.totalAvgStrikeRate,
+              totalAvgStrikeRate: CheckIntValue(
+                SafeDivide(
+                  team1TopBatsman.batting.totalRuns,
+                  team1TopBatsman.batting.totalAvgBallFaced
+                ) * 100
+              ),
               totalAvgBallFaced: CheckIntValue(
                 team1TopBatsman.batting.totalAvgBallFaced.toFixed(0)
               ),
@@ -330,7 +358,12 @@ export const GetNewAnalysis = async (data: any) => {
               totalRuns: CheckIntValue(
                 team2TopBatsman.batting.totalRuns.toFixed(0)
               ),
-              totalAvgStrikeRate: team2TopBatsman.batting.totalAvgStrikeRate,
+              totalAvgStrikeRate: CheckIntValue(
+                SafeDivide(
+                  team2TopBatsman.batting.totalRuns,
+                  team2TopBatsman.batting.totalAvgBallFaced
+                ) * 100
+              ),
               totalAvgBallFaced: CheckIntValue(
                 team2TopBatsman.batting.totalAvgBallFaced.toFixed(0)
               ),

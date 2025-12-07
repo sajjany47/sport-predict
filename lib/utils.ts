@@ -489,8 +489,10 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         overs: 0,
         runsConceded: 0,
         strikeRate: 114.29,
-        totalBallsFaced: 14, // ~16 runs @ SR 114
+        totalBallsFaced: 14,
         economy: 0,
+        battingPoint: 28,
+        bowlingPoint: 0,
       },
       BOWLER: {
         runs: 4,
@@ -498,8 +500,10 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         overs: 4,
         runsConceded: 26,
         strikeRate: 80.0,
-        totalBallsFaced: 5, // tail batter
+        totalBallsFaced: 5,
         economy: 6.5,
+        battingPoint: 6,
+        bowlingPoint: 32,
       },
       BAT_AR: {
         runs: 18,
@@ -507,8 +511,10 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         overs: 2.5,
         runsConceded: 24,
         strikeRate: 150.0,
-        totalBallsFaced: 12, // 18 off 12
+        totalBallsFaced: 12,
         economy: 9.6,
+        battingPoint: 22,
+        bowlingPoint: 24,
       },
       BOWL_AR: {
         runs: 12,
@@ -516,8 +522,10 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         overs: 3,
         runsConceded: 25,
         strikeRate: 120.0,
-        totalBallsFaced: 10, // 12 off 10
+        totalBallsFaced: 10,
         economy: 8.33,
+        battingPoint: 16,
+        bowlingPoint: 28,
       },
     },
 
@@ -530,6 +538,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 120.0,
         totalBallsFaced: 10,
         economy: 0,
+        battingPoint: 22,
+        bowlingPoint: 0,
       },
       BOWLER: {
         runs: 3,
@@ -539,6 +549,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 75.0,
         totalBallsFaced: 4,
         economy: 8.5,
+        battingPoint: 4,
+        bowlingPoint: 26,
       },
       BAT_AR: {
         runs: 14,
@@ -548,6 +560,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 155.56,
         totalBallsFaced: 9,
         economy: 12.5,
+        battingPoint: 18,
+        bowlingPoint: 20,
       },
       BOWL_AR: {
         runs: 10,
@@ -557,6 +571,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 125.0,
         totalBallsFaced: 8,
         economy: 10.67,
+        battingPoint: 14,
+        bowlingPoint: 24,
       },
     },
 
@@ -569,6 +585,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 111.11,
         totalBallsFaced: 18,
         economy: 0,
+        battingPoint: 32,
+        bowlingPoint: 0,
       },
       BOWLER: {
         runs: 6,
@@ -578,6 +596,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 85.71,
         totalBallsFaced: 7,
         economy: 9.09,
+        battingPoint: 8,
+        bowlingPoint: 34,
       },
       BAT_AR: {
         runs: 22,
@@ -587,6 +607,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 129.41,
         totalBallsFaced: 17,
         economy: 14.0,
+        battingPoint: 26,
+        bowlingPoint: 26,
       },
       BOWL_AR: {
         runs: 16,
@@ -596,6 +618,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 114.29,
         totalBallsFaced: 14,
         economy: 11.6,
+        battingPoint: 20,
+        bowlingPoint: 30,
       },
     },
 
@@ -608,6 +632,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 87.5,
         totalBallsFaced: 40,
         economy: 0,
+        battingPoint: 42,
+        bowlingPoint: 0,
       },
       BOWLER: {
         runs: 8,
@@ -617,6 +643,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 66.67,
         totalBallsFaced: 12,
         economy: 5.2,
+        battingPoint: 8,
+        bowlingPoint: 40,
       },
       BAT_AR: {
         runs: 32,
@@ -626,6 +654,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 88.89,
         totalBallsFaced: 36,
         economy: 8.0,
+        battingPoint: 36,
+        bowlingPoint: 32,
       },
       BOWL_AR: {
         runs: 25,
@@ -635,6 +665,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 83.33,
         totalBallsFaced: 30,
         economy: 6.25,
+        battingPoint: 28,
+        bowlingPoint: 36,
       },
     },
 
@@ -647,6 +679,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 53.33,
         totalBallsFaced: 75,
         economy: 0,
+        battingPoint: 48,
+        bowlingPoint: 0,
       },
       BOWLER: {
         runs: 10,
@@ -656,6 +690,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 41.67,
         totalBallsFaced: 24,
         economy: 3.0,
+        battingPoint: 10,
+        bowlingPoint: 44,
       },
       BAT_AR: {
         runs: 38,
@@ -665,6 +701,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 54.29,
         totalBallsFaced: 70,
         economy: 4.58,
+        battingPoint: 40,
+        bowlingPoint: 38,
       },
       BOWL_AR: {
         runs: 30,
@@ -674,6 +712,8 @@ export const GetDefaultRolePrediction = (role: any, format: any) => {
         strikeRate: 54.55,
         totalBallsFaced: 55,
         economy: 3.87,
+        battingPoint: 32,
+        bowlingPoint: 42,
       },
     },
   };
