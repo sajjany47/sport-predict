@@ -82,9 +82,6 @@ export const GetNewAnalysis = async (data: any) => {
       const batting = playerPredictScore?.batting || {};
       const bowling = playerPredictScore?.bowling || {};
 
-      // -------------------------------
-      // 1️⃣ Check if BATTING BLOCK is fully zero
-      // -------------------------------
       const isZero =
         (!batting.totalRuns || batting.totalRuns === 0) &&
         (!batting.totalAvgBallFaced || batting.totalAvgBallFaced === 0) &&
@@ -93,7 +90,6 @@ export const GetNewAnalysis = async (data: any) => {
         (!bowling.totalAvgWickets || bowling.totalAvgWickets === 0) &&
         (!bowling.totalAvgRunsConceded || bowling.totalAvgRunsConceded === 0);
 
-      // -------------------------------
       let a = {
         batting: {
           fantasyBattingRuns: 0,
@@ -111,8 +107,8 @@ export const GetNewAnalysis = async (data: any) => {
       };
 
       if (isZero) {
-        const def = GetDefaultRolePrediction(p.role, data.matchInfo.format);
-
+        const def =
+          GetDefaultRolePrediction(p.role, data.matchInfo.format) || {};
         a = {
           batting: {
             fantasyBattingRuns: def.battingPoint || 0,
@@ -129,26 +125,25 @@ export const GetNewAnalysis = async (data: any) => {
           },
         };
       } else {
+        const fantasyRunsVal = Number(batting.fantasyBattingRuns || 0);
+        const predictedRunsVal = Number(batting.totalRuns || 0);
         const addFantasyRuns = CheckIntValue(
-          SafeDivide(
-            playerPredictScore.batting.fantasyBattingRuns +
-              playerPredictScore.batting.totalRuns,
-            2
-          )
+          SafeDivide(fantasyRunsVal + predictedRunsVal, 2),
+          0
         );
-        const extraBalls = SafeDivide(
-          playerPredictScore.batting.fantasyBattingRuns,
-          playerPredictScore.batting.totalAvgStrikeRate
-        );
+
+        const sr = Number(batting.totalAvgStrikeRate || 0);
+        const extraBalls = sr > 0 ? SafeDivide(fantasyRunsVal, sr) : 0;
+
         a = {
           ...playerPredictScore,
           batting: {
             ...playerPredictScore.batting,
-            totalRuns: CheckIntValue(addFantasyRuns.toFixed(0)),
+            totalRuns: CheckIntValue(addFantasyRuns, 0),
             totalAvgBallFaced: CheckIntValue(
-              (
-                playerPredictScore.batting.totalAvgBallFaced + extraBalls
-              ).toFixed(0)
+              Number(playerPredictScore.batting.totalAvgBallFaced || 0) +
+                Number(extraBalls || 0),
+              0
             ),
           },
         };
@@ -165,17 +160,19 @@ export const GetNewAnalysis = async (data: any) => {
     const playingPlayer = (item.playingPlayer || []).map(processPlayer);
     const benchPlayer = (item.benchPlayer || []).map(processPlayer);
 
-    const selectPlayeList =
-      item.playingPlayer.length > 0 ? playingPlayer : benchPlayer;
+    const selectPlayerList =
+      Array.isArray(item.playingPlayer) && item.playingPlayer.length > 0
+        ? playingPlayer
+        : benchPlayer;
 
-    const count = selectPlayeList.length;
+    const count = selectPlayerList.length;
 
-    const totals = selectPlayeList.reduce(
-      (acc: any, p: any) => {
-        acc.battingRunsTotal += p.batting.totalRuns || 0;
-        acc.wicketsTotal += p.bowling.totalAvgWickets || 0;
-        acc.oversTotal += p.bowling.totalAvgOvers || 0;
-        acc.runsConcededTotal += p.bowling.totalAvgRunsConceded || 0;
+    const totals = selectPlayerList.reduce(
+      (acc: any, pl: any) => {
+        acc.battingRunsTotal += Number(pl.batting.totalRuns || 0);
+        acc.wicketsTotal += Number(pl.bowling.totalAvgWickets || 0);
+        acc.oversTotal += Number(pl.bowling.totalAvgOvers || 0);
+        acc.runsConcededTotal += Number(pl.bowling.totalAvgRunsConceded || 0);
         return acc;
       },
       {
@@ -186,29 +183,41 @@ export const GetNewAnalysis = async (data: any) => {
       }
     );
 
+    const safePredict = () => {
+      if (count === 0) {
+        return {
+          totalBattingRuns: 0,
+          totalOvers: 0,
+          totalRunsConceded: 0,
+          totalWickets: 0,
+        };
+      }
+
+      const avgBattingRuns = SafeDivide(totals.battingRunsTotal, count);
+      const avgOvers = SafeDivide(totals.oversTotal, count);
+      const avgRunsConceded = SafeDivide(totals.runsConcededTotal, count);
+      const avgWickets = SafeDivide(totals.wicketsTotal, count);
+
+      const totalBattingRuns = CheckIntValue(avgBattingRuns * count, 0);
+      const totalOvers = CheckIntValue(avgOvers * count, 2);
+      const totalRunsConceded = CheckIntValue(avgRunsConceded * count, 2);
+
+      let totalWickets = CheckIntValue(avgWickets * count, 2);
+      if (totalWickets > 10) totalWickets = 10;
+
+      return {
+        totalBattingRuns,
+        totalOvers,
+        totalRunsConceded,
+        totalWickets,
+      };
+    };
+
     return {
       ...item,
       playingPlayer,
       benchPlayer,
-      predict: {
-        totalBattingRuns: CheckIntValue(
-          SafeDivide(totals.battingRunsTotal, count) * selectPlayeList.length
-        ),
-        totalOvers: CheckIntValue(
-          SafeDivide(totals.oversTotal, count) * selectPlayeList.length
-        ),
-        totalRunsConceded: CheckIntValue(
-          SafeDivide(totals.runsConcededTotal, count) * selectPlayeList.length
-        ),
-        totalWickets:
-          CheckIntValue(
-            SafeDivide(totals.wicketsTotal, count) * selectPlayeList.length
-          ) > 10
-            ? 10
-            : CheckIntValue(
-                SafeDivide(totals.wicketsTotal, count) * selectPlayeList.length
-              ),
-      },
+      predict: safePredict(),
     };
   });
 
