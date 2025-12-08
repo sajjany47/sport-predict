@@ -15,7 +15,11 @@ const SupportPage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    GetNewAnalysis(DummyData);
+    const fetchData = async () => {
+      const data: any = await GetNewAnalysis(DummyData);
+      console.log(data);
+    };
+    fetchData();
   }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-10 px-4 md:px-8">

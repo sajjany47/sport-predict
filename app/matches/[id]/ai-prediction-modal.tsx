@@ -116,7 +116,7 @@ const AIPredictionModal: React.FC<{
 
     try {
       const data: any = await GetNewAnalysis(match);
-      console.log(data);
+
       setPredictionData(data);
     } catch (error) {
       toast.error("Failed to generate prediction data.");

@@ -736,7 +736,7 @@ export const CalculateBowlingG = (bowlingStats: any[]) => {
   const rows = bowlingStats || [];
 
   const prepared = rows.map((item: any) => {
-    const modeOver = findModeOver(String(item.mode || "").toLowerCase());
+    const modeOver = findModeOver((item.mode || "").toLowerCase());
     const matches = CheckIntValue(item.matches);
     const balls = CheckIntValue(item.balls);
     const runs = CheckIntValue(item.runs);
@@ -796,7 +796,7 @@ export const CalculateBattingG = (battingStats: any[]) => {
   const rows = battingStats || [];
 
   const prepared = rows.map((item: any) => {
-    const modeOver = findModeOver(String(item.mode || "").toLowerCase());
+    const modeOver = findModeOver((item.mode || "").toLowerCase());
     const matches = CheckIntValue(item.matches);
     const balls = CheckIntValue(item.balls);
     const runs = CheckIntValue(item.runs);
