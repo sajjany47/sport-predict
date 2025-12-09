@@ -92,13 +92,13 @@ export const GetNewAnalysis = async (data: any) => {
 
       let a = {
         batting: {
-          fantasyBattingRuns: 0,
+          // fantasyBattingRuns: 0,
           totalRuns: 0,
           totalAvgStrikeRate: 0,
           totalAvgBallFaced: 0,
         },
         bowling: {
-          fantasyBowlingPoints: 0,
+          // fantasyBowlingPoints: 0,
           totalAvgOvers: 0,
           totalAvgWickets: 0,
           totalAvgRunsConceded: 0,
@@ -111,13 +111,13 @@ export const GetNewAnalysis = async (data: any) => {
           GetDefaultRolePrediction(p.role, data.matchInfo.format) || {};
         a = {
           batting: {
-            fantasyBattingRuns: def.battingPoint || 0,
+            // fantasyBattingRuns: def.battingPoint || 0,
             totalRuns: def.runs || 0,
             totalAvgStrikeRate: def.strikeRate || 0,
             totalAvgBallFaced: def.totalBallsFaced || 0,
           },
           bowling: {
-            fantasyBowlingPoints: def.bowlingPoint || 0,
+            // fantasyBowlingPoints: def.bowlingPoint || 0,
             totalAvgOvers: def.overs || 0,
             totalAvgWickets: def.wkts || 0,
             totalAvgRunsConceded: def.runsConceded || 0,
@@ -125,25 +125,30 @@ export const GetNewAnalysis = async (data: any) => {
           },
         };
       } else {
-        const fantasyRunsVal = Number(batting.fantasyBattingRuns || 0);
+        // const fantasyRunsVal = Number(batting.fantasyBattingRuns || 0);
         const predictedRunsVal = Number(batting.totalRuns || 0);
-        const addFantasyRuns = CheckIntValue(
-          SafeDivide(fantasyRunsVal + predictedRunsVal, 2),
-          0
-        );
+        // const addFantasyRuns = CheckIntValue(
+        //   SafeDivide(fantasyRunsVal + predictedRunsVal, 2),
+        //   0
+        // );
 
         const sr = Number(batting.totalAvgStrikeRate || 0);
-        const extraBalls = sr > 0 ? SafeDivide(fantasyRunsVal, sr) : 0;
+        // const extraBalls = sr > 0 ? SafeDivide(fantasyRunsVal, sr) : 0;
 
         a = {
           ...playerPredictScore,
           batting: {
             ...playerPredictScore.batting,
-            totalRuns: CheckIntValue(addFantasyRuns, 0),
+            // totalRuns: CheckIntValue(addFantasyRuns, 0),
+            totalRuns: CheckIntValue(predictedRunsVal, 0),
+
+            // totalAvgBallFaced: CheckIntValue(
+            //   Number(playerPredictScore.batting.totalAvgBallFaced || 0) +
+            //     Number(extraBalls || 0),
+            //   0
+            // ),
             totalAvgBallFaced: CheckIntValue(
-              Number(playerPredictScore.batting.totalAvgBallFaced || 0) +
-                Number(extraBalls || 0),
-              0
+              playerPredictScore.batting.totalAvgBallFaced
             ),
           },
         };
@@ -203,7 +208,7 @@ export const GetNewAnalysis = async (data: any) => {
       const totalRunsConceded = CheckIntValue(avgRunsConceded * count, 2);
 
       let totalWickets = CheckIntValue(avgWickets * count, 2);
-      if (totalWickets > 10) totalWickets = 10;
+      // if (totalWickets > 10) totalWickets = 10;
 
       return {
         totalBattingRuns,

@@ -1000,7 +1000,7 @@ export const playerPredictionScoreCalculate = (
   // -------------------------
   // Batting
   // -------------------------
-  const fantasyBattingRuns = data.fantasyStats?.avgRunsPoint || 0;
+  // const fantasyBattingRuns = data.fantasyStats?.avgRunsPoint || 0;
 
   // recent
   const recentRuns = data.recentBattingFormStats?.averageRuns || 0;
@@ -1051,7 +1051,7 @@ export const playerPredictionScoreCalculate = (
   // -------------------------
   // Bowling
   // -------------------------
-  const fantasyBowlingPoints = data.fantasyStats?.avgBowlPoint || 0;
+  // const fantasyBowlingPoints = data.fantasyStats?.avgBowlPoint || 0;
 
   // recent bowling
   const recentEcon = data.recentBowlingFormStats?.avgEconmy || 0;
@@ -1126,14 +1126,14 @@ export const playerPredictionScoreCalculate = (
   // -------------------------
   return {
     batting: {
-      fantasyBattingRuns: CheckIntValue(fantasyBattingRuns, 2),
+      // fantasyBattingRuns: CheckIntValue(fantasyBattingRuns, 2),
       totalRuns,
       totalAvgStrikeRate,
       totalAvgBallFaced,
       weights: { recent: W_RECENT, career: W_CAREER, stadium: W_STADIUM },
     },
     bowling: {
-      fantasyBowlingPoints: CheckIntValue(fantasyBowlingPoints, 2),
+      // fantasyBowlingPoints: CheckIntValue(fantasyBowlingPoints, 2),
       totalAvgOvers,
       totalAvgWickets,
       totalAvgRunsConceded,
