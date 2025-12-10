@@ -932,10 +932,13 @@ export const CalculateBowling = (bowlingForm: any[]) => {
       avgOverFactor = overRaw / 100;
     }
 
+    const avgRunsPerOver = CheckIntValue(SafeDivide(item.r, overRaw));
+    const avgWicketPerOver = CheckIntValue(SafeDivide(item.w, overRaw));
+
     return {
       over: overRaw,
-      run: CheckIntValue(item.r),
-      wicket: CheckIntValue(item.w),
+      run: avgRunsPerOver,
+      wicket: avgWicketPerOver,
       eco: CheckIntValue(item.eco),
       avgOver: CheckIntValue(avgOverFactor),
     };
@@ -977,25 +980,21 @@ export const playerPredictionScoreCalculate = (
   matchOver: number
 ) => {
   // weights
-  const W_RECENT = 0.5;
-  const W_CAREER = 0.3;
-  const W_STADIUM = 0.2;
+  const W_RECENT = 0.7;
+  const W_CAREER = 0.5;
+  const W_STADIUM = 0.3;
 
   // normalize percentage-like inputs:
   // if value <= 1, treat as fraction (0.17 -> 17%)
-  const normalizePct = (v: any) => {
-    if (v === undefined || v === null) return 0;
-    const n = Number(v);
-    if (Number.isNaN(n) || !Number.isFinite(n)) return 0;
-    return n <= 1 ? n * 100 : n;
-  };
 
   // convert "percentage of match overs/balls" to overs/balls using provided helper
-  const pctToBalls = (pct: any) =>
-    CheckIntValue(PercentageToValue(normalizePct(pct), matchOver * 6), 2);
+  const pctToBalls = (pct: any) => {
+    return CheckIntValue(SafeDivide(pct, 100) * matchOver * 6);
+  };
 
-  const pctToOvers = (pct: any) =>
-    CheckIntValue(PercentageToValue(normalizePct(pct), matchOver), 2);
+  const pctToOvers = (pct: any) => {
+    return CheckIntValue(SafeDivide(pct, 100) * matchOver);
+  };
 
   // -------------------------
   // Batting
@@ -1003,17 +1002,17 @@ export const playerPredictionScoreCalculate = (
   // const fantasyBattingRuns = data.fantasyStats?.avgRunsPoint || 0;
 
   // recent
-  const recentRuns = data.recentBattingFormStats?.averageRuns || 0;
-  const recentBalls = data.recentBattingFormStats?.averageBallsFaced || 0;
-  const recentSR = data.recentBattingFormStats?.averageStrikeRate || 0;
+  const recentRuns = data.recentBattingFormStats?.averageRuns;
+  const recentBalls = data.recentBattingFormStats?.averageBallsFaced;
+  const recentSR = data.recentBattingFormStats?.averageStrikeRate;
 
   // career (batting)
   const battingCareerBalls = pctToBalls(data.battingStats?.avgBallPercentage);
   const battingCareerSR = data.battingStats?.avgStrikeRate || 0;
   // battingStats.run interpreted as runs-per-ball (as in your original)
   const battingCareerRuns = CheckIntValue(
-    (data.battingStats?.run || 0) * battingCareerBalls,
-    2
+    data.battingStats?.run * battingCareerBalls,
+    0
   );
 
   // stadium (batting)
@@ -1022,8 +1021,8 @@ export const playerPredictionScoreCalculate = (
   );
   const battingStadiumSR = data.statdiumBattingStats?.avgStrikeRate || 0;
   const battingStadiumRuns = CheckIntValue(
-    (data.statdiumBattingStats?.run || 0) * battingStadiumBalls,
-    2
+    data.statdiumBattingStats?.run * battingStadiumBalls,
+    0
   );
 
   // weighted combined batting metrics (50% recent, 30% career, 20% stadium)
@@ -1034,18 +1033,21 @@ export const playerPredictionScoreCalculate = (
     2
   );
 
-  const totalAvgStrikeRate = CheckIntValue(
-    recentSR * W_RECENT +
-      battingCareerSR * W_CAREER +
-      battingStadiumSR * W_STADIUM,
-    2
-  );
+  // const totalAvgStrikeRate = CheckIntValue(
+  //   recentSR * W_RECENT +
+  //     battingCareerSR * W_CAREER +
+  //     battingStadiumSR * W_STADIUM,
+  //   2
+  // );
 
   const totalAvgBallFaced = CheckIntValue(
     recentBalls * W_RECENT +
       battingCareerBalls * W_CAREER +
       battingStadiumBalls * W_STADIUM,
     2
+  );
+  const totalAvgStrikeRate = CheckIntValue(
+    SafeDivide(totalRuns, totalAvgBallFaced) * 100
   );
 
   // -------------------------
@@ -1054,45 +1056,55 @@ export const playerPredictionScoreCalculate = (
   // const fantasyBowlingPoints = data.fantasyStats?.avgBowlPoint || 0;
 
   // recent bowling
-  const recentEcon = data.recentBowlingFormStats?.avgEconmy || 0;
-  const recentWicket = data.recentBowlingFormStats?.avgWicket || 0;
+
   // avgOver in recent data might be fraction or percent; convert to overs in this match
-  const recentOvers = pctToOvers(data.recentBowlingFormStats?.avgOver);
-  const recentRunsConceded = data.recentBowlingFormStats?.avgRunsConsumed || 0;
+  const recentOvers = CheckIntValue(
+    data.recentBowlingFormStats?.avgOver * matchOver
+  );
+  const recentWicket = CheckIntValue(
+    data.recentBowlingFormStats?.avgWicket * recentOvers
+  );
+
+  const recentRunsConceded = CheckIntValue(
+    data.recentBowlingFormStats?.avgRunsConsumed * recentOvers
+  );
+  const recentEcon = CheckIntValue(recentRunsConceded / recentOvers);
 
   // career bowling
   const bowlingCareerOvers = pctToOvers(data.bowlingStats?.avgOverPercentage);
-  const bowlingCareerEcon = data.bowlingStats?.avgEconmy || 0;
   const bowlingCareerWicketsPerOver = data.bowlingStats?.avgWicket || 0;
   const bowlingCareerWickets = CheckIntValue(
     bowlingCareerWicketsPerOver * bowlingCareerOvers,
     2
   );
-
   // prefer avgRunsPerOver if present, else fallback to econ
-  const bowlingCareerRunsPerOver =
-    data.bowlingStats?.avgRunsPerOver ?? bowlingCareerEcon ?? 0;
+  const bowlingCareerRunsPerOver = data.bowlingStats?.avgRunsPerOver;
   const bowlingCareerRuns = CheckIntValue(
     bowlingCareerRunsPerOver * bowlingCareerOvers,
     2
+  );
+  const bowlingCareerEcon = CheckIntValue(
+    SafeDivide(bowlingCareerRuns, bowlingCareerOvers)
   );
 
   // stadium bowling
   const bowlingStadiumOvers = pctToOvers(
     data.statdiumBowlingStats?.avgOverPercentage
   );
-  const bowlingStadiumEcon = data.statdiumBowlingStats?.avgEconmy || 0;
+
   const bowlingStadiumWicketsPerOver =
     data.statdiumBowlingStats?.avgWicket || 0;
   const bowlingStadiumWickets = CheckIntValue(
     bowlingStadiumWicketsPerOver * bowlingStadiumOvers,
     2
   );
-  const bowlingStadiumRunsPerOver =
-    data.statdiumBowlingStats?.avgRunsPerOver ?? bowlingStadiumEcon ?? 0;
+  const bowlingStadiumRunsPerOver = data.statdiumBowlingStats?.avgRunsPerOver;
   const bowlingStadiumRuns = CheckIntValue(
     bowlingStadiumRunsPerOver * bowlingStadiumOvers,
     2
+  );
+  const bowlingStadiumEcon = CheckIntValue(
+    SafeDivide(bowlingStadiumRuns, bowlingStadiumOvers)
   );
 
   // weighted bowling aggregates (50% recent, 30% career, 20% stadium)
@@ -1278,4 +1290,41 @@ export const GetHint = (team1Chance: number, team2Chance: number) => {
         },
       };
   }
+};
+
+export const PickTop = (players: any[], keyPath: string) => {
+  if (!Array.isArray(players) || players.length === 0) return null;
+  // shallow copy then sort
+  const copy = players.slice();
+  copy.sort((a: any, b: any) => {
+    const av = a?.[keyPath.split(".")[0]] || 0;
+    const bv = b?.[keyPath.split(".")[0]] || 0;
+    // handle nested keys if needed (but your data has flat keys under batting/bowling)
+    return (
+      (b?.[keyPath.split(".")[0]]?.[keyPath.split(".")[1]] || 0) -
+      (a?.[keyPath.split(".")[0]]?.[keyPath.split(".")[1]] || 0)
+    );
+  });
+  return copy[0] || null;
+};
+
+export const MaxMin = (score: number, wicket: number) => {
+  const predicted = Math.floor(CheckIntValue(score));
+  let wickets = Math.floor(CheckIntValue(wicket));
+  if (wickets > 10) wickets = 10;
+
+  const factor = wickets / 10; // 0 .. 1
+
+  const minDiff = Math.floor(10 + factor * 5); // 10 → 15
+  const maxDiff = Math.floor(20 + factor * 5); // 20 → 25
+
+  const minScore = Math.max(0, predicted - minDiff);
+  const maxScore = predicted + maxDiff;
+
+  return {
+    min: minScore,
+    max: maxScore,
+    predicted,
+    wickets,
+  };
 };
