@@ -55,8 +55,9 @@ const MatchesPage = () => {
       match.teams[1].teamShortName
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      match.tour.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      match.venue.toLowerCase().includes(searchTerm.toLowerCase());
+      match.tourName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      match.venue.ground.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      match.venue.city.toLowerCase().includes(searchTerm.toLowerCase());
 
     let matchesStatus = false;
     switch (activeTab) {
