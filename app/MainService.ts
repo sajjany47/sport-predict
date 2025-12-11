@@ -63,6 +63,27 @@ export const UserRegister = async (payload: any) => {
     throw new Error(error.response?.data?.message);
   }
 };
+export const SendVerificationCode = async (payload: any) => {
+  try {
+    const response = await publicApi.post("/api/users/signup", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
+
+export const VerifyEmailCode = async (payload: any) => {
+  try {
+    const response = await publicApi.post("/api/users/signup", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
 
 export const UserCreditUpdate = async (payload: any) => {
   try {
