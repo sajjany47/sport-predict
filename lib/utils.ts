@@ -980,9 +980,9 @@ export const playerPredictionScoreCalculate = (
   matchOver: number
 ) => {
   // weights
-  const W_RECENT = 0.7;
-  const W_CAREER = 0.5;
-  const W_STADIUM = 0.3;
+  const W_RECENT = 1;
+  const W_CAREER = 0.6;
+  const W_STADIUM = 0.2;
 
   // normalize percentage-like inputs:
   // if value <= 1, treat as fraction (0.17 -> 17%)
@@ -1308,15 +1308,45 @@ export const PickTop = (players: any[], keyPath: string) => {
   return copy[0] || null;
 };
 
+export const PickTopBowler = (players: any[], overLimit: number) => {
+  const sortArray = players.sort(
+    (a: any, b: any) => b.bowling.totalAvgWickets - a.bowling.totalAvgWickets
+  );
+  let check = {
+    ...sortArray[0],
+    bowling: {
+      ...sortArray[0].bowling,
+      totalAvgOvers:
+        sortArray[0].bowling.totalAvgOvers > overLimit
+          ? overLimit
+          : sortArray[0].bowling.totalAvgOvers,
+    },
+  };
+  return check;
+};
+export const PickTopBatter = (players: any[]) => {
+  const sortArray = players.sort(
+    (a: any, b: any) => b.batting.totalRuns - a.batting.totalRuns
+  );
+  return sortArray[0];
+};
+
 export const MaxMin = (score: number, wicket: number) => {
   const predicted = Math.floor(CheckIntValue(score));
-  let wickets = Math.floor(CheckIntValue(wicket));
+  let wickets =
+    wicket + wicket / 2 > 10
+      ? 10
+      : Math.floor(CheckIntValue((wicket + wicket / 2).toFixed(0)));
+
+  // wicket cap: max 10
   if (wickets > 10) wickets = 10;
 
-  const factor = wickets / 10; // 0 .. 1
+  // Convert wickets (0–10) into factor 0..1
+  const factor = wickets / 10;
 
-  const minDiff = Math.floor(10 + factor * 5); // 10 → 15
-  const maxDiff = Math.floor(20 + factor * 5); // 20 → 25
+  // Dynamic ranges
+  const minDiff = Math.floor(8 + factor * 20); // 8 → 28
+  const maxDiff = Math.floor(10 + factor * 25); // 12 → 42
 
   const minScore = Math.max(0, predicted - minDiff);
   const maxScore = predicted + maxDiff;

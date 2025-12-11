@@ -5,6 +5,8 @@ import {
   GetHint,
   MaxMin,
   PickTop,
+  PickTopBatter,
+  PickTopBowler,
   SafeDivide,
 } from "./../../../lib/utils";
 import {
@@ -253,13 +255,19 @@ export const GetNewAnalysis = async (data: any) => {
         : teamB.benchPlayer.slice();
 
     // top batsman by batting.totalRuns and top bowler by bowling.totalAvgWickets
-    const team1TopBatsman = PickTop(t1Players, "batting?.totalRuns");
+    const team1TopBatsman = PickTopBatter(t1Players);
 
-    const team2TopBatsman = PickTop(t2Players, "batting?.totalRuns");
+    const team2TopBatsman = PickTopBatter(t2Players);
 
-    const team1TopBowler = PickTop(t1Players, "bowling?.totalAvgWickets");
+    const team1TopBowler = PickTopBowler(
+      t1Players,
+      matchOverInfo.bowlerOverLimit
+    );
 
-    const team2TopBowler = PickTop(t2Players, "bowling?.totalAvgWickets");
+    const team2TopBowler = PickTopBowler(
+      t2Players,
+      matchOverInfo.bowlerOverLimit
+    );
 
     const response = {
       team1: {
@@ -284,7 +292,9 @@ export const GetNewAnalysis = async (data: any) => {
               image: team1TopBatsman.image,
               role: team1TopBatsman.role,
               batting: {
-                totalRuns: CheckIntValue(team1TopBatsman.batting.totalRuns, 0),
+                totalRuns: CheckIntValue(
+                  team1TopBatsman.batting.totalRuns.toFixed(0)
+                ),
                 totalAvgStrikeRate: CheckIntValue(
                   SafeDivide(
                     team1TopBatsman.batting.totalRuns,
@@ -292,8 +302,7 @@ export const GetNewAnalysis = async (data: any) => {
                   ) * 100
                 ),
                 totalAvgBallFaced: CheckIntValue(
-                  team1TopBatsman.batting.totalAvgBallFaced,
-                  0
+                  team1TopBatsman.batting.totalAvgBallFaced.toFixed(0)
                 ),
               },
             }
@@ -306,16 +315,13 @@ export const GetNewAnalysis = async (data: any) => {
               bowling: {
                 totalAvgEconomy: team1TopBowler.bowling.totalAvgEconomy,
                 totalAvgOvers: CheckIntValue(
-                  team1TopBowler.bowling.totalAvgOvers,
-                  0
+                  team1TopBowler.bowling.totalAvgOvers.toFixed(0)
                 ),
                 totalAvgWickets: CheckIntValue(
-                  team1TopBowler.bowling.totalAvgWickets,
-                  0
+                  team1TopBowler.bowling.totalAvgWickets.toFixed(0)
                 ),
                 totalAvgRunsConceded: CheckIntValue(
-                  team1TopBowler.bowling.totalAvgRunsConceded,
-                  0
+                  team1TopBowler.bowling.totalAvgRunsConceded.toFixed(0)
                 ),
               },
             }
@@ -343,7 +349,9 @@ export const GetNewAnalysis = async (data: any) => {
               image: team2TopBatsman.image,
               role: team2TopBatsman.role,
               batting: {
-                totalRuns: CheckIntValue(team2TopBatsman.batting.totalRuns, 0),
+                totalRuns: CheckIntValue(
+                  team2TopBatsman.batting.totalRuns.toFixed(0)
+                ),
                 totalAvgStrikeRate: CheckIntValue(
                   SafeDivide(
                     team2TopBatsman.batting.totalRuns,
@@ -351,8 +359,7 @@ export const GetNewAnalysis = async (data: any) => {
                   ) * 100
                 ),
                 totalAvgBallFaced: CheckIntValue(
-                  team2TopBatsman.batting.totalAvgBallFaced,
-                  0
+                  team2TopBatsman.batting.totalAvgBallFaced.toFixed(0)
                 ),
               },
             }
@@ -365,16 +372,13 @@ export const GetNewAnalysis = async (data: any) => {
               bowling: {
                 totalAvgEconomy: team2TopBowler.bowling.totalAvgEconomy,
                 totalAvgOvers: CheckIntValue(
-                  team2TopBowler.bowling.totalAvgOvers,
-                  0
+                  team2TopBowler.bowling.totalAvgOvers.toFixed(0)
                 ),
                 totalAvgWickets: CheckIntValue(
-                  team2TopBowler.bowling.totalAvgWickets,
-                  0
+                  team2TopBowler.bowling.totalAvgWickets.toFixed(0)
                 ),
                 totalAvgRunsConceded: CheckIntValue(
-                  team2TopBowler.bowling.totalAvgRunsConceded,
-                  0
+                  team2TopBowler.bowling.totalAvgRunsConceded.toFixed(0)
                 ),
               },
             }
