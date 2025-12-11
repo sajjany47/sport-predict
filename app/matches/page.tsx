@@ -14,6 +14,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { useQuery } from "@tanstack/react-query";
 import { FetchMatchList } from "./MatchService";
 import MatchCard from "./MatchCard";
+import clsx from "clsx";
 
 const MatchesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -84,87 +85,124 @@ const MatchesPage = () => {
     (m: any) => m.status === "COMPLETED"
   ).length;
 
+  const EmptyState = ({ icon, title, subtitle }: any) => (
+    <div className="text-center py-20 bg-white rounded-2xl shadow-md border border-gray-200">
+      <div className="flex justify-center mb-4">{icon}</div>
+      <h3 className="text-2xl font-bold text-gray-800 mb-2">{title}</h3>
+      <p className="text-gray-600">{subtitle}</p>
+    </div>
+  );
+
+  const TabTriggerStyled = ({
+    value,
+    children,
+  }: {
+    value: string;
+    children: React.ReactNode;
+  }) => (
+    <TabsTrigger
+      value={value}
+      className={clsx(
+        "px-4 py-2 rounded-lg text-sm font-medium transition-all outline-none",
+        // base: subtle border & hover
+        "data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-transparent hover:bg-gray-50",
+        // active: solid background + shadow
+        "data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-md"
+      )}
+    >
+      {children}
+    </TabsTrigger>
+  );
+
   return (
     <>
       {isLoading ? (
         <CustomLoader message="Loading match list" />
       ) : (
-        <div className="min-h-screen bg-gray-50">
-          <div className="container mx-auto px-4 py-8">
+        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+          <div className="container mx-auto px-4 py-10">
             {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <div className="mb-10 text-center">
+              <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
                 Cricket Matches
               </h1>
-              <p className="text-xl text-gray-600">
-                Get AI-powered predictions for all cricket matches
+              <p className="text-lg text-gray-600 mt-2">
+                Get AI-powered predictions & live match insights
               </p>
             </div>
 
-            {/* Search and Filters */}
-            <div className="mb-8 space-y-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            {/* Search + Date Filter */}
+            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 mb-10">
+              <div className="flex flex-col md:flex-row items-center gap-4">
+                {/* Search */}
+                <div className="flex-1 relative w-full">
+                  <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <Input
-                    placeholder="Search matches, teams, venues..."
+                    placeholder="Search teams, venues, tours..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-11 py-3 text-base rounded-xl border-gray-300 focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div className="flex items-center space-x-2">
+
+                {/* Date Picker */}
+                <div className="flex items-center gap-2">
                   <DatePicker
                     date={selectedDate}
                     onDateChange={setSelectedDate}
-                    placeholder="Select a date"
+                    placeholder="Select date"
                   />
+
+                  {/* Reset Button */}
                   <Button
                     variant="outline"
                     size="icon"
+                    className="rounded-xl border-gray-300 hover:bg-gray-100"
                     onClick={() => setSelectedDate(new Date())}
-                    // title="Reset to Today-Tomorrow"
                   >
-                    <RotateCcw className="h-4 w-4" />
+                    <RotateCcw className="h-5 w-5" />
                   </Button>
                 </div>
               </div>
             </div>
 
-            {/* Match Tabs */}
-            <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+            {/* Tabs */}
+            <div className="w-full">
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="sm:grid sm:grid-cols-3 mb-8">
+                <TabsList className="grid grid-cols-3 bg-white p-1 rounded-xl shadow-sm">
                   <TabsTrigger
                     value="upcoming"
-                    className="flex items-center space-x-2"
+                    className="flex items-center justify-center gap-2 py-3 text-sm rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white"
                   >
                     <Calendar className="h-4 w-4" />
-                    <span>Upcoming ({upcomingCount})</span>
+                    Upcoming ({upcomingCount})
                   </TabsTrigger>
+
                   <TabsTrigger
                     value="live"
-                    className="flex items-center space-x-2"
+                    className="flex items-center justify-center gap-2 py-3 text-sm rounded-xl data-[state=active]:bg-red-600 data-[state=active]:text-white"
                   >
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                    <span>Live ({liveCount})</span>
+                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                    Live ({liveCount})
                   </TabsTrigger>
+
                   <TabsTrigger
                     value="completed"
-                    className="flex items-center space-x-2"
+                    className="flex items-center justify-center gap-2 py-3 text-sm rounded-xl data-[state=active]:bg-green-600 data-[state=active]:text-white"
                   >
                     <Trophy className="h-4 w-4" />
-                    <span>Completed ({completedCount})</span>
+                    Completed ({completedCount})
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="upcoming" className="space-y-6">
+                {/* UPCOMING TAB */}
+                <TabsContent value="upcoming" className="mt-6">
                   {filteredMatches.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {filteredMatches.map((match: any) => (
                         <MatchCard
                           key={match.matchId}
@@ -175,21 +213,18 @@ const MatchesPage = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        No upcoming matches found
-                      </h3>
-                      <p className="text-gray-600">
-                        Try adjusting your search criteria
-                      </p>
-                    </div>
+                    <EmptyState
+                      icon={<Calendar className="h-14 w-14 text-gray-400" />}
+                      title="No upcoming matches"
+                      subtitle="Try changing the filters"
+                    />
                   )}
                 </TabsContent>
 
-                <TabsContent value="live" className="space-y-6">
+                {/* LIVE TAB */}
+                <TabsContent value="live" className="mt-6">
                   {filteredMatches.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {filteredMatches.map((match: any) => (
                         <MatchCard
                           key={match.matchId}
@@ -199,23 +234,22 @@ const MatchesPage = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <div className="w-8 h-8 bg-red-500 rounded-full animate-pulse"></div>
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        No live matches
-                      </h3>
-                      <p className="text-gray-600">
-                        Check back later for live cricket action
-                      </p>
-                    </div>
+                    <EmptyState
+                      icon={
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                          <div className="w-8 h-8 bg-red-500 rounded-full animate-ping"></div>
+                        </div>
+                      }
+                      title="No live matches"
+                      subtitle="Check again soon!"
+                    />
                   )}
                 </TabsContent>
 
-                <TabsContent value="completed" className="space-y-6">
+                {/* COMPLETED TAB */}
+                <TabsContent value="completed" className="mt-6">
                   {filteredMatches.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {filteredMatches.map((match: any) => (
                         <MatchCard
                           key={match.matchId}
@@ -225,15 +259,11 @@ const MatchesPage = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <Trophy className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        No completed matches found
-                      </h3>
-                      <p className="text-gray-600">
-                        Try adjusting your search criteria
-                      </p>
-                    </div>
+                    <EmptyState
+                      icon={<Trophy className="h-14 w-14 text-gray-400" />}
+                      title="No completed matches"
+                      subtitle="Try searching something else"
+                    />
                   )}
                 </TabsContent>
               </Tabs>

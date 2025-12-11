@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,31 +28,31 @@ interface Tour {
 
 interface Match {
   matchId: number;
-  matchName: string;
+  matchName: string | null;
   matchDescription: string;
+  originalStartTime?: string; // ms since epoch as string
   startTime: string;
+  endTime?: string;
   status: "NOT_STARTED" | "LIVE" | "COMPLETED" | "ABANDONED";
   venue: {
     ground: string;
     city: string;
     country: string;
-    timezone: string;
+    timezone?: string;
   };
-  tour: Tour;
+  tour: Tour | string;
   format: string;
   sport: string;
   teams: Team[];
-  tourName: string;
+  tourName?: string;
   score: null | {
     matchName: string;
-    score: [
-      {
-        team: string;
-        run: string;
-      }
-    ];
+    score: {
+      team: string;
+      run: string;
+    }[];
     result: string;
-  };
+  } | null;
 }
 
 interface MatchCardProps {
@@ -61,6 +61,18 @@ interface MatchCardProps {
   onClick?: () => void;
 }
 
+const pad = (n: number) => String(n).padStart(2, "0");
+
+const getTimeRemaining = (targetTs: number) => {
+  const total = targetTs - Date.now();
+  const absTotal = Math.max(0, total);
+  const seconds = Math.floor(absTotal / 1000) % 60;
+  const minutes = Math.floor(absTotal / 1000 / 60) % 60;
+  const hours = Math.floor(absTotal / (1000 * 60 * 60)) % 24;
+  const days = Math.floor(absTotal / (1000 * 60 * 60 * 24));
+  return { total, days, hours, minutes, seconds };
+};
+
 const MatchCard = ({
   match,
   showPredictButton = false,
@@ -68,6 +80,56 @@ const MatchCard = ({
 }: MatchCardProps) => {
   const team1 = match.teams[0];
   const team2 = match.teams[1];
+
+  // Countdown state
+  const [countdown, setCountdown] = useState(() => {
+    const ts =
+      match.originalStartTime && !isNaN(Number(match.originalStartTime))
+        ? Number(match.originalStartTime)
+        : Date.parse(match.startTime);
+    return getTimeRemaining(ts);
+  });
+
+  const intervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // compute target timestamp (use originalStartTime if present)
+    const targetTs =
+      match.originalStartTime && !isNaN(Number(match.originalStartTime))
+        ? Number(match.originalStartTime)
+        : Date.parse(match.startTime);
+
+    // initialize
+    setCountdown(getTimeRemaining(targetTs));
+
+    // clear any existing
+    if (intervalRef.current) {
+      window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    // only start interval if match is upcoming / not started
+    if (match.status === "NOT_STARTED") {
+      intervalRef.current = window.setInterval(() => {
+        const rem = getTimeRemaining(targetTs);
+        setCountdown(rem);
+
+        // if passed, clear interval
+        if (rem.total <= 0 && intervalRef.current) {
+          window.clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        window.clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match.matchId, match.originalStartTime, match.startTime, match.status]);
 
   // Helper function to format score display
   const formatScore = (team: Team): string => {
@@ -84,29 +146,74 @@ const MatchCard = ({
 
   // Helper function to get match status text
   const getMatchStatusText = (): string => {
-    // 🟢 1. Abandoned or Not Started
+    // Abandoned or Not Started
     if (match.status === "ABANDONED") return "Match Abandoned";
 
     if (match.status === "NOT_STARTED") {
+      // If countdown active, show friendly text
+      if (countdown && countdown.total > 0) {
+        // show "Starts in X" shorter form
+        if (countdown.days > 0) {
+          return `Starts in ${countdown.days}d ${pad(countdown.hours)}h`;
+        }
+        return `Starts in ${pad(countdown.hours)}:${pad(
+          countdown.minutes
+        )}:${pad(countdown.seconds)}`;
+      }
       return `Starts ${new Date(match.startTime).toLocaleDateString()}`;
     }
 
     const result = match?.score?.result ?? "";
     const hasGarbage = result.includes("{\\") || result.includes('\\"');
-    // 🟢 2. Completed match
+    // Completed match
     if (match.status === "COMPLETED") {
       return result !== "" && !hasGarbage ? result : "Match completed";
     }
 
-    // 🟢 3. LIVE match (detailed test logic)
+    // LIVE match
     if (match.status === "LIVE") {
       return result !== "" && !hasGarbage && result !== "Partnership"
         ? result
         : "Match in progress";
     }
 
-    // 🟢 Fallback
     return "Match status unknown";
+  };
+
+  // Render countdown UI
+  const renderCountdown = () => {
+    if (match.status !== "NOT_STARTED") return null;
+    if (!countdown) return null;
+
+    // If match already started (total <= 0), show starting soon
+    if (countdown.total <= 0) {
+      return (
+        <div className="inline-block px-3 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700">
+          Starting soon
+        </div>
+      );
+    }
+
+    // Display days if present, otherwise HH:MM:SS
+    if (countdown.days > 0) {
+      return (
+        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-indigo-50 text-indigo-700 text-sm">
+          <Calendar className="h-3 w-3" />
+          <span className="font-medium">{`${countdown.days}d ${pad(
+            countdown.hours
+          )}h ${pad(countdown.minutes)}m`}</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-indigo-50 text-indigo-700 text-sm">
+        <Clock className="h-3 w-3" />
+        <span className="font-medium">{`${pad(countdown.hours)}:${pad(
+          countdown.minutes
+        )}:${pad(countdown.seconds)}`}</span>
+      </div>
+    );
   };
 
   return (
@@ -116,13 +223,16 @@ const MatchCard = ({
     >
       <CardContent className="p-6">
         {/* Match Header */}
-        <div className="space-y-2 text-sm text-gray-500 mb-4">
+        <div className="flex items-center justify-between mb-3 text-sm text-gray-500">
           <div className="flex items-center space-x-2">
-            <CalendarCog className="h-3 w-3" />
-            {/* <MapPin className="h-3 w-3" /> */}
+            <CalendarCog className="h-4 w-4" />
             <span className="truncate">{match?.tourName}</span>
           </div>
+
+          {/* Countdown shown here for upcoming matches */}
+          <div>{renderCountdown()}</div>
         </div>
+
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <Badge
@@ -223,11 +333,19 @@ const MatchCard = ({
           </div>
           <div className="flex items-center space-x-2">
             <Calendar className="h-3 w-3" />
-            <span>{new Date(match.startTime).toLocaleDateString()}</span>
+            <span>
+              {new Date(
+                Number(match.originalStartTime) || Date.parse(match.startTime)
+              ).toLocaleDateString()}
+            </span>
           </div>
           <div className="flex items-center space-x-2">
             <Clock className="h-3 w-3" />
-            <span>{new Date(match.startTime).toLocaleTimeString()}</span>
+            <span>
+              {new Date(
+                Number(match.originalStartTime) || Date.parse(match.startTime)
+              ).toLocaleTimeString()}
+            </span>
           </div>
         </div>
 
