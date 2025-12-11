@@ -60,6 +60,7 @@ const MatchDetailsPage = () => {
       })
       .catch((err) => {
         toast.error(err.message || "Failed to fetch match details.");
+        router.push("/matches");
         setIsLoading(false);
       });
 

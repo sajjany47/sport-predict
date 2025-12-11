@@ -1,13 +1,5 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import MatchesPage from "./matches/page";
 
 export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.push("/matches");
-  }, [router]);
-
-  return null;
+  return <MatchesPage />;
 }

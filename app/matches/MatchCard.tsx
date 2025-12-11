@@ -100,7 +100,9 @@ const MatchCard = ({
 
     // 🟢 3. LIVE match (detailed test logic)
     if (match.status === "LIVE") {
-      return result !== "" && !hasGarbage ? result : "Match in progress";
+      return result !== "" && !hasGarbage && result !== "Partnership"
+        ? result
+        : "Match in progress";
     }
 
     // 🟢 Fallback
