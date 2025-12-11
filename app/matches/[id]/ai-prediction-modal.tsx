@@ -25,7 +25,6 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import toast from "react-hot-toast";
-import { GetAIPrediction } from "./GetAIPrediction";
 import { updateCredits } from "@/store/slices/authSlice";
 import {
   Dialog,
