@@ -3,7 +3,6 @@
 "use client";
 
 import React, { useState } from "react";
-
 import {
   Trophy,
   Users,
@@ -20,6 +19,7 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,6 +31,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -110,12 +111,12 @@ const AIPredictionModal: React.FC<{
 
     if (!user || user.credits < 1) {
       toast.error("Insufficient credits. Please purchase more credits.");
+      setIsLoading(false);
       return;
     }
 
     try {
       const data: any = await GetNewAnalysis(match);
-
       setPredictionData(data);
     } catch (error) {
       toast.error("Failed to generate prediction data.");
@@ -233,69 +234,103 @@ const AIPredictionModal: React.FC<{
   if (!predictionData) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
-                <Brain className="h-6 w-6 text-white" />
-              </div>
-              <span>AI Match Prediction</span>
-            </DialogTitle>
+        <DialogContent
+          className={`
+            w-full
+            h-full
+            p-4
+            md:mx-auto md:my-6 md:w-[95%] md:max-w-2xl md:h-auto
+            bg-white
+            md:rounded-2xl
+            md:shadow-xl
+            overflow-hidden
+            flex
+            flex-col
+          `}
+          aria-label="AI Match Prediction Modal"
+        >
+          <DialogHeader className="sticky top-0 z-20 bg-white border-b px-2 py-3 md:px-6 md:py-4">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center space-x-2 text-base md:text-xl">
+                <div className="p-1.5 md:p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+                  <Brain className="h-4 w-4 md:h-6 md:w-6 text-white" />
+                </div>
+                <span>AI Match Prediction</span>
+              </DialogTitle>
+              <DialogClose className="ml-3 inline-flex items-center justify-center rounded-md p-1 hover:bg-gray-100">
+                <span className="sr-only">Close</span>
+                <X className="h-5 w-5 text-gray-600" />
+              </DialogClose>
+            </div>
           </DialogHeader>
-          {checkSquad ? (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Brain className="h-10 w-10 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Team Squads Not Available Yet
-              </h3>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                ⏳ Both team squads haven't been announced yet. Please check
-                back later when the teams are finalized to get accurate AI
-                predictions.
-              </p>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto">
-                <div className="flex items-center justify-center space-x-2 text-yellow-800">
-                  <InfoIcon className="h-5 w-5" />
-                  <span className="text-sm font-medium">
-                    Predictions will be available after squad announcements
-                  </span>
+
+          <div
+            className={`
+              flex-1
+              overflow-y-auto
+              -mx-4 md:mx-0
+              px-4 md:px-6
+              py-4 md:py-6
+            `}
+            style={{
+              maxHeight: "calc(100vh - 96px)",
+            }}
+          >
+            {checkSquad ? (
+              <div className="text-center py-6 md:py-12">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <Brain className="h-8 w-8 md:h-10 md:w-10 text-white" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
+                  Team Squads Not Available Yet
+                </h3>
+                <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8 max-w-md mx-auto px-4">
+                  ⏳ Both team squads haven't been announced yet. Please check
+                  back later when the teams are finalized to get accurate AI
+                  predictions.
+                </p>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto">
+                  <div className="flex items-center justify-center space-x-2 text-yellow-800">
+                    <InfoIcon className="h-5 w-5" />
+                    <span className="text-xs md:text-sm font-medium">
+                      Predictions will be available after squad announcements
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Brain className="h-10 w-10 text-white" />
+            ) : (
+              <div className="text-center py-6 md:py-12">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <Brain className="h-8 w-8 md:h-10 md:w-10 text-white" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
+                  Get AI-Powered Match Prediction
+                </h3>
+                <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8 max-w-md mx-auto px-4">
+                  Our advanced AI analyzes 50+ factors including player form,
+                  pitch conditions, weather, and historical data to provide
+                  accurate predictions.
+                </p>
+                <Button
+                  onClick={handleGetPrediction}
+                  disabled={isLoading}
+                  className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-4 py-2 text-white rounded-md"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Analyzing Match...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Get AI Prediction
+                    </>
+                  )}
+                </Button>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Get AI-Powered Match Prediction
-              </h3>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                Our advanced AI analyzes 50+ factors including player form,
-                pitch conditions, weather, and historical data to provide
-                accurate predictions.
-              </p>
-              <Button
-                onClick={handleGetPrediction}
-                disabled={isLoading}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3"
-              >
-                {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Analyzing Match...</span>
-                  </div>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Get AI Prediction
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     );
@@ -303,494 +338,354 @@ const AIPredictionModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto w-[95vw] sm:w-full">
-        <DialogHeader>
+      <DialogContent
+        className={`
+          w-full
+          h-full
+          p-0
+          md:mx-auto md:my-6 md:w-[95%] md:max-w-7xl md:h-auto
+          bg-white
+          md:rounded-2xl
+          md:shadow-xl
+          overflow-hidden
+          flex
+          flex-col
+        `}
+        aria-label="AI Match Prediction Modal"
+      >
+        {/* Header (sticky) */}
+        <DialogHeader className="sticky top-0 z-20 bg-white border-b px-4 py-3 md:px-6 md:py-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center space-x-2">
-              <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
-                <Brain className="h-6 w-6 text-white" />
+            <div className="flex items-center space-x-3">
+              <div className="p-1.5 md:p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center">
+                <Brain className="h-4 w-4 md:h-6 md:w-6 text-white" />
               </div>
-              <span className="text-xl sm:text-2xl">AI Match Prediction</span>
-            </DialogTitle>
-          </div>
-          <div className="flex items-center space-x-4 text-sm text-gray-600 mt-2">
-            <div className="flex items-center space-x-2">
-              <img
-                src={predictionData?.team1?.flag}
-                alt={predictionData?.team1?.shortName || "Team 1"}
-                className="w-6 h-6 rounded"
-              />
-              <span className="font-medium">
-                {predictionData?.team1?.shortName || "Team 1"}
-              </span>
-            </div>
-            <span className="text-gray-400">vs</span>
-            <div className="flex items-center space-x-2">
-              <img
-                src={predictionData?.team2?.flag}
-                alt={predictionData?.team2?.shortName || "Team 2"}
-                className="w-6 h-6 rounded"
-              />
-              <span className="font-medium">
-                {predictionData?.team2?.shortName || "Team 2"}
-              </span>
-            </div>
-          </div>
-        </DialogHeader>
-
-        <div className="space-y-6 pb-6">
-          {/* Winner Prediction */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Trophy className="h-5 w-5 text-yellow-600" />
-                <span>Winner Prediction</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-                {/* Team 1 */}
-                <div
-                  className={`text-center p-6 bg-gradient-to-br ${getTeamBgColor(
-                    1
-                  )} rounded-xl border ${getTeamBorderColor(1)}`}
-                >
-                  <div className="flex items-center justify-center space-x-2 mb-4">
+              <div>
+                <DialogTitle className="text-base md:text-xl lg:text-2xl font-semibold">
+                  AI Match Prediction
+                </DialogTitle>
+                {/* small meta row for mobile/desktop */}
+                <div className="flex items-center gap-3 text-xs md:text-sm text-gray-600 mt-1">
+                  <div className="flex items-center gap-2 truncate">
                     <img
                       src={predictionData?.team1?.flag}
                       alt={predictionData?.team1?.shortName || "Team 1"}
-                      className="w-10 h-10 rounded-lg shadow-sm"
+                      className="w-5 h-5 md:w-6 md:h-6 rounded object-cover"
                     />
-                    <div className="flex flex-col items-start">
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {predictionData?.team1?.shortName || "Team 1"}
-                      </h3>
-                      <p className="text-sm text-gray-600 font-medium">
-                        {predictionData?.team1?.name || "Full Team Name"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div
-                    className={`text-4xl font-bold ${getTeamTextColor(1)} mb-3`}
-                  >
-                    {predictionData?.team1?.winnerPrediction?.probability?.toFixed?.(
-                      2
-                    ) || "0.00"}
-                    %
-                  </div>
-
-                  <div className="w-full bg-gray-200 rounded-full h-4 mb-3">
-                    <div
-                      className={`h-4 rounded-full transition-all duration-500 bg-gradient-to-r ${getTeamColor(
-                        1
-                      )}`}
-                      style={{
-                        width: `${
-                          predictionData?.team1?.winnerPrediction
-                            ?.probability || 0
-                        }%`,
-                      }}
-                    ></div>
-                  </div>
-
-                  <Badge
-                    variant="outline"
-                    className={`${getConfidenceClass(
-                      predictionData?.team1?.winnerPrediction?.confidence || ""
-                    )} text-sm px-3 py-1 mb-3 flex items-center space-x-2 mx-auto`}
-                  >
-                    {getConfidenceIcon(
-                      predictionData?.team1?.winnerPrediction?.confidence || ""
-                    )}
-                    <span>
-                      {predictionData?.team1?.winnerPrediction?.confidence ||
-                        "Unknown"}{" "}
-                      Confidence
+                    <span className="font-medium truncate max-w-[90px] md:max-w-[140px]">
+                      {predictionData?.team1?.shortName || "Team 1"}
                     </span>
-                  </Badge>
-
-                  <div
-                    className={`mt-4 p-3 ${
-                      predictionData?.team1?.winnerPrediction?.hint?.color ||
-                      "text-gray-600 bg-gray-50 border-gray-200"
-                    } rounded-lg border text-sm`}
-                  >
-                    {predictionData?.team1?.winnerPrediction?.hint
-                      ?.hintMessage || "No betting hint available"}
                   </div>
-                </div>
 
-                {/* Team 2 */}
-                <div
-                  className={`text-center p-6 bg-gradient-to-br ${getTeamBgColor(
-                    2
-                  )} rounded-xl border ${getTeamBorderColor(2)}`}
-                >
-                  <div className="flex items-center justify-center space-x-2 mb-4">
+                  <span className="text-gray-300">•</span>
+
+                  <div className="flex items-center gap-2 truncate">
                     <img
                       src={predictionData?.team2?.flag}
                       alt={predictionData?.team2?.shortName || "Team 2"}
-                      className="w-10 h-10 rounded-lg shadow-sm"
+                      className="w-5 h-5 md:w-6 md:h-6 rounded object-cover"
                     />
-                    <div className="flex flex-col items-start">
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {predictionData?.team2?.shortName || "Team 2"}
-                      </h3>
-                      <p className="text-sm text-gray-600 font-medium">
-                        {predictionData?.team2?.name || "Full Team Name"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div
-                    className={`text-4xl font-bold ${getTeamTextColor(2)} mb-3`}
-                  >
-                    {predictionData?.team2?.winnerPrediction?.probability?.toFixed?.(
-                      2
-                    ) || "0.00"}
-                    %
-                  </div>
-
-                  <div className="w-full bg-gray-200 rounded-full h-4 mb-3">
-                    <div
-                      className={`h-4 rounded-full transition-all duration-500 bg-gradient-to-r ${getTeamColor(
-                        2
-                      )}`}
-                      style={{
-                        width: `${
-                          predictionData?.team2?.winnerPrediction
-                            ?.probability || 0
-                        }%`,
-                      }}
-                    ></div>
-                  </div>
-
-                  <Badge
-                    variant="outline"
-                    className={`${getConfidenceClass(
-                      predictionData?.team2?.winnerPrediction?.confidence || ""
-                    )} text-sm px-3 py-1 mb-3 flex items-center space-x-2 mx-auto`}
-                  >
-                    {getConfidenceIcon(
-                      predictionData?.team2?.winnerPrediction?.confidence || ""
-                    )}
-                    <span>
-                      {predictionData?.team2?.winnerPrediction?.confidence ||
-                        "Unknown"}{" "}
-                      Confidence
+                    <span className="font-medium truncate max-w-[90px] md:max-w-[140px]">
+                      {predictionData?.team2?.shortName || "Team 2"}
                     </span>
-                  </Badge>
-
-                  <div
-                    className={`mt-4 p-3 ${
-                      predictionData?.team2?.winnerPrediction?.hint?.color ||
-                      "text-gray-600 bg-gray-50 border-gray-200"
-                    } rounded-lg border text-sm`}
-                  >
-                    {predictionData?.team2?.winnerPrediction?.hint
-                      ?.hintMessage || "No betting hint available"}
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Additional Safety Note */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
-                <div className="flex items-center text-green-700 text-sm">
-                  <Shield className="h-5 w-5 mr-3 flex-shrink-0" />
-                  <span>
-                    <strong>Remember:</strong> Always set loss cut limits.
-                    Safety first for long-term earnings. Never risk more than
-                    you can afford to lose.
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            {/* Close button - visible on mobile and desktop */}
+            <DialogClose className="ml-3 inline-flex items-center justify-center rounded-md p-1 hover:bg-gray-100">
+              <span className="sr-only">Close</span>
+              <X className="h-5 w-5 text-gray-600" />
+            </DialogClose>
+          </div>
+        </DialogHeader>
 
-          {/* First Innings Score Prediction */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
-                <span>First Innings Score Prediction</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-                {/* Team 1 */}
-                <div
-                  className={`text-center p-6 bg-gradient-to-br ${getTeamBgColor(
-                    1
-                  )} rounded-xl border ${getTeamBorderColor(1)}`}
-                >
-                  <div className="flex flex-col items-center mb-4">
-                    <div className="flex items-center space-x-2 mb-2">
+        {/* Content area: allow internal scrolling while header stays sticky */}
+        <div
+          className={`
+            flex-1
+            overflow-y-auto
+            px-4 md:px-6
+            py-4 md:py-6
+          `}
+          style={{
+            maxHeight: "calc(100vh - 96px)",
+          }}
+        >
+          <div className="space-y-4 md:space-y-6">
+            {/* Winner Prediction Card */}
+            <Card className="border-0 shadow-sm md:shadow-md">
+              <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                  <Trophy className="h-4 w-4 md:h-5 md:w-5 text-yellow-600" />
+                  <span>Winner Prediction</span>
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                  {/* Team 1 */}
+                  <div
+                    className={`p-4 md:p-6 rounded-xl border ${getTeamBorderColor(
+                      1
+                    )} bg-gradient-to-br ${getTeamBgColor(1)} text-center`}
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-start md:space-x-4">
                       <img
                         src={predictionData?.team1?.flag}
                         alt={predictionData?.team1?.shortName || "Team 1"}
-                        className="w-8 h-8 rounded"
+                        className="w-9 h-9 md:w-12 md:h-12 rounded-lg shadow-sm mx-auto md:mx-0 object-cover"
                       />
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {predictionData?.team1?.shortName || "Team 1"}
-                      </h3>
+                      <div className="mt-2 md:mt-0">
+                        <h3 className="text-lg md:text-xl font-bold text-gray-900 truncate">
+                          {predictionData?.team1?.shortName || "Team 1"}
+                        </h3>
+                        <p className="text-xs md:text-sm text-gray-600 truncate max-w-[180px]">
+                          {predictionData?.team1?.name || "Full Team Name"}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 font-medium">
-                      {predictionData?.team1?.name || "Full Team Name"}
-                    </p>
+
+                    <div
+                      className={`mt-4 text-2xl md:text-3xl font-extrabold ${getTeamTextColor(
+                        1
+                      )}`}
+                    >
+                      {predictionData?.team1?.winnerPrediction?.probability?.toFixed?.(
+                        2
+                      ) || "0.00"}
+                      %
+                    </div>
+
+                    <div className="w-full bg-gray-200 rounded-full h-2 md:h-3 mt-3">
+                      <div
+                        className={`h-2 md:h-3 rounded-full bg-gradient-to-r ${getTeamColor(
+                          1
+                        )} transition-all duration-500`}
+                        style={{
+                          width: `${
+                            predictionData?.team1?.winnerPrediction
+                              ?.probability || 0
+                          }%`,
+                        }}
+                      />
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-center">
+                      <Badge
+                        variant="outline"
+                        className={`${getConfidenceClass(
+                          predictionData?.team1?.winnerPrediction?.confidence ||
+                            ""
+                        )} text-xs md:text-sm px-2 py-0.5 md:px-3 md:py-1 flex items-center space-x-2`}
+                      >
+                        {getConfidenceIcon(
+                          predictionData?.team1?.winnerPrediction?.confidence ||
+                            ""
+                        )}
+                        <span className="truncate">
+                          {predictionData?.team1?.winnerPrediction
+                            ?.confidence || "Unknown"}
+                        </span>
+                      </Badge>
+                    </div>
+
+                    <div className="mt-3 md:mt-4 text-xs md:text-sm p-2 md:p-3 rounded-lg border text-gray-700">
+                      {predictionData?.team1?.winnerPrediction?.hint
+                        ?.hintMessage || "No betting hint available"}
+                    </div>
                   </div>
 
+                  {/* Team 2 */}
                   <div
-                    className={`text-3xl font-bold ${getTeamTextColor(1)} mb-2`}
+                    className={`p-4 md:p-6 rounded-xl border ${getTeamBorderColor(
+                      2
+                    )} bg-gradient-to-br ${getTeamBgColor(2)} text-center`}
                   >
-                    {predictionData?.team1?.firstInningScore?.predicted || 0}
-                  </div>
-
-                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border mb-2">
-                    Range:{" "}
-                    <span className="font-semibold">
-                      {predictionData?.team1?.firstInningScore?.min || 0} -{" "}
-                      {predictionData?.team1?.firstInningScore?.max || 0}
-                    </span>
-                  </div>
-
-                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border">
-                    Predicted Wickets:{" "}
-                    <span className="font-semibold text-red-600">
-                      {predictionData?.team1?.firstInningScore?.wickets || 0}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Team 2 */}
-                <div
-                  className={`text-center p-6 bg-gradient-to-br ${getTeamBgColor(
-                    2
-                  )} rounded-xl border ${getTeamBorderColor(2)}`}
-                >
-                  <div className="flex flex-col items-center mb-4">
-                    <div className="flex items-center space-x-2 mb-2">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-start md:space-x-4">
                       <img
                         src={predictionData?.team2?.flag}
                         alt={predictionData?.team2?.shortName || "Team 2"}
-                        className="w-8 h-8 rounded"
+                        className="w-9 h-9 md:w-12 md:h-12 rounded-lg shadow-sm mx-auto md:mx-0 object-cover"
                       />
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {predictionData?.team2?.shortName || "Team 2"}
-                      </h3>
+                      <div className="mt-2 md:mt-0">
+                        <h3 className="text-lg md:text-xl font-bold text-gray-900 truncate">
+                          {predictionData?.team2?.shortName || "Team 2"}
+                        </h3>
+                        <p className="text-xs md:text-sm text-gray-600 truncate max-w-[180px]">
+                          {predictionData?.team2?.name || "Full Team Name"}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 font-medium">
-                      {predictionData?.team2?.name || "Full Team Name"}
-                    </p>
-                  </div>
 
-                  <div
-                    className={`text-3xl font-bold ${getTeamTextColor(2)} mb-2`}
-                  >
-                    {predictionData?.team2?.firstInningScore?.predicted || 0}
-                  </div>
+                    <div
+                      className={`mt-4 text-2xl md:text-3xl font-extrabold ${getTeamTextColor(
+                        2
+                      )}`}
+                    >
+                      {predictionData?.team2?.winnerPrediction?.probability?.toFixed?.(
+                        2
+                      ) || "0.00"}
+                      %
+                    </div>
 
-                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border mb-2">
-                    Range:{" "}
-                    <span className="font-semibold">
-                      {predictionData?.team2?.firstInningScore?.min || 0} -{" "}
-                      {predictionData?.team2?.firstInningScore?.max || 0}
-                    </span>
-                  </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 md:h-3 mt-3">
+                      <div
+                        className={`h-2 md:h-3 rounded-full bg-gradient-to-r ${getTeamColor(
+                          2
+                        )} transition-all duration-500`}
+                        style={{
+                          width: `${
+                            predictionData?.team2?.winnerPrediction
+                              ?.probability || 0
+                          }%`,
+                        }}
+                      />
+                    </div>
 
-                  <div className="text-sm text-gray-600 bg-white py-2 px-4 rounded-lg border">
-                    Predicted Wickets:{" "}
-                    <span className="font-semibold text-red-600">
-                      {predictionData?.team2?.firstInningScore?.wickets || 0}
-                    </span>
+                    <div className="mt-3 flex items-center justify-center">
+                      <Badge
+                        variant="outline"
+                        className={`${getConfidenceClass(
+                          predictionData?.team2?.winnerPrediction?.confidence ||
+                            ""
+                        )} text-xs md:text-sm px-2 py-0.5 md:px-3 md:py-1 flex items-center space-x-2`}
+                      >
+                        {getConfidenceIcon(
+                          predictionData?.team2?.winnerPrediction?.confidence ||
+                            ""
+                        )}
+                        <span className="truncate">
+                          {predictionData?.team2?.winnerPrediction
+                            ?.confidence || "Unknown"}
+                        </span>
+                      </Badge>
+                    </div>
+
+                    <div className="mt-3 md:mt-4 text-xs md:text-sm p-2 md:p-3 rounded-lg border text-gray-700">
+                      {predictionData?.team2?.winnerPrediction?.hint
+                        ?.hintMessage || "No betting hint available"}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Top Performers Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Top Batsmen */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-red-600" />
-                  <span>Top Batsmen Prediction</span>
+                {/* Safety Note */}
+                <div className="mt-4 p-3 rounded-lg border bg-green-50 border-green-200">
+                  <div className="flex items-start gap-3 text-xs md:text-sm text-green-800">
+                    <Shield className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                    <div>
+                      <strong className="font-semibold">Remember:</strong>{" "}
+                      Always set loss cut limits. Safety first for long-term
+                      earnings. Never risk more than you can afford to lose.
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* First Innings Score Prediction */}
+            <Card className="border-0 shadow-sm md:shadow-md">
+              <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                  <BarChart3 className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                  <span>First Innings Score Prediction</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Team 1 Batsman */}
+              <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                  {/* Team 1 */}
                   <div
-                    className={`flex items-center space-x-4 p-4 bg-gradient-to-r ${getTeamBgColor(
+                    className={`p-4 md:p-6 rounded-xl border ${getTeamBorderColor(
                       1
-                    )} rounded-lg border ${getTeamBorderColor(1)}`}
+                    )} bg-gradient-to-br ${getTeamBgColor(1)} text-center`}
                   >
-                    <img
-                      src={
-                        predictionData?.team1?.topBatsman?.image ||
-                        "/placeholder-player.png"
-                      }
-                      alt={predictionData?.team1?.topBatsman?.name || "Player"}
-                      className="w-16 h-16 rounded-lg shadow-sm"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-lg font-bold text-gray-900">
-                          {predictionData?.team1?.topBatsman?.name ||
-                            "Unknown Player"}
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <img
+                          src={predictionData?.team1?.flag}
+                          alt={predictionData?.team1?.shortName || "Team 1"}
+                          className="w-8 h-8 md:w-10 md:h-10 rounded object-cover"
+                        />
+                        <h3 className="text-base md:text-lg font-semibold text-gray-900">
+                          {predictionData?.team1?.shortName || "Team 1"}
                         </h3>
-                        <Badge
-                          className={getRoleColor(
-                            predictionData?.team1?.topBatsman?.role || ""
-                          )}
-                        >
-                          {getRoleIcon(
-                            predictionData?.team1?.topBatsman?.role || ""
-                          )}
-                          <span className="ml-1">
-                            {predictionData?.team1?.topBatsman?.role?.split(
-                              " "
-                            )[0] || "Player"}
-                          </span>
-                        </Badge>
+                      </div>
+                      <p className="text-xs md:text-sm text-gray-600 mb-4">
+                        {predictionData?.team1?.name || "Full Team Name"}
+                      </p>
+
+                      <div
+                        className={`text-2xl md:text-3xl font-bold ${getTeamTextColor(
+                          1
+                        )} mb-3`}
+                      >
+                        {predictionData?.team1?.firstInningScore?.predicted ||
+                          0}
                       </div>
 
-                      <div className="text-sm text-gray-600 mb-3">
-                        {predictionData?.team1?.name || "Team 1"}
+                      <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border mb-2 w-full">
+                        Range:{" "}
+                        <span className="font-semibold">
+                          {predictionData?.team1?.firstInningScore?.min || 0} -{" "}
+                          {predictionData?.team1?.firstInningScore?.max || 0}
+                        </span>
                       </div>
 
-                      {/* Batting Stats */}
-                      <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-white rounded-lg border">
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">
-                            Total Runs
-                          </div>
-                          <div className="text-sm font-bold text-green-600">
-                            {predictionData?.team1?.topBatsman?.batting
-                              ?.totalRuns || 0}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">
-                            Strike Rate
-                          </div>
-                          <div className="text-sm font-bold text-blue-600">
-                            {predictionData?.team1?.topBatsman?.batting?.totalAvgStrikeRate?.toFixed?.(
-                              2
-                            ) || "0.00"}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">Avg Balls</div>
-                          <div className="text-sm font-bold text-purple-600">
-                            {predictionData?.team1?.topBatsman?.batting
-                              ?.totalAvgBallFaced || 0}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Predicted Score */}
-                      <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-semibold text-green-800">
-                            Predicted Score:
-                          </span>
-                          <span className="text-lg font-bold text-green-600">
-                            {getBattingPrediction(
-                              predictionData?.team1?.topBatsman?.batting
-                                ?.totalRuns || 0
-                            )}
-                          </span>
-                        </div>
+                      <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border w-full">
+                        Predicted Wickets:{" "}
+                        <span className="font-semibold text-red-600">
+                          {predictionData?.team1?.firstInningScore?.wickets ||
+                            0}
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Team 2 Batsman */}
+                  {/* Team 2 */}
                   <div
-                    className={`flex items-center space-x-4 p-4 bg-gradient-to-r ${getTeamBgColor(
+                    className={`p-4 md:p-6 rounded-xl border ${getTeamBorderColor(
                       2
-                    )} rounded-lg border ${getTeamBorderColor(2)}`}
+                    )} bg-gradient-to-br ${getTeamBgColor(2)} text-center`}
                   >
-                    <img
-                      src={
-                        predictionData?.team2?.topBatsman?.image ||
-                        "/placeholder-player.png"
-                      }
-                      alt={predictionData?.team2?.topBatsman?.name || "Player"}
-                      className="w-16 h-16 rounded-lg shadow-sm"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-lg font-bold text-gray-900">
-                          {predictionData?.team2?.topBatsman?.name ||
-                            "Unknown Player"}
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <img
+                          src={predictionData?.team2?.flag}
+                          alt={predictionData?.team2?.shortName || "Team 2"}
+                          className="w-8 h-8 md:w-10 md:h-10 rounded object-cover"
+                        />
+                        <h3 className="text-base md:text-lg font-semibold text-gray-900">
+                          {predictionData?.team2?.shortName || "Team 2"}
                         </h3>
-                        <Badge
-                          className={getRoleColor(
-                            predictionData?.team2?.topBatsman?.role || ""
-                          )}
-                        >
-                          {getRoleIcon(
-                            predictionData?.team2?.topBatsman?.role || ""
-                          )}
-                          <span className="ml-1">
-                            {predictionData?.team2?.topBatsman?.role?.split(
-                              " "
-                            )[0] || "Player"}
-                          </span>
-                        </Badge>
+                      </div>
+                      <p className="text-xs md:text-sm text-gray-600 mb-4">
+                        {predictionData?.team2?.name || "Full Team Name"}
+                      </p>
+
+                      <div
+                        className={`text-2xl md:text-3xl font-bold ${getTeamTextColor(
+                          2
+                        )} mb-3`}
+                      >
+                        {predictionData?.team2?.firstInningScore?.predicted ||
+                          0}
                       </div>
 
-                      <div className="text-sm text-gray-600 mb-3">
-                        {predictionData?.team2?.name || "Team 2"}
+                      <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border mb-2 w-full">
+                        Range:{" "}
+                        <span className="font-semibold">
+                          {predictionData?.team2?.firstInningScore?.min || 0} -{" "}
+                          {predictionData?.team2?.firstInningScore?.max || 0}
+                        </span>
                       </div>
 
-                      {/* Batting Stats */}
-                      <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-white rounded-lg border">
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">
-                            Total Runs
-                          </div>
-                          <div className="text-sm font-bold text-green-600">
-                            {predictionData?.team2?.topBatsman?.batting
-                              ?.totalRuns || 0}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">
-                            Strike Rate
-                          </div>
-                          <div className="text-sm font-bold text-blue-600">
-                            {predictionData?.team2?.topBatsman?.batting?.totalAvgStrikeRate?.toFixed?.(
-                              2
-                            ) || "0.00"}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">Avg Balls</div>
-                          <div className="text-sm font-bold text-purple-600">
-                            {predictionData?.team2?.topBatsman?.batting
-                              ?.totalAvgBallFaced || 0}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Predicted Score */}
-                      <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-semibold text-green-800">
-                            Predicted Score:
-                          </span>
-                          <span className="text-lg font-bold text-green-600">
-                            {getBattingPrediction(
-                              predictionData?.team2?.topBatsman?.batting
-                                ?.totalRuns || 0
-                            )}
-                          </span>
-                        </div>
+                      <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border w-full">
+                        Predicted Wickets:{" "}
+                        <span className="font-semibold text-red-600">
+                          {predictionData?.team2?.firstInningScore?.wickets ||
+                            0}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -798,203 +693,412 @@ const AIPredictionModal: React.FC<{
               </CardContent>
             </Card>
 
-            {/* Top Bowlers */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Zap className="h-5 w-5 text-blue-600" />
-                  <span>Top Bowlers Prediction</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Team 1 Bowler */}
-                  <div
-                    className={`flex items-center space-x-4 p-4 bg-gradient-to-r ${getTeamBgColor(
-                      1
-                    )} rounded-lg border ${getTeamBorderColor(1)}`}
-                  >
-                    <img
-                      src={
-                        predictionData?.team1?.topBowler?.image ||
-                        "/placeholder-player.png"
-                      }
-                      alt={predictionData?.team1?.topBowler?.name || "Player"}
-                      className="w-16 h-16 rounded-lg shadow-sm"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-lg font-bold text-gray-900">
-                          {predictionData?.team1?.topBowler?.name ||
-                            "Unknown Player"}
-                        </h3>
-                        <Badge
-                          className={getRoleColor(
-                            predictionData?.team1?.topBowler?.role || ""
-                          )}
-                        >
-                          {getRoleIcon(
-                            predictionData?.team1?.topBowler?.role || ""
-                          )}
-                          <span className="ml-1">
-                            {predictionData?.team1?.topBowler?.role?.split(
-                              " "
-                            )[0] || "Player"}
-                          </span>
-                        </Badge>
+            {/* Top Performers Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+              {/* Top Batsmen */}
+              <Card className="border-0 shadow-sm md:shadow-md">
+                <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                  <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                    <Target className="h-4 w-4 md:h-5 md:w-5 text-red-600" />
+                    <span>Top Batsmen Prediction</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                  <div className="space-y-4 md:space-y-6">
+                    {/* Team 1 Batsman */}
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg border ${getTeamBorderColor(
+                        1
+                      )} bg-gradient-to-r ${getTeamBgColor(1)}`}
+                    >
+                      <img
+                        src={
+                          predictionData?.team1?.topBatsman?.image ||
+                          "/placeholder-player.png"
+                        }
+                        alt={
+                          predictionData?.team1?.topBatsman?.name || "Player"
+                        }
+                        className="w-14 h-14 md:w-16 md:h-16 rounded-lg shadow-sm object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                          <h3 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                            {predictionData?.team1?.topBatsman?.name ||
+                              "Unknown Player"}
+                          </h3>
+                          <Badge
+                            className={`${getRoleColor(
+                              predictionData?.team1?.topBatsman?.role || ""
+                            )} text-xs md:text-sm whitespace-nowrap`}
+                          >
+                            {getRoleIcon(
+                              predictionData?.team1?.topBatsman?.role || ""
+                            )}
+                            <span className="ml-1 truncate">
+                              {predictionData?.team1?.topBatsman?.role?.split(
+                                " "
+                              )[0] || "Player"}
+                            </span>
+                          </Badge>
+                        </div>
+
+                        <div className="text-xs md:text-sm text-gray-600 mb-3">
+                          {predictionData?.team1?.name || "Team 1"}
+                        </div>
+
+                        {/* Batting Stats */}
+                        <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-white rounded-lg border">
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Total Runs
+                            </div>
+                            <div className="text-sm font-bold text-green-600">
+                              {predictionData?.team1?.topBatsman?.batting
+                                ?.totalRuns || 0}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Strike Rate
+                            </div>
+                            <div className="text-sm font-bold text-blue-600">
+                              {predictionData?.team1?.topBatsman?.batting?.totalAvgStrikeRate?.toFixed?.(
+                                2
+                              ) || "0.00"}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Avg Balls
+                            </div>
+                            <div className="text-sm font-bold text-purple-600">
+                              {predictionData?.team1?.topBatsman?.batting
+                                ?.totalAvgBallFaced || 0}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Predicted Score */}
+                        <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                            <span className="text-xs md:text-sm font-semibold text-green-800">
+                              Predicted Score:
+                            </span>
+                            <span className="text-sm md:text-base font-bold text-green-600">
+                              {getBattingPrediction(
+                                predictionData?.team1?.topBatsman?.batting
+                                  ?.totalRuns || 0
+                              )}
+                            </span>
+                          </div>
+                        </div>
                       </div>
+                    </div>
 
-                      <div className="text-sm text-gray-600 mb-3">
-                        {predictionData?.team1?.name || "Team 1"}
-                      </div>
+                    {/* Team 2 Batsman */}
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg border ${getTeamBorderColor(
+                        2
+                      )} bg-gradient-to-r ${getTeamBgColor(2)}`}
+                    >
+                      <img
+                        src={
+                          predictionData?.team2?.topBatsman?.image ||
+                          "/placeholder-player.png"
+                        }
+                        alt={
+                          predictionData?.team2?.topBatsman?.name || "Player"
+                        }
+                        className="w-14 h-14 md:w-16 md:h-16 rounded-lg shadow-sm object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                          <h3 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                            {predictionData?.team2?.topBatsman?.name ||
+                              "Unknown Player"}
+                          </h3>
+                          <Badge
+                            className={`${getRoleColor(
+                              predictionData?.team2?.topBatsman?.role || ""
+                            )} text-xs md:text-sm whitespace-nowrap`}
+                          >
+                            {getRoleIcon(
+                              predictionData?.team2?.topBatsman?.role || ""
+                            )}
+                            <span className="ml-1 truncate">
+                              {predictionData?.team2?.topBatsman?.role?.split(
+                                " "
+                              )[0] || "Player"}
+                            </span>
+                          </Badge>
+                        </div>
 
-                      {/* Bowling Stats */}
-                      <div className="grid grid-cols-4 gap-2 mb-3 p-2 bg-white rounded-lg border">
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">Avg Overs</div>
-                          <div className="text-sm font-bold text-orange-600">
-                            {predictionData?.team1?.topBowler?.bowling
-                              ?.totalAvgOvers || 0}
+                        <div className="text-xs md:text-sm text-gray-600 mb-3">
+                          {predictionData?.team2?.name || "Team 2"}
+                        </div>
+
+                        {/* Batting Stats */}
+                        <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-white rounded-lg border">
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Total Runs
+                            </div>
+                            <div className="text-sm font-bold text-green-600">
+                              {predictionData?.team2?.topBatsman?.batting
+                                ?.totalRuns || 0}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Strike Rate
+                            </div>
+                            <div className="text-sm font-bold text-blue-600">
+                              {predictionData?.team2?.topBatsman?.batting?.totalAvgStrikeRate?.toFixed?.(
+                                2
+                              ) || "0.00"}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Avg Balls
+                            </div>
+                            <div className="text-sm font-bold text-purple-600">
+                              {predictionData?.team2?.topBatsman?.batting
+                                ?.totalAvgBallFaced || 0}
+                            </div>
                           </div>
                         </div>
 
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">
-                            Avg Wickets
+                        {/* Predicted Score */}
+                        <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                            <span className="text-xs md:text-sm font-semibold text-green-800">
+                              Predicted Score:
+                            </span>
+                            <span className="text-sm md:text-base font-bold text-green-600">
+                              {getBattingPrediction(
+                                predictionData?.team2?.topBatsman?.batting
+                                  ?.totalRuns || 0
+                              )}
+                            </span>
                           </div>
-                          <div className="text-sm font-bold text-purple-600">
-                            {predictionData?.team1?.topBowler?.bowling
-                              ?.totalAvgWickets || 0}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">Avg Runs</div>
-                          <div className="text-sm font-bold text-blue-600">
-                            {predictionData?.team1?.topBowler?.bowling
-                              ?.totalAvgRunsConceded || 0}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">Economy</div>
-                          <div className="text-sm font-bold text-red-600">
-                            {predictionData?.team1?.topBowler?.bowling?.totalAvgEconomy?.toFixed?.(
-                              2
-                            ) || "0.00"}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Predicted Wickets */}
-                      <div className="p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-semibold text-red-800">
-                            Predicted Wickets:
-                          </span>
-                          <span className="text-lg font-bold text-red-600">
-                            {
-                              predictionData?.team1?.topBowler?.bowling
-                                ?.totalAvgWickets
-                            }
-                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
 
-                  {/* Team 2 Bowler */}
-                  <div
-                    className={`flex items-center space-x-4 p-4 bg-gradient-to-r ${getTeamBgColor(
-                      2
-                    )} rounded-lg border ${getTeamBorderColor(2)}`}
-                  >
-                    <img
-                      src={
-                        predictionData?.team2?.topBowler?.image ||
-                        "/placeholder-player.png"
-                      }
-                      alt={predictionData?.team2?.topBowler?.name || "Player"}
-                      className="w-16 h-16 rounded-lg shadow-sm"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-lg font-bold text-gray-900">
-                          {predictionData?.team2?.topBowler?.name ||
-                            "Unknown Player"}
-                        </h3>
-                        <Badge
-                          className={getRoleColor(
-                            predictionData?.team2?.topBowler?.role || ""
-                          )}
-                        >
-                          {getRoleIcon(
-                            predictionData?.team2?.topBowler?.role || ""
-                          )}
-                          <span className="ml-1">
-                            {predictionData?.team2?.topBowler?.role?.split(
-                              " "
-                            )[0] || "Player"}
-                          </span>
-                        </Badge>
+              {/* Top Bowlers */}
+              <Card className="border-0 shadow-sm md:shadow-md">
+                <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                  <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                    <Zap className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                    <span>Top Bowlers Prediction</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                  <div className="space-y-4 md:space-y-6">
+                    {/* Team 1 Bowler */}
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg border ${getTeamBorderColor(
+                        1
+                      )} bg-gradient-to-r ${getTeamBgColor(1)}`}
+                    >
+                      <img
+                        src={
+                          predictionData?.team1?.topBowler?.image ||
+                          "/placeholder-player.png"
+                        }
+                        alt={predictionData?.team1?.topBowler?.name || "Player"}
+                        className="w-14 h-14 md:w-16 md:h-16 rounded-lg shadow-sm object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                          <h3 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                            {predictionData?.team1?.topBowler?.name ||
+                              "Unknown Player"}
+                          </h3>
+                          <Badge
+                            className={`${getRoleColor(
+                              predictionData?.team1?.topBowler?.role || ""
+                            )} text-xs md:text-sm whitespace-nowrap`}
+                          >
+                            {getRoleIcon(
+                              predictionData?.team1?.topBowler?.role || ""
+                            )}
+                            <span className="ml-1 truncate">
+                              {predictionData?.team1?.topBowler?.role?.split(
+                                " "
+                              )[0] || "Player"}
+                            </span>
+                          </Badge>
+                        </div>
+
+                        <div className="text-xs md:text-sm text-gray-600 mb-3">
+                          {predictionData?.team1?.name || "Team 1"}
+                        </div>
+
+                        {/* Bowling Stats */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-3 p-2 md:p-3 bg-white rounded-lg border">
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Avg Overs
+                            </div>
+                            <div className="text-sm font-bold text-orange-600">
+                              {predictionData?.team1?.topBowler?.bowling?.totalAvgOvers?.toFixed(
+                                1
+                              ) || "0.0"}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Avg Wickets
+                            </div>
+                            <div className="text-sm font-bold text-purple-600">
+                              {predictionData?.team1?.topBowler?.bowling?.totalAvgWickets?.toFixed(
+                                1
+                              ) || "0.0"}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Avg Runs
+                            </div>
+                            <div className="text-sm font-bold text-blue-600">
+                              {predictionData?.team1?.topBowler?.bowling?.totalAvgRunsConceded?.toFixed(
+                                1
+                              ) || "0.0"}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">Economy</div>
+                            <div className="text-sm font-bold text-red-600">
+                              {predictionData?.team1?.topBowler?.bowling?.totalAvgEconomy?.toFixed?.(
+                                2
+                              ) || "0.00"}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Predicted Wickets */}
+                        <div className="p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                            <span className="text-xs md:text-sm font-semibold text-red-800">
+                              Predicted Wickets:
+                            </span>
+                            <span className="text-sm md:text-base font-bold text-red-600">
+                              {predictionData?.team1?.topBowler?.bowling?.totalAvgWickets?.toFixed(
+                                1
+                              ) || "0.0"}
+                            </span>
+                          </div>
+                        </div>
                       </div>
+                    </div>
 
-                      <div className="text-sm text-gray-600 mb-3">
-                        {predictionData?.team2?.name || "Team 2"}
-                      </div>
+                    {/* Team 2 Bowler */}
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg border ${getTeamBorderColor(
+                        2
+                      )} bg-gradient-to-r ${getTeamBgColor(2)}`}
+                    >
+                      <img
+                        src={
+                          predictionData?.team2?.topBowler?.image ||
+                          "/placeholder-player.png"
+                        }
+                        alt={predictionData?.team2?.topBowler?.name || "Player"}
+                        className="w-14 h-14 md:w-16 md:h-16 rounded-lg shadow-sm object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                          <h3 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                            {predictionData?.team2?.topBowler?.name ||
+                              "Unknown Player"}
+                          </h3>
+                          <Badge
+                            className={`${getRoleColor(
+                              predictionData?.team2?.topBowler?.role || ""
+                            )} text-xs md:text-sm whitespace-nowrap`}
+                          >
+                            {getRoleIcon(
+                              predictionData?.team2?.topBowler?.role || ""
+                            )}
+                            <span className="ml-1 truncate">
+                              {predictionData?.team2?.topBowler?.role?.split(
+                                " "
+                              )[0] || "Player"}
+                            </span>
+                          </Badge>
+                        </div>
 
-                      {/* Bowling Stats */}
-                      <div className="grid grid-cols-4 gap-2 mb-3 p-2 bg-white rounded-lg border">
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">Avg Overs</div>
-                          <div className="text-sm font-bold text-orange-600">
-                            {predictionData?.team2?.topBowler?.bowling
-                              ?.totalAvgOvers || 0}
-                          </div>
+                        <div className="text-xs md:text-sm text-gray-600 mb-3">
+                          {predictionData?.team2?.name || "Team 2"}
                         </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">
-                            Avg Wickets
-                          </div>
-                          <div className="text-sm font-bold text-purple-600">
-                            {predictionData?.team2?.topBowler?.bowling
-                              ?.totalAvgWickets || 0}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">Avg Runs</div>
-                          <div className="text-sm font-bold text-blue-600">
-                            {predictionData?.team2?.topBowler?.bowling
-                              ?.totalAvgRunsConceded || 0}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-500">Economy</div>
-                          <div className="text-sm font-bold text-red-600">
-                            {predictionData?.team2?.topBowler?.bowling?.totalAvgEconomy?.toFixed?.(
-                              2
-                            ) || "0.00"}
-                          </div>
-                        </div>
-                      </div>
 
-                      {/* Predicted Wickets */}
-                      <div className="p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-semibold text-red-800">
-                            Predicted Wickets:
-                          </span>
-                          <span className="text-lg font-bold text-red-600">
-                            {
-                              predictionData?.team2?.topBowler?.bowling
-                                ?.totalAvgWickets
-                            }
-                          </span>
+                        {/* Bowling Stats */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-3 p-2 md:p-3 bg-white rounded-lg border">
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Avg Overs
+                            </div>
+                            <div className="text-sm font-bold text-orange-600">
+                              {predictionData?.team2?.topBowler?.bowling?.totalAvgOvers?.toFixed(
+                                1
+                              ) || "0.0"}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Avg Wickets
+                            </div>
+                            <div className="text-sm font-bold text-purple-600">
+                              {predictionData?.team2?.topBowler?.bowling?.totalAvgWickets?.toFixed(
+                                1
+                              ) || "0.0"}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Avg Runs
+                            </div>
+                            <div className="text-sm font-bold text-blue-600">
+                              {predictionData?.team2?.topBowler?.bowling?.totalAvgRunsConceded?.toFixed(
+                                1
+                              ) || "0.0"}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">Economy</div>
+                            <div className="text-sm font-bold text-red-600">
+                              {predictionData?.team2?.topBowler?.bowling?.totalAvgEconomy?.toFixed?.(
+                                2
+                              ) || "0.00"}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Predicted Wickets */}
+                        <div className="p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                            <span className="text-xs md:text-sm font-semibold text-red-800">
+                              Predicted Wickets:
+                            </span>
+                            <span className="text-sm md:text-base font-bold text-red-600">
+                              {predictionData?.team2?.topBowler?.bowling?.totalAvgWickets?.toFixed(
+                                1
+                              ) || "0.0"}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </DialogContent>

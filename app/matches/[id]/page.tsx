@@ -19,10 +19,8 @@ import {
   Clock,
   Zap,
   ArrowLeft,
-  CheckCircle,
-  XCircle,
 } from "lucide-react";
-import axios from "axios";
+
 import SquadDialoge from "./SquadDialoge";
 import CustomLoader from "@/components/ui/CustomLoader";
 import AIPredictionModal from "./ai-prediction-modal";

@@ -84,136 +84,235 @@ const extractKeyObject = (text: any, key: any) => {
   // no match found
   return null;
 };
+
+/* ---------- New helper functions for robust parsing ---------- */
+
+/** Find matching close char for an opener (supports nested, respects strings/escapes) */
+function findMatchingClose(
+  text: string,
+  startIdx: number,
+  openChar = "[",
+  closeChar = "]"
+) {
+  let i = startIdx;
+  let depth = 0;
+  let inString = false;
+  let stringChar: string | null = null;
+  let prevChar: string | null = null;
+
+  for (; i < text.length; i++) {
+    const ch = text[i];
+
+    if (!inString) {
+      if (ch === '"' || ch === "'") {
+        inString = true;
+        stringChar = ch;
+      } else if (ch === openChar) {
+        depth += 1;
+      } else if (ch === closeChar) {
+        depth -= 1;
+        if (depth === 0) return i;
+      }
+    } else {
+      if (ch === stringChar && prevChar !== "\\") {
+        inString = false;
+        stringChar = null;
+      }
+    }
+
+    prevChar = ch;
+  }
+  return -1;
+}
+
+/** Split top-level array contents into items (handles nested arrays/objects and strings) */
+function splitTopLevelArrayItems(arrayText: string): string[] {
+  const txt = arrayText.trim().replace(/^\[/, "").replace(/\]$/, "");
+  const items: string[] = [];
+
+  let i = 0;
+  let start = 0;
+  let inString = false;
+  let stringChar: string | null = null;
+  let depth = 0;
+  let prevChar: string | null = null;
+
+  while (i < txt.length) {
+    const ch = txt[i];
+
+    if (!inString) {
+      if (ch === '"' || ch === "'") {
+        inString = true;
+        stringChar = ch;
+      } else if (ch === "[" || ch === "{" || ch === "(") {
+        depth += 1;
+      } else if (ch === "]" || ch === "}" || ch === ")") {
+        depth -= 1;
+      } else if (ch === "," && depth === 0) {
+        items.push(txt.slice(start, i).trim());
+        start = i + 1;
+      }
+    } else {
+      if (ch === stringChar && prevChar !== "\\") {
+        inString = false;
+        stringChar = null;
+      }
+    }
+
+    prevChar = ch;
+    i += 1;
+  }
+
+  const last = txt.slice(start).trim();
+  if (last.length) items.push(last);
+  return items;
+}
+
+/** Unescape a JS string literal (single- or double-quoted). Returns null if not a quoted string */
+function unescapeJsStringLiteral(item: string): string | null {
+  const trimmed = item.trim();
+  if (!trimmed) return null;
+  const first = trimmed[0];
+  const last = trimmed[trimmed.length - 1];
+  if ((first === "'" && last === "'") || (first === '"' && last === '"')) {
+    const inner = trimmed.slice(1, -1);
+    try {
+      // Use JSON.parse on a double-quoted wrapper to honor JS escapes
+      const wrapper = `"${inner.replace(/"/g, '\\"')}"`;
+      return JSON.parse(wrapper);
+    } catch (e) {
+      // fallback simple unescape
+      return inner
+        .replace(/\\n/g, "\n")
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"')
+        .replace(/\\\\/g, "\\");
+    }
+  }
+  return null;
+}
+
+/* ---------- Updated main function ---------- */
+
 export async function extractAndTransformSchedule(
-  fromDate: Date,
-  timeZone: string
+  fromDate: Date | null,
+  timeZone: string = "Asia/Kolkata"
 ): Promise<any> {
   const $: any = await GetHtml(
     "https://www.cricbuzz.com/cricket-schedule/upcoming-series/all"
   );
+
   let scheduleData: any = null;
 
-  // Robust regex for finding a balanced JSON object after "scheduleData":
-  const scheduleDataRegex =
-    /"scheduleData":\s*({(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*})/;
-
+  // iterate script tags and try robust extraction
   $("script").each((index: any, element: any) => {
     const scriptContent = $(element).html();
+    if (!scriptContent) return;
 
-    if (scriptContent && scriptContent.includes("matchScheduleMap")) {
-      try {
-        // Look for the array pattern
-        const arrayMatch = scriptContent.match(
-          /self\.__next_f\.push\(\[1,\s*'([\s\S]*?)'\]\]/
-        );
+    if (
+      !scriptContent.includes("matchScheduleMap") &&
+      !scriptContent.includes("scheduleData")
+    ) {
+      return;
+    }
 
-        if (arrayMatch && arrayMatch[1]) {
-          let dataString = arrayMatch[1];
+    // find the push location
+    const pushIdx = scriptContent.indexOf("self.__next_f.push");
+    if (pushIdx === -1) return;
 
-          // **CRITICAL FIX: Unescape the string content**
-          // If the string is triple-escaped, unescape it once to get a usable JSON string.
-          // This uses JSON.parse on the string literal.
-          try {
-            // The outer quotes ('...') are removed by the regex.
-            // The content inside is often a JSON string literal which needs to be parsed
-            // to resolve the heavy escaping (e.g., "\\\" becomes \"").
-            dataString = JSON.parse(`"${dataString}"`);
-          } catch (e) {
-            console.log(
-              "Could not unescape dataString via JSON.parse. Proceeding with raw string."
-            );
-          }
+    // find the first '[' after push (start of array argument)
+    const firstBracket = scriptContent.indexOf("[", pushIdx);
+    if (firstBracket === -1) return;
 
-          // Find scheduleData using the robust regex
-          const scheduleDataMatch = dataString.match(scheduleDataRegex);
+    const bracketClose = findMatchingClose(
+      scriptContent,
+      firstBracket,
+      "[",
+      "]"
+    );
+    if (bracketClose === -1) return;
 
-          if (scheduleDataMatch && scheduleDataMatch[1]) {
-            try {
-              // scheduleDataMatch[1] is the JSON object string (e.g., "{...}")
-              scheduleData = { scheduleData: JSON.parse(scheduleDataMatch[1]) };
-              // Exit the loop once data is found
-              return false;
-            } catch (parseError) {
-              console.error(
-                "Failed to parse scheduleData JSON object:",
-                parseError
-              );
-            }
-          }
+    const arrayText = scriptContent.slice(firstBracket, bracketClose + 1);
+
+    // split into top-level items
+    const items = splitTopLevelArrayItems(arrayText);
+
+    // try to unescape any quoted item containing matchScheduleMap
+    let candidateStr: string | null = null;
+    for (let it of items) {
+      const un = unescapeJsStringLiteral(it);
+      if (un && un.includes("matchScheduleMap")) {
+        candidateStr = un;
+        break;
+      }
+    }
+
+    // fallback: if not found, check raw items themselves (some builds may not quote heavily)
+    if (!candidateStr) {
+      for (let it of items) {
+        if (it && it.includes("matchScheduleMap")) {
+          candidateStr = it;
+          break;
         }
-      } catch (error) {
-        console.error("Error extracting schedule data:", error);
+      }
+    }
+
+    // final fallback: entire arrayText
+    if (!candidateStr && arrayText.includes("matchScheduleMap")) {
+      candidateStr = arrayText;
+    }
+
+    if (!candidateStr) return;
+
+    // Now attempt to find scheduleData object in candidateStr
+    const key = "scheduleData";
+    const parsed = extractKeyObject(candidateStr, key);
+    if (parsed) {
+      // extractKeyObject returns parsed object when key is found
+      scheduleData = parsed;
+      return false; // break out of loop
+    }
+
+    // If extractKeyObject didn't find, try regex fallback (balanced brace captured earlier inside extractKeyObject)
+    const scheduleDataRegex = /"scheduleData":\s*({[\s\S]*})/;
+    const sdMatch = candidateStr.match(scheduleDataRegex);
+    if (sdMatch && sdMatch[1]) {
+      try {
+        const cleaned = sdMatch[1]
+          .replace(/,\s*([}\]])/g, "$1")
+          .replace(/\u0000/g, "");
+        scheduleData = JSON.parse(cleaned);
+        return false;
+      } catch (e) {
+        try {
+          const alt = sdMatch[1].replace(
+            /(['"])?([a-zA-Z0-9_]+)(['"])?:/g,
+            '"$2":'
+          );
+          scheduleData = JSON.parse(alt);
+          return false;
+        } catch (e2) {
+          // ignore and continue
+        }
       }
     }
   });
 
-  // If data was found, no need to run the complex second attempt.
-  if (scheduleData) {
-    console.log("Schedule data found:", scheduleData ? "Yes" : "No");
-  } else {
-    console.log(
-      "No schedule data found with primary method. Trying fallback..."
-    );
-
-    // Your existing, slightly more complex fallback method (second attempt)
-    // ... (keep this block for maximum robustness if the first fix doesn't work 100% of the time)
-    $("script").each((index: any, element: any) => {
-      const scriptContent = $(element).html();
-
-      if (scriptContent && scriptContent.includes("matchScheduleMap")) {
-        // Try to extract the entire array and parse it
-        const fullArrayMatch = scriptContent.match(
-          /self\.__next_f\.push\((\[[\s\S]*?\])\)/
-        );
-
-        if (fullArrayMatch && fullArrayMatch[1]) {
-          try {
-            // Replace single quotes with double quotes for JSON parsing
-            const arrayStr = fullArrayMatch[1]
-              .replace(/'/g, '"')
-              .replace(/\\"/g, '"')
-              .replace(/\\\\/g, "\\");
-
-            const dsfdsfdgfdgfrg = extractKeyObject(arrayStr, "scheduleData");
-
-            scheduleData = dsfdsfdgfdgfrg;
-
-            // const parsedArray = JSON.parse(arrayStr);
-
-            // if (parsedArray.length >= 2) {
-            //   const dataString = parsedArray[1];
-
-            //   // Use the robust regex to find scheduleData
-            //   const match = dataString.match(scheduleDataRegex);
-
-            //   if (match && match[1]) {
-            //     try {
-            //       scheduleData = { scheduleData: JSON.parse(match[1]) };
-            //       return false; // Exit once found
-            //     } catch (e) {
-            //       console.error("Final parse attempt failed");
-            //     }
-            //   }
-            // }
-          } catch (e) {
-            console.error("Could not parse full array");
-          }
-        }
-      }
-    });
+  // normalize scheduleData: extract if nested
+  if (scheduleData && scheduleData.scheduleData) {
+    scheduleData = scheduleData.scheduleData;
   }
 
-  // Debug: Log if we found data
   console.log("Schedule data found:", scheduleData ? "Yes" : "No");
 
-  if (!scheduleData || !scheduleData || !scheduleData.matchScheduleMap) {
+  if (!scheduleData || !scheduleData.matchScheduleMap) {
     console.log("No valid schedule data structure found");
     return [];
   }
 
-  //   // Rest of your transformation code...
+  // transformation (kept same as your original)
   const matches: any[] = [];
-  // ... (transformation logic is fine and omitted for brevity)
+
   scheduleData.matchScheduleMap.forEach((day: any) => {
     const scheduleAdWrapper = day.scheduleAdWrapper;
 
@@ -228,15 +327,19 @@ export async function extractAndTransformSchedule(
 
       series.matchInfo.forEach((match: any) => {
         const venue = match.venueInfo || {};
-        // const timeZone = venue.timezone || "+00:00";
 
         const makeTeam = (t: any) => ({
           squadId: t.teamId,
           teamName: t.teamName,
           teamShortName: t.teamSName,
-          teamFlagUrl: `https://static.cricbuzz.com/a/img/v1/25x18/i1/c${
-            t.imageId
-          }/${t.teamName.toLowerCase().trim().replace(/\s+/g, "-")}.jpg`,
+          teamFlagUrl: t.imageId
+            ? `https://static.cricbuzz.com/a/img/v1/25x18/i1/c${
+                t.imageId
+              }/${String(t.teamName || "")
+                .toLowerCase()
+                .trim()
+                .replace(/\s+/g, "-")}.jpg`
+            : null,
           isWinner: null,
           color: null,
           cricketScore: null,
@@ -254,7 +357,8 @@ export async function extractAndTransformSchedule(
           matchId: match.matchId,
           matchName: null,
           matchDescription: match.matchDesc ?? null,
-          originalStartTime: String(match.startDate),
+          originalStartTime:
+            match.startDate != null ? String(match.startDate) : null,
           startTime: formatDate(match.startDate),
           endTime: formatDate(match.endDate),
           status: null,
@@ -265,11 +369,11 @@ export async function extractAndTransformSchedule(
             timezone: venue.timezone ?? null,
           },
           tour: series.seriesCategory ?? null,
-          format: series.seriesName.toLowerCase().includes("t10")
+          format: series.seriesName?.toLowerCase().includes("t10")
             ? "T10"
             : match.matchFormat ?? null,
           sport: "cricket",
-          teams: [makeTeam(match.team1), makeTeam(match.team2)],
+          teams: [makeTeam(match.team1 || {}), makeTeam(match.team2 || {})],
         };
 
         matches.push(targetMatch);

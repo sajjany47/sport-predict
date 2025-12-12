@@ -45,12 +45,12 @@ const ForgotPasswordPage = () => {
       .then((res) => {
         toast.success(res.message);
         setIsLoading(false);
-        return res;
+        return true;
       })
       .catch((err) => {
         toast.error(err.message || "Failed update details. Please try again.");
         setIsLoading(false);
-        throw err;
+        return false;
       });
   };
 
@@ -88,9 +88,8 @@ const ForgotPasswordPage = () => {
     });
 
     if (result) {
-      setResData(result.createdAt);
       setStep(2);
-      setCountdown(30); // 30 seconds countdown
+      setCountdown(60); // 30 seconds countdown
       startCountdown();
     }
   };
@@ -113,11 +112,9 @@ const ForgotPasswordPage = () => {
     const result: any = await resetPassword({
       userId: email,
       type: "verify-otp",
-      createdAt: resData,
       otp: otp.join(""),
     });
     if (result) {
-      setResData(result);
       setStep(3);
     }
   };
@@ -140,6 +137,7 @@ const ForgotPasswordPage = () => {
     const result: any = await resetPassword({
       userId: email,
       type: "reset-password",
+      otp: otp.join(""),
       password: values.password,
     });
     if (result) {
@@ -149,14 +147,17 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900 p-4">
+    <div
+      className="min-h-screen flex items-center justify-center 
+      bg-gradient-to-br from-violet-100 via-indigo-100 to-slate-100 p-4"
+    >
       <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
+        {/* <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold text-white">Account Recovery</h1>
           <p className="text-indigo-200 mt-2">
             Follow the steps to reset your password
           </p>
-        </div>
+        </div> */}
 
         <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
           <CardHeader className="space-y-1">
@@ -284,7 +285,7 @@ const ForgotPasswordPage = () => {
                   ) : (
                     <Button
                       variant="link"
-                      onClick={handleResendOtp}
+                      onClick={handleSendOtp}
                       disabled={isLoading}
                       className="text-indigo-600 hover:text-indigo-800"
                     >
