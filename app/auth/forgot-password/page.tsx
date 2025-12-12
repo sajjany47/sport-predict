@@ -149,14 +149,17 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900 p-4">
+    <div
+      className="min-h-screen flex items-center justify-center 
+      bg-gradient-to-br from-violet-100 via-indigo-100 to-slate-100 p-4"
+    >
       <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
+        {/* <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold text-white">Account Recovery</h1>
           <p className="text-indigo-200 mt-2">
             Follow the steps to reset your password
           </p>
-        </div>
+        </div> */}
 
         <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
           <CardHeader className="space-y-1">

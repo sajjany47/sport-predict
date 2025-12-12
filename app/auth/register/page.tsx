@@ -244,9 +244,12 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900 p-4">
+    <div
+      className="min-h-screen flex items-center justify-center 
+      bg-gradient-to-br from-violet-100 via-indigo-100 to-slate-100 p-4"
+    >
       <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
+        {/* <div className="mb-6 text-center">
           <div className="inline-flex items-center justify-center space-x-2 mb-4">
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl shadow-lg">
               <Trophy className="h-8 w-8 text-white" />
@@ -257,7 +260,7 @@ const RegisterPage = () => {
           <p className="text-indigo-200 mt-2">
             Join our prediction community and start winning
           </p>
-        </div>
+        </div> */}
 
         <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
           <CardHeader className="space-y-1">
@@ -434,9 +437,6 @@ const RegisterPage = () => {
                     <Form onSubmit={handleSubmit} className="space-y-4">
                       <div className="grid gap-4">
                         <div className="space-y-2">
-                          {/* <Label htmlFor="username" className="text-gray-700">
-                            Username
-                          </Label> */}
                           <Field
                             label="Username"
                             component={FormikTextInput}
@@ -455,9 +455,6 @@ const RegisterPage = () => {
                         </div>
 
                         <div className="space-y-2">
-                          {/* <Label htmlFor="name" className="text-gray-700">
-                            Full Name
-                          </Label> */}
                           <Field
                             label="Full Name"
                             component={FormikTextInput}
@@ -470,12 +467,6 @@ const RegisterPage = () => {
                         </div>
 
                         <div className="space-y-2">
-                          {/* <Label
-                            htmlFor="mobileNumber"
-                            className="text-gray-700"
-                          >
-                            Mobile Number
-                          </Label> */}
                           <Field
                             label="Mobile Number"
                             component={FormikTextInput}
@@ -489,9 +480,6 @@ const RegisterPage = () => {
                         </div>
 
                         <div className="space-y-2">
-                          {/* <Label htmlFor="password" className="text-gray-700">
-                            Password
-                          </Label> */}
                           <Field
                             label="Password"
                             component={FormikTextPassword}
@@ -504,12 +492,6 @@ const RegisterPage = () => {
                         </div>
 
                         <div className="space-y-2">
-                          {/* <Label
-                            htmlFor="confirmPassword"
-                            className="text-gray-700"
-                          >
-                            Confirm Password
-                          </Label> */}
                           <Field
                             label="Confirm Password"
                             component={FormikTextPassword}
