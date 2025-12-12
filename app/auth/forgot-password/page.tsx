@@ -119,19 +119,6 @@ const ForgotPasswordPage = () => {
     }
   };
 
-  // Handle resend OTP
-  const handleResendOtp = async () => {
-    const result: any = await resetPassword({
-      userId: email,
-      type: "reset-password",
-    });
-    if (result) {
-      setResData(result.createdAt);
-      setCountdown(30);
-      startCountdown();
-    }
-  };
-
   // Handle password reset
   const handleResetPassword = async (values: any) => {
     const result: any = await resetPassword({
@@ -255,7 +242,8 @@ const ForgotPasswordPage = () => {
                     ))}
                   </div>
                   <p className="text-xs text-gray-500 text-center">
-                    Enter the 6-digit code sent to {email}
+                    Enter the 6-digit code sent to{" "}
+                    <span className="text-blue-500">{email}</span>
                   </p>
                 </div>
 
@@ -280,7 +268,8 @@ const ForgotPasswordPage = () => {
                 <div className="text-center">
                   {countdown > 0 ? (
                     <p className="text-sm text-gray-500">
-                      Resend code in {countdown} seconds
+                      Resend code in{" "}
+                      <span className="text-blue-500">{countdown} seconds</span>
                     </p>
                   ) : (
                     <Button
