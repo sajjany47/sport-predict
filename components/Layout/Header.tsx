@@ -94,12 +94,6 @@ const Header = () => {
       icon: <CreditCard className="mr-2 h-4 w-4" />,
       description: "Manage your token",
     },
-    // {
-    //   label: "Profile Settings",
-    //   href: "/profile",
-    //   icon: <User className="mr-2 h-4 w-4" />,
-    //   description: "Update your profile",
-    // },
   ];
 
   const handleCreditAdd = () => {
@@ -203,9 +197,6 @@ const Header = () => {
                             <span className="text-sm font-medium text-gray-900">
                               {user.username}
                             </span>
-                            {/* {user?.role === "premium" && (
-                              <Crown className="h-3 w-3 ml-1 text-yellow-500" />
-                            )} */}
                             {user.role === "admin" && (
                               <Shield className="h-3 w-3 ml-1 text-blue-500" />
                             )}
@@ -243,11 +234,7 @@ const Header = () => {
                         </div>
                         <Badge
                           variant={
-                            user.role === "admin"
-                              ? "default"
-                              : // : user?.role === "premium"
-                                // ? "secondary"
-                                "outline"
+                            user.role === "admin" ? "default" : "outline"
                           }
                           className="ml-2"
                         >
@@ -323,25 +310,40 @@ const Header = () => {
                   </DropdownMenu>
                 </>
               ) : (
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="ghost"
-                    asChild
-                    className="hidden sm:inline-flex text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                  >
-                    <Link href="/auth/login">Login</Link>
-                  </Button>
-                  <Button
-                    asChild
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
-                  >
-                    <Link href="/auth/register" className="flex items-center">
-                      <span className="hidden sm:inline">Get Started</span>
-                      <span className="sm:hidden">Join</span>
-                      <Sparkles className="ml-2 h-3 w-3" />
-                    </Link>
-                  </Button>
-                </div>
+                <>
+                  {/* Mobile Auth Buttons - IN ROW */}
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      asChild
+                      size="sm"
+                      className="text-gray-600 hover:text-blue-600 hover:bg-gray-50 border border-gray-200 hidden sm:inline-flex"
+                    >
+                      <Link href="/auth/login">Login</Link>
+                    </Button>
+
+                    {/* Mobile View - Smaller Login Button */}
+                    <Button
+                      variant="outline"
+                      asChild
+                      size="sm"
+                      className="sm:hidden h-9 px-3 text-sm border-gray-200"
+                    >
+                      <Link href="/auth/login">Login</Link>
+                    </Button>
+
+                    <Button
+                      asChild
+                      size="sm"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all h-9 px-3 sm:px-4"
+                    >
+                      <Link href="/auth/register" className="flex items-center">
+                        <span className="text-sm">Join</span>
+                        <Sparkles className="ml-1 h-3 w-3" />
+                      </Link>
+                    </Button>
+                  </div>
+                </>
               )}
 
               {/* Mobile Menu Button */}
@@ -350,7 +352,7 @@ const Header = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 rounded-lg hover:bg-gray-100"
+                    className="h-9 w-9 rounded-lg hover:bg-gray-100 ml-1"
                   >
                     <Menu className="h-5 w-5" />
                   </Button>
