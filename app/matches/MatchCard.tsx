@@ -389,9 +389,12 @@ const MatchCard = ({
       <CardContent className="p-6">
         {/* Match Header */}
         <div className="flex items-center justify-between mb-3 text-sm text-gray-500">
-          <div className="flex items-center space-x-2">
-            <CalendarCog className="h-4 w-4" />
-            <span className="truncate">{match?.tourName}</span>
+          <div className="flex items-center space-x-2 w-full">
+            <CalendarCog className="h-4 w-4 shrink-0" />
+
+            <span className="whitespace-normal break-words flex-1">
+              {match?.tourName}
+            </span>
           </div>
         </div>
 
