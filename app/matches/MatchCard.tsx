@@ -393,9 +393,6 @@ const MatchCard = ({
             <CalendarCog className="h-4 w-4" />
             <span className="truncate">{match?.tourName}</span>
           </div>
-
-          {/* Countdown shown here for upcoming matches */}
-          <div>{renderCountdown()}</div>
         </div>
 
         <div className="flex items-center justify-between mb-4">
