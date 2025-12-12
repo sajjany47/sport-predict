@@ -25,9 +25,9 @@ export async function POST(request: NextRequest) {
   try {
     await dbConnect();
     const body = await request.json();
-    if (body.type === "finalize") {
-      await userValidationSchema.validate(body, { abortEarly: false });
-    }
+    // if (body.type === "finalize") {
+    //   await userValidationSchema.validate(body, { abortEarly: false });
+    // }
 
     // ✅ Check if email or mobile number already exists
     const existingUser = await User.findOne({
@@ -79,55 +79,77 @@ export async function POST(request: NextRequest) {
             }),
           });
         }
-        const cookie = `otp_token=${otpToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=300`;
 
-        return NextResponse.json(
+        const response = NextResponse.json(
           {
             success: true,
-            message: "OTP Send successfully.",
+            message: "OTP sent successfully.",
           },
-          {
-            status: 200,
-            headers: {
-              "Set-Cookie": cookie,
-              "Content-Type": "application/json",
-            },
-          }
+          { status: 200 }
         );
+
+        response.cookies.set({
+          name: "otp_token",
+          value: otpToken,
+          httpOnly: true,
+          secure: true,
+          sameSite: "strict",
+          path: "/",
+          maxAge: 300,
+        });
+
+        return response;
       } else if (body.type === "verified") {
         const newOtpToken: any = await VerifyOTPToken({
           email: body.email,
           otp: body.otp,
         });
 
-        const newCookie = `otp_token=${newOtpToken.token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=300`;
-        return NextResponse.json(
+        if (!newOtpToken.isSuccess) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: newOtpToken.message,
+            },
+            { status: newOtpToken.code }
+          );
+        }
+
+        const response = NextResponse.json(
           {
             success: true,
-            message: "OTP verified successfully.",
+            message: "OTP sent successfully.",
           },
-          {
-            status: 200,
-            headers: {
-              "Set-Cookie": newCookie,
-              "Content-Type": "application/json",
-            },
-          }
+          { status: 200 }
         );
-      } else if (body.type !== "finalize") {
+
+        response.cookies.set({
+          name: "otp_token",
+          value: newOtpToken.token,
+          httpOnly: true,
+          secure: true,
+          sameSite: "strict",
+          path: "/",
+          maxAge: 300,
+        });
+
+        return response;
+      } else if (body.type === "finalize") {
+        await userValidationSchema.validate(body, { abortEarly: false });
         const checkOtpToken: any = await VerifyOTPToken({
           email: body.email,
           otp: body.otp,
         });
-        if (!checkOtpToken.payload.isVerified) {
+        if (!checkOtpToken.isSuccess || !checkOtpToken.payload.isVerified) {
           return NextResponse.json(
             {
               success: false,
-              message: "OTP not verified!",
+              message: checkOtpToken.message || "OTP not verified!",
             },
-            { status: 400 }
+            { status: checkOtpToken.code || 400 }
           );
         }
+
         let userData: any = {
           _id: new mongoose.Types.ObjectId(),
           ...UserData({
@@ -190,6 +212,11 @@ export async function POST(request: NextRequest) {
             }
           );
         }
+      } else {
+        return NextResponse.json(
+          { success: false, message: "Invalid request." },
+          { status: 400 }
+        );
       }
     }
   } catch (error: any) {

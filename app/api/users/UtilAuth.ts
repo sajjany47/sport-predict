@@ -1,6 +1,5 @@
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
 
 export const SECRET_KEY = new TextEncoder().encode(
   process.env.JWT_SECRET || "6bf6680598a374557023eabfc280e3e930bf080b"
@@ -48,22 +47,32 @@ export async function GenerateOTPToken(payload: any) {
 }
 
 export const VerifyOTPToken = async (body: any) => {
-  const cookieStore: any = cookies();
+  const cookieStore = await cookies();
   const otpToken = cookieStore.get("otp_token")?.value;
+
   if (!otpToken) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "OTP token is missing or expired.",
-      },
-      { status: 400 }
-    );
+    return {
+      isSuccess: false,
+      message: "OTP token is missing or expired.",
+      code: 400,
+    };
+    // return NextResponse.json(
+    //   {
+    //     success: false,
+    //     message: "OTP token is missing or expired.",
+    //   },
+    //   { status: 400 }
+    // );
   }
-  const payload: any = await jwtVerify(otpToken, SECRET_KEY);
-  const otp = GenerateOTP(payload.createdAt);
+  const payload: any = (await jwtVerify(otpToken, SECRET_KEY)).payload;
+
+  // Convert createdAt from token → Date
+  const createdAt = new Date(payload.createdAt);
+
+  const otp = GenerateOTP(createdAt);
 
   const now = new Date();
-  const diffMs = now.getTime() - new Date(payload.createdAt).getTime();
+  const diffMs = now.getTime() - createdAt.getTime();
   const diffMinutes = diffMs / (1000 * 60);
 
   if (
@@ -72,20 +81,33 @@ export const VerifyOTPToken = async (body: any) => {
     payload.email !== body.email ||
     payload.otp !== otp
   ) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "OTP has expired!",
-      },
-      { status: 400 }
-    );
-  }
-  const newOtpToken = await GenerateOTPToken({
-    createdAt: payload.createdAt,
-    email: body.email,
-    otp: otp,
-    isVerified: true,
-  });
+    if (diffMinutes > 5) {
+      return { isSuccess: false, message: "OTP has expired!", code: 400 };
+    }
 
-  return { token: newOtpToken, payload: payload };
+    if (payload.email !== body.email) {
+      return { isSuccess: false, message: "Email does not match!", code: 400 };
+    }
+
+    if (payload.otp !== body.otp) {
+      return { isSuccess: false, message: "Invalid OTP!", code: 400 };
+    }
+
+    if (payload.otp !== otp) {
+      return {
+        isSuccess: false,
+        message: "OTP is incorrect or manipulated!",
+        code: 400,
+      };
+    }
+  } else {
+    const newOtpToken = await GenerateOTPToken({
+      createdAt: createdAt,
+      email: body.email,
+      otp: otp,
+      isVerified: true,
+    });
+
+    return { isSuccess: true, token: newOtpToken, payload: payload };
+  }
 };

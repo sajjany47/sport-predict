@@ -96,6 +96,7 @@ const RegisterPage = () => {
   const [verificationSent, setVerificationSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [resendEnabled, setResendEnabled] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -137,6 +138,7 @@ const RegisterPage = () => {
     try {
       await VerifyEmailCode({ email, otp: code, type: "verified" });
       toast.success("Email verified successfully!");
+      setOtpCode(code);
       setStep(3);
     } catch (error: any) {
       toast.error(error.message || "Invalid verification code");
@@ -169,6 +171,8 @@ const RegisterPage = () => {
         mobileNumber: values.mobileNumber.trim(),
         password: values.password,
         agreeToTerms: values.agreeToTerms,
+        type: "finalize",
+        otp: otpCode,
       };
 
       const res = await UserRegister(formData);
@@ -415,7 +419,7 @@ const RegisterPage = () => {
             validationSchema={registrationSchema}
             onSubmit={handleRegister}
           >
-            {({ handleSubmit, isSubmitting }) => (
+            {({ handleSubmit, isSubmitting, setFieldValue }) => (
               <Form onSubmit={handleSubmit}>
                 <div className="space-y-6">
                   <div className="text-center">
@@ -448,6 +452,9 @@ const RegisterPage = () => {
                       component={FormikTextInput}
                       name="username"
                       placeholder="Choose a unique username"
+                      onChange={(e: any) =>
+                        setFieldValue("username", e?.target?.value?.trim())
+                      }
                       icon={
                         <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                       }
