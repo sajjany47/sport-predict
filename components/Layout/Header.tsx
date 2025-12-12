@@ -89,17 +89,17 @@ const Header = () => {
       description: "Your personal dashboard",
     },
     {
-      label: "Subscription",
+      label: "Token",
       href: "/subscription",
       icon: <CreditCard className="mr-2 h-4 w-4" />,
-      description: "Manage your subscription",
+      description: "Manage your token",
     },
-    {
-      label: "Profile Settings",
-      href: "/profile",
-      icon: <User className="mr-2 h-4 w-4" />,
-      description: "Update your profile",
-    },
+    // {
+    //   label: "Profile Settings",
+    //   href: "/profile",
+    //   icon: <User className="mr-2 h-4 w-4" />,
+    //   description: "Update your profile",
+    // },
   ];
 
   const handleCreditAdd = () => {

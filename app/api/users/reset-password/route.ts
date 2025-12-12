@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
 import { FormatErrorMessage } from "@/lib/utils";
 import User from "../UserModel";
-import { GenerateOTP } from "../UtilAuth";
+import { GenerateOTP, GenerateOTPToken, VerifyOTPToken } from "../UtilAuth";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import {
@@ -35,55 +35,99 @@ export const POST = async (request: NextRequest) => {
       );
     }
     if (reqData.type === "generate-otp") {
-      const date = new Date();
+      // const date = new Date();
+      // const otp = GenerateOTP(date);
+      // await MailSend({
+      //   to: [user.email],
+      //   subject: "OTP generated for password reset",
+      //   html: ResetPasswordTem({
+      //     username: user.username,
+      //     otp: otp,
+      //   }),
+      // });
+      // return NextResponse.json(
+      //   {
+      //     success: true,
+      //     message: "OTP generated successfully!",
+      //     createdAt: date,
+      //   },
+      //   { status: 200 }
+      // );
+
+      let date = new Date();
       const otp = GenerateOTP(date);
-      await MailSend({
-        to: [user.email],
-        subject: "OTP generated for password reset",
-        html: ResetPasswordTem({
-          username: user.username,
-          otp: otp,
-        }),
+      const otpToken = await GenerateOTPToken({
+        createdAt: date,
+        email: user.email,
+        otp: otp,
+        isVerified: false,
       });
-      return NextResponse.json(
+      if (otpToken) {
+        await MailSend({
+          to: [user.email],
+          subject: "Unlock Predictions - SportPredict Email Verification OTP",
+          html: ResetPasswordTem({
+            username: user.username,
+            otp: otp,
+          }),
+        });
+      }
+
+      const response = NextResponse.json(
         {
           success: true,
-          message: "OTP generated successfully!",
-          createdAt: date,
+          message: "OTP sent successfully.",
         },
         { status: 200 }
       );
+
+      response.cookies.set({
+        name: "otp_token",
+        value: otpToken,
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+        maxAge: 300,
+      });
+
+      return response;
     }
     if (reqData.type === "verify-otp") {
-      const databaseOtp = GenerateOTP(new Date(reqData.createdAt));
-      const now = new Date();
-      const diffMs = now.getTime() - new Date(reqData.createdAt).getTime(); // difference in ms
-      const diffMinutes = diffMs / (1000 * 60);
-      if (diffMinutes > 10) {
+      const newOtpToken: any = await VerifyOTPToken({
+        email: user.email,
+        otp: reqData.otp,
+      });
+
+      if (!newOtpToken.isSuccess) {
         return NextResponse.json(
           {
             success: false,
-            message: "OTP has expired!",
+            message: newOtpToken.message,
           },
-          { status: 400 }
+          { status: newOtpToken.code }
         );
       }
-      if (databaseOtp !== reqData.otp) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Invalid OTP!",
-          },
-          { status: 400 }
-        );
-      }
-      return NextResponse.json(
+
+      const response = NextResponse.json(
         {
           success: true,
-          message: "OTP verified successfully!",
+          message: "OTP sent successfully.",
         },
         { status: 200 }
       );
+
+      response.cookies.set({
+        name: "otp_token",
+        value: newOtpToken.token,
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+        maxAge: 300,
+      });
+
+      return response;
     } else if (reqData.type === "reset-password") {
       if (reqData.hasOwnProperty("oldPassword")) {
         const isValidPassword = await bcrypt.compare(
@@ -97,6 +141,20 @@ export const POST = async (request: NextRequest) => {
               message: "Invalid old password.",
             },
             { status: 403 }
+          );
+        }
+      } else {
+        const checkOtpToken: any = await VerifyOTPToken({
+          email: user.email,
+          otp: reqData.otp,
+        });
+        if (!checkOtpToken.isSuccess || !checkOtpToken.payload.isVerified) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: checkOtpToken.message || "OTP not verified!",
+            },
+            { status: checkOtpToken.code || 400 }
           );
         }
       }

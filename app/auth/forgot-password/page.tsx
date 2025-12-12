@@ -45,12 +45,12 @@ const ForgotPasswordPage = () => {
       .then((res) => {
         toast.success(res.message);
         setIsLoading(false);
-        return res;
+        return true;
       })
       .catch((err) => {
         toast.error(err.message || "Failed update details. Please try again.");
         setIsLoading(false);
-        throw err;
+        return false;
       });
   };
 
@@ -88,9 +88,8 @@ const ForgotPasswordPage = () => {
     });
 
     if (result) {
-      setResData(result.createdAt);
       setStep(2);
-      setCountdown(30); // 30 seconds countdown
+      setCountdown(60); // 30 seconds countdown
       startCountdown();
     }
   };
@@ -113,11 +112,9 @@ const ForgotPasswordPage = () => {
     const result: any = await resetPassword({
       userId: email,
       type: "verify-otp",
-      createdAt: resData,
       otp: otp.join(""),
     });
     if (result) {
-      setResData(result);
       setStep(3);
     }
   };
@@ -140,6 +137,7 @@ const ForgotPasswordPage = () => {
     const result: any = await resetPassword({
       userId: email,
       type: "reset-password",
+      otp: otp.join(""),
       password: values.password,
     });
     if (result) {
@@ -287,7 +285,7 @@ const ForgotPasswordPage = () => {
                   ) : (
                     <Button
                       variant="link"
-                      onClick={handleResendOtp}
+                      onClick={handleSendOtp}
                       disabled={isLoading}
                       className="text-indigo-600 hover:text-indigo-800"
                     >
