@@ -376,7 +376,8 @@ const RegisterPage = () => {
                     ))}
                   </div>
                   <p className="text-xs text-gray-500 text-center">
-                    Enter the 6-digit code sent to {email}
+                    Enter the 6-digit code sent to{" "}
+                    <span className="text-blue-500">{email}</span>
                   </p>
                 </div>
 
