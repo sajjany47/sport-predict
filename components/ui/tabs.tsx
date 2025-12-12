@@ -6,18 +6,25 @@ import { cn } from "@/lib/utils";
 
 const Tabs = TabsPrimitive.Root;
 
-// TabsList with responsive scroll for mobile and grid layout for large screens
+/**
+ * TabsList — FULL WIDTH + SCROLLABLE on mobile
+ * -------------------------------------------
+ * - 100% width container
+ * - On mobile → horizontally scrollable
+ * - On large screens → grid layout
+ */
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
-  <div className="overflow-x-auto sm:overflow-visible scrollbar-hide">
+  <div className="w-full overflow-x-auto scrollbar-hide">
     <TabsPrimitive.List
       ref={ref}
       className={cn(
-        "inline-flex items-center justify-start sm:justify-between rounded-md bg-muted text-muted-foreground",
-        "flex-nowrap gap-2 sm:gap-0",
-        "sm:grid sm:grid-cols-5",
+        "flex w-full gap-2 sm:gap-0",
+        "sm:grid sm:grid-cols-5", // 5 tabs → adjust as needed
+        "rounded-md bg-muted text-muted-foreground",
+        "min-w-max sm:min-w-0", // allows scroll on mobile
         className
       )}
       {...props}
@@ -26,7 +33,12 @@ const TabsList = React.forwardRef<
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;
 
-// TabsTrigger with min-w-max for mobile scroll, auto width on larger screens
+/**
+ * TabsTrigger — 100% width on mobile (scrollable)
+ * ----------------------------------------------
+ * - Automatically takes space based on content on mobile
+ * - Equal grid width on larger screens
+ */
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
@@ -34,11 +46,13 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all",
-      "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      "flex items-center justify-center px-3 py-1.5 text-sm font-medium transition-all whitespace-nowrap",
+      "rounded-sm",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      "ring-offset-background focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
-      "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-      "min-w-max sm:min-w-0 flex-1 sm:flex-none", // scrollable on mobile
+      "min-w-max sm:min-w-0", // scrollable on mobile
+      "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow",
       className
     )}
     {...props}
@@ -46,7 +60,9 @@ const TabsTrigger = React.forwardRef<
 ));
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
-// TabsContent stays the same
+/**
+ * TabsContent — unchanged
+ */
 const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
@@ -54,7 +70,7 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      "mt-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       className
     )}
     {...props}
