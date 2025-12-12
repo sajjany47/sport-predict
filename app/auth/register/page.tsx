@@ -12,7 +12,11 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import {
   Trophy,
   Mail,
@@ -26,7 +30,7 @@ import {
   RefreshCw,
   ShieldCheck,
   Clock,
-  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { loginSuccess } from "@/store/slices/authSlice";
 import toast from "react-hot-toast";
@@ -42,7 +46,6 @@ import {
   SendVerificationCode,
   VerifyEmailCode,
 } from "@/app/MainService";
-import CustomLoader from "@/components/ui/CustomLoader";
 
 // Validation schemas
 const emailValidationSchema = Yup.object({
@@ -91,12 +94,12 @@ const registrationSchema = Yup.object({
 
 const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState(1); // 1: Email, 2: Verification, 3: Registration
+  const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: Registration, 4: Success
   const [email, setEmail] = useState("");
-  const [verificationSent, setVerificationSent] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [countdown, setCountdown] = useState(0);
-  const [resendEnabled, setResendEnabled] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
+  const [resData, setResData] = useState<any>(null);
+  const [userData, setUserData] = useState<any>(null);
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -106,53 +109,87 @@ const RegisterPage = () => {
     sessionStorage.setItem("currentPath", pathname);
   }, [pathname]);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    } else if (countdown === 0 && verificationSent) {
-      setResendEnabled(true);
-    }
-    return () => clearTimeout(timer);
-  }, [countdown, verificationSent]);
+  // Handle OTP input change
+  const handleOtpChange = (element: any, index: number) => {
+    if (isNaN(element.value)) return false;
 
-  const handleSendVerification = async (email: string) => {
+    setOtp([...otp.map((d, idx) => (idx === index ? element.value : d))]);
+
+    // Focus next input
+    if (element.nextSibling && element.value !== "") {
+      element.nextSibling.focus();
+    }
+  };
+
+  // Handle OTP key actions
+  const handleKeyDown = (e: any, index: number) => {
+    if (e.key === "Backspace" && !e.target.value && index > 0) {
+      // Focus previous input on backspace
+      const prevInput = e.target.previousSibling;
+      prevInput.focus();
+    }
+  };
+
+  // Handle back to login
+  const handleBackToLogin = () => {
+    router.push("/auth/login");
+  };
+
+  // Start countdown for resend OTP
+  const startCountdown = () => {
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Handle send verification code
+  const handleSendVerification = async (values: any) => {
     setIsLoading(true);
     try {
-      await SendVerificationCode({ email, type: "generate" });
-      setEmail(email);
-      setVerificationSent(true);
-      setCountdown(60); // 60 seconds countdown
-      setResendEnabled(false);
+      await SendVerificationCode({ email: values.email, type: "generate" });
+      setEmail(values.email);
+      setIsLoading(false);
       setStep(2);
+      setCountdown(60); // 60 seconds countdown
+      startCountdown();
       toast.success("Verification code sent to your email!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to send verification code");
-    } finally {
       setIsLoading(false);
+      toast.error(error.message || "Failed to send verification code");
     }
   };
 
-  const handleVerifyCode = async (code: string) => {
+  // Handle verify OTP
+  const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
-      await VerifyEmailCode({ email, otp: code, type: "verified" });
+      await VerifyEmailCode({
+        email,
+        otp: otp.join(""),
+        type: "verified",
+      });
+      setIsLoading(false);
       toast.success("Email verified successfully!");
-      setOtpCode(code);
       setStep(3);
     } catch (error: any) {
-      toast.error(error.message || "Invalid verification code");
-    } finally {
       setIsLoading(false);
+      toast.error(error.message || "Invalid verification code");
     }
   };
 
-  const handleResendCode = async () => {
+  // Handle resend OTP
+  const handleResendOtp = async () => {
     setIsLoading(true);
     try {
       await SendVerificationCode({ email, type: "generate" });
       setCountdown(60);
-      setResendEnabled(false);
+      startCountdown();
       toast.success("New verification code sent!");
     } catch (error: any) {
       toast.error(error.message || "Failed to resend code");
@@ -161,6 +198,7 @@ const RegisterPage = () => {
     }
   };
 
+  // Handle registration
   const handleRegister = async (values: any) => {
     setIsLoading(true);
     try {
@@ -172,7 +210,7 @@ const RegisterPage = () => {
         password: values.password,
         agreeToTerms: values.agreeToTerms,
         type: "finalize",
-        otp: otpCode,
+        otp: otp.join(""),
       };
 
       const res = await UserRegister(formData);
@@ -187,10 +225,17 @@ const RegisterPage = () => {
         token: res.data.token,
         subscription: res.data.user.subscription ?? [],
       };
+
       sessionStorage.setItem("token", res.data.token);
       dispatch(loginSuccess(userData));
       toast.success("Account created successfully!");
-      router.push("/matches");
+      setUserData(userData);
+      setStep(4);
+
+      // Redirect after 3 seconds
+      setTimeout(() => {
+        router.push("/matches");
+      }, 3000);
     } catch (error: any) {
       toast.error(error.message || "Registration failed. Please try again.");
     } finally {
@@ -198,455 +243,387 @@ const RegisterPage = () => {
     }
   };
 
-  const renderProgressSteps = () => (
-    <div className="flex items-center justify-center mb-8">
-      <div className="flex items-center space-x-2 sm:space-x-4">
-        {[1, 2, 3].map((stepNumber) => (
-          <div key={stepNumber} className="flex items-center">
-            <div
-              className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-                step >= stepNumber
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-500"
-              }`}
-            >
-              {step > stepNumber ? (
-                <Check className="h-4 w-4 sm:h-5 sm:w-5" />
-              ) : (
-                stepNumber
-              )}
-            </div>
-            {stepNumber < 3 && (
-              <div
-                className={`w-4 sm:w-8 h-1 transition-all duration-300 ${
-                  step > stepNumber
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600"
-                    : "bg-gray-200 dark:bg-gray-700"
-                }`}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderStepContent = () => {
-    switch (step) {
-      case 1: // Email step
-        return (
-          <Formik
-            initialValues={{ email: "" }}
-            validationSchema={emailValidationSchema}
-            onSubmit={(values) => handleSendVerification(values.email)}
-          >
-            {({ handleSubmit }) => (
-              <Form onSubmit={handleSubmit}>
-                <div className="space-y-6">
-                  <div>
-                    <div className="mb-2 text-center">
-                      <div className="inline-flex items-center justify-center p-3 rounded-full bg-blue-50 dark:bg-blue-900/20 mb-3">
-                        <Mail className="h-8 w-8 text-blue-600" />
-                      </div>
-                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        Start with your email
-                      </h2>
-                      <p className="text-gray-600 dark:text-gray-400 mt-1">
-                        We'll send a verification code to confirm your email
-                      </p>
-                    </div>
-
-                    <Field
-                      label="Email Address"
-                      component={FormikTextInput}
-                      name="email"
-                      type="email"
-                      placeholder="Enter your email address"
-                      icon={
-                        <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      }
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center">
-                        <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                        Sending Code...
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center">
-                        Send Verification Code
-                        <Key className="ml-2 h-5 w-5" />
-                      </div>
-                    )}
-                  </Button>
-
-                  <div className="text-center">
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Already have an account?{" "}
-                      <Link
-                        href="/auth/login"
-                        className="text-blue-600 hover:underline font-medium"
-                      >
-                        Sign in here
-                      </Link>
-                    </p>
-                  </div>
-                </div>
-              </Form>
-            )}
-          </Formik>
-        );
-
-      case 2: // Verification step
-        return (
-          <Formik
-            initialValues={{ verificationCode: "" }}
-            validationSchema={verificationSchema}
-            onSubmit={(values) => handleVerifyCode(values.verificationCode)}
-          >
-            {({ handleSubmit, values }) => (
-              <Form onSubmit={handleSubmit}>
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-1" />
-                      Change email
-                    </button>
-
-                    <div className="inline-flex items-center justify-center p-3 rounded-full bg-green-50 dark:bg-green-900/20 mb-3">
-                      <ShieldCheck className="h-8 w-8 text-green-600" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      Check your email
-                    </h2>
-                    <p className="text-gray-600 dark:text-gray-400 mt-1">
-                      Enter the 6-digit code sent to
-                    </p>
-                    <p className="font-medium text-blue-600 dark:text-blue-400 break-all">
-                      {email}
-                    </p>
-                  </div>
-
-                  <div>
-                    <Field
-                      label="Verification Code"
-                      component={FormikTextInput}
-                      name="verificationCode"
-                      placeholder="Enter 6-digit code"
-                      maxLength={6}
-                      icon={
-                        <Key className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      }
-                    />
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {countdown > 0
-                          ? `Resend in ${countdown}s`
-                          : "Code expired"}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleResendCode}
-                        disabled={!resendEnabled || isLoading}
-                        className="text-sm text-blue-600 hover:text-blue-700 disabled:text-gray-400 disabled:cursor-not-allowed"
-                      >
-                        <div className="flex items-center">
-                          <RefreshCw className="h-4 w-4 mr-1" />
-                          Resend Code
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setStep(1)}
-                      disabled={isLoading}
-                      className="py-3"
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={
-                        isLoading || values?.verificationCode?.length !== 6
-                      }
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3"
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center justify-center">
-                          <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                          Verifying...
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center">
-                          Verify & Continue
-                          <Check className="ml-2 h-5 w-5" />
-                        </div>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </Form>
-            )}
-          </Formik>
-        );
-
-      case 3: // Registration step
-        return (
-          <Formik
-            initialValues={{
-              username: "",
-              name: "",
-              mobileNumber: "",
-              password: "",
-              confirmPassword: "",
-              agreeToTerms: false,
-            }}
-            validationSchema={registrationSchema}
-            onSubmit={handleRegister}
-          >
-            {({ handleSubmit, isSubmitting, setFieldValue }) => (
-              <Form onSubmit={handleSubmit}>
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => setStep(2)}
-                      className="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-1" />
-                      Back to verification
-                    </button>
-
-                    <div className="inline-flex items-center justify-center p-3 rounded-full bg-purple-50 dark:bg-purple-900/20 mb-3">
-                      <User className="h-8 w-8 text-purple-600" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      Complete Your Profile
-                    </h2>
-                    <p className="text-gray-600 dark:text-gray-400 mt-1">
-                      Verified email:{" "}
-                      <span className="font-medium text-green-600">
-                        {email}
-                      </span>
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4">
-                    <Field
-                      label="Username"
-                      component={FormikTextInput}
-                      name="username"
-                      placeholder="Choose a unique username"
-                      onChange={(e: any) =>
-                        setFieldValue("username", e?.target?.value?.trim())
-                      }
-                      icon={
-                        <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      }
-                    />
-
-                    <Field
-                      label="Full Name"
-                      component={FormikTextInput}
-                      name="name"
-                      placeholder="Enter your full name"
-                      icon={
-                        <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      }
-                    />
-
-                    <Field
-                      label="Mobile Number"
-                      component={FormikTextInput}
-                      name="mobileNumber"
-                      placeholder="10-digit mobile number"
-                      maxLength={10}
-                      icon={
-                        <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      }
-                    />
-
-                    <Field
-                      label="Password"
-                      component={FormikTextPassword}
-                      name="password"
-                      placeholder="Create a strong password"
-                      icon={
-                        <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      }
-                    />
-
-                    <Field
-                      label="Confirm Password"
-                      component={FormikTextPassword}
-                      name="confirmPassword"
-                      placeholder="Confirm your password"
-                      icon={
-                        <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      }
-                    />
-
-                    <div className="mt-2">
-                      <Field
-                        label={
-                          <span className="text-sm">
-                            I agree to the{" "}
-                            <Link
-                              href="/terms"
-                              className="text-blue-600 hover:underline font-medium"
-                              target="_blank"
-                            >
-                              Terms of Service
-                            </Link>{" "}
-                            and{" "}
-                            <Link
-                              href="/privacy"
-                              className="text-blue-600 hover:underline font-medium"
-                              target="_blank"
-                            >
-                              Privacy Policy
-                            </Link>
-                          </span>
-                        }
-                        component={FormikCheckBox}
-                        name="agreeToTerms"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={isLoading || isSubmitting}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    {isLoading || isSubmitting ? (
-                      <div className="flex items-center justify-center">
-                        <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                        Creating Account...
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center">
-                        <Sparkles className="h-5 w-5 mr-2" />
-                        Complete Registration
-                      </div>
-                    )}
-                  </Button>
-
-                  <div className="text-center pt-4 border-t">
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      By registering, you confirm that your email{" "}
-                      <span className="font-medium">{email}</span> is verified
-                      and you agree to our terms.
-                    </p>
-                  </div>
-                </div>
-              </Form>
-            )}
-          </Formik>
-        );
-
-      default:
-        return null;
-    }
-  };
-
   return (
-    <>
-      {/* {isLoading && <CustomLoader message="Processing..." />} */}
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-indigo-950 flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 dark:bg-blue-900/20 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 dark:bg-purple-900/20 rounded-full filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
-          <div className="absolute top-1/4 right-1/4 w-60 h-60 bg-indigo-200 dark:bg-indigo-900/20 rounded-full filter blur-3xl opacity-10 animate-pulse delay-500"></div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900 p-4">
+      <div className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <div className="inline-flex items-center justify-center space-x-2 mb-4">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl shadow-lg">
+              <Trophy className="h-8 w-8 text-white" />
+            </div>
+            <span className="text-3xl font-bold text-white">SportPredict</span>
+          </div>
+          <h1 className="text-3xl font-bold text-white">Create Your Account</h1>
+          <p className="text-indigo-200 mt-2">
+            Join our prediction community and start winning
+          </p>
         </div>
 
-        <div className="w-full max-w-md z-10">
-          {/* Logo */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center space-x-2 mb-4">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl shadow-lg">
-                <Trophy className="h-8 w-8 text-white" />
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                SportPredict
-              </span>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              {step === 1 && "Join Our Prediction Community"}
-              {step === 2 && "Verify Your Email"}
-              {step === 3 && "Complete Your Profile"}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              {step === 1 && "Start your winning journey with us"}
-              {step === 2 && "Enter the code we sent to your email"}
-              {step === 3 && "Fill in your details to get started"}
-            </p>
-          </div>
-
-          {/* Progress Steps */}
-          {step > 1 && renderProgressSteps()}
-
-          <Card className="shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-center text-xl">
+        <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl text-gray-900">
                 {step === 1 && "Email Verification"}
-                {step === 2 && "Enter Verification Code"}
-                {step === 3 && "Create Your Account"}
+                {step === 2 && "Verify OTP"}
+                {step === 3 && "Complete Profile"}
+                {step === 4 && "Registration Successful"}
               </CardTitle>
-              <CardDescription className="text-center">
-                {step === 1 && "Step 1 of 3: Verify your email"}
-                {step === 2 && "Step 2 of 3: Enter 6-digit code"}
-                {step === 3 && "Step 3 of 3: Complete registration"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>{renderStepContent()}</CardContent>
-          </Card>
+              {step !== 4 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleBackToLogin}
+                  className="h-8 w-8 text-gray-700 hover:text-indigo-700"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <CardDescription className="text-gray-600">
+              {step === 1 && "Enter your email to receive a verification code"}
+              {step === 2 && "Enter the 6-digit code sent to your email"}
+              {step === 3 && "Fill in your details to complete registration"}
+              {step === 4 && "Your account has been successfully created"}
+            </CardDescription>
+          </CardHeader>
 
-          {/* Bottom Links */}
-          <div className="text-center mt-6">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              {step === 1 ? (
-                <>
-                  Already have an account?{" "}
+          <CardContent className="space-y-4">
+            {/* Progress bar */}
+            <div className="space-y-2">
+              <Progress value={step * 25} className="h-2 bg-gray-200" />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Step {step} of 4</span>
+                <span>{step * 25}% Complete</span>
+              </div>
+            </div>
+
+            {/* Step 1: Email Input */}
+            {step === 1 && (
+              <div className="space-y-4">
+                <Formik
+                  initialValues={{ email: email }}
+                  validationSchema={emailValidationSchema}
+                  onSubmit={handleSendVerification}
+                >
+                  {({ handleSubmit, isSubmitting, setFieldValue }) => (
+                    <Form onSubmit={handleSubmit}>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="text-gray-700">
+                            Email Address
+                          </Label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                            <Input
+                              id="email"
+                              type="email"
+                              name="email"
+                              placeholder="Enter your email"
+                              className="pl-10 bg-white"
+                              onChange={(e) => {
+                                setEmail(e.target.value);
+                                setFieldValue("email", e.target.value.trim());
+                              }}
+                              value={email}
+                            />
+                          </div>
+                        </div>
+                        <Button
+                          type="submit"
+                          className="w-full bg-indigo-600 hover:bg-indigo-700"
+                          disabled={!email || isLoading || isSubmitting}
+                        >
+                          {isLoading ? (
+                            <>
+                              <Clock className="mr-2 h-4 w-4 animate-spin" />
+                              Sending Code...
+                            </>
+                          ) : (
+                            <>
+                              <ShieldCheck className="mr-2 h-4 w-4" />
+                              Send Verification Code
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </Form>
+                  )}
+                </Formik>
+              </div>
+            )}
+
+            {/* Step 2: OTP Verification */}
+            {step === 2 && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-gray-700">Verification Code</Label>
+                  <div className="flex justify-between space-x-2">
+                    {otp.map((data, index) => (
+                      <Input
+                        key={index}
+                        type="text"
+                        name="otp"
+                        maxLength={1}
+                        value={data}
+                        onChange={(e) => handleOtpChange(e.target, index)}
+                        onKeyDown={(e) => handleKeyDown(e, index)}
+                        onFocus={(e) => e.target.select()}
+                        className="text-center h-12 text-lg font-semibold bg-white"
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 text-center">
+                    Enter the 6-digit code sent to {email}
+                  </p>
+                </div>
+
+                <Button
+                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                  onClick={handleVerifyOtp}
+                  disabled={otp.some((digit) => digit === "") || isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Clock className="mr-2 h-4 w-4 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Verify Code
+                    </>
+                  )}
+                </Button>
+
+                <div className="text-center">
+                  {countdown > 0 ? (
+                    <p className="text-sm text-gray-500">
+                      Resend code in {countdown} seconds
+                    </p>
+                  ) : (
+                    <Button
+                      variant="link"
+                      onClick={handleResendOtp}
+                      disabled={isLoading}
+                      className="text-indigo-600 hover:text-indigo-800"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Resend Verification Code
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Registration Form */}
+            {step === 3 && (
+              <div className="space-y-4">
+                <Formik
+                  initialValues={{
+                    username: "",
+                    name: "",
+                    mobileNumber: "",
+                    password: "",
+                    confirmPassword: "",
+                    agreeToTerms: false,
+                  }}
+                  validationSchema={registrationSchema}
+                  onSubmit={handleRegister}
+                >
+                  {({ handleSubmit, isSubmitting, setFieldValue }) => (
+                    <Form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="grid gap-4">
+                        <div className="space-y-2">
+                          {/* <Label htmlFor="username" className="text-gray-700">
+                            Username
+                          </Label> */}
+                          <Field
+                            label="Username"
+                            component={FormikTextInput}
+                            name="username"
+                            placeholder="Choose a unique username"
+                            onChange={(e: any) =>
+                              setFieldValue(
+                                "username",
+                                e?.target?.value?.trim()
+                              )
+                            }
+                            icon={
+                              <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                            }
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          {/* <Label htmlFor="name" className="text-gray-700">
+                            Full Name
+                          </Label> */}
+                          <Field
+                            label="Full Name"
+                            component={FormikTextInput}
+                            name="name"
+                            placeholder="Enter your full name"
+                            icon={
+                              <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                            }
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          {/* <Label
+                            htmlFor="mobileNumber"
+                            className="text-gray-700"
+                          >
+                            Mobile Number
+                          </Label> */}
+                          <Field
+                            label="Mobile Number"
+                            component={FormikTextInput}
+                            name="mobileNumber"
+                            placeholder="10-digit mobile number"
+                            maxLength={10}
+                            icon={
+                              <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                            }
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          {/* <Label htmlFor="password" className="text-gray-700">
+                            Password
+                          </Label> */}
+                          <Field
+                            label="Password"
+                            component={FormikTextPassword}
+                            name="password"
+                            placeholder="Create a strong password"
+                            icon={
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                            }
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          {/* <Label
+                            htmlFor="confirmPassword"
+                            className="text-gray-700"
+                          >
+                            Confirm Password
+                          </Label> */}
+                          <Field
+                            label="Confirm Password"
+                            component={FormikTextPassword}
+                            name="confirmPassword"
+                            placeholder="Confirm your password"
+                            icon={
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                            }
+                          />
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                          <Field
+                            label={
+                              <span className="text-sm">
+                                I agree to the{" "}
+                                <Link
+                                  href="/terms"
+                                  className="text-indigo-600 hover:underline"
+                                >
+                                  Terms of Service
+                                </Link>{" "}
+                                and{" "}
+                                <Link
+                                  href="/privacy"
+                                  className="text-indigo-600 hover:underline"
+                                >
+                                  Privacy Policy
+                                </Link>
+                              </span>
+                            }
+                            component={FormikCheckBox}
+                            name="agreeToTerms"
+                          />
+                        </div>
+                      </div>
+
+                      <Button
+                        type="submit"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700"
+                        disabled={isLoading || isSubmitting}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Clock className="mr-2 h-4 w-4 animate-spin" />
+                            Creating Account...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Complete Registration
+                          </>
+                        )}
+                      </Button>
+                    </Form>
+                  )}
+                </Formik>
+              </div>
+            )}
+
+            {/* Step 4: Success */}
+            {step === 4 && (
+              <div className="text-center py-6 space-y-4">
+                <div className="flex justify-center">
+                  <div className="rounded-full bg-green-100 p-4">
+                    <CheckCircle2 className="h-12 w-12 text-green-600" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Registration Successful!
+                </h3>
+                <p className="text-gray-600">
+                  Welcome to SportPredict, {userData?.username}! Your account
+                  has been created successfully. You will be redirected to the
+                  matches page shortly.
+                </p>
+                <Button
+                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                  onClick={() => router.push("/matches")}
+                >
+                  Go to Matches
+                </Button>
+              </div>
+            )}
+          </CardContent>
+
+          <CardFooter className="flex flex-col space-y-4">
+            {step !== 4 && (
+              <>
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-gray-500">
+                      Already have an account?
+                    </span>
+                  </div>
+                </div>
+                <p className="text-center text-sm text-gray-600">
+                  Sign in to your account{" "}
                   <Link
                     href="/auth/login"
-                    className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                    className="text-indigo-600 hover:underline"
                   >
-                    Sign in here
+                    here
                   </Link>
-                </>
-              ) : (
-                <>
-                  Having trouble?{" "}
-                  <button
-                    onClick={() => setStep(1)}
-                    className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-                  >
-                    Start over
-                  </button>
-                </>
-              )}
-            </p>
-          </div>
-        </div>
+                </p>
+              </>
+            )}
+          </CardFooter>
+        </Card>
       </div>
-    </>
+    </div>
   );
 };
 
