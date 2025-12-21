@@ -825,3 +825,272 @@ export const RegistrationOTP = (a: any) => {
 </html>
 `;
 };
+
+export const AdminFreeCreditsEmail = (data: {
+  user: {
+    name?: string;
+    email: string;
+  };
+  credits: number;
+  totalCreditsAdded: number;
+  reason?: string;
+  adminName?: string;
+  termsUrl?: string;
+  appUrl?: string;
+  supportEmail?: string;
+  supportPhone?: string;
+}) => {
+  const {
+    user,
+    credits,
+    totalCreditsAdded,
+    reason = "As a token of our appreciation",
+    adminName = "SportPredict Admin",
+    termsUrl = process.env.NEXT_PUBLIC_API_URL + "/terms",
+    appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_API_URL,
+    supportEmail = process.env.NEXT_PUBLIC_EMAIL,
+    supportPhone = process.env.NEXT_PUBLIC_MOBILE,
+  } = data;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎁 Free Credits Added to Your Account!</title>
+    <style>
+        body, table, td {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: #333333;
+        }
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .wrapper {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            margin: 0 auto;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+        .center-table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .header {
+            padding: 25px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .credits-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 50px;
+            padding: 8px 24px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 24px;
+            margin: 10px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .expiry-notice {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        @media only screen and (max-width: 600px) {
+            body { padding: 10px; }
+            .wrapper { width: 100% !important; }
+            .credits-badge { font-size: 20px; padding: 6px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <table class="wrapper" cellpadding="0" cellspacing="0" width="100%">
+
+        <!-- HEADER -->
+        <tr>
+            <td class="header">
+                <table class="center-table" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td align="center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; font-size: 32px;">
+                            🎁
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding-top: 15px;">
+                            <span style="font-size: 32px; font-weight: bold; color: white;">
+                                Free Credits Added!
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- BODY -->
+        <tr>
+            <td style="padding: 30px;">
+
+                <h2 style="font-size: 22px; margin-bottom: 20px; color: #333;">
+                    Hello ${user.name || "Valued User"},
+                </h2>
+
+                <p style="font-size: 16px; line-height: 1.6; color: #555; margin-bottom: 25px;">
+                    Great news! Our admin team has added <strong style="color: #f5576c;">${totalCreditsAdded} free credits</strong> to your SportPredict account.
+                </p>
+
+                <!-- CREDITS DISPLAY -->
+                <table class="center-table" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+                    <tr>
+                        <td style="padding: 35px 25px; text-align: center;">
+                            <div style="font-size: 16px; opacity: 0.9; margin-bottom: 10px;">
+                                🎉 YOUR NEW CREDITS 🎉
+                            </div>
+                            <div class="credits-badge">
+                                ${credits} CREDITS
+                            </div>
+                            <div style="font-size: 14px; opacity: 0.8; margin-top: 15px;">
+                                Added on ${new Date().toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    weekday: "long",
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  }
+                                )}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- REASON SECTION -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #764ba2;">
+                    <h4 style="color: #764ba2; margin: 0 0 10px;">Why did you receive these credits?</h4>
+                    <p style="font-size: 15px; color: #555; line-height: 1.6; margin: 0;">
+                        ${reason}
+                    </p>
+                    <p style="font-size: 14px; color: #666; margin-top: 10px; font-style: italic;">
+                        — From ${adminName}
+                    </p>
+                </div>
+
+                <!-- EXPIRY NOTICE -->
+                
+
+                <!-- HOW TO USE -->
+                <div style="background: #fff5e6; border: 1px solid #ffcc80; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                    <h4 style="color: #e65100; margin: 0 0 15px;">🚀 How to Use Your Credits:</h4>
+                    <table cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                            <td valign="top" width="40" style="padding: 5px 0;">
+                                <div style="background: #e65100; color: white; width: 30px; height: 30px; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold;">1</div>
+                            </td>
+                            <td style="padding: 5px 0 5px 15px;">
+                                <strong style="color: #333;">Join Predictions</strong><br>
+                                <span style="color: #666; font-size: 14px;">Use credits to enter prediction contests</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td valign="top" width="40" style="padding: 5px 0;">
+                                <div style="background: #e65100; color: white; width: 30px; height: 30px; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold;">2</div>
+                            </td>
+                            <td style="padding: 5px 0 5px 15px;">
+                                <strong style="color: #333;">Win Real Rewards</strong><br>
+                                <span style="color: #666; font-size: 14px;">Make accurate predictions to win prizes</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td valign="top" width="40" style="padding: 5px 0;">
+                                <div style="background: #e65100; color: white; width: 30px; height: 30px; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold;">3</div>
+                            </td>
+                            <td style="padding: 5px 0 5px 15px;">
+                                <strong style="color: #333;">Check Balance</strong><br>
+                                <span style="color: #666; font-size: 14px;">Visit your dashboard to see available credits</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- CTA BUTTONS -->
+                <table cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
+                    <tr>
+                        <td align="center">
+                            <a href="${appUrl}/dashboard"
+                               style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-size: 16px; font-weight: bold; padding: 16px 40px; text-decoration: none; border-radius: 50px; display: inline-block; margin: 0 10px 10px 0; box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);">
+                                🚀 Start Predicting
+                            </a>
+                            <a href="${appUrl}/account/credits"
+                               style="background: #667eea; color: white; font-size: 16px; font-weight: bold; padding: 16px 40px; text-decoration: none; border-radius: 50px; display: inline-block; margin: 0 0 10px 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                                💰 View Credits
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- TERMS -->
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0; text-align: center;">
+                    <p style="font-size: 13px; color: #666; margin: 0; line-height: 1.5;">
+                        By using these credits, you agree to our 
+                        <a href="${termsUrl}" style="color: #667eea; text-decoration: none; font-weight: bold;">Terms & Conditions</a>.
+                        Credits are non-transferable and non-refundable.
+                    </p>
+                </div>
+
+                <!-- CONTACT SUPPORT -->
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="font-size: 15px; color: #555; margin-bottom: 15px;">
+                        Questions about your credits?
+                    </p>
+                    <a href="mailto:${supportEmail}"
+                       style="display: inline-block; background: #333; color: white; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-size: 14px;">
+                        📧 Contact Support
+                    </a>
+                </div>
+
+                <p style="margin-top: 30px; font-size: 16px;">
+                    Happy predicting!<br />
+                    <strong style="color: #667eea;">The SportPredict Team</strong>
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%); text-align: center; padding: 30px; font-size: 14px; color: rgba(255,255,255,0.8);">
+                <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 15px;">SportPredict</div>
+                
+                <p style="margin: 20px 0; line-height: 1.8;">
+                    📍 Predict. Win. Celebrate.<br />
+                    📧 ${supportEmail || "support@sportpredict.com"}<br />
+                    📞 ${supportPhone || "+1 (555) 123-4567"}
+                </p>
+                
+                <div style="margin: 25px 0;">
+                    <a href="${appUrl}" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 8px 15px; margin: 0 5px;">Home</a>
+                    <a href="${appUrl}/matches" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 8px 15px; margin: 0 5px;">Matches</a>
+                    <a href="${appUrl}/leaderboard" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 8px 15px; margin: 0 5px;">Leaderboard</a>
+                    <a href="${appUrl}/support" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 8px 15px; margin: 0 5px;">Support</a>
+                </div>
+                
+                <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    © ${new Date().getFullYear()} SportPredict. All rights reserved.<br />
+                    This is an automated message, please do not reply directly to this email.
+                </p>
+            </td>
+        </tr>
+
+    </table>
+</body>
+</html>`;
+};
