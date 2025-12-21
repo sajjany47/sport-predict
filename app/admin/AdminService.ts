@@ -95,3 +95,18 @@ export const fetchUserDetails = async (payload: any) => {
     throw new Error(error.response?.data?.message);
   }
 };
+
+export const UserSendCredit = async (payload: any) => {
+  try {
+    const response = await privateApi.post(
+      "/api/users/add-offer-credit",
+      payload,
+      {
+        headers: getHeadersWithToken(),
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};

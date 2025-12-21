@@ -832,6 +832,7 @@ export const AdminFreeCreditsEmail = (data: {
     email: string;
   };
   credits: number;
+  totalCreditsAdded: number;
   reason?: string;
   adminName?: string;
   termsUrl?: string;
@@ -842,6 +843,7 @@ export const AdminFreeCreditsEmail = (data: {
   const {
     user,
     credits,
+    totalCreditsAdded,
     reason = "As a token of our appreciation",
     adminName = "SportPredict Admin",
     termsUrl = process.env.NEXT_PUBLIC_API_URL + "/terms",
@@ -943,7 +945,7 @@ export const AdminFreeCreditsEmail = (data: {
                 </h2>
 
                 <p style="font-size: 16px; line-height: 1.6; color: #555; margin-bottom: 25px;">
-                    Great news! Our admin team has added <strong style="color: #f5576c;">${credits} free credits</strong> to your SportPredict account.
+                    Great news! Our admin team has added <strong style="color: #f5576c;">${totalCreditsAdded} free credits</strong> to your SportPredict account.
                 </p>
 
                 <!-- CREDITS DISPLAY -->

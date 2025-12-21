@@ -12,6 +12,7 @@ export const POST = async (request: NextRequest) => {
   try {
     const body = await request.json();
     const xUser = request.headers.get("x-user");
+
     const loggedInUser = xUser ? JSON.parse(xUser) : null;
     if (!loggedInUser?._id) {
       return NextResponse.json(
@@ -51,7 +52,9 @@ export const POST = async (request: NextRequest) => {
           email: targetUser.email,
         },
         credits: updatedCredits,
-        reason: "Welcome bonus for being one of our first 100 users!",
+        totalCreditsAdded: body.credits,
+        reason:
+          "SportPredict added 5 bonus tokens to your account as a special gesture.",
         adminName: "SportPredict Team",
         appUrl: process.env.NEXT_PUBLIC_API_URL,
         supportEmail: process.env.NEXT_PUBLIC_EMAIL,
@@ -69,8 +72,7 @@ export const POST = async (request: NextRequest) => {
     return NextResponse.json(
       {
         success: true,
-        message: "Credits updated successfully",
-        data: { credits: updatedCredits },
+        message: "Credits send successfully",
       },
       { status: 200 }
     );
