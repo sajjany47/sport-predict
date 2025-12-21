@@ -441,6 +441,7 @@ const AdminUsersPage = () => {
                                       <Edit className="h-3 w-3 mr-2" />
                                       Edit
                                     </DropdownMenuItem>
+
                                     {user.status === "active" && (
                                       <DropdownMenuItem
                                         onClick={() =>
@@ -579,9 +580,18 @@ const AdminUsersPage = () => {
                                       Terms:
                                     </span>
                                     <span className="ml-1">
-                                      {user.agreeToTerms
-                                        ? "Agreed"
-                                        : "Not Agreed"}
+                                      {user.agreeToTerms ? (
+                                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 text-xs">
+                                          Agreed
+                                        </Badge>
+                                      ) : (
+                                        <Badge
+                                          variant="outline"
+                                          className="text-red-600 text-xs"
+                                        >
+                                          Not Agreed
+                                        </Badge>
+                                      )}
                                     </span>
                                   </div>
                                   <div>
@@ -589,7 +599,15 @@ const AdminUsersPage = () => {
                                       Active:
                                     </span>
                                     <span className="ml-1">
-                                      {user.isActive ? "Yes" : "No"}
+                                      {user.isActive ? (
+                                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 text-xs">
+                                          Yes
+                                        </Badge>
+                                      ) : (
+                                        <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 text-xs">
+                                          No
+                                        </Badge>
+                                      )}
                                     </span>
                                   </div>
                                 </div>
