@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { setUsers, updateUserStatus } from "@/store/slices/adminSlice";
@@ -51,305 +51,115 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { UserUpdate } from "@/app/MainService";
 
-// Dummy API functions - Replace these with your actual API calls
-const dummyAPIs = {
-  // Send free credits/tokens to user
-  sendFreeCredits: async (userId: string, credits: number, reason: string) => {
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(
-          `Sending ${credits} credits to user ${userId} with reason: ${reason}`
-        );
-        resolve({
-          success: true,
-          message: `Successfully added ${credits} credits to user account`,
-        });
-      }, 1000);
-    });
-  },
+// Memoized User Info Component
+const UserInfoGrid = React.memo(
+  ({
+    selectedUser,
+    getStatusColor,
+  }: {
+    selectedUser: any;
+    getStatusColor: (status: string) => string;
+  }) => (
+    <div className="space-y-2">
+      <Label>User Information</Label>
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        {/* Email - Full width */}
+        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                Email:
+              </span>
+            </div>
+            <p className="font-medium text-gray-900 dark:text-gray-100 text-right break-all text-sm">
+              {selectedUser?.email || "N/A"}
+            </p>
+          </div>
+        </div>
 
-  // Suspend user
-  suspendUser: async (userId: string, reason: string) => {
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(`Suspending user ${userId} with reason: ${reason}`);
-        resolve({ success: true, message: "User suspended successfully" });
-      }, 1000);
-    });
-  },
+        {/* Name, Status, Credits - Grid on desktop, stacked on mobile */}
+        <div className="p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Name */}
+            <div className="text-center sm:text-left">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                Name
+              </p>
+              <div className="flex items-center justify-center sm:justify-start gap-2">
+                <User className="h-4 w-4 text-gray-400" />
+                <p className="font-medium text-sm">
+                  {selectedUser?.name || selectedUser?.username || "N/A"}
+                </p>
+              </div>
+            </div>
 
-  // Ban user
-  banUser: async (userId: string, reason: string) => {
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(`Banning user ${userId} with reason: ${reason}`);
-        resolve({ success: true, message: "User banned successfully" });
-      }, 1000);
-    });
-  },
+            {/* Status */}
+            <div className="text-center sm:text-left">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                Status
+              </p>
+              <div className="flex justify-center sm:justify-start">
+                <Badge
+                  className={getStatusColor(selectedUser?.status || "active")}
+                >
+                  {selectedUser?.status || "active"}
+                </Badge>
+              </div>
+            </div>
 
-  // Activate user
-  activateUser: async (userId: string) => {
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(`Activating user ${userId}`);
-        resolve({ success: true, message: "User activated successfully" });
-      }, 1000);
-    });
-  },
-};
+            {/* Credits */}
+            <div className="text-center sm:text-left">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                Credits
+              </p>
+              <div className="flex items-center justify-center sm:justify-start gap-2">
+                <Coins className="h-4 w-4 text-yellow-500" />
+                <p className="font-medium text-lg">
+                  {selectedUser?.credits || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+);
 
-const AdminUsersPage = () => {
-  const router = useRouter();
-  const { users } = useSelector((state: RootState) => state.admin);
-  const { user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
-  const [loading, setLoading] = useState(false);
-  const [sendingCredits, setSendingCredits] = useState(false);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+UserInfoGrid.displayName = "UserInfoGrid";
 
-  // Dialog states
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [creditsAmount, setCreditsAmount] = useState<number>(5);
-  const [suspendReason, setSuspendReason] = useState<string>("");
-  const [banReason, setBanReason] = useState<string>("");
-
-  // Dialog open states
-  const [sendCreditsOpen, setSendCreditsOpen] = useState(false);
-  const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
-  const [banDialogOpen, setBanDialogOpen] = useState(false);
-
-  useEffect(() => {
-    GetUserDetails();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const GetUserDetails = () => {
-    setLoading(true);
-    fetchUserDetails({})
-      .then((res) => {
-        setLoading(false);
-        dispatch(setUsers(res.data ?? []));
-      })
-      .catch((err) => {
-        setLoading(false);
-        toast.error(err.message || "Failed to fetch users. Please try again.");
-      });
-  };
-
-  const UserUpadteStatus = async (values: any) => {
-    let reqData: any = { userId: values._id };
-
-    if (user?.role === "admin") {
-      reqData.isActive = JSON.parse(values.isActive);
-
-      reqData.status = values.status;
-
-      reqData.remarks = values.remarks;
-    }
-    await UserUpdate(reqData)
-      .then((res) => {
-        return { message: res.message, isSuccess: true };
-        // toast.success(res.message);
-      })
-      .catch((err) => {
-        return {
-          message: err.message || "Failed to save details. Please try again.",
-          isSuccess: false,
-        };
-        // toast.error(err.message || "Failed to save details. Please try again.");
-      });
-  };
-
-  const handleSendCredits = async (userId: string) => {
-    if (!creditsAmount || creditsAmount <= 0) {
-      toast.error("Please enter a valid credit amount");
-      return;
-    }
-
-    setSendingCredits(true);
-
-    UserSendCredit({ userId, credits: creditsAmount })
-      .then((res) => {
-        setSendingCredits(false);
-        toast.success(
-          `Successfully added ${creditsAmount} credits to user account`
-        );
-
-        // Refresh user data
-        GetUserDetails();
-        setSendCreditsOpen(false);
-        setCreditsAmount(5);
-      })
-      .catch((error) => {
-        setSendingCredits(false);
-        toast.error(error.message || "Failed to send credits");
-      });
-  };
-
-  const handleSuspendUser = async (userId: string) => {
-    if (!suspendReason.trim()) {
-      toast.error("Please provide a reason for suspension");
-      return;
-    }
-
-    setActionLoading(`suspend-${userId}`);
-
-    const result: any = await UserUpadteStatus({
-      _id: userId,
-      isActive: false,
-      status: "suspended",
-      remarks: suspendReason,
-    });
-    if (result.isSuccess) {
-      toast.success("User suspended successfully");
-      dispatch(updateUserStatus({ id: userId, status: "suspended" }));
-      setSuspendDialogOpen(false);
-      setSuspendReason("");
-      setActionLoading(null);
-    } else {
-      setActionLoading(null);
-      toast.error(result.message || "Failed to suspend user");
-    }
-  };
-
-  const handleBanUser = async (userId: string) => {
-    if (!banReason.trim()) {
-      toast.error("Please provide a reason for ban");
-      return;
-    }
-
-    setActionLoading(`ban-${userId}`);
-    const result: any = await UserUpadteStatus({
-      _id: userId,
-      isActive: false,
-      status: "banned",
-      remarks: banReason,
-    });
-    if (result.isSuccess) {
-      toast.success("User banned successfully");
-      dispatch(updateUserStatus({ id: userId, status: "banned" }));
-      setBanDialogOpen(false);
-      setBanReason("");
-      setActionLoading(null);
-    } else {
-      setActionLoading(null);
-      toast.error(result.message || "Failed to banned user");
-    }
-  };
-
-  const handleActivateUser = async (userId: string) => {
-    setActionLoading(`activate-${userId}`);
-
-    const result: any = await UserUpadteStatus({
-      _id: userId,
-      isActive: true,
-      status: "active",
-      remarks: "Issue resolved, reactivating account.",
-    });
-    if (result.isSuccess) {
-      toast.success("User activated successfully");
-      dispatch(updateUserStatus({ id: userId, status: "active" }));
-
-      setActionLoading(null);
-    } else {
-      setActionLoading(null);
-      toast.error(result.message || "Failed to activate user");
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "active":
-        return <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />;
-      case "suspended":
-        return <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-600" />;
-      case "banned":
-        return <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />;
-      default:
-        return <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-      case "suspended":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
-      case "banned":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
-    }
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
-      case "employee":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
-    }
-  };
-
-  const filteredUsers = users.filter((user: any) => {
-    const matchesSearch =
-      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.mobileNumber?.includes(searchTerm);
-
-    const matchesStatus = activeTab === "all" || user.status === activeTab;
-
-    return matchesSearch && matchesStatus;
-  });
-
-  const activeUsers = users.filter((u) => u.status === "active").length;
-  const suspendedUsers = users.filter((u) => u.status === "suspended").length;
-  const bannedUsers = users.filter((u) => u.status === "banned").length;
-
-  const handleViewUser = (user: any) => {
-    router.push(`/admin/users/${user._id}`);
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const getInitials = (name: string) => {
-    if (!name) return "U";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  // Send Credits Dialog
-  const SendCreditsDialog = () => (
-    <Dialog open={sendCreditsOpen} onOpenChange={setSendCreditsOpen}>
-      <DialogContent className="sm:max-w-[500px]">
+// Memoized Dialogs
+const SendCreditsDialog = React.memo(
+  ({
+    open,
+    onOpenChange,
+    selectedUser,
+    creditsAmount,
+    onCreditsAmountChange,
+    sendingCredits,
+    onSendCredits,
+    getStatusColor,
+  }: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    selectedUser: any;
+    creditsAmount: number;
+    onCreditsAmountChange: (amount: number) => void;
+    sendingCredits: boolean;
+    onSendCredits: () => void;
+    getStatusColor: (status: string) => string;
+  }) => (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="sm:max-w-[500px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Coins className="h-5 w-5 text-yellow-600" />
@@ -361,40 +171,10 @@ const AdminUsersPage = () => {
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* User Info */}
-          <div className="space-y-2">
-            <Label>User Information</Label>
-            <div className="grid grid-cols-2 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Name</p>
-                <p className="font-medium">
-                  {selectedUser?.name || selectedUser?.username || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Email
-                </p>
-                <p className="font-medium">{selectedUser?.email || "N/A"}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Current Credits
-                </p>
-                <p className="font-medium">{selectedUser?.credits || 0}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Status
-                </p>
-                <Badge
-                  className={getStatusColor(selectedUser?.status || "active")}
-                >
-                  {selectedUser?.status || "active"}
-                </Badge>
-              </div>
-            </div>
-          </div>
+          <UserInfoGrid
+            selectedUser={selectedUser}
+            getStatusColor={getStatusColor}
+          />
 
           {/* Credits Amount */}
           <div className="space-y-2">
@@ -407,19 +187,19 @@ const AdminUsersPage = () => {
                 min="1"
                 max="100000"
                 value={creditsAmount}
-                onChange={(e) => setCreditsAmount(Number(e.target.value))}
+                onChange={(e) => onCreditsAmountChange(Number(e.target.value))}
                 className="pl-10"
                 placeholder="Enter credits amount"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {[5, 10, 15, 20, 30].map((amount) => (
                 <Button
                   key={amount}
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setCreditsAmount(amount)}
+                  onClick={() => onCreditsAmountChange(amount)}
                   className={
                     creditsAmount === amount ? "bg-blue-50 border-blue-200" : ""
                   }
@@ -435,14 +215,14 @@ const AdminUsersPage = () => {
           <Button
             variant="outline"
             onClick={() => {
-              setSendCreditsOpen(false);
-              setCreditsAmount(100);
+              onOpenChange(false);
+              onCreditsAmountChange(5);
             }}
           >
             Cancel
           </Button>
           <Button
-            onClick={() => handleSendCredits(selectedUser?._id)}
+            onClick={onSendCredits}
             disabled={sendingCredits || !creditsAmount}
             className="bg-green-600 hover:bg-green-700"
           >
@@ -461,174 +241,667 @@ const AdminUsersPage = () => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
+);
 
-  // Suspend User Dialog
-  const SuspendUserDialog = () => (
-    <Dialog open={suspendDialogOpen} onOpenChange={setSuspendDialogOpen}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-yellow-600">
-            <Clock className="h-5 w-5" />
-            Suspend User
-          </DialogTitle>
-          <DialogDescription>
-            This will temporarily suspend the user's account. They won't be able
-            to login or use the platform.
-          </DialogDescription>
-        </DialogHeader>
+SendCreditsDialog.displayName = "SendCreditsDialog";
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>User Information</Label>
-            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
-              <p className="font-medium">
-                {selectedUser?.name || selectedUser?.username || "N/A"}
+const ActionDialog = React.memo(
+  ({
+    open,
+    onOpenChange,
+    selectedUser,
+    reason,
+    onReasonChange,
+    actionLoading,
+    onAction,
+    type,
+  }: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    selectedUser: any;
+    reason: string;
+    onReasonChange: (reason: string) => void;
+    actionLoading: boolean;
+    onAction: () => void;
+    type: "suspend" | "ban";
+  }) => {
+    const config = {
+      suspend: {
+        title: "Suspend User",
+        icon: <Clock className="h-5 w-5" />,
+        color: "text-yellow-600",
+        description:
+          "This will temporarily suspend the user's account. They won't be able to login or use the platform.",
+        buttonText: "Suspend User",
+        warning:
+          "⚠️ The user will be notified about this suspension. They can contact support for more information.",
+        warningClass:
+          "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300",
+      },
+      ban: {
+        title: "Ban User Permanently",
+        icon: <Ban className="h-5 w-5" />,
+        color: "text-red-600",
+        description:
+          "This will permanently ban the user's account. This action cannot be undone.",
+        buttonText: "Ban User Permanently",
+        warning:
+          "⚠️ Warning: This action is permanent and cannot be undone. The user will be permanently blocked from the platform.",
+        warningClass:
+          "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300",
+      },
+    }[type];
+
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent
+          className="sm:max-w-[500px]"
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle className={`flex items-center gap-2 ${config.color}`}>
+              {config.icon}
+              {config.title}
+            </DialogTitle>
+            <DialogDescription>{config.description}</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>User Information</Label>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                <p className="font-medium">
+                  {selectedUser?.name || selectedUser?.username || "N/A"}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {selectedUser?.email || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="reason">
+                Reason for {type === "suspend" ? "Suspension" : "Ban"} *
+              </Label>
+              <Textarea
+                id="reason"
+                value={reason}
+                onChange={(e) => onReasonChange(e.target.value)}
+                placeholder={`Enter reason for ${
+                  type === "suspend" ? "suspension" : "permanent ban"
+                }`}
+                rows={3}
+                required
+              />
+              <p className="text-sm text-gray-500">
+                This reason will be logged
+                {type === "suspend"
+                  ? " and may be shown to the user"
+                  : " for audit purposes"}
+                .
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {selectedUser?.email || "N/A"}
-              </p>
+            </div>
+
+            <div className={`p-3 ${config.warningClass} border rounded-md`}>
+              <p className="text-sm">{config.warning}</p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="suspendReason">Reason for Suspension *</Label>
-            <Textarea
-              id="suspendReason"
-              value={suspendReason}
-              onChange={(e) => setSuspendReason(e.target.value)}
-              placeholder="Enter reason for suspension"
-              rows={3}
-              required
-            />
-            <p className="text-sm text-gray-500">
-              This reason will be logged and may be shown to the user.
-            </p>
-          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={onAction}
+              disabled={!reason.trim() || actionLoading}
+              variant={type === "ban" ? "destructive" : "default"}
+              className={type === "ban" ? "bg-red-600 hover:bg-red-700" : ""}
+            >
+              {actionLoading ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                  {type === "suspend" ? "Suspending..." : "Banning..."}
+                </>
+              ) : (
+                <>
+                  {type === "suspend" ? (
+                    <Clock className="h-4 w-4 mr-2" />
+                  ) : (
+                    <Ban className="h-4 w-4 mr-2" />
+                  )}
+                  {config.buttonText}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+);
 
-          <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
-            <p className="text-sm text-yellow-800 dark:text-yellow-300">
-              ⚠️ The user will be notified about this suspension. They can
-              contact support for more information.
-            </p>
-          </div>
-        </div>
+ActionDialog.displayName = "ActionDialog";
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setSuspendDialogOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() => handleSuspendUser(selectedUser?._id)}
-            disabled={
-              !suspendReason.trim() ||
-              actionLoading === `suspend-${selectedUser?._id}`
-            }
-            variant="destructive"
-          >
-            {actionLoading === `suspend-${selectedUser?._id}` ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
-                Suspending...
-              </>
-            ) : (
-              <>
-                <Clock className="h-4 w-4 mr-2" />
-                Suspend User
-              </>
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+// User Row Component
+const UserRow = React.memo(
+  ({
+    user,
+    onView,
+    onSendCredits,
+    onSuspend,
+    onActivate,
+    onBan,
+    getStatusIcon,
+    getStatusColor,
+    getRoleColor,
+    formatDate,
+    getInitials,
+    actionLoading,
+  }: {
+    user: any;
+    onView: () => void;
+    onSendCredits: () => void;
+    onSuspend: () => void;
+    onActivate: () => void;
+    onBan: () => void;
+    getStatusIcon: (status: string) => React.ReactNode;
+    getStatusColor: (status: string) => string;
+    getRoleColor: (role: string) => string;
+    formatDate: (date: string) => string;
+    getInitials: (name: string) => string;
+    actionLoading: string | null;
+  }) => (
+    <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-3 min-w-0">
+            <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border-2 border-white dark:border-gray-800 shadow-sm flex-shrink-0">
+              <AvatarFallback className="bg-blue-600 text-white text-sm sm:text-base">
+                {getInitials(user.name || user.username)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                <h3 className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg truncate">
+                  {user.name || user.username}
+                </h3>
+                <div className="flex flex-wrap gap-1">
+                  <Badge className={`text-xs ${getStatusColor(user.status)}`}>
+                    <div className="flex items-center gap-1">
+                      {getStatusIcon(user.status)}
+                      <span className="capitalize">{user.status}</span>
+                    </div>
+                  </Badge>
+                  {user.role === "admin" && (
+                    <Badge className={`text-xs ${getRoleColor(user.role)}`}>
+                      <Crown className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
+                      Admin
+                    </Badge>
+                  )}
+                  {user.role === "employee" && (
+                    <Badge className={`text-xs ${getRoleColor(user.role)}`}>
+                      <Users className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
+                      Employee
+                    </Badge>
+                  )}
+                </div>
+              </div>
 
-  // Ban User Dialog
-  const BanUserDialog = () => (
-    <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-red-600">
-            <Ban className="h-5 w-5" />
-            Ban User Permanently
-          </DialogTitle>
-          <DialogDescription>
-            This will permanently ban the user's account. This action cannot be
-            undone.
-          </DialogDescription>
-        </DialogHeader>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="truncate">{user.email}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span>{user.mobileNumber || "N/A"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span>{user.credits || 0} Credits</span>
+                </div>
+              </div>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>User Information</Label>
-            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
-              <p className="font-medium">
-                {selectedUser?.name || selectedUser?.username || "N/A"}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {selectedUser?.email || "N/A"}
-              </p>
+              <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span>Joined {formatDate(user.createdAt)}</span>
+                </div>
+                {user.lastAdCreditDate && (
+                  <div className="flex items-center gap-2">
+                    <span>
+                      Last Ad Credit: {formatDate(user.lastAdCreditDate)}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="banReason">Reason for Ban *</Label>
-            <Textarea
-              id="banReason"
-              value={banReason}
-              onChange={(e) => setBanReason(e.target.value)}
-              placeholder="Enter reason for permanent ban"
-              rows={3}
-              required
-            />
-            <p className="text-sm text-gray-500">
-              This reason will be logged for audit purposes.
-            </p>
-          </div>
-
-          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-            <p className="text-sm text-red-800 dark:text-red-300">
-              ⚠️ Warning: This action is permanent and cannot be undone. The
-              user will be permanently blocked from the platform.
-            </p>
+          <div className="sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={onView}>
+                  <Eye className="h-3 w-3 mr-2" />
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onSendCredits}>
+                  <Coins className="h-3 w-3 mr-2" />
+                  Send Free Credits
+                </DropdownMenuItem>
+                {user.status === "active" && (
+                  <DropdownMenuItem onClick={onSuspend}>
+                    <Clock className="h-3 w-3 mr-2" />
+                    Suspend User
+                  </DropdownMenuItem>
+                )}
+                {user.status === "suspended" && (
+                  <DropdownMenuItem onClick={onActivate}>
+                    <CheckCircle className="h-3 w-3 mr-2" />
+                    Activate User
+                  </DropdownMenuItem>
+                )}
+                {user.status !== "banned" && (
+                  <DropdownMenuItem onClick={onBan} className="text-red-600">
+                    <Ban className="h-3 w-3 mr-2" />
+                    Ban User
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setBanDialogOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() => handleBanUser(selectedUser?._id)}
-            disabled={
-              !banReason.trim() || actionLoading === `ban-${selectedUser?._id}`
-            }
-            variant="destructive"
-            className="bg-red-600 hover:bg-red-700"
-          >
-            {actionLoading === `ban-${selectedUser?._id}` ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
-                Banning...
-              </>
+        <div className="hidden sm:flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="font-medium">Terms:</span>{" "}
+            {user.agreeToTerms ? (
+              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 text-xs">
+                Agreed
+              </Badge>
             ) : (
-              <>
-                <Ban className="h-4 w-4 mr-2" />
-                Ban User Permanently
-              </>
+              <Badge variant="outline" className="text-red-600 text-xs">
+                Not Agreed
+              </Badge>
             )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <span className="mx-2">•</span>
+            <span className="font-medium">Active:</span>{" "}
+            {user.isActive ? (
+              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 text-xs">
+                Yes
+              </Badge>
+            ) : (
+              <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 text-xs">
+                No
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onView}
+              className="gap-1 sm:gap-2"
+            >
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>View</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onSendCredits}
+              className="gap-1 sm:gap-2 bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800"
+            >
+              <Coins className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>Send Credits</span>
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {user.status === "active" && (
+                  <DropdownMenuItem onClick={onSuspend}>
+                    <Clock className="h-4 w-4 mr-2" />
+                    Suspend User
+                  </DropdownMenuItem>
+                )}
+                {user.status === "suspended" && (
+                  <DropdownMenuItem onClick={onActivate}>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Activate User
+                  </DropdownMenuItem>
+                )}
+                {user.status !== "banned" && (
+                  <DropdownMenuItem onClick={onBan} className="text-red-600">
+                    <Ban className="h-4 w-4 mr-2" />
+                    Ban User
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+);
+
+UserRow.displayName = "UserRow";
+
+const AdminUsersPage = () => {
+  const router = useRouter();
+  const { users } = useSelector((state: RootState) => state.admin);
+  const { user: authUser } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+
+  // State hooks
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
+  const [loading, setLoading] = useState(false);
+  const [sendingCredits, setSendingCredits] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [creditsAmount, setCreditsAmount] = useState<number>(5);
+  const [suspendReason, setSuspendReason] = useState<string>("");
+  const [banReason, setBanReason] = useState<string>("");
+  const [sendCreditsOpen, setSendCreditsOpen] = useState(false);
+  const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
+  const [banDialogOpen, setBanDialogOpen] = useState(false);
+
+  // Memoized computations
+  const activeUsers = useMemo(
+    () => users.filter((u) => u.status === "active").length,
+    [users]
   );
+
+  const suspendedUsers = useMemo(
+    () => users.filter((u) => u.status === "suspended").length,
+    [users]
+  );
+
+  const bannedUsers = useMemo(
+    () => users.filter((u) => u.status === "banned").length,
+    [users]
+  );
+
+  const filteredUsers = useMemo(
+    () =>
+      users.filter((user: any) => {
+        const matchesSearch =
+          user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.mobileNumber?.includes(searchTerm);
+
+        const matchesStatus = activeTab === "all" || user.status === activeTab;
+
+        return matchesSearch && matchesStatus;
+      }),
+    [users, searchTerm, activeTab]
+  );
+
+  // Callbacks for stable references
+  const GetUserDetails = useCallback(() => {
+    setLoading(true);
+    fetchUserDetails({})
+      .then((res) => {
+        setLoading(false);
+        dispatch(setUsers(res.data ?? []));
+      })
+      .catch((err) => {
+        setLoading(false);
+        toast.error(err.message || "Failed to fetch users. Please try again.");
+      });
+  }, [dispatch]);
+
+  const UserUpdateStatus = useCallback(
+    async (values: any) => {
+      let reqData: any = { userId: values._id };
+
+      if (authUser?.role === "admin") {
+        reqData.isActive = JSON.parse(values.isActive);
+        reqData.status = values.status;
+        reqData.remarks = values.remarks;
+      }
+
+      try {
+        const res = await UserUpdate(reqData);
+        return { message: res.message, isSuccess: true };
+      } catch (err: any) {
+        return {
+          message: err.message || "Failed to save details. Please try again.",
+          isSuccess: false,
+        };
+      }
+    },
+    [authUser?.role]
+  );
+
+  const handleSendCredits = useCallback(
+    async (userId: string) => {
+      if (!creditsAmount || creditsAmount <= 0) {
+        toast.error("Please enter a valid credit amount");
+        return;
+      }
+
+      setSendingCredits(true);
+
+      try {
+        await UserSendCredit({ userId, credits: creditsAmount });
+        toast.success(
+          `Successfully added ${creditsAmount} credits to user account`
+        );
+        GetUserDetails();
+        setSendCreditsOpen(false);
+        setCreditsAmount(5);
+      } catch (error: any) {
+        toast.error(error.message || "Failed to send credits");
+      } finally {
+        setSendingCredits(false);
+      }
+    },
+    [creditsAmount, GetUserDetails]
+  );
+
+  const handleSuspendUser = useCallback(
+    async (userId: string) => {
+      if (!suspendReason.trim()) {
+        toast.error("Please provide a reason for suspension");
+        return;
+      }
+
+      setActionLoading(`suspend-${userId}`);
+
+      try {
+        const result: any = await UserUpdateStatus({
+          _id: userId,
+          isActive: false,
+          status: "suspended",
+          remarks: suspendReason,
+        });
+
+        if (result.isSuccess) {
+          toast.success("User suspended successfully");
+          dispatch(updateUserStatus({ id: userId, status: "suspended" }));
+          setSuspendDialogOpen(false);
+          setSuspendReason("");
+          GetUserDetails();
+        } else {
+          toast.error(result.message || "Failed to suspend user");
+        }
+      } catch (error: any) {
+        toast.error(error.message || "Failed to suspend user");
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [UserUpdateStatus, dispatch, suspendReason]
+  );
+
+  const handleBanUser = useCallback(
+    async (userId: string) => {
+      if (!banReason.trim()) {
+        toast.error("Please provide a reason for ban");
+        return;
+      }
+
+      setActionLoading(`ban-${userId}`);
+
+      try {
+        const result: any = await UserUpdateStatus({
+          _id: userId,
+          isActive: false,
+          status: "banned",
+          remarks: banReason,
+        });
+
+        if (result.isSuccess) {
+          toast.success("User banned successfully");
+          dispatch(updateUserStatus({ id: userId, status: "banned" }));
+          setBanDialogOpen(false);
+          setBanReason("");
+          GetUserDetails();
+        } else {
+          toast.error(result.message || "Failed to banned user");
+        }
+      } catch (error: any) {
+        toast.error(error.message || "Failed to banned user");
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [UserUpdateStatus, dispatch, banReason]
+  );
+
+  const handleActivateUser = useCallback(
+    async (userId: string) => {
+      setActionLoading(`activate-${userId}`);
+
+      try {
+        const result: any = await UserUpdateStatus({
+          _id: userId,
+          isActive: true,
+          status: "active",
+          remarks: "Issue resolved, reactivating account.",
+        });
+
+        if (result.isSuccess) {
+          toast.success("User activated successfully");
+          dispatch(updateUserStatus({ id: userId, status: "active" }));
+          GetUserDetails();
+        } else {
+          toast.error(result.message || "Failed to activate user");
+        }
+      } catch (error: any) {
+        toast.error(error.message || "Failed to activate user");
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [UserUpdateStatus, dispatch]
+  );
+
+  // Stable helper functions
+  const getStatusIcon = useCallback((status: string) => {
+    switch (status) {
+      case "active":
+        return <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />;
+      case "suspended":
+        return <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-600" />;
+      case "banned":
+        return <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />;
+      default:
+        return <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />;
+    }
+  }, []);
+
+  const getStatusColor = useCallback((status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      case "suspended":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+      case "banned":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+    }
+  }, []);
+
+  const getRoleColor = useCallback((role: string) => {
+    switch (role) {
+      case "admin":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
+      case "employee":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+    }
+  }, []);
+
+  const formatDate = useCallback((dateString: string) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }, []);
+
+  const getInitials = useCallback((name: string) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }, []);
+
+  // Event handlers with stable references
+  const handleViewUser = useCallback(
+    (user: any) => {
+      router.push(`/admin/users/${user._id}`);
+    },
+    [router]
+  );
+
+  const handleOpenSendCredits = useCallback((user: any) => {
+    setSelectedUser(user);
+    setSendCreditsOpen(true);
+  }, []);
+
+  const handleOpenSuspend = useCallback((user: any) => {
+    setSelectedUser(user);
+    setSuspendDialogOpen(true);
+  }, []);
+
+  const handleOpenBan = useCallback((user: any) => {
+    setSelectedUser(user);
+    setBanDialogOpen(true);
+  }, []);
+
+  useEffect(() => {
+    GetUserDetails();
+  }, [GetUserDetails]);
 
   return (
     <>
       {loading && <CustomLoader message="User details loading" />}
       <AdminLayout>
         <div className="space-y-6 sm:space-y-8">
-          {/* Header */}
+          {/* Header - Optimized with stable components */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
@@ -647,7 +920,7 @@ const AdminUsersPage = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats Cards - Memoized values */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             <Card className="border-0 shadow-lg dark:bg-gray-800">
               <CardContent className="p-4 sm:p-6">
@@ -796,339 +1069,27 @@ const AdminUsersPage = () => {
                   {filteredUsers.length > 0 ? (
                     <div className="space-y-3 sm:space-y-4">
                       {filteredUsers.map((user: any) => (
-                        <div
+                        <UserRow
                           key={user._id}
-                          className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        >
-                          <div className="flex flex-col gap-4">
-                            {/* User Header */}
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-3 min-w-0">
-                                <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border-2 border-white dark:border-gray-800 shadow-sm flex-shrink-0">
-                                  <AvatarFallback className="bg-blue-600 text-white text-sm sm:text-base">
-                                    {getInitials(user.name || user.username)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
-                                    <h3 className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg truncate">
-                                      {user.name || user.username}
-                                    </h3>
-                                    <div className="flex flex-wrap gap-1">
-                                      <Badge
-                                        className={`text-xs ${getStatusColor(
-                                          user.status
-                                        )}`}
-                                      >
-                                        <div className="flex items-center gap-1">
-                                          {getStatusIcon(user.status)}
-                                          <span className="capitalize">
-                                            {user.status}
-                                          </span>
-                                        </div>
-                                      </Badge>
-                                      {user.role === "admin" && (
-                                        <Badge
-                                          className={`text-xs ${getRoleColor(
-                                            user.role
-                                          )}`}
-                                        >
-                                          <Crown className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
-                                          Admin
-                                        </Badge>
-                                      )}
-                                      {user.role === "employee" && (
-                                        <Badge
-                                          className={`text-xs ${getRoleColor(
-                                            user.role
-                                          )}`}
-                                        >
-                                          <Users className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
-                                          Employee
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  {/* User Info */}
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 text-sm text-gray-600 dark:text-gray-400">
-                                    <div className="flex items-center gap-2">
-                                      <Mail className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                                      <span className="truncate">
-                                        {user.email}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Phone className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                                      <span>{user.mobileNumber || "N/A"}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                                      <span>{user.credits || 0} Credits</span>
-                                    </div>
-                                  </div>
-
-                                  {/* Additional Info */}
-                                  <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                                    <div className="flex items-center gap-2">
-                                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                                      <span>
-                                        Joined {formatDate(user.createdAt)}
-                                      </span>
-                                    </div>
-                                    {user.lastAdCreditDate && (
-                                      <div className="flex items-center gap-2">
-                                        <span>
-                                          Last Ad Credit:{" "}
-                                          {formatDate(user.lastAdCreditDate)}
-                                        </span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Mobile Actions Dropdown */}
-                              <div className="sm:hidden">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-8 w-8 p-0"
-                                    >
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent
-                                    align="end"
-                                    className="w-48"
-                                  >
-                                    <DropdownMenuItem
-                                      onClick={() => handleViewUser(user)}
-                                    >
-                                      <Eye className="h-3 w-3 mr-2" />
-                                      View Details
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setTimeout(() => {
-                                          setSelectedUser(user);
-                                          setSendCreditsOpen(true);
-                                        }, 50);
-                                      }}
-                                    >
-                                      <Coins className="h-3 w-3 mr-2" />
-                                      Send Free Credits
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem>
-                                      <Edit className="h-3 w-3 mr-2" />
-                                      Edit User
-                                    </DropdownMenuItem>
-
-                                    {user.status === "active" && (
-                                      <DropdownMenuItem
-                                        onClick={() => {
-                                          setTimeout(() => {
-                                            setSelectedUser(user);
-                                            setSuspendDialogOpen(true);
-                                          }, 50);
-                                        }}
-                                      >
-                                        <Clock className="h-3 w-3 mr-2" />
-                                        Suspend User
-                                      </DropdownMenuItem>
-                                    )}
-                                    {user.status === "suspended" && (
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handleActivateUser(user._id)
-                                        }
-                                      >
-                                        <CheckCircle className="h-3 w-3 mr-2" />
-                                        Activate User
-                                      </DropdownMenuItem>
-                                    )}
-                                    {user.status !== "banned" && (
-                                      <DropdownMenuItem
-                                        onClick={() => {
-                                          setTimeout(() => {
-                                            setSelectedUser(user);
-                                            setBanDialogOpen(true);
-                                          }, 50);
-                                        }}
-                                        className="text-red-600"
-                                      >
-                                        <Ban className="h-3 w-3 mr-2" />
-                                        Ban User
-                                      </DropdownMenuItem>
-                                    )}
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </div>
-
-                            {/* Desktop Actions */}
-                            <div className="hidden sm:flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-600">
-                              <div className="text-sm text-gray-600 dark:text-gray-400">
-                                <span className="font-medium">Terms:</span>{" "}
-                                {user.agreeToTerms ? (
-                                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 text-xs">
-                                    Agreed
-                                  </Badge>
-                                ) : (
-                                  <Badge
-                                    variant="outline"
-                                    className="text-red-600 text-xs"
-                                  >
-                                    Not Agreed
-                                  </Badge>
-                                )}
-                                <span className="mx-2">•</span>
-                                <span className="font-medium">
-                                  Active:
-                                </span>{" "}
-                                {user.isActive ? (
-                                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 text-xs">
-                                    Yes
-                                  </Badge>
-                                ) : (
-                                  <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 text-xs">
-                                    No
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleViewUser(user)}
-                                  className="gap-1 sm:gap-2"
-                                >
-                                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                                  <span>View</span>
-                                </Button>
-
-                                {/* Send Credits Button - Desktop */}
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedUser(user);
-                                    setSendCreditsOpen(true);
-                                  }}
-                                  className="gap-1 sm:gap-2 bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800"
-                                >
-                                  <Coins className="h-3 w-3 sm:h-4 sm:w-4" />
-                                  <span>Send Credits</span>
-                                </Button>
-
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" size="sm">
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>
-                                      <Edit className="h-4 w-4 mr-2" />
-                                      Edit User
-                                    </DropdownMenuItem>
-                                    {user.status === "active" && (
-                                      <DropdownMenuItem
-                                        onClick={() => {
-                                          setTimeout(() => {
-                                            setSelectedUser(user);
-                                            setSuspendDialogOpen(true);
-                                          }, 50);
-                                        }}
-                                      >
-                                        <Clock className="h-4 w-4 mr-2" />
-                                        Suspend User
-                                      </DropdownMenuItem>
-                                    )}
-                                    {user.status === "suspended" && (
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handleActivateUser(user._id)
-                                        }
-                                      >
-                                        <CheckCircle className="h-4 w-4 mr-2" />
-                                        Activate User
-                                      </DropdownMenuItem>
-                                    )}
-                                    {user.status !== "banned" && (
-                                      <DropdownMenuItem
-                                        onClick={() => {
-                                          setTimeout(() => {
-                                            setSelectedUser(user);
-                                            setBanDialogOpen(true);
-                                          }, 50);
-                                        }}
-                                        className="text-red-600"
-                                      >
-                                        <Ban className="h-4 w-4 mr-2" />
-                                        Ban User
-                                      </DropdownMenuItem>
-                                    )}
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </div>
-
-                            {/* Mobile Status Info */}
-                            <div className="sm:hidden pt-3 border-t border-gray-200 dark:border-gray-600">
-                              <div className="flex items-center justify-between text-xs">
-                                <div className="flex items-center gap-4">
-                                  <div>
-                                    <span className="font-medium text-gray-600 dark:text-gray-400">
-                                      Terms:
-                                    </span>
-                                    <span className="ml-1">
-                                      {user.agreeToTerms ? (
-                                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 text-xs">
-                                          Agreed
-                                        </Badge>
-                                      ) : (
-                                        <Badge
-                                          variant="outline"
-                                          className="text-red-600 text-xs"
-                                        >
-                                          Not Agreed
-                                        </Badge>
-                                      )}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-gray-600 dark:text-gray-400">
-                                      Active:
-                                    </span>
-                                    <span className="ml-1">
-                                      {user.isActive ? (
-                                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 text-xs">
-                                          Yes
-                                        </Badge>
-                                      ) : (
-                                        <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 text-xs">
-                                          No
-                                        </Badge>
-                                      )}
-                                    </span>
-                                  </div>
-                                </div>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleViewUser(user)}
-                                  className="gap-1 text-xs"
-                                >
-                                  <Eye className="h-3 w-3" />
-                                  View
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                          user={user}
+                          onView={() => handleViewUser(user)}
+                          onSendCredits={() => {
+                            setTimeout(() => handleOpenSendCredits(user), 50);
+                          }}
+                          onSuspend={() => {
+                            setTimeout(() => handleOpenSuspend(user), 50);
+                          }}
+                          onActivate={() => handleActivateUser(user._id)}
+                          onBan={() => {
+                            setTimeout(() => handleOpenBan(user), 50);
+                          }}
+                          getStatusIcon={getStatusIcon}
+                          getStatusColor={getStatusColor}
+                          getRoleColor={getRoleColor}
+                          formatDate={formatDate}
+                          getInitials={getInitials}
+                          actionLoading={actionLoading}
+                        />
                       ))}
                     </div>
                   ) : (
@@ -1150,10 +1111,39 @@ const AdminUsersPage = () => {
           </Card>
         </div>
 
-        {/* Dialogs */}
-        <SendCreditsDialog />
-        <SuspendUserDialog />
-        <BanUserDialog />
+        {/* Memoized Dialogs */}
+        <SendCreditsDialog
+          open={sendCreditsOpen}
+          onOpenChange={setSendCreditsOpen}
+          selectedUser={selectedUser}
+          creditsAmount={creditsAmount}
+          onCreditsAmountChange={setCreditsAmount}
+          sendingCredits={sendingCredits}
+          onSendCredits={() => handleSendCredits(selectedUser?._id)}
+          getStatusColor={getStatusColor}
+        />
+
+        <ActionDialog
+          open={suspendDialogOpen}
+          onOpenChange={setSuspendDialogOpen}
+          selectedUser={selectedUser}
+          reason={suspendReason}
+          onReasonChange={setSuspendReason}
+          actionLoading={actionLoading === `suspend-${selectedUser?._id}`}
+          onAction={() => handleSuspendUser(selectedUser?._id)}
+          type="suspend"
+        />
+
+        <ActionDialog
+          open={banDialogOpen}
+          onOpenChange={setBanDialogOpen}
+          selectedUser={selectedUser}
+          reason={banReason}
+          onReasonChange={setBanReason}
+          actionLoading={actionLoading === `ban-${selectedUser?._id}`}
+          onAction={() => handleBanUser(selectedUser?._id)}
+          type="ban"
+        />
       </AdminLayout>
     </>
   );
