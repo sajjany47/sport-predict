@@ -1,652 +1,265 @@
 export const UserAccountClosureTemp = (data: any) => {
-  const url =
-    data.status === "banned"
-      ? "https://www.landlordtoday.co.uk/wp-content/uploads/sites/3/Banned-400x310-1.png"
-      : "https://thumbs.dreamstime.com/b/account-suspended-rubber-stamp-red-grunge-text-written-inside-87783000.jpg";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sportpredict.com";
+  const supportEmail =
+    process.env.NEXT_PUBLIC_EMAIL || "support@sportpredict.com";
+  const supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (888) 123-4567";
+
+  const isBanned = data.status === "banned";
+
+  // Attractive icon configuration
+  const iconConfig = {
+    banned: {
+      url: "https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
+      color: "#dc2626",
+      gradient: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+      shadow: "0 6px 20px rgba(220, 38, 38, 0.25)",
+      title: "Account Permanently Banned",
+      subTitle: "Access has been permanently revoked",
+      emoji: "🚫",
+    },
+    suspended: {
+      url: "https://cdn-icons-png.flaticon.com/512/3184/3184839.png",
+      color: "#f59e0b",
+      gradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+      shadow: "0 6px 20px rgba(245, 158, 11, 0.25)",
+      title: "Account Temporarily Suspended",
+      subTitle: "Access has been temporarily restricted",
+      emoji: "⚠️",
+    },
+  };
+
+  const config = iconConfig[isBanned ? "banned" : "suspended"];
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Suspended - SportPredict</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <title>SportPredict Account Status Update</title>
+    
     <style>
-               * {
+        /* Reset and Base Styles */
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
         }
         
         body {
-            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0;
             padding: 20px;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: ${isBanned ? "#fef2f2" : "#fffbeb"};
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+            color: #333333;
         }
         
-        .container {
-            max-width: 650px;
+        .wrapper {
             width: 100%;
-            background: white;
+            max-width: 600px;
+            background: #ffffff;
+            margin: 0 auto;
             border-radius: 12px;
+            border: 1px solid #e0e0e0;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
         
+        .center-table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* PERFECT HEADER - Same as AdminFreeCreditsEmail */
         .header {
-            background: linear-gradient(to right, #1a2a6c, #2c3e50);
-            padding: 30px;
-            color: white;
+            background: linear-gradient(135deg, #1a2a6c 0%, #2c3e50 100%);
+            padding: 32px 24px;
             text-align: center;
+            color: #ffffff;
         }
         
         .header h1 {
             font-size: 32px;
-            margin-bottom: 10px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.5px;
         }
         
-        .header h1 span {
+        .header span {
             color: #fdbb2d;
+            font-weight: 800;
         }
         
         .header p {
-            font-size: 16px;
+            font-size: 15px;
             opacity: 0.9;
+            margin: 0;
+            font-weight: 300;
         }
         
-        .content {
-            padding: 40px;
+        /* Status Icon */
+        .status-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: ${config.gradient};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: ${config.shadow};
         }
         
-        .icon-container {
-            text-align: center;
-            margin: 20px 0;
-        }
-        
-        .icon-container img {
-            max-width: 180px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        .status-icon img {
+            width: 56px;
+            height: 56px;
+            filter: brightness(0) invert(1);
         }
         
         .status-badge {
             display: inline-block;
-            background: #e53e3e;
+            padding: 8px 20px;
+            background: ${config.color};
             color: white;
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-weight: bold;
-            margin-left: 10px;
-            font-size: 14px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
-        .suspension-card {
-            background: #fff5f5;
-            border-radius: 10px;
-            padding: 25px;
-            margin: 25px 0;
-            border: 1px dashed #e53e3e;
+        /* Cards */
+        .info-card {
+            background: ${isBanned ? "#fef2f2" : "#fffbeb"};
+            border: 1px solid ${isBanned ? "#fecaca" : "#fde68a"};
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
         }
         
-        .suspension-card h3 {
-            color: #c53030;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #fed7d7;
+        /* Details Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px 20px;
         }
         
-        .detail-row {
-            display: flex;
-            margin-bottom: 12px;
-        }
-        
-        .detail-label {
-            flex: 1;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .detail-value {
-            flex: 2;
-            color: #555;
-        }
-        
-        .reason-box {
-            background: white;
-            border-left: 4px solid #e53e3e;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        
-        .action-card {
-            background: #f0f4ff;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 25px 0;
-            border-left: 4px solid #1a2a6c;
-        }
-        
+        /* Footer */
         .footer {
-            background: #2c3e50;
-            color: white;
-            padding: 30px;
+            background: #1f2937;
+            padding: 32px 24px;
             text-align: center;
+            color: #e5e7eb;
         }
         
         .footer-links {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            gap: 20px;
+            margin-bottom: 24px;
         }
         
         .footer-links a {
-            color: rgba(255, 255, 255, 0.8);
+            color: #e5e7eb;
             text-decoration: none;
-            margin: 0 12px;
             font-size: 14px;
-            transition: color 0.3s;
+            transition: color 0.3s ease;
         }
         
         .footer-links a:hover {
             color: #fdbb2d;
         }
         
-        .copyright {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 10px;
+        .footer-copyright {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 16px;
+            line-height: 1.5;
         }
         
-        .button {
+        /* Button Styles */
+        .button-primary {
             display: inline-block;
-            background: #1a2a6c;
-            color: white;
-            text-align: center;
-            padding: 12px 24px;
-            border-radius: 6px;
+            padding: 14px 32px;
+            background: ${isBanned ? "#dc2626" : "#1a2a6c"};
+            color: white !important;
             text-decoration: none;
-            font-weight: bold;
-            margin: 15px 10px 5px 0;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            text-align: center;
+            min-width: 180px;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         
-        .button:hover {
-            background: #2c3e50;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .button-outline {
+        .button-secondary {
             display: inline-block;
-            background: transparent;
-            color: #1a2a6c;
-            text-align: center;
-            padding: 12px 24px;
-            border-radius: 6px;
+            padding: 14px 32px;
+            background: white;
+            color: #1a2a6c !important;
             text-decoration: none;
-            font-weight: bold;
-            margin: 15px 10px 5px 0;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            text-align: center;
+            min-width: 180px;
             border: 2px solid #1a2a6c;
             transition: all 0.3s ease;
         }
         
-        .button-outline:hover {
-            background: #1a2a6c;
-            color: white;
-        }
-        
-        @media (max-width: 600px) {
-            .content {
-                padding: 25px;
+        /* Responsive Styles */
+        @media only screen and (max-width: 600px) {
+            body { 
+                padding: 12px; 
             }
             
-            .detail-row {
-                flex-direction: column;
-                margin-bottom: 15px;
+            .wrapper { 
+                width: 100% !important;
+                border-radius: 8px;
             }
             
-            .detail-label {
-                margin-bottom: 5px;
+            .header {
+                padding: 24px 20px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .status-icon {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .status-icon img {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .button-primary,
+            .button-secondary {
+                width: 100%;
+                max-width: 100%;
+                margin: 8px 0;
             }
             
             .footer-links {
                 flex-direction: column;
-                gap: 10px;
-            }
-            
-            .footer-links a {
-                margin: 5px 0;
-            }
-            
-            .button, .button-outline {
-                display: block;
-                margin: 10px 0;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1><span>Sport</span>Predict</h1>
-            <p>The future of sports predictions</p>
-        </div>
-        
-        <div class="content">
-            <div class="icon-container">
-                <img src=${url} alt="Account Suspended">
-            </div>
-            
-            <h2 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">
-                Account ${
-                  data.status === "banned" ? "Banned" : "Suspended"
-                } <span class="status-badge">${
-    data.isPermanent ? "PERMANENT" : "RESTRICTED"
-  }</span>
-            </h2>
-            
-            <p>Hello <strong> ${data.username}</strong>,</p>
-            <p>We're writing to inform you that your SportPredict account has been ${
-              data.status === "banned" ? "permanently banned" : "suspended"
-            } due to a violation of our Terms of Service.</p>
-            
-            <div class="suspension-card">
-                <h3>${
-                  data.status === "banned" ? "Ban" : "Suspension"
-                } Details</h3>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Username:</div>
-                    <div class="detail-value"> ${data.username}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Account Status:</div>
-                    <div class="detail-value">${
-                      data.status === "banned"
-                        ? "Permanently Banned"
-                        : "Suspended"
-                    }</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">${
-                      data.status === "banned" ? "Ban" : "Suspension"
-                    } Date:</div>
-                    <div class="detail-value"> ${data.date}</div>
-                </div>
-                
-               
-            </div>
-            
-            <div class="reason-box">
-                <h3 style="color: #c53030; margin-top: 0;">${
-                  data.status === "banned" ? "Ban" : "Suspension"
-                } Reason</h3>
-                <p><strong> ${data.reason}</strong></p>
-                
-            </div>
-            
-            <div class="action-card">
-                <h3 style="color: #1a2a6c; margin-top: 0;">Next Steps</h3>
-                <p>During the ${
-                  data.status === "banned" ? "ban" : "suspension"
-                } period, you will not be able to:</p>
-                <ul style="margin: 10px 0 10px 20px;">
-                    <li>Access your account</li>
-                    <li>Place new predictions</li>
-                    <li>Participate in community features</li>
-                    <li>Withdraw funds</li>
-                </ul>
-                
-                ${
-                  data.status !== "banned"
-                    ? `
-                <p>If you believe this suspension was applied in error, you may appeal the decision by contacting our support team.</p>
-                
-                <div style="margin-top: 20px;">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL}/appeal" class="button">Appeal Suspension</a>
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL}/terms" class="button-outline">Review Terms of Service</a>
-                </div>
-                `
-                    : `
-                <p>This decision is final and cannot be appealed. Creating new accounts to circumvent this ban will result in immediate termination of those accounts.</p>
-                `
-                }
-            </div>
-            
-            <p>Please review our <a href="${
-              process.env.NEXT_PUBLIC_APP_URL
-            }/guidelines" style="color: #1a2a6c;">Community Guidelines</a> and <a href="${
-    process.env.NEXT_PUBLIC_APP_URL
-  }/terms" style="color: #1a2a6c;">Terms of Service</a> to understand the rules governing our platform.</p>
-            
-            <p>Best regards,<br><strong>The SportPredict Safety Team</strong></p>
-        </div>
-        
-        <div class="footer">
-            <div class="footer-links">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}">Home</a>
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/about">About Us</a>
-                <a href="${
-                  process.env.NEXT_PUBLIC_APP_URL
-                }/privacy">Privacy Policy</a>
-                <a href="${
-                  process.env.NEXT_PUBLIC_APP_URL
-                }/terms">Terms of Service</a>
-                <a href="${
-                  process.env.NEXT_PUBLIC_APP_URL
-                }/guidelines">Community Guidelines</a>
-                <a href="${
-                  process.env.NEXT_PUBLIC_APP_URL
-                }/support">Contact Support</a>
-            </div>
-            <p class="copyright">© 2023 SportPredict. All rights reserved.</p>
-        </div>
-    </div>
-</body>
-</html>`;
-};
-
-export const UserWelcomeTemp = (data: any) => {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to SportPredict</title>
-  
-  <style>
-    /* Mobile Styles */
-    @media only screen and (max-width: 600px) {
-      .container {
-        width: 100% !important;
-        padding: 0 !important;
-      }
-      .content {
-        padding: 20px !important;
-      }
-      .grid-2 {
-        display: block !important;
-      }
-    }
-  </style>
-</head>
-
-<body style="margin:0; padding:0; background:#f0f3f8; font-family:Arial,Helvetica,sans-serif;">
-
-  <!-- MAIN WRAPPER -->
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="padding:20px 0;">
-    <tr>
-      <td align="center">
-
-        <!-- CONTAINER -->
-        <table class="container" width="600" border="0" cellspacing="0" cellpadding="0" 
-               style="background:white; border-radius:14px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-
-          <!-- HEADER -->
-          <tr>
-            <td align="center" 
-                style="background:#667eea; padding:35px 20px; color:white;">
-
-              <div style="font-size:40px;">🏆</div>
-              <div style="font-size:28px; font-weight:700; margin-top:10px;">SportPredict</div>
-              <div style="opacity:0.9; margin-top:8px;">Predict. Win. Celebrate.</div>
-            </td>
-          </tr>
-
-          <!-- HERO -->
-          <tr>
-            <td align="center" style="padding:35px 20px; background:#f8faff;">
-              <div style="background:#38a169; color:white; padding:8px 20px; border-radius:30px; font-weight:600; display:inline-block;">
-                WELCOME ABOARD!
-              </div>
-
-              <h1 style="margin-top:20px; font-size:26px; font-weight:700; color:#333;">
-                Your Winning Journey Begins Now
-              </h1>
-
-              <p style="max-width:480px; color:#555; font-size:15px;">
-                Join thousands of sports enthusiasts making accurate predictions.
-              </p>
-            </td>
-          </tr>
-
-          <!-- CONTENT -->
-          <tr>
-            <td class="content" style="padding:35px 30px; color:#444; font-size:15px; line-height:1.7;">
-
-              <h2 style="font-size:20px; font-weight:700; color:#222;">
-                Hello ${data.username},
-              </h2>
-
-              <p>
-                Welcome to SportPredict! We're absolutely thrilled to have you join our
-                community of passionate sports fans and prediction experts.
-              </p>
-
-              <p>
-                Your account has been successfully created and you're now ready to begin
-                your exciting prediction journey.
-              </p>
-
-              <!-- ACCOUNT DETAIL CARD -->
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" 
-                     style="background:#f5f7ff; border:1px solid #e1e5f2; border-radius:10px; padding:25px; margin:25px 0;">
-                
-                <tr>
-                  <td colspan="2" style="font-size:18px; font-weight:700; color:#222; padding-bottom:15px;">
-                    👤 Your Account Details
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="font-weight:600; padding:6px 0; width:40%;">Username</td>
-                  <td style="color:#667eea; font-weight:700;">${
-                    data.username
-                  }</td>
-                </tr>
-
-                <tr>
-                  <td style="font-weight:600; padding:6px 0;">Email</td>
-                  <td>${data.email}</td>
-                </tr>
-
-                <tr>
-                  <td style="font-weight:600; padding:6px 0;">Mobile Number</td>
-                  <td>${data.mobileNumber}</td>
-                </tr>
-
-                <tr>
-                  <td style="font-weight:600; padding:6px 0;">Member Since</td>
-                  <td>${data.joinDate}</td>
-                </tr>
-
-                <tr>
-                  <td style="font-weight:600; padding:6px 0;">Account Status</td>
-                  <td style="color:#38a169; font-weight:700;">Active ✅</td>
-                </tr>
-
-                <tr>
-                  <td style="font-weight:600; padding:6px 0;">Starting Credits</td>
-                  <td style="color:#667eea; font-weight:700;">
-                    ${data.initialCredits || "100"} 🪙
-                  </td>
-                </tr>
-
-              </table>
-
-              <!-- FEATURES -->
-              <h3 style="text-align:center; font-size:20px; font-weight:700; margin:30px 0 20px;">What You Can Do</h3>
-
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" class="grid-2">
-                <tr>
-                  <td width="50%" style="padding:10px;">
-                    <div style="background:white; border:1px solid #eee; padding:20px; border-radius:10px; text-align:center;">
-                      <div style="font-size:26px;">🎯</div>
-                      <div style="font-weight:700; margin-top:10px;">Make Predictions</div>
-                      <p style="font-size:13px; color:#666;">Predict cricket, football & more</p>
-                    </div>
-                  </td>
-
-                  <td width="50%" style="padding:10px;">
-                    <div style="background:white; border:1px solid #eee; padding:20px; border-radius:10px; text-align:center;">
-                      <div style="font-size:26px;">📊</div>
-                      <div style="font-weight:700; margin-top:10px;">Track Performance</div>
-                      <p style="font-size:13px; color:#666;">View detailed analytics</p>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td width="50%" style="padding:10px;">
-                    <div style="background:white; border:1px solid #eee; padding:20px; border-radius:10px; text-align:center;">
-                      <div style="font-size:26px;">🏆</div>
-                      <div style="font-weight:700; margin-top:10px;">Win Rewards</div>
-                      <p style="font-size:13px; color:#666;">Earn credits & prizes</p>
-                    </div>
-                  </td>
-
-                  <td width="50%" style="padding:10px;">
-                    <div style="background:white; border:1px solid #eee; padding:20px; border-radius:10px; text-align:center;">
-                      <div style="font-size:26px;">👥</div>
-                      <div style="font-weight:700; margin-top:10px;">Join Community</div>
-                      <p style="font-size:13px; color:#666;">Meet prediction experts</p>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- CTA -->
-              <div style="background:#ff7e5f; padding:30px; border-radius:10px; margin:35px 0; text-align:center; color:white;">
-                <h2 style="margin:0 0 15px; font-size:22px;">Ready to Start Predicting?</h2>
-                <p style="opacity:0.9;">Jump in and make your first prediction now.</p>
-
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/matches"
-                   style="display:inline-block; background:white; color:#ff7e5f; padding:12px 28px; 
-                          font-weight:700; border-radius:40px; text-decoration:none; margin-top:12px;">
-                  Make Your First Prediction
-                </a>
-              </div>
-
-              <!-- FOOTER -->
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" 
-                     style="background:#1a202c; color:#cbd5e0; text-align:center; padding:35px 20px; border-radius:0 0 14px 14px;">
-
-                <tr>
-                  <td style="font-size:20px; font-weight:700; color:white;">
-                    SportPredict
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding-top:20px; font-size:14px;">
-                    Questions? We're here to help.<br/>
-                    📧 <a href="mailto:sportpredict247@gmail.com" style="color:#667eea;">sportpredict247@gmail.com</a>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding-top:20px; font-size:12px; color:#888;">
-                    © ${new Date().getFullYear()} SportPredict. All rights reserved.
-                  </td>
-                </tr>
-
-              </table>
-
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-
-</body>
-</html>
-`;
-};
-
-export const RegistrationOTP = (a: any) => {
-  const data = {
-    ...a,
-    expiryMinutes: 5,
-
-    // URLs (can use environment variables)
-    verificationUrl: process.env.NEXT_PUBLIC_API_URL,
-    appUrl: process.env.NEXT_PUBLIC_API_URL,
-    websiteUrl: process.env.NEXT_PUBLIC_API_URL,
-    matchesUrl: process.env.NEXT_PUBLIC_API_URL,
-    leaderboardUrl: process.env.NEXT_PUBLIC_API_URL,
-    privacyUrl: process.env.NEXT_PUBLIC_API_URL,
-    termsUrl: process.env.NEXT_PUBLIC_API_URL,
-    supportUrl: `${process.env.NEXT_PUBLIC_API_URL}/support`,
-
-    // Contact info
-    supportEmail: process.env.NEXT_PUBLIC_EMAIL,
-    supportPhone: process.env.NEXT_PUBLIC_MOBILE,
-
-    // Social media URLs (optional)
-    facebookUrl: process.env.NEXT_PUBLIC_API_URL,
-    twitterUrl: process.env.NEXT_PUBLIC_API_URL,
-    instagramUrl: process.env.NEXT_PUBLIC_API_URL,
-    linkedinUrl: process.env.NEXT_PUBLIC_API_URL,
-  };
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SportPredict Email Verification</title>
-
-    <style>
-        /* GENERAL EMAIL RESET */
-        body, table, td {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            color: #333333;
-        }
-
-        body {
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-
-        .wrapper {
-            width: 100%;
-            max-width: 600px;
-            background: #ffffff;
-            margin: 0 auto;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-
-        /* FORCE CENTERING IN ALL EMAIL CLIENTS */
-        .center-table {
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* HEADERS */
-        .header {
-            padding: 25px 20px;
-            text-align: center;
-            border-bottom: 1px solid #eeeeee;
-        }
-
-        /* RESPONSIVE FIX */
-        @media only screen and (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            .wrapper {
-                width: 100% !important;
+                gap: 12px;
             }
         }
     </style>
@@ -655,175 +268,1030 @@ export const RegistrationOTP = (a: any) => {
 <body>
     <table class="wrapper" cellpadding="0" cellspacing="0" width="100%">
 
-        <!-- HEADER -->
+        <!-- PERFECT HEADER - Same as AdminFreeCreditsEmail -->
         <tr>
             <td class="header">
-                <table class="center-table" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <!-- ICON BOX -->
-                        <td align="center" style="
-                            background:#007bff;
-                            width:50px;
-                            height:50px;
-                            border-radius:8px;
-                            color:#ffffff;
-                            font-size:28px;
-                            font-weight:bold;
-                            text-align:center;
-                        ">
-                            🏆
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center" style="padding-top:10px;">
-                            <span style="font-size:28px; font-weight:bold; color:#007bff;">
-                                SportPredict
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center" style="padding-top:5px; color:#666666; font-size:16px;">
-                            Predict. Win. Celebrate.
-                        </td>
-                    </tr>
-                </table>
+                <h1><span>Sport</span>Predict</h1>
+                <p>The future of sports predictions</p>
             </td>
         </tr>
 
-        <!-- BODY -->
+        <!-- BODY CONTENT -->
         <tr>
-            <td style="padding: 30px;">
+            <td style="padding: 40px 32px;">
 
-                <h2 style="font-size:20px; margin-bottom:15px;">Hello User,</h2>
+                <!-- Status Section -->
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <div class="status-icon">
+                        <img src="${config.url}" alt="${
+    isBanned ? "Banned" : "Suspended"
+  }">
+                    </div>
+                    <h2 style="font-size: 24px; font-weight: 700; color: ${
+                      config.color
+                    }; margin-bottom: 8px;">
+                        ${config.title}
+                    </h2>
+                    <p style="color: #6b7280; font-size: 16px; margin-bottom: 12px;">
+                        ${config.subTitle}
+                    </p>
+                    <div class="status-badge">
+                        ${data.isPermanent ? "PERMANENT" : "TEMPORARY"}
+                    </div>
+                </div>
 
-                <p style="font-size:15px; line-height:1.6; color:#555;">
-                    Welcome to <b style="color:#007bff;">SportPredict</b>!  
-                    To activate your account, please verify your email using the OTP below.
+                <!-- Greeting -->
+                <h2 style="font-size: 22px; margin-bottom: 20px; color: #1f2937;">
+                    Hello ${data.username},
+                </h2>
+
+                <!-- Main Message -->
+                <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin-bottom: 24px;">
+                    We're writing to inform you that your SportPredict account has been 
+                    <strong style="color: ${config.color}">${
+    isBanned ? "permanently banned" : "temporarily suspended"
+  }</strong> 
+                    due to a violation of our Terms of Service.
                 </p>
 
-                <!-- OTP BOX -->
-                <table class="center-table" cellpadding="0" cellspacing="0" width="100%" style="margin:30px 0; background:#f8f9fa; border:1px solid #e0e0e0; border-radius:10px;">
-                    <tr>
-                        <td style="padding:25px; text-align:center;">
-                            <div style="color:#666; font-size:14px; margin-bottom:8px;">Your Verification Code</div>
-
-                            <div style="
-                                font-size:40px;
-                                font-weight:bold;
-                                color:#007bff;
-                                letter-spacing:6px;
-                                font-family:Courier, monospace;
-                                padding:12px;
-                                border:1px dashed #007bff;
-                                background:#ffffff;
-                                border-radius:6px;
-                                display:inline-block;
-                            ">
-                                ${data.otp || "123456"}
+                <!-- Account Details -->
+                <div class="info-card">
+                    <h3 style="color: ${
+                      isBanned ? "#b91c1c" : "#92400e"
+                    }; margin: 0 0 20px; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                        📋 Account Details
+                    </h3>
+                    <div class="details-grid">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                Username
                             </div>
-
-                            <div style="font-size:14px; color:#777; margin-top:12px;">
-                                Valid for <span style="color:#dc3545; font-weight:bold;">${
-                                  data.expiryMinutes || 10
-                                } minutes</span>
+                            <div style="font-size: 15px; font-weight: 500; color: #111827;">
+                                ${data.username}
                             </div>
-                        </td>
-                    </tr>
-                </table>
+                        </div>
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                Status
+                            </div>
+                            <div style="font-size: 15px; font-weight: 500; color: ${
+                              config.color
+                            };">
+                                ${isBanned ? "Banned" : "Suspended"}
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                Date
+                            </div>
+                            <div style="font-size: 15px; font-weight: 500; color: #111827;">
+                                ${data.date}
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                User ID
+                            </div>
+                            <div style="font-size: 15px; font-weight: 500; color: #111827;">
+                                ${data.userId || "N/A"}
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                <!-- CTA -->
-                <div style="text-align:center; margin:25px 0;">
-                    <a href="${
-                      data.verificationUrl ||
-                      data.appUrl ||
-                      "https://sportpredict.com/verify"
-                    }"
-                       style="
-                           background:#007bff;
-                           color:#ffffff;
-                           font-size:16px;
-                           font-weight:bold;
-                           padding:14px 28px;
-                           text-decoration:none;
-                           border-radius:6px;
-                           display:inline-block;
-                       ">
-                        Verify & Activate Account
+                <!-- Reason -->
+                <div style="background: white; border-left: 4px solid ${
+                  config.color
+                }; padding: 20px; border-radius: 8px; margin: 24px 0; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);">
+                    <h4 style="color: ${
+                      config.color
+                    }; margin: 0 0 12px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                        ${config.emoji} ${
+    isBanned ? "Ban" : "Suspension"
+  } Reason
+                    </h4>
+                    <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #111827;">
+                        <strong>${data.reason}</strong>
+                    </p>
+                    ${
+                      data.remarks
+                        ? `<p style="margin-top: 12px; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                             <strong>Additional Notes:</strong> ${data.remarks}
+                           </p>`
+                        : ""
+                    }
+                </div>
+
+                <!-- Account Restrictions -->
+                <div class="info-card">
+                    <h3 style="color: ${
+                      isBanned ? "#b91c1c" : "#92400e"
+                    }; margin: 0 0 16px; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                        🔒 Account Restrictions
+                    </h3>
+                    <p style="margin-bottom: 12px; color: #4b5563;">During this period, you will not be able to:</p>
+                    <ul style="margin: 0 0 0 20px; color: #4b5563;">
+                        <li style="margin-bottom: 8px;">Access your SportPredict account</li>
+                        <li style="margin-bottom: 8px;">Place predictions or participate in contests</li>
+                        <li style="margin-bottom: 8px;">Withdraw or deposit funds</li>
+                        <li style="margin-bottom: 8px;">Use community features and chat</li>
+                        <li>Access leaderboards and achievements</li>
+                    </ul>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="text-align: center; margin: 32px 0;">
+                    ${
+                      !isBanned
+                        ? `<a href="${appUrl}/appeal" class="button-primary" style="margin: 0 8px 12px;">
+                             ✍️ Appeal Suspension
+                           </a>`
+                        : ""
+                    }
+                    <a href="${appUrl}/terms" class="button-secondary" style="margin: 0 8px 12px;">
+                        📜 Terms of Service
+                    </a>
+                    <a href="${appUrl}/guidelines" class="button-secondary" style="margin: 0 8px 12px;">
+                        📋 Community Guidelines
                     </a>
                 </div>
 
-                <!-- SECURITY NOTICE -->
-                <div style="background:#fff5f5; border:1px solid #ffcccc; padding:18px; border-radius:8px;">
-                    <h4 style="color:#dc3545; margin:0 0 10px;">Security Reminder</h4>
-                    <p style="font-size:14px; color:#7f1d1d; line-height:1.6;">
-                        Never share this OTP with anyone. If you did not request this, please ignore this email.
+                <!-- Contact Support -->
+                <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 12px; padding: 24px; text-align: center; margin: 30px 0; border: 1px solid #e2e8f0;">
+                    <h3 style="color: #1e293b; margin: 0 0 16px; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        📞 Contact Support
+                    </h3>
+                    <p style="color: #475569; margin-bottom: 20px;">
+                        If you believe this ${
+                          isBanned ? "ban" : "suspension"
+                        } was applied in error or have questions, our support team is here to help.
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px; color: #475569;">
+                            <span>📧</span>
+                            <a href="mailto:${supportEmail}" style="color: #1a2a6c; text-decoration: none;">
+                                ${supportEmail}
+                            </a>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; color: #475569;">
+                            <span>📱</span>
+                            <span>${supportPhone}</span>
+                        </div>
+                    </div>
+                    <p style="margin-top: 16px; font-size: 14px; color: #64748b;">
+                        <strong>Support Hours:</strong> Mon-Fri, 9AM-6PM (Your Local Time)
                     </p>
                 </div>
 
-                <p style="margin-top:20px; color:#555; font-size:15px;">
-                    Need help? Our support team is here anytime.
-                </p>
+                <!-- Final Message -->
+                ${
+                  isBanned
+                    ? `<div style="padding: 16px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #dc2626; color: #b91c1c; font-size: 14px; margin: 24px 0;">
+                         ⚠️ <strong>Important:</strong> This decision is final. Creating new accounts to circumvent this ban will result in immediate termination.
+                       </div>`
+                    : `<div style="padding: 16px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0369a1; color: #075985; font-size: 14px; margin: 24px 0;">
+                         ℹ️ Your account will remain suspended until the issue is resolved. Review our guidelines to ensure compliance upon reinstatement.
+                       </div>`
+                }
 
-                <p style="margin-top:20px; font-size:15px;">
-                    Best regards,<br />
-                    <b style="color:#007bff;">The SportPredict Team</b>
+                <!-- Closing -->
+                <p style="margin-top: 32px; margin-bottom: 0; font-size: 16px; color: #1f2937;">
+                    Best regards,<br>
+                    <strong style="color: #1a2a6c;">The SportPredict Safety Team</strong>
                 </p>
-
-                <!-- SOCIAL ICONS -->
-                <table class="center-table" cellpadding="0" cellspacing="0" style="margin:25px auto 0;">
-                    <tr>
-                        ${["FB", "TW", "IG", "IN"]
-                          .map(
-                            (i) => `<td style="padding:0 6px;">
-                                <a href="#" style="
-                                    display:inline-block;
-                                    width:36px;
-                                    height:36px;
-                                    background:#e9ecef;
-                                    border-radius:50%;
-                                    text-align:center;
-                                    line-height:36px;
-                                    font-size:12px;
-                                    color:#666;
-                                    text-decoration:none;">
-                                    ${i}
-                                </a>
-                            </td>`
-                          )
-                          .join("")}
-                    </tr>
-                </table>
 
             </td>
         </tr>
 
-        <!-- FOOTER -->
+        <!-- FOOTER - Same as AdminFreeCreditsEmail -->
         <tr>
-            <td style="background:#f8f9fa; text-align:center; padding:25px; font-size:13px; color:#666;">
-                <div style="font-size:18px; font-weight:bold; color:#007bff;">SportPredict</div>
-
-                <p style="margin:15px 0;">
-                    <a href="#" style="color:#666; text-decoration:none; padding:4px 10px;">Home</a>
-                    <a href="#" style="color:#666; text-decoration:none; padding:4px 10px;">Matches</a>
-                    <a href="#" style="color:#666; text-decoration:none; padding:4px 10px;">Privacy</a>
-                    <a href="#" style="color:#666; text-decoration:none; padding:4px 10px;">Support</a>
+            <td class="footer">
+                <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 16px;">
+                    SportPredict
+                </div>
+                
+                <p style="margin: 20px 0; line-height: 1.8; color: #e5e7eb;">
+                    📍 Predict. Win. Celebrate.<br />
+                    📧 ${supportEmail}<br />
+                    📞 ${supportPhone}
                 </p>
-
-                <p style="margin:20px 0; line-height:1.6;">
-                    📧 ${data.supportEmail || "support@sportpredict.com"}<br />
-                    📞 ${data.supportPhone || "+1 (555) 123-4567"}
-                </p>
-
-                <p style="font-size:12px; color:#999; margin-top:20px;">
-                    © ${new Date().getFullYear()} SportPredict. All rights reserved.
-                </p>
+                
+                <div class="footer-links">
+                    <a href="${appUrl}">Home</a>
+                    <a href="${appUrl}/matches">Matches</a>
+                    <a href="${appUrl}/leaderboard">Leaderboard</a>
+                    <a href="${appUrl}/privacy">Privacy</a>
+                    <a href="${appUrl}/terms">Terms</a>
+                    <a href="${appUrl}/support">Support</a>
+                </div>
+                
+                <div class="footer-copyright">
+                    © ${new Date().getFullYear()} SportPredict. All rights reserved.<br />
+                    This is an automated notification. Please do not reply to this email.
+                </div>
             </td>
         </tr>
 
     </table>
 </body>
-</html>
-`;
+</html>`;
+};
+
+export const UserWelcomeTemp = (data: any) => {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sportpredict.com";
+  const supportEmail =
+    process.env.NEXT_PUBLIC_EMAIL || "sportpredict247@gmail.com";
+  const supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (888) 123-4567";
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <title>Welcome to SportPredict - Your Prediction Journey Begins!</title>
+    
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
+        body {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+            color: #333333;
+        }
+        
+        .wrapper {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            margin: 0 auto;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .center-table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* PERFECT HEADER - Same as AdminFreeCreditsEmail */
+        .header {
+            background: linear-gradient(135deg, #1a2a6c 0%, #2c3e50 100%);
+            padding: 32px 24px;
+            text-align: center;
+            color: #ffffff;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.5px;
+        }
+        
+        .header span {
+            color: #fdbb2d;
+            font-weight: 800;
+        }
+        
+        .header p {
+            font-size: 15px;
+            opacity: 0.9;
+            margin: 0;
+            font-weight: 300;
+        }
+        
+        /* Welcome Badge */
+        .welcome-badge {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            color: white;
+            border-radius: 50px;
+            padding: 8px 24px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 10px 0;
+            box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Account Details Card */
+        .account-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 24px;
+            margin: 25px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 25px 0;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px 0;
+            color: white;
+            text-align: center;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #1f2937;
+            padding: 32px 24px;
+            text-align: center;
+            color: #e5e7eb;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .footer-links a {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #fdbb2d;
+        }
+        
+        .footer-copyright {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 16px;
+            line-height: 1.5;
+        }
+        
+        /* Button Styles */
+        .button-primary {
+            display: inline-block;
+            padding: 14px 32px;
+            background: white;
+            color: #667eea !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .button-secondary {
+            display: inline-block;
+            padding: 14px 32px;
+            background: transparent;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            text-align: center;
+            min-width: 200px;
+            border: 2px solid white;
+            transition: all 0.3s ease;
+        }
+        
+        /* Responsive Styles */
+        @media only screen and (max-width: 600px) {
+            body { 
+                padding: 12px; 
+            }
+            
+            .wrapper { 
+                width: 100% !important;
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 24px 20px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .button-primary,
+            .button-secondary {
+                width: 100%;
+                max-width: 100%;
+                margin: 8px 0;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <table class="wrapper" cellpadding="0" cellspacing="0" width="100%">
+
+        <!-- PERFECT HEADER - Same as AdminFreeCreditsEmail -->
+        <tr>
+            <td class="header">
+                <h1><span>Sport</span>Predict</h1>
+                <p>The future of sports predictions</p>
+            </td>
+        </tr>
+
+        <!-- BODY CONTENT -->
+        <tr>
+            <td style="padding: 40px 32px;">
+
+                <!-- Welcome Message -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div class="welcome-badge">
+                        🎉 WELCOME ABOARD! 🎉
+                    </div>
+                    <h2 style="font-size: 24px; color: #1f2937; margin: 15px 0 10px;">
+                        Your Winning Journey Begins Now
+                    </h2>
+                    <p style="color: #6b7280; font-size: 16px;">
+                        Join thousands of sports enthusiasts making accurate predictions
+                    </p>
+                </div>
+
+                <!-- Greeting -->
+                <h2 style="font-size: 22px; margin-bottom: 20px; color: #1f2937;">
+                    Hello ${data.username || "Valued User"},
+                </h2>
+
+                <!-- Introduction -->
+                <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin-bottom: 20px;">
+                    Welcome to SportPredict! We're absolutely thrilled to have you join our community of passionate sports fans and prediction experts.
+                </p>
+                
+                <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin-bottom: 25px;">
+                    Your account has been successfully created and you're now ready to begin your exciting prediction journey.
+                </p>
+
+                <!-- ACCOUNT DETAILS CARD -->
+                <div class="account-card">
+                    <h3 style="color: #1a2a6c; margin: 0 0 20px; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                        👤 Your Account Details
+                    </h3>
+                    
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px;">
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: 600; color: #374151; width: 40%;">Username:</td>
+                            <td style="padding: 8px 0; color: #667eea; font-weight: 700;">${
+                              data.username
+                            }</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: 600; color: #374151;">Email:</td>
+                            <td style="padding: 8px 0; color: #4b5563;">${
+                              data.email
+                            }</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: 600; color: #374151;">Mobile:</td>
+                            <td style="padding: 8px 0; color: #4b5563;">${
+                              data.mobileNumber
+                            }</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: 600; color: #374151;">Member Since:</td>
+                            <td style="padding: 8px 0; color: #4b5563;">${
+                              data.joinDate
+                            }</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: 600; color: #374151;">Status:</td>
+                            <td style="padding: 8px 0; color: #38a169; font-weight: 700;">Active ✅</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: 600; color: #374151;">Starting Credits:</td>
+                            <td style="padding: 8px 0; color: #f59e0b; font-weight: 700; font-size: 18px;">
+                                ${data.initialCredits || "100"} 🪙
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- FEATURES -->
+                <h3 style="text-align: center; font-size: 20px; font-weight: 700; color: #1f2937; margin: 30px 0 20px;">
+                    What You Can Do
+                </h3>
+
+                <div class="features-grid">
+                    <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 20px; text-align: center;">
+                        <div style="font-size: 32px; margin-bottom: 12px;">🎯</div>
+                        <div style="font-weight: 700; color: #92400e; margin-bottom: 8px;">Make Predictions</div>
+                        <p style="font-size: 14px; color: #92400e; line-height: 1.5;">
+                            Predict cricket, football & more
+                        </p>
+                    </div>
+
+                    <div style="background: #dbeafe; border: 1px solid #bfdbfe; border-radius: 10px; padding: 20px; text-align: center;">
+                        <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
+                        <div style="font-weight: 700; color: #1e40af; margin-bottom: 8px;">Track Performance</div>
+                        <p style="font-size: 14px; color: #1e40af; line-height: 1.5;">
+                            View detailed analytics
+                        </p>
+                    </div>
+
+                    <div style="background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 10px; padding: 20px; text-align: center;">
+                        <div style="font-size: 32px; margin-bottom: 12px;">🏆</div>
+                        <div style="font-weight: 700; color: #166534; margin-bottom: 8px;">Win Rewards</div>
+                        <p style="font-size: 14px; color: #166534; line-height: 1.5;">
+                            Earn credits & prizes
+                        </p>
+                    </div>
+
+                    <div style="background: #f3e8ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 20px; text-align: center;">
+                        <div style="font-size: 32px; margin-bottom: 12px;">👥</div>
+                        <div style="font-weight: 700; color: #6b21a8; margin-bottom: 8px;">Join Community</div>
+                        <p style="font-size: 14px; color: #6b21a8; line-height: 1.5;">
+                            Meet prediction experts
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CTA SECTION -->
+                <div class="cta-section">
+                    <h2 style="margin: 0 0 15px; font-size: 22px; color: white;">
+                        Ready to Start Predicting?
+                    </h2>
+                    <p style="opacity: 0.9; margin-bottom: 25px; font-size: 16px;">
+                        Jump in and make your first prediction now!
+                    </p>
+
+                    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                        <a href="${appUrl}/matches" class="button-primary">
+                            🚀 Make Your First Prediction
+                        </a>
+                        <a href="${appUrl}/dashboard" class="button-secondary">
+                            📊 Explore Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <!-- GETTING STARTED TIPS -->
+                <div style="background: #f0f9ff; border: 1px solid #e0f2fe; border-radius: 10px; padding: 24px; margin: 30px 0;">
+                    <h3 style="color: #0369a1; margin: 0 0 16px; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                        💡 Getting Started Tips
+                    </h3>
+                    <ul style="margin: 0; padding-left: 20px; color: #0c4a6e;">
+                        <li style="margin-bottom: 8px;">Start with smaller predictions to get comfortable</li>
+                        <li style="margin-bottom: 8px;">Check upcoming matches in the Matches section</li>
+                        <li style="margin-bottom: 8px;">Join prediction contests to compete with others</li>
+                        <li>Follow expert predictions to learn strategies</li>
+                    </ul>
+                </div>
+
+                <!-- SUPPORT SECTION -->
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                    <p style="font-size: 15px; color: #4b5563; margin-bottom: 16px;">
+                        Need help getting started? Our support team is here for you!
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 20px 0;">
+                        <div style="display: flex; align-items: center; gap: 8px; color: #374151;">
+                            <span>📧</span>
+                            <a href="mailto:${supportEmail}" style="color: #667eea; text-decoration: none;">
+                                ${supportEmail}
+                            </a>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; color: #374151;">
+                            <span>📱</span>
+                            <span>${supportPhone}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Closing -->
+                <p style="margin-top: 32px; font-size: 16px; color: #1f2937;">
+                    Welcome to the community!<br />
+                    <strong style="color: #667eea;">The SportPredict Team</strong>
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- FOOTER - Same as AdminFreeCreditsEmail -->
+        <tr>
+            <td class="footer">
+                <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 16px;">
+                    SportPredict
+                </div>
+                
+                <p style="margin: 20px 0; line-height: 1.8; color: #e5e7eb;">
+                    📍 Predict. Win. Celebrate.<br />
+                    📧 ${supportEmail}<br />
+                    📞 ${supportPhone}
+                </p>
+                
+                <div class="footer-links">
+                    <a href="${appUrl}">Home</a>
+                    <a href="${appUrl}/matches">Matches</a>
+                    <a href="${appUrl}/leaderboard">Leaderboard</a>
+                    <a href="${appUrl}/privacy">Privacy</a>
+                    <a href="${appUrl}/terms">Terms</a>
+                    <a href="${appUrl}/support">Support</a>
+                </div>
+                
+                <div class="footer-copyright">
+                    © ${new Date().getFullYear()} SportPredict. All rights reserved.<br />
+                    This is an automated welcome message. We're excited to have you onboard!
+                </div>
+            </td>
+        </tr>
+
+    </table>
+</body>
+</html>`;
+};
+
+export const RegistrationOTP = (a: any) => {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sportpredict.com";
+  const supportEmail =
+    process.env.NEXT_PUBLIC_EMAIL || "support@sportpredict.com";
+  const supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (888) 123-4567";
+
+  const data = {
+    ...a,
+    expiryMinutes: 5,
+    appUrl,
+    supportEmail,
+    supportPhone,
+  };
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <title>Verify Your Email - SportPredict</title>
+    
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
+        body {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+            color: #333333;
+        }
+        
+        .wrapper {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            margin: 0 auto;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .center-table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* PERFECT HEADER - Same as Other Templates */
+        .header {
+            background: linear-gradient(135deg, #1a2a6c 0%, #2c3e50 100%);
+            padding: 32px 24px;
+            text-align: center;
+            color: #ffffff;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.5px;
+        }
+        
+        .header span {
+            color: #fdbb2d;
+            font-weight: 800;
+        }
+        
+        .header p {
+            font-size: 15px;
+            opacity: 0.9;
+            margin: 0;
+            font-weight: 300;
+        }
+        
+        /* OTP Display */
+        .otp-display {
+            font-size: 40px;
+            font-weight: 700;
+            color: #1a2a6c;
+            letter-spacing: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 2px dashed #1a2a6c;
+            border-radius: 10px;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        /* OTP Container */
+        .otp-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        /* Security Notice */
+        .security-notice {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        
+        /* Button Styles */
+        .button-primary {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #1a2a6c 0%, #2c3e50 100%);
+            color: white !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(26, 42, 108, 0.3);
+        }
+        
+        /* Footer */
+        .footer {
+            background: #1f2937;
+            padding: 32px 24px;
+            text-align: center;
+            color: #e5e7eb;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .footer-links a {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #fdbb2d;
+        }
+        
+        .footer-copyright {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 16px;
+            line-height: 1.5;
+        }
+        
+        /* Responsive Styles */
+        @media only screen and (max-width: 600px) {
+            body { 
+                padding: 12px; 
+            }
+            
+            .wrapper { 
+                width: 100% !important;
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 24px 20px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .otp-display {
+                font-size: 32px;
+                letter-spacing: 6px;
+                padding: 16px;
+            }
+            
+            .otp-container {
+                padding: 20px;
+            }
+            
+            .button-primary {
+                width: 100%;
+                max-width: 100%;
+                margin: 8px 0;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <table class="wrapper" cellpadding="0" cellspacing="0" width="100%">
+
+        <!-- PERFECT HEADER - Same as Other Templates -->
+        <tr>
+            <td class="header">
+                <h1><span>Sport</span>Predict</h1>
+                <p>The future of sports predictions</p>
+            </td>
+        </tr>
+
+        <!-- BODY CONTENT -->
+        <tr>
+            <td style="padding: 40px 32px;">
+
+                <!-- Greeting -->
+                <h2 style="font-size: 22px; margin-bottom: 20px; color: #1f2937;">
+                    Hello ${a.username || "User"},
+                </h2>
+
+                <!-- Welcome Message -->
+                <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin-bottom: 20px;">
+                    Welcome to <strong style="color: #1a2a6c;">SportPredict</strong>!  
+                    To activate your account, please verify your email using the OTP below.
+                </p>
+
+                <!-- OTP CONTAINER -->
+                <div class="otp-container">
+                    <div style="color: #6b7280; font-size: 14px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                        Your Verification Code
+                    </div>
+                    
+                    <div class="otp-display">
+                        ${data.otp || "123456"}
+                    </div>
+                    
+                    <div style="font-size: 14px; color: #6b7280; margin-top: 16px;">
+                        Valid for <span style="color: #dc2626; font-weight: 700;">${
+                          data.expiryMinutes || 10
+                        } minutes</span>
+                    </div>
+                </div>
+
+                <!-- CTA BUTTON -->
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${appUrl}/verify?otp=${data.otp || "123456"}"
+                       class="button-primary">
+                        ✅ Verify & Activate Account
+                    </a>
+                </div>
+
+                <!-- SECURITY NOTICE -->
+                <div class="security-notice">
+                    <h4 style="color: #dc2626; margin: 0 0 12px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                        🔒 Security Reminder
+                    </h4>
+                    <p style="font-size: 14px; color: #7f1d1d; line-height: 1.6; margin: 0;">
+                        Never share this OTP with anyone. SportPredict will never ask for your OTP via phone, email, or text message.
+                        If you did not request this verification, please ignore this email.
+                    </p>
+                </div>
+
+                <!-- TIPS SECTION -->
+                <div style="background: #f0f9ff; border: 1px solid #e0f2fe; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                    <h4 style="color: #0369a1; margin: 0 0 12px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                        💡 Quick Tips
+                    </h4>
+                    <ul style="margin: 0; padding-left: 20px; color: #0c4a6e;">
+                        <li style="margin-bottom: 8px;">Enter this OTP on the verification page to activate your account</li>
+                        <li style="margin-bottom: 8px;">The OTP expires in ${
+                          data.expiryMinutes || 10
+                        } minutes</li>
+                        <li>If OTP expires, request a new one from the login page</li>
+                    </ul>
+                </div>
+
+                <!-- SUPPORT SECTION -->
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                    <p style="font-size: 15px; color: #4b5563; margin-bottom: 16px;">
+                        Having trouble with verification? Our support team is here to help!
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 20px 0;">
+                        <div style="display: flex; align-items: center; gap: 8px; color: #374151;">
+                            <span>📧</span>
+                            <a href="mailto:${supportEmail}" style="color: #667eea; text-decoration: none;">
+                                ${supportEmail}
+                            </a>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; color: #374151;">
+                            <span>📱</span>
+                            <span>${supportPhone}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Closing -->
+                <p style="margin-top: 32px; font-size: 16px; color: #1f2937;">
+                    Welcome aboard!<br />
+                    <strong style="color: #1a2a6c;">The SportPredict Team</strong>
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- FOOTER - Same as Other Templates -->
+        <tr>
+            <td class="footer">
+                <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 16px;">
+                    SportPredict
+                </div>
+                
+                <p style="margin: 20px 0; line-height: 1.8; color: #e5e7eb;">
+                    📍 Predict. Win. Celebrate.<br />
+                    📧 ${supportEmail}<br />
+                    📞 ${supportPhone}
+                </p>
+                
+                <div class="footer-links">
+                    <a href="${appUrl}">Home</a>
+                    <a href="${appUrl}/matches">Matches</a>
+                    <a href="${appUrl}/leaderboard">Leaderboard</a>
+                    <a href="${appUrl}/privacy">Privacy</a>
+                    <a href="${appUrl}/terms">Terms</a>
+                    <a href="${appUrl}/support">Support</a>
+                </div>
+                
+                <div class="footer-copyright">
+                    © ${new Date().getFullYear()} SportPredict. All rights reserved.<br />
+                    This is an automated verification email. Please do not reply to this message.
+                </div>
+            </td>
+        </tr>
+
+    </table>
+</body>
+</html>`;
 };
 
 export const AdminFreeCreditsEmail = (data: {
@@ -857,18 +1325,32 @@ export const AdminFreeCreditsEmail = (data: {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🎁 Free Credits Added to Your Account!</title>
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <title>🎁 Free Credits Added to Your SportPredict Account!</title>
+    
     <style>
-        body, table, td {
+        /* Reset and Base Styles */
+        * {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
+        body {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
             color: #333333;
         }
-        body {
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
+        
         .wrapper {
             width: 100%;
             max-width: 600px;
@@ -877,88 +1359,224 @@ export const AdminFreeCreditsEmail = (data: {
             border-radius: 12px;
             border: 1px solid #e0e0e0;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
+        
         .center-table {
             margin-left: auto;
             margin-right: auto;
         }
+        
+        /* PERFECT HEADER - Same as previous templates */
         .header {
-            padding: 25px 20px;
+            background: linear-gradient(135deg, #1a2a6c 0%, #2c3e50 100%);
+            padding: 32px 24px;
             text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            color: #ffffff;
         }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.5px;
+        }
+        
+        .header span {
+            color: #fdbb2d;
+            font-weight: 800;
+        }
+        
+        .header p {
+            font-size: 15px;
+            opacity: 0.9;
+            margin: 0;
+            font-weight: 300;
+        }
+        
+        /* Credits Display */
         .credits-badge {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
             border-radius: 50px;
-            padding: 8px 24px;
+            padding: 12px 32px;
             display: inline-block;
             font-weight: bold;
-            font-size: 24px;
+            font-size: 28px;
             margin: 10px 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.3);
         }
-        .expiry-notice {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
+        
+        /* Footer */
+        .footer {
+            background: #1f2937;
+            padding: 32px 24px;
+            text-align: center;
+            color: #e5e7eb;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .footer-links a {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #fdbb2d;
+        }
+        
+        .footer-copyright {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 16px;
+            line-height: 1.5;
+        }
+        
+        /* Button Styles */
+        .button-primary {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white !important;
+            text-decoration: none;
             border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
+            font-weight: 600;
+            font-size: 15px;
+            text-align: center;
+            min-width: 180px;
+            transition: all 0.3s ease;
         }
+        
+        .button-secondary {
+            display: inline-block;
+            padding: 14px 32px;
+            background: #667eea;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            text-align: center;
+            min-width: 180px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Responsive Styles */
         @media only screen and (max-width: 600px) {
-            body { padding: 10px; }
-            .wrapper { width: 100% !important; }
-            .credits-badge { font-size: 20px; padding: 6px 20px; }
+            body { 
+                padding: 12px; 
+            }
+            
+            .wrapper { 
+                width: 100% !important;
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 24px 20px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .credits-badge { 
+                font-size: 22px; 
+                padding: 10px 24px; 
+            }
+            
+            .button-primary,
+            .button-secondary {
+                width: 100%;
+                max-width: 100%;
+                margin: 8px 0;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+        
+        /* Additional Styles */
+        .reason-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border-left: 4px solid #764ba2;
+        }
+        
+        .usage-guide {
+            background: #fff5e6;
+            border: 1px solid #ffcc80;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        
+        .terms-notice {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .contact-support {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
     </style>
 </head>
+
 <body>
     <table class="wrapper" cellpadding="0" cellspacing="0" width="100%">
 
-        <!-- HEADER -->
+        <!-- PERFECT HEADER - Same as Previous Templates -->
         <tr>
             <td class="header">
-                <table class="center-table" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td align="center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; font-size: 32px;">
-                            🎁
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center" style="padding-top: 15px;">
-                            <span style="font-size: 32px; font-weight: bold; color: white;">
-                                Free Credits Added!
-                            </span>
-                        </td>
-                    </tr>
-                </table>
+                <h1><span>Sport</span>Predict</h1>
+                <p>The future of sports predictions</p>
             </td>
         </tr>
 
-        <!-- BODY -->
+        <!-- BODY CONTENT -->
         <tr>
-            <td style="padding: 30px;">
+            <td style="padding: 40px 32px;">
 
-                <h2 style="font-size: 22px; margin-bottom: 20px; color: #333;">
+                <!-- Greeting -->
+                <h2 style="font-size: 22px; margin-bottom: 20px; color: #1f2937;">
                     Hello ${user.name || "Valued User"},
                 </h2>
 
-                <p style="font-size: 16px; line-height: 1.6; color: #555; margin-bottom: 25px;">
+                <!-- Introduction -->
+                <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin-bottom: 25px;">
                     Great news! Our admin team has added <strong style="color: #f5576c;">${totalCreditsAdded} free credits</strong> to your SportPredict account.
                 </p>
 
                 <!-- CREDITS DISPLAY -->
                 <table class="center-table" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
                     <tr>
-                        <td style="padding: 35px 25px; text-align: center;">
-                            <div style="font-size: 16px; opacity: 0.9; margin-bottom: 10px;">
+                        <td style="padding: 40px 25px; text-align: center;">
+                            <div style="font-size: 16px; opacity: 0.9; margin-bottom: 10px; letter-spacing: 1px;">
                                 🎉 YOUR NEW CREDITS 🎉
                             </div>
                             <div class="credits-badge">
                                 ${credits} CREDITS
                             </div>
-                            <div style="font-size: 14px; opacity: 0.8; margin-top: 15px;">
+                            <div style="font-size: 14px; opacity: 0.9; margin-top: 15px;">
                                 Added on ${new Date().toLocaleDateString(
                                   "en-US",
                                   {
@@ -974,63 +1592,64 @@ export const AdminFreeCreditsEmail = (data: {
                 </table>
 
                 <!-- REASON SECTION -->
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #764ba2;">
-                    <h4 style="color: #764ba2; margin: 0 0 10px;">Why did you receive these credits?</h4>
-                    <p style="font-size: 15px; color: #555; line-height: 1.6; margin: 0;">
+                <div class="reason-box">
+                    <h4 style="color: #764ba2; margin: 0 0 12px; font-size: 18px;">Why did you receive these credits?</h4>
+                    <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0;">
                         ${reason}
                     </p>
-                    <p style="font-size: 14px; color: #666; margin-top: 10px; font-style: italic;">
+                    <p style="font-size: 14px; color: #6b7280; margin-top: 12px; font-style: italic;">
                         — From ${adminName}
                     </p>
                 </div>
 
-                <!-- EXPIRY NOTICE -->
-                
-
                 <!-- HOW TO USE -->
-                <div style="background: #fff5e6; border: 1px solid #ffcc80; padding: 20px; border-radius: 8px; margin: 25px 0;">
-                    <h4 style="color: #e65100; margin: 0 0 15px;">🚀 How to Use Your Credits:</h4>
+                <div class="usage-guide">
+                    <h4 style="color: #e65100; margin: 0 0 20px; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                        <span>🚀</span> How to Use Your Credits:
+                    </h4>
                     <table cellpadding="0" cellspacing="0" width="100%">
                         <tr>
-                            <td valign="top" width="40" style="padding: 5px 0;">
-                                <div style="background: #e65100; color: white; width: 30px; height: 30px; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold;">1</div>
+                            <td valign="top" width="48" style="padding: 8px 0;">
+                                <div style="background: #e65100; color: white; width: 36px; height: 36px; border-radius: 50%; text-align: center; line-height: 36px; font-weight: bold; font-size: 16px;">1</div>
                             </td>
-                            <td style="padding: 5px 0 5px 15px;">
-                                <strong style="color: #333;">Join Predictions</strong><br>
-                                <span style="color: #666; font-size: 14px;">Use credits to enter prediction contests</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td valign="top" width="40" style="padding: 5px 0;">
-                                <div style="background: #e65100; color: white; width: 30px; height: 30px; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold;">2</div>
-                            </td>
-                            <td style="padding: 5px 0 5px 15px;">
-                                <strong style="color: #333;">Win Real Rewards</strong><br>
-                                <span style="color: #666; font-size: 14px;">Make accurate predictions to win prizes</span>
+                            <td style="padding: 8px 0 8px 16px;">
+                                <strong style="color: #1f2937; font-size: 16px;">Join Predictions</strong><br>
+                                <span style="color: #6b7280; font-size: 14px;">Use credits to enter prediction contests and matches</span>
                             </td>
                         </tr>
                         <tr>
-                            <td valign="top" width="40" style="padding: 5px 0;">
-                                <div style="background: #e65100; color: white; width: 30px; height: 30px; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold;">3</div>
+                            <td valign="top" width="48" style="padding: 8px 0;">
+                                <div style="background: #e65100; color: white; width: 36px; height: 36px; border-radius: 50%; text-align: center; line-height: 36px; font-weight: bold; font-size: 16px;">2</div>
                             </td>
-                            <td style="padding: 5px 0 5px 15px;">
-                                <strong style="color: #333;">Check Balance</strong><br>
-                                <span style="color: #666; font-size: 14px;">Visit your dashboard to see available credits</span>
+                            <td style="padding: 8px 0 8px 16px;">
+                                <strong style="color: #1f2937; font-size: 16px;">Win Real Rewards</strong><br>
+                                <span style="color: #6b7280; font-size: 14px;">Make accurate predictions to win exciting prizes</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td valign="top" width="48" style="padding: 8px 0;">
+                                <div style="background: #e65100; color: white; width: 36px; height: 36px; border-radius: 50%; text-align: center; line-height: 36px; font-weight: bold; font-size: 16px;">3</div>
+                            </td>
+                            <td style="padding: 8px 0 8px 16px;">
+                                <strong style="color: #1f2937; font-size: 16px;">Check Balance</strong><br>
+                                <span style="color: #6b7280; font-size: 14px;">Visit your dashboard anytime to track available credits</span>
                             </td>
                         </tr>
                     </table>
                 </div>
 
                 <!-- CTA BUTTONS -->
-                <table cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
+                <table cellpadding="0" cellspacing="0" width="100%" style="margin: 32px 0;">
                     <tr>
                         <td align="center">
                             <a href="${appUrl}/dashboard"
-                               style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-size: 16px; font-weight: bold; padding: 16px 40px; text-decoration: none; border-radius: 50px; display: inline-block; margin: 0 10px 10px 0; box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);">
+                               class="button-primary"
+                               style="margin: 0 10px 10px 0;">
                                 🚀 Start Predicting
                             </a>
                             <a href="${appUrl}/account/credits"
-                               style="background: #667eea; color: white; font-size: 16px; font-weight: bold; padding: 16px 40px; text-decoration: none; border-radius: 50px; display: inline-block; margin: 0 0 10px 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                               class="button-secondary"
+                               style="margin: 0 0 10px 10px;">
                                 💰 View Credits
                             </a>
                         </td>
@@ -1038,26 +1657,27 @@ export const AdminFreeCreditsEmail = (data: {
                 </table>
 
                 <!-- TERMS -->
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0; text-align: center;">
-                    <p style="font-size: 13px; color: #666; margin: 0; line-height: 1.5;">
+                <div class="terms-notice">
+                    <p style="font-size: 13px; color: #6b7280; margin: 0; line-height: 1.6;">
                         By using these credits, you agree to our 
-                        <a href="${termsUrl}" style="color: #667eea; text-decoration: none; font-weight: bold;">Terms & Conditions</a>.
+                        <a href="${termsUrl}" style="color: #667eea; text-decoration: none; font-weight: 600;">Terms & Conditions</a>.
                         Credits are non-transferable and non-refundable.
                     </p>
                 </div>
 
                 <!-- CONTACT SUPPORT -->
-                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                    <p style="font-size: 15px; color: #555; margin-bottom: 15px;">
+                <div class="contact-support">
+                    <p style="font-size: 15px; color: #4b5563; margin-bottom: 16px;">
                         Questions about your credits?
                     </p>
                     <a href="mailto:${supportEmail}"
-                       style="display: inline-block; background: #333; color: white; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-size: 14px;">
+                       style="display: inline-block; background: #374151; color: white; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 600; transition: background 0.3s ease;">
                         📧 Contact Support
                     </a>
                 </div>
 
-                <p style="margin-top: 30px; font-size: 16px;">
+                <!-- Closing -->
+                <p style="margin-top: 32px; font-size: 16px; color: #1f2937;">
                     Happy predicting!<br />
                     <strong style="color: #667eea;">The SportPredict Team</strong>
                 </p>
@@ -1067,26 +1687,30 @@ export const AdminFreeCreditsEmail = (data: {
 
         <!-- FOOTER -->
         <tr>
-            <td style="background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%); text-align: center; padding: 30px; font-size: 14px; color: rgba(255,255,255,0.8);">
-                <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 15px;">SportPredict</div>
+            <td class="footer">
+                <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 16px;">
+                    SportPredict
+                </div>
                 
-                <p style="margin: 20px 0; line-height: 1.8;">
+                <p style="margin: 20px 0; line-height: 1.8; color: #e5e7eb;">
                     📍 Predict. Win. Celebrate.<br />
                     📧 ${supportEmail || "support@sportpredict.com"}<br />
                     📞 ${supportPhone || "+1 (555) 123-4567"}
                 </p>
                 
-                <div style="margin: 25px 0;">
-                    <a href="${appUrl}" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 8px 15px; margin: 0 5px;">Home</a>
-                    <a href="${appUrl}/matches" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 8px 15px; margin: 0 5px;">Matches</a>
-                    <a href="${appUrl}/leaderboard" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 8px 15px; margin: 0 5px;">Leaderboard</a>
-                    <a href="${appUrl}/support" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 8px 15px; margin: 0 5px;">Support</a>
+                <div class="footer-links">
+                    <a href="${appUrl}">Home</a>
+                    <a href="${appUrl}/matches">Matches</a>
+                    <a href="${appUrl}/leaderboard">Leaderboard</a>
+                    <a href="${appUrl}/privacy">Privacy</a>
+                    <a href="${appUrl}/terms">Terms</a>
+                    <a href="${appUrl}/support">Support</a>
                 </div>
                 
-                <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div class="footer-copyright">
                     © ${new Date().getFullYear()} SportPredict. All rights reserved.<br />
                     This is an automated message, please do not reply directly to this email.
-                </p>
+                </div>
             </td>
         </tr>
 
