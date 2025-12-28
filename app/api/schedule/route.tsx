@@ -3,6 +3,7 @@ import moment from "moment-timezone";
 import { CricBuzzList } from "./CricBuzzList";
 import { ScoreCard } from "./ScoreCard";
 import { extractAndTransformSchedule } from "./CricBuzzScarbList";
+import { CrexList } from "./CrexList";
 
 export async function POST(request: Request) {
   try {
@@ -93,6 +94,13 @@ export async function POST(request: Request) {
     //     : "LIVE",
     //   score: null,
     // }));
+
+    // let crexData = await CrexList(fromDate, "");
+    // const prepareData = modifyResult.map((item: any) => {
+    //   const matchedCrex = crexData.find(
+    //     (crex: any) => crex.matchId === item.matchId
+    //   );
+    // });
 
     return Response.json(
       {
