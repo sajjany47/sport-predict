@@ -4,6 +4,7 @@ import { CricBuzzList } from "./CricBuzzList";
 import { ScoreCard } from "./ScoreCard";
 import { extractAndTransformSchedule } from "./CricBuzzScarbList";
 import { CrexList } from "./CrexList";
+import { CrexDetails } from "../match-details/CrexDetails";
 
 export async function POST(request: Request) {
   try {
@@ -124,6 +125,10 @@ export async function POST(request: Request) {
         crexUrl: matchedCrex ? normalizeCrexUrl(matchedCrex.url) : null,
       };
     });
+
+    // const data: any = await CrexDetails(
+    //   "https://crex.com/scoreboard/VHG/1QU/9th-Match/MX/N1/dsg-vs-jsk-9th-match-sa20-league-2025-26/info"
+    // );
 
     return Response.json(
       {
