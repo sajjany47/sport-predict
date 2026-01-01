@@ -1,113 +1,90 @@
 import { GetHtml } from "@/lib/utils";
-import { Target } from "@/types/CricbuzzListType";
 
 export const CrexList = async (
   fromDate: Date,
   timeZone: string
-): Promise<Target[]> => {
-  const $ = await GetHtml("https://crex.com/fixtures/match-list");
+): Promise<any> => {
+  const $: any = await GetHtml("https://crex.com/fixtures/match-list");
 
-  const results: Target[] = [];
+  const matches: any = [];
 
-  $(".date-wise-matches-card").each((_, dateBlock) => {
-    const dateText = $(dateBlock).find(".date div").first().text().trim(); // e.g. Sun, 28 Dec 2025
+  $(".date-wise-matches-card > div").each((_, dateBlock) => {
+    const matchDate = $(dateBlock).find(".date div").text().trim();
 
     $(dateBlock)
       .find("li.match-card-container")
       .each((_, matchEl) => {
         const link = $(matchEl).find("a.match-card-wrapper").attr("href");
 
-        if (!link) return;
+        const teamEls = $(matchEl).find(".team-name");
+        const scoreEls = $(matchEl).find(".team-score");
+        const imgEls = $(matchEl).find(".team img");
 
-        const fullUrl = `https://crex.com${link}`;
+        const team1 = $(teamEls[0]).text().trim();
+        const team2 = $(teamEls[1]).text().trim();
 
-        // 🔹 matchId from URL
-        // /scoreboard/Z2R/27O/8th-Match/O4/SY/...
-        const urlParts = link.split("/");
-        const matchId = parseInt(urlParts[2], 36) || Date.now();
+        const score1 = $(scoreEls[0]).text().trim() || null;
+        const score2 = $(scoreEls[1]).text().trim() || null;
 
-        // 🔹 status
-        let status: string | null = "UPCOMING";
-        if ($(matchEl).find(".liveTag").length) status = "LIVE";
-        if ($(matchEl).find(".result").length) status = "COMPLETED";
+        const team1Flag = $(imgEls[0]).attr("src") || null;
+        const team2Flag = $(imgEls[1]).attr("src") || null;
 
-        // 🔹 description & series
-        const matchDescription =
-          $(matchEl)
-            .find(".time span")
-            .map((_, el) => $(el).text().trim())
-            .get()
-            .join(" ") || null;
+        const isLive = $(matchEl).find(".liveTag").length > 0;
+        const isUpcoming = $(matchEl).find(".not-started").length > 0;
 
-        const seriesText = $(matchEl)
-          .find(".time")
-          .text()
-          .replace(matchDescription ?? "", "")
-          .trim();
+        let status: "LIVE" | "UPCOMING" | "COMPLETED";
+        if (isLive) status = "LIVE";
+        else if (isUpcoming) status = "UPCOMING";
+        else status = "COMPLETED";
 
-        // 🔹 format
-        const format = matchDescription?.includes("ODI")
-          ? "ODI"
-          : matchDescription?.includes("T20")
-          ? "T20"
-          : null;
+        const result =
+          $(matchEl).find(".result span").first().text().trim() || null;
 
-        // 🔹 teams
-        const teams: Target["teams"] = [];
+        const startTime = $(matchEl).find(".start-text").text().trim() || null;
 
-        $(matchEl)
-          .find(".team")
-          .each((_, teamEl) => {
-            const teamName = $(teamEl).find(".team-name").first().text().trim();
+        const description =
+          $(matchEl).find(".time").text().replace(/\s+/g, " ").trim() || null;
+        // const result =
+        //   $(matchEl).find(".result span").first().text().trim() || null;
 
-            if (!teamName) return;
-
-            const img = $(teamEl).find("img").attr("src") || null;
-
-            // teamId from image URL (Teams/O4.png)
-            let squadId = 0;
-            if (img) {
-              const match = img.match(/Teams\/(.+)\.png/);
-              if (match) squadId = parseInt(match[1], 36);
-            }
-
-            teams.push({
-              squadId,
-              teamName,
-              teamShortName:
-                teamName.length <= 4
-                  ? teamName
-                  : teamName
-                      .split(" ")
-                      .map((w) => w[0])
-                      .join("")
-                      .toUpperCase(),
-              teamFlagUrl: img,
-              isWinner: null,
-              color: null,
-              cricketScore: null,
-              squadNo: null,
-            });
-          });
-
-        results.push({
-          tourId: null,
-          tourName: seriesText || null,
-          matchId,
-          matchName: null,
-          matchDescription,
-          startTime: dateText ? new Date(dateText).getTime().toString() : null,
-          endTime: null,
+        matches.push({
+          matchId: link?.split("/")[3] || null,
+          url: link ? `https://crex.com${link}` : null,
+          matchName: `${team1} vs ${team2}`,
+          matchDescription: description,
+          startTime,
+          matchDate,
           status,
-          venue: null,
-          tour: "International",
-          format,
+          format: description?.includes("T20")
+            ? "T20"
+            : description?.includes("ODI")
+            ? "ODI"
+            : null,
           sport: "cricket",
-          teams,
-          url: fullUrl,
+          teams: [
+            {
+              teamName: team1,
+              teamShortName: team1.split(" ")[0],
+              teamFlagUrl: team1Flag,
+              cricketScore: score1,
+            },
+            {
+              teamName: team2,
+              teamShortName: team2.split(" ")[0],
+              teamFlagUrl: team2Flag,
+              cricketScore: score2,
+            },
+          ],
+          score: {
+            score: [
+              score1 ? { team: team1, run: score1 } : null,
+              score2 ? { team: team2, run: score2 } : null,
+            ].filter(Boolean),
+            result: result || "",
+          },
         });
       });
   });
 
-  return results;
+  return matches;
 };

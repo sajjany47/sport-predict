@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     //   score: null,
     // }));
 
-    // let crexData = await CrexList(fromDate, "");
+    let crexData = await CrexList(fromDate, "");
     // const prepareData = modifyResult.map((item: any) => {
     //   const matchedCrex = crexData.find(
     //     (crex: any) => crex.matchId === item.matchId
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
 
     return Response.json(
       {
-        data: modifyResult,
+        data: crexData,
         date: moment(fromDate).format("DD-MM-YYYY"),
         success: true,
         message: "Schedule fetched successfully",
