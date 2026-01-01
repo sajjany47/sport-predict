@@ -95,6 +95,8 @@ export async function POST(request: Request) {
     //   score: null,
     // }));
 
+    const normalizeCrexUrl = (url: string) => url.replace(/\/live$/, "/info");
+
     let crexData = await CrexList(fromDate, "");
     const prepareData = modifyResult.map((item: any) => {
       let cricbuzzTeam1 = item?.teams[0];
@@ -113,11 +115,14 @@ export async function POST(request: Request) {
           cricbuzzTeam2?.teamShortName.toLowerCase() ===
             crexTeam2?.teamShortName.toLowerCase()
         ) {
-          return { url: crxItem.url, matchId: crxItem.matchId };
+          return { url: crxItem.url };
         }
       });
 
-      return { ...data, crexUrl: matchedCrex ? matchedCrex.url : null };
+      return {
+        ...data,
+        crexUrl: matchedCrex ? normalizeCrexUrl(matchedCrex.url) : null,
+      };
     });
 
     return Response.json(
