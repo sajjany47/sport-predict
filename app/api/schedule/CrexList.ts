@@ -8,12 +8,12 @@ export const CrexList = async (
 
   const matches: any = [];
 
-  $(".date-wise-matches-card > div").each((_, dateBlock) => {
+  $(".date-wise-matches-card > div").each((_: any, dateBlock: any) => {
     const matchDate = $(dateBlock).find(".date div").text().trim();
 
     $(dateBlock)
       .find("li.match-card-container")
-      .each((_, matchEl) => {
+      .each((_: any, matchEl: any) => {
         const link = $(matchEl).find("a.match-card-wrapper").attr("href");
 
         const teamEls = $(matchEl).find(".team-name");

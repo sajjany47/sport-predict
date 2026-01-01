@@ -96,15 +96,33 @@ export async function POST(request: Request) {
     // }));
 
     let crexData = await CrexList(fromDate, "");
-    // const prepareData = modifyResult.map((item: any) => {
-    //   const matchedCrex = crexData.find(
-    //     (crex: any) => crex.matchId === item.matchId
-    //   );
-    // });
+    const prepareData = modifyResult.map((item: any) => {
+      let cricbuzzTeam1 = item?.teams[0];
+      let cricbuzzTeam2 = item.teams[1];
+      let data = item;
+      let matchedCrex = crexData.find((crxItem: any) => {
+        let crexTeam1 = crxItem?.teams[0];
+        let crexTeam2 = crxItem?.teams[1];
+        if (
+          cricbuzzTeam1?.teamName?.toLowerCase() ===
+            crexTeam1?.teamName?.toLowerCase() ||
+          cricbuzzTeam1?.teamShortName.toLowerCase() ===
+            crexTeam1?.teamShortName.toLowerCase() ||
+          cricbuzzTeam2?.teamName?.toLowerCase() ===
+            crexTeam2?.teamName?.toLowerCase() ||
+          cricbuzzTeam2?.teamShortName.toLowerCase() ===
+            crexTeam2?.teamShortName.toLowerCase()
+        ) {
+          return { url: crxItem.url, matchId: crxItem.matchId };
+        }
+      });
+
+      return { ...data, crexUrl: matchedCrex ? matchedCrex.url : null };
+    });
 
     return Response.json(
       {
-        data: crexData,
+        data: prepareData,
         date: moment(fromDate).format("DD-MM-YYYY"),
         success: true,
         message: "Schedule fetched successfully",
