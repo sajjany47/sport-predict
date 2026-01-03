@@ -32,13 +32,13 @@ import {
   TargetIcon,
 } from "lucide-react";
 
-import SquadDialoge from "./SquadDialoge";
 import CustomLoader from "@/components/ui/CustomLoader";
 import AIPredictionModal from "./ai-prediction-modal";
 import { FetchMatchDetails } from "../MatchService";
 import toast from "react-hot-toast";
 import OverviewTab from "./OverviewTab";
 import CrexOverviewTab from "./CrexOverviewTab";
+import PlayerCard from "./SquadDialoge";
 
 const MatchDetailsPage = () => {
   const params = useParams();
@@ -169,7 +169,7 @@ const MatchDetailsPage = () => {
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
-        <div className="container mx-auto  max-w-7xl">
+        <div className="container ">
           {/* Back Button */}
           <div className="mb-6">
             <Button
@@ -652,8 +652,15 @@ const MatchDetailsPage = () => {
                               <TabsContent value="playing" className="mt-4">
                                 {squad.playingPlayer &&
                                 squad.playingPlayer.length > 0 ? (
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                                    <SquadDialoge data={squad.playingPlayer} />
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 md:gap-4">
+                                    {squad.playingPlayer.map(
+                                      (player: any, index: number) => (
+                                        <PlayerCard
+                                          key={index}
+                                          player={player}
+                                        />
+                                      )
+                                    )}
                                   </div>
                                 ) : (
                                   <div className="text-center py-6">
@@ -668,10 +675,20 @@ const MatchDetailsPage = () => {
                               <TabsContent value="bench" className="mt-4">
                                 {squad.benchPlayer &&
                                 squad.benchPlayer.length > 0 ? (
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                                    <SquadDialoge data={squad.benchPlayer} />
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
+                                    {squad.benchPlayer.map(
+                                      (player: any, index: any) => (
+                                        <PlayerCard
+                                          key={index}
+                                          player={player}
+                                        />
+                                      )
+                                    )}
                                   </div>
                                 ) : (
+                                  // <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                                  //   <SquadDialoge data={squad.benchPlayer} />
+                                  // </div>
                                   <div className="text-center py-6">
                                     <Users className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mx-auto mb-3" />
                                     <p className="text-gray-500 text-sm">
@@ -781,7 +798,11 @@ const MatchDetailsPage = () => {
       <AIPredictionModal
         isOpen={isPredictionModalOpen}
         onClose={() => setIsPredictionModalOpen(false)}
-        match={{ ...matchData, matchInfo: selectedMatch }}
+        match={{
+          ...matchData,
+          matchInfo: selectedMatch,
+          crexOverallStats: matchData.crexOverallStats,
+        }}
       />
     </>
   );

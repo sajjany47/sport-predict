@@ -313,7 +313,7 @@ const RegisterPage = () => {
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="email" className="text-gray-700">
-                            Email Address
+                            Email/Gmail Address
                           </Label>
                           <div className="relative">
                             <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
