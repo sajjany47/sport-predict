@@ -321,7 +321,7 @@ const RegisterPage = () => {
                               id="email"
                               type="email"
                               name="email"
-                              placeholder="Enter your email"
+                              placeholder="dummy123@gmail.com"
                               className="pl-10 bg-white"
                               onChange={(e) => {
                                 setEmail(e.target.value);

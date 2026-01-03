@@ -7,18 +7,18 @@ export const CrexDetails = async (url: string): Promise<any> => {
      1️⃣ TEAMS (DYNAMIC) + RECENT 5 MATCHES
   ====================================================== */
 
-  const teams: Record<string, any> = {};
+  const teamsMap: Record<string, any> = {};
 
-  $(".format-match-exp").each((_, el) => {
+  $(".format-match-exp").each((_: any, el: any) => {
     const teamId = $(el).attr("id");
     const header = $(el).prev(".format-match");
 
     if (!teamId) return;
 
-    teams[teamId] = {
+    teamsMap[teamId] = {
       teamId,
       teamName: header.find(".form-team-name").text().trim(),
-      teamFlag: header.find(".form-team-img").attr("src"),
+      teamFlag: header.find(".form-team-img").attr("src") || null,
       recent5: [],
     };
   });
@@ -26,17 +26,17 @@ export const CrexDetails = async (url: string): Promise<any> => {
   const getTeamRecentMatches = (teamId: string) => {
     const matches: any[] = [];
 
-    $(`#${teamId} a.team-form-card`).each((_, el) => {
+    $(`#${teamId} a.team-form-card`).each((_: any, el: any) => {
       const teamScores: any[] = [];
 
       $(el)
         .find(".form-team-detail")
-        .each((_, t) => {
+        .each((_: any, t: any) => {
           teamScores.push({
             team: $(t).find(".team-name").text().trim(),
             score: $(t).find(".team-score").text().trim(),
             overs: $(t).find(".team-over").text().trim(),
-            flag: $(t).find("img").attr("src"),
+            flag: $(t).find("img").attr("src") || null,
           });
         });
 
@@ -45,16 +45,19 @@ export const CrexDetails = async (url: string): Promise<any> => {
         series: $(el).find(".series-name").text().trim(),
         result: $(el).find(".win.match span, .loss.match span").text().trim(),
         teams: teamScores,
-        url: "https://crex.com" + $(el).attr("href"),
+        url: "https://crex.com" + ($(el).attr("href") || ""),
       });
     });
 
     return matches.slice(0, 5);
   };
 
-  Object.keys(teams).forEach((teamId) => {
-    teams[teamId].recent5 = getTeamRecentMatches(teamId);
+  Object.keys(teamsMap).forEach((teamId) => {
+    teamsMap[teamId].recent5 = getTeamRecentMatches(teamId);
   });
+
+  // 🔥 CONVERT OBJECT → ARRAY (THIS IS WHAT YOU NEED)
+  const teams = Object.values(teamsMap);
 
   /* =====================================================
      2️⃣ HEAD TO HEAD (LAST MATCHES)
@@ -62,7 +65,7 @@ export const CrexDetails = async (url: string): Promise<any> => {
 
   const h2h: any[] = [];
 
-  $(".global-match-card.gmc-without-logo").each((_, el) => {
+  $(".global-match-card.gmc-without-logo").each((_: any, el: any) => {
     h2h.push({
       team1: {
         name: $(el).find(".global-match-team .team-name").first().text().trim(),
@@ -84,7 +87,7 @@ export const CrexDetails = async (url: string): Promise<any> => {
       },
       result: $(el).find(".match-dec-text").text().trim(),
       series: $(el).find(".series-name").text().trim(),
-      url: "https://crex.com" + $(el).attr("href"),
+      url: "https://crex.com" + ($(el).attr("href") || ""),
     });
   });
 
@@ -94,13 +97,13 @@ export const CrexDetails = async (url: string): Promise<any> => {
 
   const pointsTable: any[] = [];
 
-  $("#table tbody tr").each((_, row) => {
+  $("#table tbody tr").each((_: any, row: any) => {
     const td = $(row).find("td");
     if (td.length < 6) return;
 
     pointsTable.push({
       team: $(td[0]).text().trim(),
-      flag: $(td[0]).find("img").attr("src"),
+      flag: $(td[0]).find("img").attr("src") || null,
       played: $(td[1]).text().trim(),
       won: $(td[2]).text().trim(),
       lost: $(td[3]).text().trim(),
@@ -115,11 +118,14 @@ export const CrexDetails = async (url: string): Promise<any> => {
 
   const teamComparison: any[] = [];
 
-  $(".table.colHeader tbody tr").each((_, row) => {
+  $(".table.colHeader tbody tr").each((_: any, row: any) => {
+    const td = $(row).find("td");
+    if (td.length !== 3) return;
+
     teamComparison.push({
-      team1: $(row).find("td").first().text().trim(),
-      metric: $(row).find("td").eq(1).text().trim(),
-      team2: $(row).find("td").last().text().trim(),
+      team1: td.eq(0).text().trim(),
+      metric: td.eq(1).text().trim(),
+      team2: td.eq(2).text().trim(),
     });
   });
 
@@ -148,7 +154,7 @@ export const CrexDetails = async (url: string): Promise<any> => {
   };
 
   /* =====================================================
-     7️⃣ PACE vs SPIN (LAST 10)
+     7️⃣ PACE vs SPIN
   ====================================================== */
 
   const paceVsSpin = {
@@ -164,7 +170,7 @@ export const CrexDetails = async (url: string): Promise<any> => {
 
   const venueRecentMatches: any[] = [];
 
-  $(".global-match-card:not(.gmc-without-logo)").each((_, el) => {
+  $(".global-match-card:not(.gmc-without-logo)").each((_: any, el: any) => {
     venueRecentMatches.push({
       team1: $(el).find(".global-match-team .team-name").text().trim(),
       team1Score: $(el).find(".global-match-team .team-score").text().trim(),
@@ -172,64 +178,7 @@ export const CrexDetails = async (url: string): Promise<any> => {
       team2Score: $(el).find(".global-match-end .team-score").text().trim(),
       result: $(el).find(".match-dec-text").text().trim(),
       series: $(el).find(".series-name").text().trim(),
-      url: "https://crex.com" + $(el).attr("href"),
-    });
-  });
-
-  /* =====================================================
-     8️⃣ Squad Details (IF AVAILABLE)
-  ====================================================== */
-
-  const extractPlayer = (el: any) => ({
-    name: $(el).find(".p-name").text().trim(),
-    image: $(el).find("img").first().attr("src") || "",
-    role: $(el).find(".bat-ball-type div").text().trim(),
-    url: "https://crex.com" + $(el).attr("href"),
-  });
-
-  const squadList: any[] = [];
-
-  // Team buttons (JSK / DSG)
-  $(".playingxi-button").each((index, btn) => {
-    const shortName = $(btn).text().trim();
-
-    // Team flag & full name
-    const teamHeader = $(".form-match-team")
-      .filter((_, el) =>
-        $(el).find(".form-team-name").text().includes(shortName)
-      )
-      .first();
-
-    const teamFlag = teamHeader.find(".form-team-img").attr("src") || null;
-
-    const teamName =
-      teamHeader.find(".form-team-name").text().trim() || shortName;
-
-    // Players block
-    const playerBlock = $(".playingxi-card").eq(index);
-    const players = playerBlock.find(".playingxi-card-row a");
-
-    const playingPlayer: any[] = [];
-    const benchPlayer: any[] = [];
-
-    players.each((i, el) => {
-      const player = extractPlayer(el);
-
-      // First 11 → Playing XI
-      if (i < 11) {
-        playingPlayer.push(player);
-      } else {
-        benchPlayer.push(player);
-      }
-    });
-
-    squadList.push({
-      flag: teamFlag,
-      color: null,
-      name: teamName,
-      shortName,
-      playingPlayer,
-      benchPlayer,
+      url: "https://crex.com" + ($(el).attr("href") || ""),
     });
   });
 
@@ -238,7 +187,7 @@ export const CrexDetails = async (url: string): Promise<any> => {
   ====================================================== */
 
   return {
-    teams,
+    teams, // ✅ ARRAY
     h2h,
     pointsTable,
     teamComparison,
@@ -246,6 +195,5 @@ export const CrexDetails = async (url: string): Promise<any> => {
     venueStats,
     paceVsSpin,
     venueRecentMatches,
-    squadList,
   };
 };

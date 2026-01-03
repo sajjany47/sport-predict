@@ -127,7 +127,7 @@ export async function POST(request: Request) {
     });
 
     // const data: any = await CrexDetails(
-    //   "https://crex.com/scoreboard/VHG/1QU/9th-Match/MX/N1/dsg-vs-jsk-9th-match-sa20-league-2025-26/info"
+    //   "https://crex.com/scoreboard/VDR/1VD/21st-Match/40/51/hbh-vs-syt-21st-match-big-bash-league-2025-26/info"
     // );
 
     return Response.json(

@@ -6,6 +6,7 @@ import cache from "@/lib/NodeCacheService";
 import dbConnect from "../db";
 import Stats from "../stats/StatsModel";
 import { CricSquadDetails } from "./CricSquadDetails";
+import { CrexDetails } from "./CrexDetails";
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -325,7 +326,9 @@ export async function POST(request: NextRequest) {
       const key = String(t.teamName).trim();
       errorsByTeam[key] = teamErrors[key] ?? null;
     });
-
+    const crexOverallStats = body.crexUrl
+      ? await CrexDetails(body.crexUrl)
+      : null;
     return Response.json(
       {
         data: {
@@ -346,6 +349,7 @@ export async function POST(request: NextRequest) {
               errors: errorsByTeam,
             },
           },
+          crexOverallStats: crexOverallStats,
         },
       },
       { status: 200 }

@@ -73,7 +73,8 @@ const LoginPage = () => {
           router.push("/matches");
         } else {
           sessionStorage.setItem("currentPath", "");
-          router.back();
+          // router.back();
+          router.push("/matches");
         }
       })
       .catch((error) => {
