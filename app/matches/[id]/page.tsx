@@ -557,23 +557,20 @@ const MatchDetailsPage = () => {
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger
                       value="overview"
-                      className="flex items-center gap-2 text-xs md:text-sm"
+                      className=" text-xs md:text-sm"
                     >
                       <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
                       <span className="hidden sm:inline">Overview</span>
                       <span className="sm:hidden">Stats</span>
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="squads"
-                      className="flex items-center gap-2 text-xs md:text-sm"
-                    >
+                    <TabsTrigger value="squads" className=" text-xs md:text-sm">
                       <Users className="h-3 w-3 md:h-4 md:w-4" />
                       <span className="hidden sm:inline">Squads</span>
                       <span className="sm:hidden">Teams</span>
                     </TabsTrigger>
                     <TabsTrigger
                       value="stadium"
-                      className="flex items-center gap-2 text-xs md:text-sm"
+                      className=" text-xs md:text-sm"
                     >
                       <MapPin className="h-3 w-3 md:h-4 md:w-4" />
                       <span className="hidden sm:inline">Stadium</span>

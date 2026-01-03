@@ -173,8 +173,9 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
     <div className="space-y-6">
       {/* Header with Teams and Basic Info */}
       <Card>
-        <CardContent className="">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+        <CardContent className="p-4 md:p-6">
+          {/* Desktop View (3 columns) */}
+          <div className="hidden md:flex flex-col md:flex-row justify-between items-center gap-6">
             {/* Team 1 */}
             <div className="flex flex-col items-center text-center space-y-3 flex-1">
               <div className="relative">
@@ -254,6 +255,104 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Mobile View (Single line) */}
+          <div className="md:hidden">
+            <div className="flex items-center justify-between">
+              {/* Team 1 */}
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="relative mb-2">
+                  <img
+                    src={team1.teamFlag}
+                    alt={team1.teamName}
+                    className="w-12 h-12 rounded-full border-2 border-white shadow-md"
+                  />
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-blue-600 text-[10px] px-1 py-0.5">
+                      {team1.teamId}
+                    </Badge>
+                  </div>
+                </div>
+                <h3 className="text-xs font-bold text-gray-900 truncate max-w-[80px]">
+                  {team1.teamName}
+                </h3>
+                {team1Points && (
+                  <div className="mt-1">
+                    <div className="flex items-center justify-center gap-1">
+                      <Trophy className="w-3 h-3 text-yellow-500" />
+                      <span className="text-xs font-semibold">
+                        {team1Points.points}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* VS and H2H */}
+              <div className="flex flex-col items-center mx-2">
+                <Badge className="px-3 py-1 text-sm font-bold bg-gradient-to-r from-red-500 to-orange-500 mb-1">
+                  VS
+                </Badge>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm font-bold text-blue-600">
+                    {h2hStats.team1Wins}
+                  </span>
+                  <span className="text-sm font-bold text-gray-400">-</span>
+                  <span className="text-sm font-bold text-red-600">
+                    {h2hStats.team2Wins}
+                  </span>
+                </div>
+                <p className="text-[10px] text-gray-500 mt-1">H2H</p>
+              </div>
+
+              {/* Team 2 */}
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="relative mb-2">
+                  <img
+                    src={team2.teamFlag}
+                    alt={team2.teamName}
+                    className="w-12 h-12 rounded-full border-2 border-white shadow-md"
+                  />
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-red-600 text-[10px] px-1 py-0.5">
+                      {team2.teamId}
+                    </Badge>
+                  </div>
+                </div>
+                <h3 className="text-xs font-bold text-gray-900 truncate max-w-[80px]">
+                  {team2.teamName}
+                </h3>
+                {team2Points && (
+                  <div className="mt-1">
+                    <div className="flex items-center justify-center gap-1">
+                      <Trophy className="w-3 h-3 text-yellow-500" />
+                      <span className="text-xs font-semibold">
+                        {team2Points.points}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Additional info for mobile */}
+            {team1Points && team2Points && (
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <div className="text-center p-2 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-gray-500">NRR</p>
+                  <p className="text-sm font-bold text-blue-600">
+                    {team1Points.nrr}
+                  </p>
+                </div>
+                <div className="text-center p-2 bg-red-50 rounded-lg">
+                  <p className="text-xs text-gray-500">NRR</p>
+                  <p className="text-sm font-bold text-red-600">
+                    {team2Points.nrr}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
