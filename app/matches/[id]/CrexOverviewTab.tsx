@@ -173,7 +173,7 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
     <div className="space-y-6">
       {/* Header with Teams and Basic Info */}
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             {/* Team 1 */}
             <div className="flex flex-col items-center text-center space-y-3 flex-1">
