@@ -102,6 +102,8 @@ export const POST = async (req: NextRequest) => {
             { headers, timeout: 10000 }
           );
           paymentDetails = paymentsResp.data;
+          prepareData.paymentStatus = true;
+          prepareData.status = "completed";
         } catch (e: any) {
           // Do not fail processing if payments fetch fails; we still mark PAID but log.
           console.warn(
@@ -109,9 +111,9 @@ export const POST = async (req: NextRequest) => {
             e?.response?.data || e.message
           );
         }
+        // prepareData.paymentStatus = true;
+        // prepareData.status = "completed";
 
-        prepareData.paymentStatus = true;
-        prepareData.status = "completed";
         // Prefer payment_time from payments list if present
         if (Array.isArray(paymentDetails) && paymentDetails[0]?.payment_time) {
           prepareData.paymentDate = new Date(paymentDetails[0].payment_time);
