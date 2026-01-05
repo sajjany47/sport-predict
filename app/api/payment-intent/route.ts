@@ -25,7 +25,8 @@ export async function POST(request: Request) {
       },
       order_note: "Your order purchase will be processed soon.",
       order_meta: {
-        return_url: `${process.env.NEXT_PUBLIC_WEB_URL}/payment-success`,
+        // return_url: `${process.env.NEXT_PUBLIC_WEB_URL}/payment-success`,
+        return_url: `${process.env.NEXT_PUBLIC_WEB_URL}/payment/callback`,
       },
     };
 
