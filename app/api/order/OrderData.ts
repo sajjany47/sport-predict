@@ -23,7 +23,7 @@ export function PrepareOrderData(formData: any, isEdit = false) {
       formData.orderNumber || (isEdit ? undefined : generateOrderNumber()),
 
     ordertype: formData.ordertype || "purchase",
-
+    paymentId: formData.paymentIntentId || null,
     price: formData.price !== undefined ? Number(formData.price) : null,
 
     userId: new mongoose.Types.ObjectId(formData.userId),

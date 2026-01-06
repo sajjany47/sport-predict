@@ -71,6 +71,18 @@ export const POST = async (req: NextRequest) => {
     let prepareData = PrepareOrderData({ ...data, userId: loggedInUser._id });
 
     if (data.ordertype === "purchase" && data.paymentIntentId) {
+      const isValidPaymentIntent = await Order.findOne({
+        paymentId: data.paymentIntentId,
+      });
+      if (isValidPaymentIntent) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Duplicate payment intent ID.",
+          },
+          { status: 500 }
+        );
+      }
       const headers = {
         "Content-Type": "application/json",
         "x-api-version": "2025-01-01",
