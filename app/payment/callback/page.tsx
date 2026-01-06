@@ -82,6 +82,14 @@ export default function PaymentCallback() {
 
     UserOrderCredit(payload)
       .then((res) => {
+        if (res.data.paymentStatus) {
+          const prepareUser: any = user
+            ? { ...user, credits: user.credits + (plans?.credits || 0) }
+            : null;
+
+          dispatch(loginSuccess({ ...prepareUser }));
+        }
+
         dispatch(setPlans(null));
         dispatch(setOrderHistory(null));
         router.push("/matches");
@@ -100,11 +108,6 @@ export default function PaymentCallback() {
     const res = await axios.get(`/api/payment-verify?order_id=${orderId}`);
 
     if (res.data.status === "SUCCESS") {
-      const prepareUser: any = user
-        ? { ...user, credits: user.credits + (plans?.credits || 0) }
-        : null;
-
-      dispatch(loginSuccess({ ...prepareUser }));
       setPaymentStatus({
         isVerified: true,
         message:
