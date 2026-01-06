@@ -82,8 +82,9 @@ export default function PaymentCallback() {
 
     UserOrderCredit(payload)
       .then((res) => {
-        // dispatch(setPlans(null));
-        // dispatch(setOrderHistory(null));
+        dispatch(setPlans(null));
+        dispatch(setOrderHistory(null));
+        router.push("/matches");
       })
       .catch((error) => {
         setPaymentStatus({
