@@ -67,7 +67,7 @@ const MatchDetailsPage = () => {
         setIsLoading(false);
       })
       .catch((err) => {
-        toast.error(err.message || "Failed to fetch match details.");
+        // toast.error(err.message || "Failed to fetch match details.");
         router.push("/matches");
         setIsLoading(false);
       });
@@ -168,7 +168,7 @@ const MatchDetailsPage = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 flex justify-center">
         <div className="container ">
           {/* Back Button */}
           <div className="mb-6">
