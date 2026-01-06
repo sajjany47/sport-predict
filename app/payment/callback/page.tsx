@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { UserOrderCredit } from "@/app/MainService";
 import { loginSuccess } from "@/store/slices/authSlice";
 import { setOrderHistory, setPlans } from "@/store/slices/subscriptionSlice";
+import toast from "react-hot-toast";
 
 export default function PaymentCallback() {
   const router = useRouter();
@@ -59,9 +60,11 @@ export default function PaymentCallback() {
       setShowResult(true);
       return;
     }
-    Promise.all([userPaymentUpadte(), verifyPayment(orderId)]);
+
+    verifyPayment(orderId);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderHistory?.order_id]);
+  }, []);
 
   const userPaymentUpadte = () => {
     if (!isAuthenticated) {
@@ -79,8 +82,8 @@ export default function PaymentCallback() {
 
     UserOrderCredit(payload)
       .then((res) => {
-        dispatch(setPlans(null));
-        dispatch(setOrderHistory(null));
+        // dispatch(setPlans(null));
+        // dispatch(setOrderHistory(null));
       })
       .catch((error) => {
         setPaymentStatus({
@@ -114,6 +117,7 @@ export default function PaymentCallback() {
       });
       setShowResult(true);
     }
+    userPaymentUpadte();
   };
 
   const handleTryAgain = () => {
@@ -170,7 +174,7 @@ export default function PaymentCallback() {
     );
   }
 
-  // Transaction Details Card Component (used in both success and failed states)
+  // Transaction Details Card Component - Optimized for no scrolling
   const TransactionDetailsCard = ({
     status,
   }: {
@@ -183,123 +187,127 @@ export default function PaymentCallback() {
           <span>Transaction Details</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Package Info */}
-        <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-          <span className="text-gray-700 font-medium">Package:</span>
-          <Badge
-            className={`${
-              status === "success"
-                ? "bg-green-100 text-green-800"
-                : "bg-gray-100 text-gray-800"
-            }`}
-          >
-            {packageName}
-          </Badge>
-        </div>
-
-        {/* Tokens Added */}
-        <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-          <span className="text-gray-700 font-medium">Tokens Added:</span>
-          <div className="flex items-center space-x-2">
-            <Coins className="h-4 w-4 text-yellow-500" />
-            <span className="font-bold text-gray-900">+{tokens}</span>
+      <CardContent className="space-y-3">
+        {/* Row 1: Package & Tokens in same row */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 bg-green-50 rounded-lg">
+            <p className="text-xs text-gray-500 mb-1">Package</p>
+            <Badge
+              className={`${
+                status === "success"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-gray-100 text-gray-800"
+              } text-sm`}
+            >
+              {packageName}
+            </Badge>
+          </div>
+          <div className="p-3 bg-blue-50 rounded-lg">
+            <p className="text-xs text-gray-500 mb-1">Tokens Added</p>
+            <div className="flex items-center space-x-1">
+              <Coins className="h-3 w-3 text-yellow-500" />
+              <span className="font-bold text-gray-900 text-sm">+{tokens}</span>
+            </div>
           </div>
         </div>
 
-        {/* Amount Paid */}
-        <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-          <span className="text-gray-700 font-medium">Amount Paid:</span>
-          <span className="font-bold text-gray-900">₹{amount}</span>
+        {/* Row 2: Amount & Status in same row */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 bg-purple-50 rounded-lg">
+            <p className="text-xs text-gray-500 mb-1">Amount Paid</p>
+            <span className="font-bold text-gray-900 text-sm">₹{amount}</span>
+          </div>
+          <div className="p-3 bg-emerald-50 rounded-lg">
+            <p className="text-xs text-gray-500 mb-1">Status</p>
+            <Badge
+              className={`${
+                status === "success"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              } flex items-center space-x-1 text-xs`}
+            >
+              {status === "success" ? (
+                <>
+                  <CheckCircle className="h-3 w-3" />
+                  <span>Completed</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-3 w-3" />
+                  <span>Failed</span>
+                </>
+              )}
+            </Badge>
+          </div>
         </div>
 
-        {/* Transaction ID */}
-        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-          <span className="text-gray-700 font-medium">Transaction ID:</span>
-          <span className="font-mono text-sm text-gray-600 truncate max-w-[150px]">
+        {/* Row 3: Transaction ID (full width) */}
+        <div className="p-3 bg-gray-50 rounded-lg">
+          <p className="text-xs text-gray-500 mb-1">Transaction ID</p>
+          <p className="font-mono text-xs text-gray-700 truncate">
             {transactionId}
-          </span>
+          </p>
         </div>
 
-        {/* Status */}
-        <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-lg">
-          <span className="text-gray-700 font-medium">Status:</span>
-          <Badge
-            className={`${
-              status === "success"
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800"
-            } flex items-center space-x-1`}
-          >
-            {status === "success" ? (
-              <>
-                <CheckCircle className="h-3 w-3" />
-                <span>Completed</span>
-              </>
-            ) : (
-              <>
-                <XCircle className="h-3 w-3" />
-                <span>Failed</span>
-              </>
-            )}
-          </Badge>
-        </div>
-
-        {/* Date & Time */}
-        <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-          <span className="text-gray-700 font-medium">Date & Time:</span>
-          <span className="text-sm text-gray-600">
+        {/* Row 4: Date & Time (full width) */}
+        <div className="p-3 bg-orange-50 rounded-lg">
+          <p className="text-xs text-gray-500 mb-1">Date & Time</p>
+          <p className="text-xs text-gray-600">
             {orderHistory?.created_at
               ? new Date(orderHistory.created_at).toLocaleString()
               : "N/A"}
-          </span>
+          </p>
         </div>
       </CardContent>
     </Card>
   );
 
-  // Success Result
+  // Success Result - All content visible without scrolling
   if (paymentStatus.isVerified) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full space-y-6">
+        <div className="max-w-md w-full space-y-4">
+          {" "}
+          {/* Reduced spacing */}
           {/* Success Icon */}
-          <div className="text-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <CheckCircle className="h-12 w-12 text-white" />
+          <div className="text-center mb-2">
+            {" "}
+            {/* Reduced margin */}
+            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <CheckCircle className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              {" "}
+              {/* Reduced font size */}
               Payment Successful!
             </h1>
-            <p className="text-gray-600">{paymentStatus.message}</p>
+            <p className="text-sm text-gray-600">
+              {paymentStatus.message}
+            </p>{" "}
+            {/* Reduced font size */}
           </div>
-
           {/* Transaction Details Card */}
           <TransactionDetailsCard status="success" />
+          {/* Action Buttons - Compact */}
+          <div className="space-y-2">
+            <Button
+              onClick={handleGoToMatches}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-sm py-2"
+            >
+              Go to Matches
+            </Button>
 
-          {/* Action Buttons */}
-          <Card className="shadow-lg border-0 bg-blue-50/80 backdrop-blur-sm">
-            <CardContent className="p-4 space-y-3">
-              <Button
-                onClick={handleGoToMatches}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                Go to Matches
-              </Button>
-
-              <Button
-                onClick={handleGoToHome}
-                variant="outline"
-                className="w-full border-gray-300 hover:bg-gray-50"
-              >
-                Go to Home
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Help Section */}
-          <div className="text-center">
-            <p className="text-sm text-gray-500">
+            <Button
+              onClick={handleGoToHome}
+              variant="outline"
+              className="w-full border-gray-300 hover:bg-gray-50 text-sm py-2"
+            >
+              Go to Home
+            </Button>
+          </div>
+          {/* Help Section - Compact */}
+          <div className="text-center pt-2">
+            <p className="text-xs text-gray-500">
               Need help?{" "}
               <a
                 href={`mailto:${
@@ -316,65 +324,67 @@ export default function PaymentCallback() {
     );
   }
 
-  // Failed Result
+  // Failed Result - All content visible without scrolling
   if (paymentStatus.isVerified === false) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full space-y-6">
+        <div className="max-w-md w-full space-y-4">
+          {" "}
+          {/* Reduced spacing */}
           {/* Failure Icon */}
-          <div className="text-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <XCircle className="h-12 w-12 text-white" />
+          <div className="text-center mb-2">
+            {" "}
+            {/* Reduced margin */}
+            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <XCircle className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              {" "}
+              {/* Reduced font size */}
               Payment Failed
             </h1>
-            <p className="text-gray-600">{paymentStatus.message}</p>
+            <p className="text-sm text-gray-600">
+              {paymentStatus.message}
+            </p>{" "}
+            {/* Reduced font size */}
           </div>
-
           {/* Transaction Details Card */}
           <TransactionDetailsCard status="failed" />
+          {/* Action Buttons - Compact */}
+          <div className="space-y-2">
+            <p className="text-xs text-gray-600 text-center mb-1">
+              No charges were made to your account.
+            </p>
 
-          {/* Action Buttons */}
-          <Card className="shadow-lg border-0 bg-yellow-50/80 backdrop-blur-sm">
-            <CardContent className="p-4 space-y-3">
-              <p className="text-sm text-gray-600 mb-2 text-center">
-                No charges were made to your account. You can try the payment
-                again.
-              </p>
+            <Button
+              onClick={handleTryAgain}
+              className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-sm py-2"
+            >
+              Try Payment Again
+            </Button>
 
+            <div className="grid grid-cols-2 gap-2">
               <Button
-                onClick={handleTryAgain}
-                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
+                onClick={handleGoToMatches}
+                variant="outline"
+                className="w-full border-gray-300 hover:bg-gray-50 text-xs py-2"
               >
-                Try Payment Again
+                Back to Matches
               </Button>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  onClick={handleGoToMatches}
-                  variant="outline"
-                  className="w-full border-gray-300 hover:bg-gray-50"
-                >
-                  Back to Matches
-                </Button>
-
-                <Button
-                  onClick={handleGoToHome}
-                  variant="outline"
-                  className="w-full border-gray-300 hover:bg-gray-50"
-                >
-                  Go to Home
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Support Section */}
-          <div className="text-center">
-            <p className="text-sm text-gray-500">
-              If you were charged but received this error, please contact
-              support with your transaction ID.
+              <Button
+                onClick={handleGoToHome}
+                variant="outline"
+                className="w-full border-gray-300 hover:bg-gray-50 text-xs py-2"
+              >
+                Go to Home
+              </Button>
+            </div>
+          </div>
+          {/* Support Section - Compact */}
+          <div className="text-center pt-2">
+            <p className="text-xs text-gray-500">
+              If you were charged, contact support with your transaction ID.
               <br />
               <a
                 href={`mailto:${
@@ -382,7 +392,7 @@ export default function PaymentCallback() {
                 }`}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                {process.env.NEXT_PUBLIC_EMAIL}
+                {process.env.NEXT_PUBLIC_EMAIL || "sportpredict247@gmail.com"}
               </a>
             </p>
           </div>
@@ -390,4 +400,6 @@ export default function PaymentCallback() {
       </div>
     );
   }
+
+  return null;
 }
