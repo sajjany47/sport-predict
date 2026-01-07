@@ -20,13 +20,11 @@ import {
   Trophy,
   Target,
   CreditCard,
-  Users,
   Star,
   Clock,
   CheckCircle,
   Gift,
   Zap,
-  Crown,
   Activity,
   DollarSign,
   RefreshCw,
@@ -35,36 +33,21 @@ import {
   Building,
   QrCode,
   User as UserIcon,
-  Download,
   ArrowLeft,
   BarChart3,
-  TrendingUp,
   Mail,
   Phone,
   Settings,
-  LogOut,
   ChevronRight,
-  Sparkles,
   Award,
   Coins,
   Calendar,
   IndianRupee,
   MoreVertical,
-  Menu,
-  Eye,
-  FileText,
-  Wallet,
   Shield,
-  Bell,
-  HelpCircle,
-  ExternalLink,
   ChevronDown,
   ChevronUp,
-  Home,
-  CreditCardIcon,
-  History,
   UserCheck,
-  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -73,12 +56,6 @@ import { fetchUserDetails } from "@/app/admin/AdminService";
 import toast from "react-hot-toast";
 import CustomLoader from "./ui/CustomLoader";
 import ResetPassword from "@/app/dashboard/ResetPassword";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import moment from "moment";
 
@@ -891,7 +868,9 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                     </p>
                                     <p className="text-sm text-gray-500">
                                       #{order.orderNumber} •{" "}
-                                      {formatShortDate(order.paymentDate)}
+                                      {moment(order.paymentDate).format(
+                                        "Do MMM,YYYY HH:mm"
+                                      )}
                                     </p>
                                   </div>
                                 </div>
@@ -1037,7 +1016,9 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                               : "Free Credit"}
                                           </p>
                                           <p className="text-sm text-gray-500">
-                                            {formatShortDate(order.paymentDate)}
+                                            {moment(order.paymentDate).format(
+                                              "Do MMM,YYYY HH:mm"
+                                            )}
                                           </p>
                                         </div>
                                       </div>
@@ -1092,7 +1073,9 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                           {order.credits} Credits
                                         </p>
                                         <p className="text-sm text-gray-500">
-                                          {formatShortDate(order.paymentDate)}
+                                          {moment(order.paymentDate).format(
+                                            "Do MMM,YYYY HH:mm"
+                                          )}
                                         </p>
                                       </div>
                                       <div className="text-right">
