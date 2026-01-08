@@ -131,13 +131,13 @@ export async function POST(request: Request) {
     //   "https://crex.com/scoreboard/VDR/1VD/21st-Match/40/51/hbh-vs-syt-21st-match-big-bash-league-2025-26/info"
     // );
 
-    // const data = await CrexV2Details(
-    //   "https://crex.com/scoreboard/VDX/1VD/27th-Match/4M/4O/mls-vs-sys-27th-match-big-bash-league-2025-26/info"
-    // );
+    const data = await CrexV2Details(
+      "https://crex.com/scoreboard/VDY/1VD/28th-Match/40/4Q/ads-vs-hbh-28th-match-big-bash-league-2025-26/info"
+    );
 
     return Response.json(
       {
-        data: prepareData,
+        data: data,
         date: moment(fromDate).format("DD-MM-YYYY"),
         success: true,
         message: "Schedule fetched successfully",
