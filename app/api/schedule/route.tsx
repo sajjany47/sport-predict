@@ -5,6 +5,7 @@ import { ScoreCard } from "./ScoreCard";
 import { extractAndTransformSchedule } from "./CricBuzzScarbList";
 import { CrexList } from "./CrexList";
 import { CrexDetails } from "../match-details/CrexDetails";
+import { CrexV2Details } from "../match-details/CrexV2Details";
 
 export async function POST(request: Request) {
   try {
@@ -128,6 +129,10 @@ export async function POST(request: Request) {
 
     // const data: any = await CrexDetails(
     //   "https://crex.com/scoreboard/VDR/1VD/21st-Match/40/51/hbh-vs-syt-21st-match-big-bash-league-2025-26/info"
+    // );
+
+    // const data = await CrexV2Details(
+    //   "https://crex.com/scoreboard/VDX/1VD/27th-Match/4M/4O/mls-vs-sys-27th-match-big-bash-league-2025-26/info"
     // );
 
     return Response.json(
