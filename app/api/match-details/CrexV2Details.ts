@@ -1,4 +1,5 @@
 import puppeteer from "puppeteer";
+import { CrexPlayerDetails } from "./CrexPlayerDetails";
 
 export const CrexV2Details = async (url: string) => {
   const browser = await puppeteer.launch({
@@ -443,6 +444,29 @@ export const CrexV2Details = async (url: string) => {
   });
 
   await browser.close();
+  // const prepareData = await Promise.all(
+  //   squads.map(async (team: any) => {
+  //     const teamPlayers = await Promise.all(
+  //       team.players.map(async (player: any) => {
+  //         const playerDetails = await CrexPlayerDetails(player.playerUrl);
+
+  //         return {
+  //           ...player,
+  //           style: playerDetails.player.style,
+  //           rank: playerDetails.player.rank,
+  //           recentForm: playerDetails.stats.recentForm,
+  //           careerStats: playerDetails.stats.careerStats,
+  //           details: playerDetails,
+  //         };
+  //       })
+  //     );
+
+  //     return {
+  //       ...team,
+  //       players: teamPlayers,
+  //     };
+  //   })
+  // );
 
   return {
     squads,
