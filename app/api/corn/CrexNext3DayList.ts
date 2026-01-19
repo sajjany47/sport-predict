@@ -27,7 +27,7 @@ export const CrexNext3DaysFixturesArray = async (): Promise<any[]> => {
   const maxClicks = 15;
   let clicks = 0;
 
-  while (orderedDays.length < 3 && clicks <= maxClicks) {
+  while (orderedDays.length < 5 && clicks <= maxClicks) {
     const pageData = await page.evaluate(() => {
       const blocks = Array.from(
         document.querySelectorAll(".date-wise-matches-card > div")
