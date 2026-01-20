@@ -2,75 +2,69 @@ import mongoose, { Schema } from "mongoose";
 
 const TeamSchema = new Schema(
   {
-    squadId: { type: Number, default: null },
     teamName: { type: String, default: null },
     teamShortName: { type: String, default: null },
     teamFlagUrl: { type: String, default: null },
-    isWinner: { type: Boolean, default: null },
-    color: { type: String, default: null },
-    cricketScore: { type: Schema.Types.Mixed, default: null },
-    squadNo: { type: Number, default: null },
-  },
-  { _id: false }
-);
 
-const VenueSchema = new Schema(
-  {
-    ground: { type: String, default: null },
-    city: { type: String, default: null },
-    country: { type: String, default: null },
-    timezone: { type: String, default: null },
+    // upcoming => null, completed => "117/8"
+    cricketScore: { type: Schema.Types.Mixed, default: null },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const ScoreItemSchema = new Schema(
   {
-    team: { type: String, default: null },
-    run: { type: String, default: null },
+    team: { type: String, default: null }, // "GGW"
+    run: { type: String, default: null }, // "117/8"
   },
-  { _id: false }
+  { _id: false },
 );
 
 const ScoreSchema = new Schema(
   {
-    matchName: { type: String, default: null },
-    score: { type: [ScoreItemSchema], default: null },
-    result: { type: String, default: null },
+    score: { type: [ScoreItemSchema], default: [] }, // UPCOMING => [], COMPLETED => list
+    result: { type: String, default: "" }, // UPCOMING => "", COMPLETED => "RCBW Won"
   },
-  { _id: false }
+  { _id: false },
 );
 
 const MatchSchema = new Schema(
   {
-    tourId: { type: Number, default: null },
-    tourName: { type: String, default: null },
+    matchId: { type: String, default: null }, // "1XM", "21I"
 
-    matchId: { type: Number, default: null },
+    crexUrl: { type: String, default: null }, // your json "url"
+
     matchName: { type: String, default: null },
     matchDescription: { type: String, default: null },
 
-    originalStartTime: { type: String, default: null }, // "1768053600000"
-    startTime: { type: String, default: null }, // "10 Jan 2026, 19:30"
-    endTime: { type: String, default: null },
+    startTime: { type: String, default: null }, // "6:40 AM" OR null
+    matchDate: { type: String, default: null }, // "Wed, 21 Jan 2026"
 
-    status: { type: String, default: null }, // LIVE, UPCOMING, etc.
+    status: {
+      type: String,
+      default: null,
+      enum: [
+        "UPCOMING",
+        "LIVE",
+        "COMPLETED",
+        "ABANDONED",
+        "CANCELLED",
+        "NO RESULT",
+        null,
+      ],
+    },
 
-    venue: { type: VenueSchema, default: null },
-
-    tour: { type: String, default: null }, // Women / League
     format: { type: String, default: null }, // T20
     sport: { type: String, default: "cricket" },
 
-    teams: { type: [TeamSchema], default: null },
+    teams: { type: [TeamSchema], default: [] },
 
-    score: { type: ScoreSchema, default: null },
-
-    crexUrl: { type: String, default: null },
+    score: { type: ScoreSchema, default: () => ({ score: [], result: "" }) },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const MatchList =
   mongoose.models.MatchList || mongoose.model("MatchList", MatchSchema);
+
 export default MatchList;

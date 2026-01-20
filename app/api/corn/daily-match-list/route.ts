@@ -32,9 +32,11 @@ export const GET = async (req: NextRequest) => {
 
     const filterNewMatches = day3List.filter((prepMatch: any) => {
       return !databaseMatches.some(
-        (dbMatch: any) => dbMatch.matchId === prepMatch.matchId,
+        (dbMatch: any) => dbMatch.url === prepMatch.url,
       );
     });
+
+    await MatchList.insertMany(filterNewMatches);
 
     // const dbMatchMap = new Map(
     //   databaseMatches.map((match: any) => [match.matchId, match]),
@@ -86,7 +88,7 @@ export const GET = async (req: NextRequest) => {
         data: {
           // inserted: insertData,
           // updated: updateData,
-          data: day3List,
+          data: filterNewMatches,
         },
       },
       { status: 200 },
