@@ -8,9 +8,15 @@ export const CrexV2Details = async (url: string) => {
   });
 
   const page = await browser.newPage();
+
   page.setDefaultTimeout(60000);
 
-  await page.goto(url, { waitUntil: "networkidle2" });
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+  await sleep(1000);
+
+  // ✅ wait some safe selector
+  await page.waitForSelector("body", { timeout: 15000 });
 
   /* ===============================
      🧑‍🤝‍🧑 SQUADS (ARRAY FORMAT)
@@ -25,14 +31,14 @@ export const CrexV2Details = async (url: string) => {
 
   const teamCount = await page.$$eval(
     ".playingxi-button",
-    (btns) => btns.length
+    (btns) => btns.length,
   );
 
   for (let i = 0; i < teamCount; i++) {
     const teamName = await page.$$eval(
       ".playingxi-button",
       (btns, idx) => btns[idx]?.textContent?.trim(),
-      i
+      i,
     );
 
     await page.evaluate((idx) => {
@@ -42,7 +48,7 @@ export const CrexV2Details = async (url: string) => {
 
     await new Promise((r) => setTimeout(r, 300));
     await page.waitForFunction(
-      () => document.querySelectorAll(".playingxi-card-row").length > 0
+      () => document.querySelectorAll(".playingxi-card-row").length > 0,
     );
 
     const players = await page.$$eval(".playingxi-card-row", (rows) =>
@@ -60,7 +66,7 @@ export const CrexV2Details = async (url: string) => {
           image:
             row.querySelector(".img-card img")?.getAttribute("src") || null,
         };
-      })
+      }),
     );
 
     if (teamName) {
@@ -100,7 +106,7 @@ export const CrexV2Details = async (url: string) => {
         teamFlag,
         last5,
       };
-    })
+    }),
   );
 
   //Expand match details to get more data of team form
@@ -109,10 +115,10 @@ export const CrexV2Details = async (url: string) => {
       const teamId = section.getAttribute("id") || "";
 
       const matches = Array.from(
-        section.querySelectorAll(".team-form-card")
+        section.querySelectorAll(".team-form-card"),
       ).map((card) => {
         const teams = Array.from(
-          card.querySelectorAll(".form-team-detail")
+          card.querySelectorAll(".form-team-detail"),
         ).map((t) => ({
           name: t.querySelector(".team-name")?.textContent?.trim() || "",
           score: t.querySelector(".team-score")?.textContent?.trim() || "",
@@ -136,7 +142,7 @@ export const CrexV2Details = async (url: string) => {
       });
 
       return { teamId, matches };
-    })
+    }),
   );
 
   const teamFormFinal = teamForm.map((team) => ({
@@ -162,7 +168,7 @@ export const CrexV2Details = async (url: string) => {
         header.querySelector(".team1 .team-name")?.textContent?.trim() || "",
       logo: header.querySelector(".team1 img")?.getAttribute("src") || "",
       wins: Number(
-        header.querySelector(".team1-wins")?.textContent?.trim() || 0
+        header.querySelector(".team1-wins")?.textContent?.trim() || 0,
       ),
     };
 
@@ -171,12 +177,12 @@ export const CrexV2Details = async (url: string) => {
         header.querySelector(".team2 .team-name")?.textContent?.trim() || "",
       logo: header.querySelector(".team2 img")?.getAttribute("src") || "",
       wins: Number(
-        header.querySelector(".team2-wins")?.textContent?.trim() || 0
+        header.querySelector(".team2-wins")?.textContent?.trim() || 0,
       ),
     };
 
     const matches = Array.from(
-      document.querySelectorAll(".global-match-card")
+      document.querySelectorAll(".global-match-card"),
     ).map((card) => {
       const teams = card.querySelectorAll(".team-name");
       const scores = card.querySelectorAll(".team-score");
@@ -213,7 +219,7 @@ export const CrexV2Details = async (url: string) => {
 
   // wait for Angular table render
   await page.waitForFunction(
-    () => document.querySelectorAll("table#table tbody tr").length >= 2
+    () => document.querySelectorAll("table#table tbody tr").length >= 2,
   );
 
   const pointsTable = await page.evaluate(() => {
@@ -264,12 +270,12 @@ export const CrexV2Details = async (url: string) => {
 
   const readComparisonTable = async () => {
     await page.waitForFunction(
-      () => document.querySelectorAll("table.colHeader tbody tr").length > 0
+      () => document.querySelectorAll("table.colHeader tbody tr").length > 0,
     );
 
     return page.evaluate(() => {
       const rows = Array.from(
-        document.querySelectorAll("table.colHeader tbody tr")
+        document.querySelectorAll("table.colHeader tbody tr"),
       );
 
       return rows.map((row) => {
@@ -303,7 +309,7 @@ export const CrexV2Details = async (url: string) => {
   await page.waitForFunction(() =>
     document
       .querySelector(".team-comp-type.highlited")
-      ?.textContent?.includes("Venue")
+      ?.textContent?.includes("Venue"),
   );
 
   const venue = await readComparisonTable();
@@ -411,7 +417,7 @@ export const CrexV2Details = async (url: string) => {
     =============================== */
 
     const recentMatches = Array.from(
-      document.querySelectorAll(".global-match-card")
+      document.querySelectorAll(".global-match-card"),
     ).map((card) => {
       const teams = card.querySelectorAll(".team-name");
       const scores = card.querySelectorAll(".team-score");
