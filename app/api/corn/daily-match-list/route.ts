@@ -17,78 +17,39 @@ export const GET = async (req: NextRequest) => {
     });
 
     //fetch existing matches from DB
-    const databaseMatches = await MatchList.aggregate([
-      {
-        $match: {
-          formatDate: { $gte: today },
+    const databaseMatches = await MatchList.find(
+      { formatDate: { $gte: today } },
+      { url: 1, _id: 0 },
+    );
+
+    const dbUrlSet = new Set(databaseMatches.map((m: any) => m.url));
+
+    const day3List: any[] = await CrexNext3DaysFixturesArray();
+
+    const bulkOps = day3List.map((item: any) => ({
+      updateOne: {
+        filter: { url: item.url },
+        update: {
+          $setOnInsert: {
+            ...item,
+            formatDate: moment(item.matchDate, "ddd, DD MMM YYYY").format(
+              "YYYY-MM-DD",
+            ),
+            createdAt: new Date(),
+          },
         },
+        upsert: true,
       },
-    ]);
+    }));
 
-    const day3List: any = await CrexNext3DaysFixturesArray();
-
-    let updateData = [];
-    let insertData = [];
-
-    const filterNewMatches = day3List.filter((prepMatch: any) => {
-      return !databaseMatches.some(
-        (dbMatch: any) => dbMatch.url === prepMatch.url,
-      );
-    });
-
-    await MatchList.insertMany(filterNewMatches);
-
-    // const dbMatchMap = new Map(
-    //   databaseMatches.map((match: any) => [match.matchId, match]),
-    // );
-
-    // for (const prepMatch of day3List) {
-    //   const dbMatch = dbMatchMap.get(prepMatch.matchId);
-    //   if (dbMatch) {
-    //     updateData.push({
-    //       ...dbMatch,
-    //       formatDate: moment(prepMatch.matchDate).format("YYYY-MM-DD"),
-    //     });
-    //   } else {
-    //     insertData.push({
-    //       ...prepMatch,
-    //       formatDate: moment(prepMatch.matchDate).format("YYYY-MM-DD"),
-    //     });
-    //   }
-    // }
-
-    // const operations = [];
-    // //Insert new matches
-
-    // for (const doc of insertData) {
-    //   operations.push({ insertOne: { document: doc } });
-    // }
-
-    // //Update existing matches
-    // for (const doc of updateData) {
-    //   operations.push({
-    //     updateOne: {
-    //       filter: { matchId: doc.matchId },
-    //       update: {
-    //         $set: { crexUrl: doc.crexUrl },
-    //       },
-    //       upsert: false,
-    //     },
-    //   });
-    // }
-
-    // if (operations.length > 0) {
-    //   await MatchList.bulkWrite(operations, { ordered: false });
-    // }
+    await MatchList.bulkWrite(bulkOps);
 
     return NextResponse.json(
       {
         success: true,
         message: "Daily match list updated successfully",
         data: {
-          // inserted: insertData,
-          // updated: updateData,
-          data: filterNewMatches,
+          data: bulkOps,
         },
       },
       { status: 200 },

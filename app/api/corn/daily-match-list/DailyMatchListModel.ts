@@ -32,7 +32,7 @@ const MatchSchema = new Schema(
   {
     matchId: { type: String, default: null }, // "1XM", "21I"
 
-    crexUrl: { type: String, default: null }, // your json "url"
+    url: { type: String, default: null }, // your json "url"
 
     matchName: { type: String, default: null },
     matchDescription: { type: String, default: null },
