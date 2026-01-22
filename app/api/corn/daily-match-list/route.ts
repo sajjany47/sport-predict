@@ -19,60 +19,58 @@ export const GET = async (req: NextRequest) => {
 
     const day3List: any[] = await CrexNext3DaysFixturesArray();
 
-    let prepareArray = [];
+    // let prepareArray = [];
 
-    const today = moment().startOf("day");
-    const tomorrow = moment().add(1, "day").startOf("day");
+    // const today = moment().startOf("day");
+    // const tomorrow = moment().add(1, "day").startOf("day");
 
-    for (let index = 0; index < day3List.length; index++) {
-      console.log("check api running or not", index);
-      const element = day3List[index];
-      const matchDate = moment(element.matchDate, "ddd, DD MMM YYYY");
-      console.log(matchDate);
-      let details = null;
-      if (matchDate.isSame(today, "day") || matchDate.isSame(tomorrow, "day")) {
-        console.log("first");
-        details = await CrexV2Details(element.url);
-      }
-      prepareArray.push({
-        ...element,
-        formatDate: moment(element.matchDate, "ddd, DD MMM YYYY").format(
-          "YYYY-MM-DD",
-        ),
-        details,
-        detailsUpdatedAt: new Date(),
-      });
-    }
+    // for (let index = 0; index < day3List.length; index++) {
+    //   console.log("check api running or not", index);
+    //   const element = day3List[index];
+    //   const matchDate = moment(element.matchDate, "ddd, DD MMM YYYY");
+    //   console.log(matchDate);
+    //   let details = null;
+    //   if (matchDate.isSame(today, "day") || matchDate.isSame(tomorrow, "day")) {
+    //     console.log("first");
+    //     details = await CrexV2Details(element.url);
+    //   }
+    //   prepareArray.push({
+    //     ...element,
+    //     formatDate: moment(element.matchDate, "ddd, DD MMM YYYY").format(
+    //       "YYYY-MM-DD",
+    //     ),
+    //     details,
+    //     detailsUpdatedAt: new Date(),
+    //   });
+    // }
 
-    // const bulkOps = day3List.map((item: any) => ({
-    //   updateOne: {
-    //     filter: { url: item.url },
-    //     update: {
-    //       $set: {
-    //         details: item.details,
-    //         detailsUpdatedAt: item.detailsUpdatedAt,
-    //       },
-    //       $setOnInsert: {
-    //         ...item,
-    //         formatDate: moment(item.matchDate, "ddd, DD MMM YYYY").format(
-    //           "YYYY-MM-DD",
-    //         ),
-    //         createdAt: new Date(),
-    //       },
-    //     },
-    //     upsert: true,
-    //   },
-    // }));
+    const bulkOps = day3List.map((item: any) => ({
+      updateOne: {
+        filter: { url: item.url },
+        update: {
+          $set: {
+            details: item.details,
+            detailsUpdatedAt: item.detailsUpdatedAt,
+          },
+          $setOnInsert: {
+            ...item,
+            formatDate: moment(item.matchDate, "ddd, DD MMM YYYY").format(
+              "YYYY-MM-DD",
+            ),
+            createdAt: new Date(),
+          },
+        },
+        upsert: true,
+      },
+    }));
 
-    // await MatchList.bulkWrite(bulkOps);
+    await MatchList.bulkWrite(bulkOps);
 
     return NextResponse.json(
       {
         success: true,
         message: "Daily match list updated successfully",
-        data: {
-          data: prepareArray,
-        },
+        data: day3List,
       },
       { status: 200 },
     );
