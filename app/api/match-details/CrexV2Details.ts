@@ -464,14 +464,14 @@ export const CrexV2Details = async (url: string) => {
   //           careerStats: playerDetails.stats.careerStats,
   //           details: playerDetails,
   //         };
-  //       })
+  //       }),
   //     );
 
   //     return {
   //       ...team,
   //       players: teamPlayers,
   //     };
-  //   })
+  //   }),
   // );
 
   return {

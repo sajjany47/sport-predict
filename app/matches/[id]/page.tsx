@@ -44,7 +44,7 @@ const MatchDetailsPage = () => {
   const params = useParams();
   const router = useRouter();
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
   const { selectedMatch } = useSelector((state: RootState) => state.matches);
   const [matchData, setMatchData] = useState<any>(null);
@@ -89,7 +89,7 @@ const MatchDetailsPage = () => {
   const getTeamScore = (teamShortName: string) => {
     if (!matchData?.matchInfo?.score?.score) return null;
     const scoreEntry = matchData.matchInfo.score.score.find(
-      (s: any) => s.team === teamShortName
+      (s: any) => s.team === teamShortName,
     );
     return scoreEntry ? parseScore(scoreEntry.run) : null;
   };
@@ -200,7 +200,7 @@ const MatchDetailsPage = () => {
                     </Badge>
                     <Badge
                       className={`px-4 py-1.5 font-bold ${getStatusColor(
-                        matchStatus
+                        matchStatus,
                       )}`}
                     >
                       {matchStatus === "LIVE" && (
@@ -659,7 +659,7 @@ const MatchDetailsPage = () => {
                                           key={index}
                                           player={player}
                                         />
-                                      )
+                                      ),
                                     )}
                                   </div>
                                 ) : (
@@ -682,7 +682,7 @@ const MatchDetailsPage = () => {
                                           key={index}
                                           player={player}
                                         />
-                                      )
+                                      ),
                                     )}
                                   </div>
                                 ) : (
