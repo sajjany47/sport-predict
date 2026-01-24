@@ -14,8 +14,6 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { useQuery } from "@tanstack/react-query";
 import { FetchMatchList } from "./MatchService";
 import MatchCard from "./MatchCard";
-import CrexOverviewTab from "./[id]/CrexOverviewTab";
-import { DummyData } from "@/lib/DummyData";
 
 // Enhanced Tab configuration
 const TAB_CONFIG = [
@@ -181,7 +179,7 @@ const MatchesPage = () => {
             Get AI-powered predictions & live match insights
           </p>
         </div>
-        <CrexOverviewTab matchData={DummyData} />
+
         {/* Search + Date Filter */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 mb-6 md:mb-10">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
