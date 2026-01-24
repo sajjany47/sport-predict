@@ -1,9 +1,6 @@
 import { GetHtml } from "@/lib/utils";
 
-export const CrexList = async (
-  fromDate: Date,
-  timeZone: string
-): Promise<any> => {
+export const CrexList = async (): Promise<any> => {
   const $: any = await GetHtml("https://crex.com/fixtures/match-list");
 
   const matches: any = [];
@@ -58,8 +55,8 @@ export const CrexList = async (
           format: description?.includes("T20")
             ? "T20"
             : description?.includes("ODI")
-            ? "ODI"
-            : null,
+              ? "ODI"
+              : null,
           sport: "cricket",
           teams: [
             {

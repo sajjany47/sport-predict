@@ -85,7 +85,7 @@ export const GetPSearchList = async (searchTerm: string) => {
   } catch (error: any) {
     console.error(
       `GetPSearchList error for "${searchTerm}":`,
-      error?.message || error
+      error?.message || error,
     );
     return []; // always return empty on error
   }
@@ -129,7 +129,7 @@ export const GetStadiumList = async (searchTerm: string) => {
     // internal logging only — function never throws
     console.error(
       `GetStadiumList error for "${searchTerm}":`,
-      (err as any)?.message || err
+      (err as any)?.message || err,
     );
     return [];
   }
@@ -171,7 +171,7 @@ export const GetTeamList = async (searchTerm: string) => {
   } catch (err) {
     console.error(
       `GetTeamList error for "${searchTerm}":`,
-      (err as any)?.message || err
+      (err as any)?.message || err,
     );
     return [];
   }
@@ -208,7 +208,7 @@ export const TransAdvanceStatData = (originalData: any) => {
 
     // Extract head-to-head data
     const h2hData = originalData.data.teamHeadToHead.segments.find(
-      (segment: any) => segment.type === "H2H"
+      (segment: any) => segment.type === "H2H",
     ).data;
     const h2h = {
       h2hStat: h2hData.resultCompare.squads.map((team: any) => ({
@@ -242,14 +242,14 @@ export const TransAdvanceStatData = (originalData: any) => {
 
     // Extract team strengths
     const teamStrengthData = originalData.data.teamHeadToHead.segments.find(
-      (segment: any) => segment.type === "TEAM_STRENGTH"
+      (segment: any) => segment.type === "TEAM_STRENGTH",
     ).data;
     const teamStrength = teamStrengthData.squadChaseDefend.data[0].values.map(
       (value: any, index: any) => ({
         teamName: teamStrengthData.squads[index].shortName,
         battingFirstWin: `${value}%`,
         bowlingFirstWin: `${teamStrengthData.squadChaseDefend.data[1].values[index]}%`,
-      })
+      }),
     );
 
     return {
@@ -355,7 +355,7 @@ export const ParseScore = (scoreStr: any) => {
 export const FindWinner = (team: any, selectedMatch: any, teamName: any) => {
   const prepareData = team.map((match: any) => {
     const findTeamShortName = selectedMatch?.teams.find(
-      (item: any) => item.teamName === teamName
+      (item: any) => item.teamName === teamName,
     )?.teamShortName;
 
     const team1Score: any = ParseScore(match.team1?.score);
@@ -430,7 +430,7 @@ export const SortArray = (arr: any[]) => {
   return arr.sort(
     (a: any, b: any) =>
       moment(b.date, "DD/MM/YY").valueOf() -
-      moment(a.date, "DD/MM/YY").valueOf()
+      moment(a.date, "DD/MM/YY").valueOf(),
   );
 };
 export const findModeOver = (format: any) => {
@@ -460,12 +460,12 @@ export const FindMatchOver = (format: any) => {
   return format === "T20"
     ? { over: 20, bowlerOverLimit: 4 }
     : format === "ODI"
-    ? { over: 50, bowlerOverLimit: 10 }
-    : format === "T10"
-    ? { over: 10, bowlerOverLimit: 2 }
-    : format === "TEST"
-    ? { over: 100, bowlerOverLimit: 25 }
-    : { over: 16.4, bowlerOverLimit: 3.28 };
+      ? { over: 50, bowlerOverLimit: 10 }
+      : format === "T10"
+        ? { over: 10, bowlerOverLimit: 2 }
+        : format === "TEST"
+          ? { over: 100, bowlerOverLimit: 25 }
+          : { over: 16.4, bowlerOverLimit: 3.28 };
 };
 
 export const GetDefaultRolePrediction = (role: any, format: any) => {
@@ -775,7 +775,7 @@ export const CalculateBowlingG = (bowlingStats: any[]) => {
       wicket: 0,
       eco: 0,
       avgOverPercentage: 0,
-    }
+    },
   );
 
   const count = prepared.length;
@@ -784,7 +784,7 @@ export const CalculateBowlingG = (bowlingStats: any[]) => {
   const avgRunsPerOver = CheckIntValue(SafeDivide(total.run, count));
   const avgWicket = CheckIntValue(SafeDivide(total.wicket, count));
   const avgOverPercentage = CheckIntValue(
-    SafeDivide(total.avgOverPercentage, count)
+    SafeDivide(total.avgOverPercentage, count),
   );
 
   return { avgEconmy, avgWicket, avgOverPercentage, avgRunsPerOver };
@@ -830,7 +830,7 @@ export const CalculateBattingG = (battingStats: any[]) => {
       run: 0,
       strikeRate: 0,
       avgBallPercentage: 0,
-    }
+    },
   );
 
   const count = prepared.length;
@@ -838,7 +838,7 @@ export const CalculateBattingG = (battingStats: any[]) => {
   const run = CheckIntValue(SafeDivide(total.run, count)); // average runs per ball across rows
   const avgStrikeRate = CheckIntValue(SafeDivide(total.strikeRate, count));
   const avgBallPercentage = CheckIntValue(
-    SafeDivide(total.avgBallPercentage, count)
+    SafeDivide(total.avgBallPercentage, count),
   );
 
   return { run, avgStrikeRate, avgBallPercentage };
@@ -857,7 +857,7 @@ export const CalculateFantasy = (fantasy: any[]) => {
       acc.bowl += bowl;
       return acc;
     },
-    { bat: 0, bowl: 0 }
+    { bat: 0, bowl: 0 },
   );
 
   const count = sorted.length;
@@ -903,7 +903,7 @@ export const CalculateBatting = (battingForm: any[]) => {
       acc.strikeRate += curr.strikeRate;
       return acc;
     },
-    { runs: 0, ballFaced: 0, strikeRate: 0 }
+    { runs: 0, ballFaced: 0, strikeRate: 0 },
   );
 
   const count = mapped.length;
@@ -957,7 +957,7 @@ export const CalculateBowling = (bowlingForm: any[]) => {
       wicket: 0,
       eco: 0,
       avgOver: 0,
-    }
+    },
   );
 
   const count = mapped.length;
@@ -977,7 +977,7 @@ export const PercentageToValue = (percentage: any, total: any) => {
 
 export const playerPredictionScoreCalculate = (
   data: any,
-  matchOver: number
+  matchOver: number,
 ) => {
   // weights
   const W_RECENT = 1;
@@ -1012,17 +1012,17 @@ export const playerPredictionScoreCalculate = (
   // battingStats.run interpreted as runs-per-ball (as in your original)
   const battingCareerRuns = CheckIntValue(
     data.battingStats?.run * battingCareerBalls,
-    0
+    0,
   );
 
   // stadium (batting)
   const battingStadiumBalls = pctToBalls(
-    data.statdiumBattingStats?.avgBallPercentage
+    data.statdiumBattingStats?.avgBallPercentage,
   );
   const battingStadiumSR = data.statdiumBattingStats?.avgStrikeRate || 0;
   const battingStadiumRuns = CheckIntValue(
     data.statdiumBattingStats?.run * battingStadiumBalls,
-    0
+    0,
   );
 
   // weighted combined batting metrics (50% recent, 30% career, 20% stadium)
@@ -1030,7 +1030,7 @@ export const playerPredictionScoreCalculate = (
     recentRuns * W_RECENT +
       battingCareerRuns * W_CAREER +
       battingStadiumRuns * W_STADIUM,
-    2
+    2,
   );
 
   // const totalAvgStrikeRate = CheckIntValue(
@@ -1044,10 +1044,10 @@ export const playerPredictionScoreCalculate = (
     recentBalls * W_RECENT +
       battingCareerBalls * W_CAREER +
       battingStadiumBalls * W_STADIUM,
-    2
+    2,
   );
   const totalAvgStrikeRate = CheckIntValue(
-    SafeDivide(totalRuns, totalAvgBallFaced) * 100
+    SafeDivide(totalRuns, totalAvgBallFaced) * 100,
   );
 
   // -------------------------
@@ -1059,14 +1059,14 @@ export const playerPredictionScoreCalculate = (
 
   // avgOver in recent data might be fraction or percent; convert to overs in this match
   const recentOvers = CheckIntValue(
-    data.recentBowlingFormStats?.avgOver * matchOver
+    data.recentBowlingFormStats?.avgOver * matchOver,
   );
   const recentWicket = CheckIntValue(
-    data.recentBowlingFormStats?.avgWicket * recentOvers
+    data.recentBowlingFormStats?.avgWicket * recentOvers,
   );
 
   const recentRunsConceded = CheckIntValue(
-    data.recentBowlingFormStats?.avgRunsConsumed * recentOvers
+    data.recentBowlingFormStats?.avgRunsConsumed * recentOvers,
   );
   const recentEcon = CheckIntValue(recentRunsConceded / recentOvers);
 
@@ -1075,36 +1075,36 @@ export const playerPredictionScoreCalculate = (
   const bowlingCareerWicketsPerOver = data.bowlingStats?.avgWicket || 0;
   const bowlingCareerWickets = CheckIntValue(
     bowlingCareerWicketsPerOver * bowlingCareerOvers,
-    2
+    2,
   );
   // prefer avgRunsPerOver if present, else fallback to econ
   const bowlingCareerRunsPerOver = data.bowlingStats?.avgRunsPerOver;
   const bowlingCareerRuns = CheckIntValue(
     bowlingCareerRunsPerOver * bowlingCareerOvers,
-    2
+    2,
   );
   const bowlingCareerEcon = CheckIntValue(
-    SafeDivide(bowlingCareerRuns, bowlingCareerOvers)
+    SafeDivide(bowlingCareerRuns, bowlingCareerOvers),
   );
 
   // stadium bowling
   const bowlingStadiumOvers = pctToOvers(
-    data.statdiumBowlingStats?.avgOverPercentage
+    data.statdiumBowlingStats?.avgOverPercentage,
   );
 
   const bowlingStadiumWicketsPerOver =
     data.statdiumBowlingStats?.avgWicket || 0;
   const bowlingStadiumWickets = CheckIntValue(
     bowlingStadiumWicketsPerOver * bowlingStadiumOvers,
-    2
+    2,
   );
   const bowlingStadiumRunsPerOver = data.statdiumBowlingStats?.avgRunsPerOver;
   const bowlingStadiumRuns = CheckIntValue(
     bowlingStadiumRunsPerOver * bowlingStadiumOvers,
-    2
+    2,
   );
   const bowlingStadiumEcon = CheckIntValue(
-    SafeDivide(bowlingStadiumRuns, bowlingStadiumOvers)
+    SafeDivide(bowlingStadiumRuns, bowlingStadiumOvers),
   );
 
   // weighted bowling aggregates (50% recent, 30% career, 20% stadium)
@@ -1112,21 +1112,21 @@ export const playerPredictionScoreCalculate = (
     recentOvers * W_RECENT +
       bowlingCareerOvers * W_CAREER +
       bowlingStadiumOvers * W_STADIUM,
-    2
+    2,
   );
 
   const totalAvgWickets = CheckIntValue(
     recentWicket * W_RECENT +
       bowlingCareerWickets * W_CAREER +
       bowlingStadiumWickets * W_STADIUM,
-    2
+    2,
   );
 
   const totalAvgRunsConceded = CheckIntValue(
     recentRunsConceded * W_RECENT +
       bowlingCareerRuns * W_CAREER +
       bowlingStadiumRuns * W_STADIUM,
-    2
+    2,
   );
 
   const totalAvgEconomy = totalAvgOvers
@@ -1310,7 +1310,7 @@ export const PickTop = (players: any[], keyPath: string) => {
 
 export const PickTopBowler = (players: any[], overLimit: number) => {
   const sortArray = players.sort(
-    (a: any, b: any) => b.bowling.totalAvgWickets - a.bowling.totalAvgWickets
+    (a: any, b: any) => b.bowling.totalAvgWickets - a.bowling.totalAvgWickets,
   );
   let check = {
     ...sortArray[0],
@@ -1326,7 +1326,7 @@ export const PickTopBowler = (players: any[], overLimit: number) => {
 };
 export const PickTopBatter = (players: any[]) => {
   const sortArray = players.sort(
-    (a: any, b: any) => b.batting.totalRuns - a.batting.totalRuns
+    (a: any, b: any) => b.batting.totalRuns - a.batting.totalRuns,
   );
   return sortArray[0];
 };
@@ -1357,4 +1357,10 @@ export const MaxMin = (score: number, wicket: number) => {
     predicted,
     wickets,
   };
+};
+
+export const NormalizeCrexUrl = (url: string) => {
+  return url
+    .replace(/\/(live|scorecard)(\/)?$/i, "/info") // live or scorecard => info
+    .replace(/\/info(\/)?$/i, "/info"); // ensure ending clean
 };

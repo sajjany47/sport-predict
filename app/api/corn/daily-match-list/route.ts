@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
-import { FormatErrorMessage } from "@/lib/utils";
+import { FormatErrorMessage, NormalizeCrexUrl } from "@/lib/utils";
 import { CrexNext3DaysFixturesArray } from "../CrexNext3DayList";
 import moment from "moment";
 import MatchList from "./DailyMatchListModel";
@@ -17,8 +17,10 @@ export const GET = async (req: NextRequest) => {
       formatDate: { $lte: cutoffDate },
     });
 
-    const day3List: any[] = await CrexNext3DaysFixturesArray();
-
+    const day3List = (await CrexNext3DaysFixturesArray()).map((item: any) => ({
+      ...item,
+      url: NormalizeCrexUrl(item.url),
+    }));
     // let prepareArray = [];
 
     // const today = moment().startOf("day");
