@@ -186,14 +186,24 @@ export const CrexV2Details = async (url: string) => {
     await page.waitForSelector("body", { timeout: 15000 });
 
     /* ===============================
-       🧑‍🤝‍🧑 SQUADS (ARRAY FORMAT)
-    =============================== */
+   🧑‍🤝‍🧑 SQUADS (BEFORE + AFTER TOSS)
+=============================== */
 
+    // Toss (null before toss)
+    const toss = await page
+      .$eval(".toss-wrap p", (el) => el.textContent?.trim())
+      .catch(() => null);
+
+    const isAfterToss = Boolean(toss);
+
+    // wait team buttons
     await page.waitForSelector(".playingxi-button");
 
     const squads: {
       teamName: string;
-      players: any[];
+      toss: string | null;
+      playingPlayers: any[];
+      benchPlayers: any[];
     }[] = [];
 
     const teamCount = await page.$$eval(
@@ -201,26 +211,16 @@ export const CrexV2Details = async (url: string) => {
       (btns) => btns.length,
     );
 
-    for (let i = 0; i < teamCount; i++) {
-      const teamName = await page.$$eval(
-        ".playingxi-button",
-        (btns, idx) => btns[idx]?.textContent?.trim(),
-        i,
-      );
-
-      await page.evaluate((idx) => {
-        const btns = document.querySelectorAll(".playingxi-button");
-        (btns[idx] as HTMLElement)?.click();
-      }, i);
-
-      await new Promise((r) => setTimeout(r, 300));
+    // helper → extract currently visible players
+    const extractPlayers = async () => {
       await page.waitForFunction(
-        () => document.querySelectorAll(".playingxi-card-row").length > 0,
+        () => document.querySelectorAll(".playingxi-card-row").length >= 11,
       );
 
-      const players = await page.$$eval(".playingxi-card-row", (rows) =>
+      return page.$$eval(".playingxi-card-row", (rows) =>
         rows.map((row) => {
           const a = row.querySelector("a");
+
           return {
             name: a?.getAttribute("title") || "",
             shortName: row.querySelector(".p-name")?.textContent?.trim() || "",
@@ -236,13 +236,68 @@ export const CrexV2Details = async (url: string) => {
           };
         }),
       );
+    };
 
-      if (teamName) {
-        squads.push({
-          teamName,
-          players,
+    for (let i = 0; i < teamCount; i++) {
+      const teamName = await page.$$eval(
+        ".playingxi-button",
+        (btns, idx) => btns[idx]?.textContent?.trim(),
+        i,
+      );
+
+      // click team
+      await page.evaluate((idx) => {
+        const btn = document.querySelectorAll(".playingxi-button")[
+          idx
+        ] as HTMLElement;
+        btn?.click();
+      }, i);
+
+      await delay(400);
+
+      // expand bench AFTER toss (EVERY TEAM)
+      if (isAfterToss) {
+        await page.evaluate(() => {
+          const arrow = document.querySelector("#bench-arrow") as HTMLElement;
+          arrow?.scrollIntoView({ block: "center" });
+          arrow?.click();
         });
+
+        // wait until bench rows appear (>11)
+        await page
+          .waitForFunction(
+            () => {
+              return (
+                document.querySelectorAll(".playingxi-card-row").length > 11
+              );
+            },
+            { timeout: 5000 },
+          )
+          .catch(() => {});
+
+        await delay(300);
       }
+
+      const allPlayers = await extractPlayers();
+
+      let playingPlayers: any[] = [];
+      let benchPlayers: any[] = [];
+
+      if (!isAfterToss) {
+        // BEFORE toss → full squad
+        benchPlayers = allPlayers;
+      } else {
+        // AFTER toss → split
+        playingPlayers = allPlayers.slice(0, 11);
+        benchPlayers = allPlayers.slice(11);
+      }
+
+      squads.push({
+        teamName: teamName || "",
+        toss,
+        playingPlayers,
+        benchPlayers,
+      });
     }
 
     /* ===============================
@@ -617,64 +672,85 @@ export const CrexV2Details = async (url: string) => {
     await page.close();
 
     // Process player details with rate limiting
-    const prepareData = [];
+    const prepareData: any[] = [];
 
     for (const team of squads) {
-      const teamPlayers = [];
+      const playingPlayers = [];
+      const benchPlayers = [];
 
-      // Process players in batches with delays
-      for (let i = 0; i < team.players.length; i++) {
-        const player = team.players[i];
-
-        if (player.playerUrl) {
-          try {
-            console.log(
-              `Fetching details for player ${i + 1}/${team.players.length}: ${player.name}`,
-            );
-            const playerDetails = await CrexPlayerDetailsWithBrowser(
-              player.playerUrl,
-              browser,
-            );
-
-            teamPlayers.push({
-              ...player,
-              style: playerDetails.player.style,
-              rank: playerDetails.player.rank,
-              recentForm: playerDetails.stats.recentForm,
-              careerStats: playerDetails.stats.careerStats,
-              // details: playerDetails,
-            });
-          } catch (error) {
-            console.error(`Failed to fetch details for ${player.name}:`, error);
-            teamPlayers.push({
-              ...player,
-              style: null,
-              rank: null,
-              recentForm: null,
-              careerStats: null,
-              details: null,
-            });
-          }
-
-          // Add delay between requests (1 second)
-          if (i < team.players.length - 1) {
-            await delay(1000);
-          }
-        } else {
-          teamPlayers.push({
+      // helper
+      const enrichPlayer = async (player: any, idx: number, total: number) => {
+        if (!player.playerUrl) {
+          return {
             ...player,
             style: null,
             rank: null,
             recentForm: null,
             careerStats: null,
-            details: null,
-          });
+          };
         }
+
+        try {
+          console.log(`Fetching ${idx + 1}/${total}: ${player.name}`);
+
+          const playerDetails = await CrexPlayerDetailsWithBrowser(
+            player.playerUrl,
+            browser,
+          );
+
+          return {
+            ...player,
+            style: playerDetails.player.style,
+            rank: playerDetails.player.rank,
+            recentForm: playerDetails.stats.recentForm,
+            careerStats: playerDetails.stats.careerStats,
+          };
+        } catch (err) {
+          console.error(`Failed ${player.name}`, err);
+
+          return {
+            ...player,
+            style: null,
+            rank: null,
+            recentForm: null,
+            careerStats: null,
+          };
+        }
+      };
+
+      /* ================= PLAYING XI ================= */
+
+      for (let i = 0; i < team.playingPlayers.length; i++) {
+        const enriched = await enrichPlayer(
+          team.playingPlayers[i],
+          i,
+          team.playingPlayers.length,
+        );
+
+        playingPlayers.push(enriched);
+
+        if (i < team.playingPlayers.length - 1) await delay(1000);
+      }
+
+      /* ================= BENCH ================= */
+
+      for (let i = 0; i < team.benchPlayers.length; i++) {
+        const enriched = await enrichPlayer(
+          team.benchPlayers[i],
+          i,
+          team.benchPlayers.length,
+        );
+
+        benchPlayers.push(enriched);
+
+        if (i < team.benchPlayers.length - 1) await delay(1000);
       }
 
       prepareData.push({
-        ...team,
-        players: teamPlayers,
+        teamName: team.teamName,
+        toss: team.toss,
+        playingPlayers,
+        benchPlayers,
       });
     }
 
