@@ -464,15 +464,17 @@ export const CrexV2Details = async (url: string) => {
 
     await page.evaluate(() => {
       const tabs = Array.from(document.querySelectorAll(".team-comp-type"));
-      const venueTab = tabs.find((el) => el.textContent?.trim() === "On Venue");
+      const venueTab = tabs.find((el) => el.textContent?.includes("Venue"));
       (venueTab as HTMLElement)?.click();
     });
 
     // wait for Angular re-render
-    await page.waitForFunction(() =>
-      document
-        .querySelector(".team-comp-type.highlited")
-        ?.textContent?.includes("Venue"),
+    await page.waitForFunction(
+      () => {
+        const rows = document.querySelectorAll("table.colHeader tbody tr");
+        return rows.length > 0;
+      },
+      { timeout: 30000 },
     );
 
     const venue = await readComparisonTable();
