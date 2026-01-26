@@ -69,27 +69,6 @@ const MatchDetailsPage = () => {
     // setMatchData({ ...DummyData, matchInfo: { ...selectedMatch } });
   }, [params.id, selectedMatch, router]);
 
-  // Parse score function
-  const parseScore = (scoreString: string) => {
-    const match = scoreString.match(/(\d+)(?:\(([\d.]+)\))?/);
-    if (match) {
-      return {
-        runs: parseInt(match[1]),
-        overs: match[2] || "0",
-      };
-    }
-    return { runs: 0, overs: "0" };
-  };
-
-  // Get team score
-  const getTeamScore = (teamShortName: string) => {
-    if (!matchData?.matchInfo?.score?.score) return null;
-    const scoreEntry = matchData.matchInfo.score.score.find(
-      (s: any) => s.team === teamShortName,
-    );
-    return scoreEntry ? parseScore(scoreEntry.run) : null;
-  };
-
   const handleGetPrediction = () => {
     if (!isAuthenticated) {
       router.push("/auth/login");
