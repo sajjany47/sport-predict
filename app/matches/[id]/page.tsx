@@ -62,7 +62,7 @@ const MatchDetailsPage = () => {
         setIsLoading(false);
       })
       .catch((err) => {
-        toast.error(err.message || "Failed to fetch match details.");
+        // toast.error(err.message || "Failed to fetch match details.");
         router.push("/matches");
         setIsLoading(false);
       });
