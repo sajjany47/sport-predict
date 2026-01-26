@@ -15,28 +15,22 @@ import {
   Trophy,
   Calendar,
   MapPin,
-  TrendingUp,
   BarChart3,
   Clock,
   Zap,
   ArrowLeft,
   Users,
-  Target,
   Activity,
   Radio,
   Home,
   Shield,
   Star,
-  Award,
-  Flame,
-  TargetIcon,
 } from "lucide-react";
 
 import CustomLoader from "@/components/ui/CustomLoader";
 import AIPredictionModal from "./ai-prediction-modal";
 import { FetchMatchDetails } from "../MatchService";
 import toast from "react-hot-toast";
-import OverviewTab from "./OverviewTab";
 import CrexOverviewTab from "./CrexOverviewTab";
 import PlayerCard from "./SquadDialoge";
 import { DummyData } from "@/lib/DummyData";
@@ -54,25 +48,25 @@ const MatchDetailsPage = () => {
   const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
 
   useEffect(() => {
-    // setIsLoading(true);
-    // FetchMatchDetails({
-    //   ...selectedMatch,
-    // })
-    //   .then((res) => {
-    //     setMatchData({
-    //       ...res.data,
-    //       matchInfo: {
-    //         ...selectedMatch,
-    //       },
-    //     });
-    //     setIsLoading(false);
-    //   })
-    //   .catch((err) => {
-    //     toast.error(err.message || "Failed to fetch match details.");
-    //     // router.push("/matches");
-    //     setIsLoading(false);
-    //   });
-    setMatchData({ ...DummyData, matchInfo: { ...selectedMatch } });
+    setIsLoading(true);
+    FetchMatchDetails({
+      ...selectedMatch,
+    })
+      .then((res) => {
+        setMatchData({
+          ...res.data,
+          matchInfo: {
+            ...selectedMatch,
+          },
+        });
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to fetch match details.");
+        router.push("/matches");
+        setIsLoading(false);
+      });
+    // setMatchData({ ...DummyData, matchInfo: { ...selectedMatch } });
   }, [params.id, selectedMatch, router]);
 
   // Parse score function
@@ -108,27 +102,6 @@ const MatchDetailsPage = () => {
     setIsPredictionModalOpen(true);
   };
 
-  // Format time
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
-  // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   // Get match status color
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -136,7 +109,7 @@ const MatchDetailsPage = () => {
         return "bg-red-500 text-white animate-pulse";
       case "COMPLETED":
         return "bg-green-500 text-white";
-      case "NOT_STARTED":
+      case "UPCOMING":
         return "bg-blue-500 text-white";
       case "ABANDONED":
         return "bg-gray-500 text-white";
@@ -164,8 +137,6 @@ const MatchDetailsPage = () => {
 
   const team1 = matchData.matchInfo.teams[0];
   const team2 = matchData.matchInfo.teams[1];
-  const team1Score = getTeamScore(team1.teamShortName);
-  const team2Score = getTeamScore(team2.teamShortName);
   const matchStatus = matchData.matchInfo.status;
 
   return (
@@ -255,11 +226,6 @@ const MatchDetailsPage = () => {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      {/* {team1.isWinner && (
-                        <div className="absolute -top-2 -right-2">
-                          <Award className="h-8 w-8 text-yellow-500 fill-yellow-500/20" />
-                        </div>
-                      )} */}
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-1">
                       {team1.teamName}
@@ -320,31 +286,11 @@ const MatchDetailsPage = () => {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      {/* {team2.isWinner && (
-                        <div className="absolute -top-2 -right-2">
-                          <Award className="h-8 w-8 text-yellow-500 fill-yellow-500/20" />
-                        </div>
-                      )} */}
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-1">
                       {team2.teamName}
                     </h3>
                     <p className="text-gray-600 mb-4">{team2.teamShortName}</p>
-
-                    {/* {team2Score && (
-                      <div className="space-y-2">
-                        <div className="text-4xl font-bold text-red-600">
-                          {team2Score.runs}
-                          <span className="text-lg text-gray-500 ml-2">
-                            runs
-                          </span>
-                        </div>
-                        <div className="text-gray-600">
-                          <TargetIcon className="h-4 w-4 inline mr-1" />
-                          {team2Score.overs} overs
-                        </div>
-                      </div>
-                    )} */}
                   </div>
                 </div>
 
@@ -371,16 +317,6 @@ const MatchDetailsPage = () => {
                           {team1.teamName}
                         </p>
                       </div>
-                      {/* {team1Score && (
-                        <div className="mt-1">
-                          <div className="text-lg font-bold text-blue-600">
-                            {team1Score.runs}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {team1Score.overs} ov
-                          </div>
-                        </div>
-                      )} */}
                     </div>
 
                     {/* VS Separator */}
@@ -417,16 +353,6 @@ const MatchDetailsPage = () => {
                           {team2.teamName}
                         </p>
                       </div>
-                      {/* {team2Score && (
-                        <div className="mt-1">
-                          <div className="text-lg font-bold text-red-600">
-                            {team2Score.runs}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {team2Score.overs} ov
-                          </div>
-                        </div>
-                      )} */}
                     </div>
                   </div>
 
@@ -505,23 +431,6 @@ const MatchDetailsPage = () => {
                     </div>
                   </CardContent>
                 </Card>
-
-                {/* <Card className="border border-gray-200 shadow-sm">
-                  <CardContent className="p-4 flex items-center space-x-3">
-                    <div className="p-2 bg-amber-100 rounded-lg">
-                      <Clock className="h-6 w-6 text-amber-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Timezone</p>
-                      <p className="font-medium text-gray-900 text-sm md:text-base">
-                        GMT {matchData.matchInfo.venue.timezone}
-                      </p>
-                      <p className="text-xs md:text-sm text-gray-600">
-                        Local Time
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card> */}
               </div>
             </div>
           </div>
@@ -667,9 +576,6 @@ const MatchDetailsPage = () => {
                                     )}
                                   </div>
                                 ) : (
-                                  // <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                                  //   <SquadDialoge data={squad.benchPlayer} />
-                                  // </div>
                                   <div className="text-center py-6">
                                     <Users className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mx-auto mb-3" />
                                     <p className="text-gray-500 text-sm">
