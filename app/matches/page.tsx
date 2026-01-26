@@ -155,7 +155,7 @@ const MatchesPage = () => {
           <MatchCard
             key={match._id}
             match={match}
-            showPredictButton={tabId === "upcoming"}
+            showPredictButton={tabId === "upcoming" || tabId === "live"}
             onClick={() => handleMatchClick(match)}
           />
         ))}

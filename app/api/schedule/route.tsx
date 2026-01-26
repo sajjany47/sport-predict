@@ -30,30 +30,55 @@ export async function POST(request: Request) {
       url: NormalizeCrexUrl(item.url),
     }));
 
-    const prepareData = data.map((item: any) => {
-      const crexMatch = crexData.find((m: any) => m.url === item.url);
-      let teamA = item.teams[0];
-      let teamB = item.teams[1];
-      return {
-        ...item,
-        teams: [
-          {
-            ...teamA,
-            teamShortName: crexMatch
-              ? crexMatch.teams[0].teamShortName
-              : teamA.teamShortName,
-          },
-          {
-            ...teamB,
-            teamShortName: crexMatch
-              ? crexMatch.teams[1].teamShortName
-              : teamB.teamShortName,
-          },
-        ],
-        status: crexMatch ? crexMatch.status : item.status,
-        score: crexMatch ? crexMatch.score : item.score,
-      };
-    });
+    // const prepareData = data.map((item: any) => {
+    //   const crexMatch = crexData.find((m: any) => m.url === item.url);
+    //   let teamA = item.teams[0];
+    //   let teamB = item.teams[1];
+    //   return {
+    //     ...item,
+    //     teams: [
+    //       {
+    //         ...teamA,
+    //         teamShortName: crexMatch
+    //           ? crexMatch.teams[0].teamShortName
+    //           : teamA.teamShortName,
+    //       },
+    //       {
+    //         ...teamB,
+    //         teamShortName: crexMatch
+    //           ? crexMatch.teams[1].teamShortName
+    //           : teamB.teamShortName,
+    //       },
+    //     ],
+    //     status: crexMatch ? crexMatch.status : item.status,
+    //     score: crexMatch ? crexMatch.score : item.score,
+    //   };
+    // });
+
+    const prepareData = crexData
+      .map((item: any) => {
+        const match = data.find((m: any) => m.url === item.url);
+        if (match) {
+          let teamA = match.teams[0];
+          let teamB = match.teams[1];
+          return {
+            ...match,
+            teams: [
+              {
+                ...teamA,
+                teamShortName: item.teams[0].teamShortName,
+              },
+              {
+                ...teamB,
+                teamShortName: item.teams[1].teamShortName,
+              },
+            ],
+            status: item.status,
+            score: item.score,
+          };
+        }
+      })
+      .filter(Boolean);
     return Response.json(
       {
         data: prepareData,

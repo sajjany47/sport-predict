@@ -122,6 +122,7 @@ const MatchCard = ({
         window.clearInterval(intervalRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match._id, match.formatDate, match.startTime, match.status]);
 
   // Format score display
