@@ -16856,4 +16856,33 @@ export const DummyData = {
       },
     ],
   },
+  matchInfo: {
+    matchId: "1RS",
+    url: "https://crex.com/scoreboard/TO5/1RS/1st-T20/P/V/sa-vs-wi-1st-t20-west-indies-tour-of-south-africa-2026/info",
+    matchName: "South Africa vs West Indies",
+    matchDescription: "1stT20, WI vs SA 2026",
+    startTime: "9:30 PM",
+    matchDate: "Tue, 27 Jan 2026",
+    status: "UPCOMING",
+    format: "T20",
+    sport: "cricket",
+    teams: [
+      {
+        teamName: "South Africa",
+        teamShortName: "South",
+        teamFlagUrl: "https://cricketvectors.akamaized.net/Teams/P.png",
+        cricketScore: null,
+      },
+      {
+        teamName: "West Indies",
+        teamShortName: "West",
+        teamFlagUrl: "https://cricketvectors.akamaized.net/Teams/V.png",
+        cricketScore: null,
+      },
+    ],
+    score: {
+      score: [],
+      result: "",
+    },
+  },
 };

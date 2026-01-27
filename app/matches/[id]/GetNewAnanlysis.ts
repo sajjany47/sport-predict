@@ -5,6 +5,68 @@
 const safe = (value: number): number =>
   Number.isFinite(value) && !Number.isNaN(value) ? value : 0;
 
+type MatchOverConfig = {
+  totalOvers: number; // overs
+  ballsPerInnings: number; // total balls
+  bowlerOverLimit: number; // overs
+};
+
+const matchOver = (description: string): MatchOverConfig => {
+  const text = description.toLowerCase();
+
+  /* ---------- TEST ---------- */
+  if (text.includes("test")) {
+    return {
+      totalOvers: 90,
+      ballsPerInnings: 90 * 6,
+      bowlerOverLimit: 30,
+    };
+  }
+
+  /* ---------- ODI ---------- */
+  if (text.includes("odi")) {
+    return {
+      totalOvers: 50,
+      ballsPerInnings: 50 * 6,
+      bowlerOverLimit: 10,
+    };
+  }
+
+  /* ---------- T20 ---------- */
+  if (text.includes("t20")) {
+    return {
+      totalOvers: 20,
+      ballsPerInnings: 20 * 6,
+      bowlerOverLimit: 4,
+    };
+  }
+
+  /* ---------- T10 ---------- */
+  if (text.includes("t10")) {
+    return {
+      totalOvers: 10,
+      ballsPerInnings: 10 * 6,
+      bowlerOverLimit: 2,
+    };
+  }
+
+  /* ---------- THE HUNDRED ---------- */
+  if (text.includes("100") || text.includes("hundred")) {
+    return {
+      totalOvers: 20, // 100 balls = 20 overs
+      ballsPerInnings: 100,
+      bowlerOverLimit: 5, // 20 balls
+    };
+  }
+
+  /* ---------- DEFAULT (T20 DOMESTIC) ---------- */
+  return {
+    totalOvers: 20,
+    ballsPerInnings: 120,
+    bowlerOverLimit: 4,
+  };
+};
+
 const parseBattingScore = (score: string) => {
   const match = score?.match(/\d+/g);
   if (!match || match.length < 2) {
@@ -144,7 +206,7 @@ const getPlayerBowlingStats = (player: any) => {
    Team 1st Innings Prediction
 ========================= */
 
-const squadAnanlysis = (team: any) => {
+const squadAnanlysis = (team: any, matchDescription: string) => {
   const squad =
     team?.playingPlayers?.length > 0
       ? team.playingPlayers
@@ -167,9 +229,10 @@ const squadAnanlysis = (team: any) => {
     teamWicket += safe(bowlingStats.impactWickets);
   });
 
-  // /* Normalize to T20 (120 balls) */
-  // const runRate = safe(teamRuns / teamBallsFaced);
-  // let predictedScore = safe(runRate * 120);
+  /* Normalize to T20 (120 balls) */
+  const runRate = safe(teamRuns / teamBallsFaced);
+  const findOver = matchOver(matchDescription);
+  let predictedScore = safe(runRate * findOver.ballsPerInnings);
 
   // /* Clamp realistic T20 scores */
   // predictedScore = Math.max(120, Math.min(220, Math.round(predictedScore)));
@@ -181,8 +244,7 @@ const squadAnanlysis = (team: any) => {
   // };
 
   return {
-    teamRuns,
-    teamBallsFaced,
+    predictedScore,
     teamRunsConced,
     teamWicket,
   };
@@ -196,8 +258,8 @@ export const GetNewAnalysis = async (data: any) => {
   const teamA = data.squads[0];
   const teamB = data.squads[1];
 
-  const teamAScore = squadAnanlysis(teamA);
-  const teamBScore = squadAnanlysis(teamB);
+  const teamAScore = squadAnanlysis(teamA, data.matchInfo.matchDescription);
+  const teamBScore = squadAnanlysis(teamB, data.matchInfo.matchDescription);
 
   return {
     teamA: teamAScore,
