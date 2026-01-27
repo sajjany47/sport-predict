@@ -16,7 +16,8 @@ const SupportPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await GetNewAnalysis(DummyData);
+      const a = await GetNewAnalysis(DummyData);
+      console.log(a);
     };
     fetchData();
   }, []);
