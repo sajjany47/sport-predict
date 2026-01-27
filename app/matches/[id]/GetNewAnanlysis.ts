@@ -234,18 +234,11 @@ const squadAnanlysis = (team: any, matchDescription: string) => {
   const findOver = matchOver(matchDescription);
   let predictedScore = safe(runRate * findOver.ballsPerInnings);
 
-  // /* Clamp realistic T20 scores */
-  // predictedScore = Math.max(120, Math.min(220, Math.round(predictedScore)));
-
-  // return {
-  //   teamName: team.teamName,
-  //   predictedFirstInningsScore: predictedScore,
-  //   estimatedRunRate: safe(predictedScore / 20),
-  // };
+  let totalTeamRunsConced = safe((teamRunsConced / teamWicket) * 10);
 
   return {
     predictedScore,
-    teamRunsConced,
+    totalTeamRunsConced,
     teamWicket,
   };
 };
@@ -258,11 +251,161 @@ export const GetNewAnalysis = async (data: any) => {
   const teamA = data.squads[0];
   const teamB = data.squads[1];
 
+  const matchInfoTeamA = data.matchInfo.teams[0];
+  const matchInfoTeamB = data.matchInfo.teams[1];
+
   const teamAScore = squadAnanlysis(teamA, data.matchInfo.matchDescription);
   const teamBScore = squadAnanlysis(teamB, data.matchInfo.matchDescription);
 
-  return {
-    teamA: teamAScore,
-    teamB: teamBScore,
+  let teamAPredictedScore =
+    (teamAScore.predictedScore + teamBScore.totalTeamRunsConced) / 2 -
+    teamBScore.teamWicket * 5;
+
+  let teamBPredictedScore =
+    (teamBScore.predictedScore + teamAScore.totalTeamRunsConced) / 2 -
+    teamAScore.teamWicket * 5;
+
+  if (
+    data?.venueDetails?.stats?.avg1stInns &&
+    data?.venueDetails?.stats?.avg2ndInns
+  ) {
+    const avg1st = Number(data.venueDetails.stats.avg1stInns);
+    const avg2nd = Number(data.venueDetails.stats.avg2ndInns);
+
+    const totalVenueAvgScore = (avg1st + avg2nd) / 2;
+
+    teamAPredictedScore = (teamAPredictedScore + totalVenueAvgScore) / 2;
+    teamBPredictedScore = (teamBPredictedScore + totalVenueAvgScore) / 2;
+  }
+
+  const response = {
+    team1: {
+      name: matchInfoTeamA.teamName,
+      shortName: teamA.teamName,
+      flag: matchInfoTeamA.teamFlagUrl,
+      firstInningScore: {
+        min: Math.round(teamAPredictedScore * 0.9),
+        max: Math.round(teamAPredictedScore * 1.1),
+        predicted: Math.round(teamAPredictedScore),
+        wickets:
+          Math.round(teamBScore.teamWicket * 0.4) > 10
+            ? 10
+            : Math.round(teamBScore.teamWicket * 0.4),
+      },
+      // winnerPrediction: {
+      //   probability: teamAChance,
+      //   confidence: GetConfidence(teamAChance),
+      //   hint: {
+      //     hintMessage: hintData.team1.message,
+      //     badgeColor: hintData.team1.badgeColor,
+      //     color: hintData.team1.color,
+      //   },
+      // },
+      // topBatsman: team1TopBatsman
+      //   ? {
+      //       name: team1TopBatsman.name,
+      //       image: team1TopBatsman.image,
+      //       role: team1TopBatsman.role,
+      //       batting: {
+      //         totalRuns: CheckIntValue(
+      //           team1TopBatsman.batting.totalRuns.toFixed(0),
+      //         ),
+      //         totalAvgStrikeRate: CheckIntValue(
+      //           SafeDivide(
+      //             team1TopBatsman.batting.totalRuns,
+      //             team1TopBatsman.batting.totalAvgBallFaced,
+      //           ) * 100,
+      //         ),
+      //         totalAvgBallFaced: CheckIntValue(
+      //           team1TopBatsman.batting.totalAvgBallFaced.toFixed(0),
+      //         ),
+      //       },
+      //     }
+      //   : null,
+      // topBowler: team1TopBowler
+      //   ? {
+      //       name: team1TopBowler.name,
+      //       image: team1TopBowler.image,
+      //       role: team1TopBowler.role,
+      //       bowling: {
+      //         totalAvgEconomy: team1TopBowler.bowling.totalAvgEconomy,
+      //         totalAvgOvers: CheckIntValue(
+      //           team1TopBowler.bowling.totalAvgOvers.toFixed(0),
+      //         ),
+      //         totalAvgWickets: CheckIntValue(
+      //           team1TopBowler.bowling.totalAvgWickets.toFixed(0),
+      //         ),
+      //         totalAvgRunsConceded: CheckIntValue(
+      //           team1TopBowler.bowling.totalAvgRunsConceded.toFixed(0),
+      //         ),
+      //       },
+      //     }
+      //   : null,
+    },
+    team2: {
+      name: matchInfoTeamB.teamName,
+      shortName: teamB.teamName,
+      flag: matchInfoTeamB.teamFlagUrl,
+      firstInningScore: {
+        min: Math.round(teamBPredictedScore * 0.9),
+        max: Math.round(teamBPredictedScore * 1.1),
+        predicted: Math.round(teamBPredictedScore),
+        wickets:
+          Math.round(teamAScore.teamWicket * 0.6) > 10
+            ? 10
+            : Math.round(teamAScore.teamWicket * 0.4),
+      },
+      // winnerPrediction: {
+      //   probability: teamBChance,
+      //   confidence: GetConfidence(teamBChance),
+      //   hint: {
+      //     hintMessage: hintData.team2.message,
+      //     badgeColor: hintData.team2.badgeColor,
+      //     color: hintData.team2.color,
+      //   },
+      // },
+      // topBatsman: team2TopBatsman
+      //   ? {
+      //       name: team2TopBatsman.name,
+      //       image: team2TopBatsman.image,
+      //       role: team2TopBatsman.role,
+      //       batting: {
+      //         totalRuns: CheckIntValue(
+      //           team2TopBatsman.batting.totalRuns.toFixed(0),
+      //         ),
+      //         totalAvgStrikeRate: CheckIntValue(
+      //           SafeDivide(
+      //             team2TopBatsman.batting.totalRuns,
+      //             team2TopBatsman.batting.totalAvgBallFaced,
+      //           ) * 100,
+      //         ),
+      //         totalAvgBallFaced: CheckIntValue(
+      //           team2TopBatsman.batting.totalAvgBallFaced.toFixed(0),
+      //         ),
+      //       },
+      //     }
+      //   : null,
+      // topBowler: team2TopBowler
+      //   ? {
+      //       name: team2TopBowler.name,
+      //       image: team2TopBowler.image,
+      //       role: team2TopBowler.role,
+      //       bowling: {
+      //         totalAvgEconomy: team2TopBowler.bowling.totalAvgEconomy,
+      //         totalAvgOvers: CheckIntValue(
+      //           team2TopBowler.bowling.totalAvgOvers.toFixed(0),
+      //         ),
+      //         totalAvgWickets: CheckIntValue(
+      //           team2TopBowler.bowling.totalAvgWickets.toFixed(0),
+      //         ),
+      //         totalAvgRunsConceded: CheckIntValue(
+      //           team2TopBowler.bowling.totalAvgRunsConceded.toFixed(0),
+      //         ),
+      //       },
+      //     }
+      //   : null,
+    },
   };
+
+  return response;
 };
