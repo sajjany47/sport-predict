@@ -84,7 +84,9 @@ const MatchCard = ({
   // Parse date and time from formatDate and startTime
   const getMatchDateTime = () => {
     const date = new Date(match.formatDate);
-    const [time, modifier] = match.startTime.split(" ");
+    const [time, modifier]: any = match?.startTime
+      ? match?.startTime?.split(" ")
+      : " ";
     let [hours, minutes] = time.split(":").map(Number);
 
     if (modifier === "PM" && hours < 12) hours += 12;

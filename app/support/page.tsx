@@ -16,7 +16,7 @@ const SupportPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data: any = await GetNewAnalysis(DummyData);
+      await GetNewAnalysis(DummyData);
     };
     fetchData();
   }, []);
@@ -207,7 +207,7 @@ const SupportPage = () => {
                         user?.username || "YourUsername"
                       }%0D%0A%0D%0AThank you!`;
                       window.location.href = `mailto:sportpredict247@gmail.com?subject=${encodeURIComponent(
-                        subject
+                        subject,
                       )}&body=${encodeURIComponent(body)}`;
                     }}
                   >
