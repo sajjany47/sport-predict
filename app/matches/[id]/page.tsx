@@ -66,7 +66,7 @@ const MatchDetailsPage = () => {
         router.push("/matches");
         setIsLoading(false);
       });
-    // setMatchData({ ...DummyData, matchInfo: { ...selectedMatch } });
+    // setMatchData({ ...DummyData });
   }, [params.id, selectedMatch, router]);
 
   const handleGetPrediction = () => {
@@ -372,40 +372,6 @@ const MatchDetailsPage = () => {
                       <p className="text-sm text-gray-500">Venue</p>
                       <p className="font-medium text-gray-900 text-sm md:text-base">
                         {matchData.venueDetails.name}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border border-gray-200 shadow-sm">
-                  <CardContent className="p-4 flex items-center space-x-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Home className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Tournament</p>
-                      <p className="font-medium text-gray-900 text-sm md:text-base">
-                        {matchData.matchInfo.matchDescription}
-                      </p>
-                      <p className="text-xs md:text-sm text-gray-600">
-                        {matchData.matchInfo.format}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border border-gray-200 shadow-sm">
-                  <CardContent className="p-4 flex items-center space-x-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <Shield className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Match Status</p>
-                      <p className="font-medium text-gray-900 text-sm md:text-base">
-                        {matchData.matchInfo.status}
-                      </p>
-                      <p className="text-xs md:text-sm text-gray-600">
-                        {matchData.matchInfo.format}
                       </p>
                     </div>
                   </CardContent>

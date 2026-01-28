@@ -322,17 +322,17 @@ export const GetNewAnalysis = async (data: any) => {
         const stats = getPlayerBattingStats(item);
         return {
           ...basePlayer,
-          impactRuns: stats.impactRuns,
-          strikeRate: stats.strikeRate,
-          avgBalls: stats.avgBalls,
+          impactRuns: Math.round(stats.impactRuns),
+          strikeRate: Math.round(stats.strikeRate),
+          avgBalls: Math.round(stats.avgBalls),
         };
       }
 
       const stats = getPlayerBowlingStats(item);
       return {
         ...basePlayer,
-        impactWickets: stats.impactWickets,
-        avgRunsConced: stats.avgRunsConced,
+        impactWickets: Math.round(stats.impactWickets),
+        avgRunsConced: Math.round(stats.avgRunsConced),
       };
     });
 
