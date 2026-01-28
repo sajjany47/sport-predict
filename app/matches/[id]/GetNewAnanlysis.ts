@@ -2,6 +2,8 @@
    Utility Helpers
 ========================= */
 
+import { CheckIntValue, GetConfidence, GetHint } from "@/lib/utils";
+
 const safe = (value: number): number =>
   Number.isFinite(value) && !Number.isNaN(value) ? value : 0;
 
@@ -278,6 +280,70 @@ export const GetNewAnalysis = async (data: any) => {
     teamBPredictedScore = (teamBPredictedScore + totalVenueAvgScore) / 2;
   }
 
+  const totalBothTeamScore = teamAPredictedScore + teamBPredictedScore;
+
+  const teamAChance =
+    totalBothTeamScore > 0
+      ? CheckIntValue((teamAPredictedScore / totalBothTeamScore) * 100)
+      : Number("50.00");
+  const teamBChance =
+    totalBothTeamScore > 0
+      ? CheckIntValue((teamBPredictedScore / totalBothTeamScore) * 100)
+      : Number("50.00");
+
+  const hintData = GetHint(teamAChance, teamBChance);
+
+  const playPerformance = (team: any, type: "bat" | "bowl") => {
+    const squad =
+      team?.playingPlayers?.length > 0
+        ? team.playingPlayers
+        : (team?.benchPlayers ?? []);
+
+    if (!squad.length) return null;
+
+    const players = squad.map((item: any) => {
+      const basePlayer = {
+        name: item.name,
+        shortName: item.shortName,
+        role: item.role,
+        isWK: item.isWK,
+        playerUrl: item.playerUrl,
+        image: item.image,
+        style: item.style,
+        rank: item.rank,
+        impactRuns: 0,
+        strikeRate: 0,
+        avgBalls: 0,
+        impactWickets: 0,
+        avgRunsConced: 0,
+      };
+
+      if (type === "bat") {
+        const stats = getPlayerBattingStats(item);
+        return {
+          ...basePlayer,
+          impactRuns: stats.impactRuns,
+          strikeRate: stats.strikeRate,
+          avgBalls: stats.avgBalls,
+        };
+      }
+
+      const stats = getPlayerBowlingStats(item);
+      return {
+        ...basePlayer,
+        impactWickets: stats.impactWickets,
+        avgRunsConced: stats.avgRunsConced,
+      };
+    });
+
+    return players.reduce((best: any, curr: any) => {
+      if (type === "bat") {
+        return curr.impactRuns > best.impactRuns ? curr : best;
+      }
+      return curr.impactWickets > best.impactWickets ? curr : best;
+    });
+  };
+
   const response = {
     team1: {
       name: matchInfoTeamA.teamName,
@@ -292,55 +358,17 @@ export const GetNewAnalysis = async (data: any) => {
             ? 10
             : Math.round(teamBScore.teamWicket * 0.4),
       },
-      // winnerPrediction: {
-      //   probability: teamAChance,
-      //   confidence: GetConfidence(teamAChance),
-      //   hint: {
-      //     hintMessage: hintData.team1.message,
-      //     badgeColor: hintData.team1.badgeColor,
-      //     color: hintData.team1.color,
-      //   },
-      // },
-      // topBatsman: team1TopBatsman
-      //   ? {
-      //       name: team1TopBatsman.name,
-      //       image: team1TopBatsman.image,
-      //       role: team1TopBatsman.role,
-      //       batting: {
-      //         totalRuns: CheckIntValue(
-      //           team1TopBatsman.batting.totalRuns.toFixed(0),
-      //         ),
-      //         totalAvgStrikeRate: CheckIntValue(
-      //           SafeDivide(
-      //             team1TopBatsman.batting.totalRuns,
-      //             team1TopBatsman.batting.totalAvgBallFaced,
-      //           ) * 100,
-      //         ),
-      //         totalAvgBallFaced: CheckIntValue(
-      //           team1TopBatsman.batting.totalAvgBallFaced.toFixed(0),
-      //         ),
-      //       },
-      //     }
-      //   : null,
-      // topBowler: team1TopBowler
-      //   ? {
-      //       name: team1TopBowler.name,
-      //       image: team1TopBowler.image,
-      //       role: team1TopBowler.role,
-      //       bowling: {
-      //         totalAvgEconomy: team1TopBowler.bowling.totalAvgEconomy,
-      //         totalAvgOvers: CheckIntValue(
-      //           team1TopBowler.bowling.totalAvgOvers.toFixed(0),
-      //         ),
-      //         totalAvgWickets: CheckIntValue(
-      //           team1TopBowler.bowling.totalAvgWickets.toFixed(0),
-      //         ),
-      //         totalAvgRunsConceded: CheckIntValue(
-      //           team1TopBowler.bowling.totalAvgRunsConceded.toFixed(0),
-      //         ),
-      //       },
-      //     }
-      //   : null,
+      winnerPrediction: {
+        probability: teamAChance,
+        confidence: GetConfidence(teamAChance),
+        hint: {
+          hintMessage: hintData.team1.message,
+          badgeColor: hintData.team1.badgeColor,
+          color: hintData.team1.color,
+        },
+      },
+      topBatsman: playPerformance(teamA, "bat"),
+      topBowler: playPerformance(teamA, "bowl"),
     },
     team2: {
       name: matchInfoTeamB.teamName,
@@ -355,55 +383,17 @@ export const GetNewAnalysis = async (data: any) => {
             ? 10
             : Math.round(teamAScore.teamWicket * 0.4),
       },
-      // winnerPrediction: {
-      //   probability: teamBChance,
-      //   confidence: GetConfidence(teamBChance),
-      //   hint: {
-      //     hintMessage: hintData.team2.message,
-      //     badgeColor: hintData.team2.badgeColor,
-      //     color: hintData.team2.color,
-      //   },
-      // },
-      // topBatsman: team2TopBatsman
-      //   ? {
-      //       name: team2TopBatsman.name,
-      //       image: team2TopBatsman.image,
-      //       role: team2TopBatsman.role,
-      //       batting: {
-      //         totalRuns: CheckIntValue(
-      //           team2TopBatsman.batting.totalRuns.toFixed(0),
-      //         ),
-      //         totalAvgStrikeRate: CheckIntValue(
-      //           SafeDivide(
-      //             team2TopBatsman.batting.totalRuns,
-      //             team2TopBatsman.batting.totalAvgBallFaced,
-      //           ) * 100,
-      //         ),
-      //         totalAvgBallFaced: CheckIntValue(
-      //           team2TopBatsman.batting.totalAvgBallFaced.toFixed(0),
-      //         ),
-      //       },
-      //     }
-      //   : null,
-      // topBowler: team2TopBowler
-      //   ? {
-      //       name: team2TopBowler.name,
-      //       image: team2TopBowler.image,
-      //       role: team2TopBowler.role,
-      //       bowling: {
-      //         totalAvgEconomy: team2TopBowler.bowling.totalAvgEconomy,
-      //         totalAvgOvers: CheckIntValue(
-      //           team2TopBowler.bowling.totalAvgOvers.toFixed(0),
-      //         ),
-      //         totalAvgWickets: CheckIntValue(
-      //           team2TopBowler.bowling.totalAvgWickets.toFixed(0),
-      //         ),
-      //         totalAvgRunsConceded: CheckIntValue(
-      //           team2TopBowler.bowling.totalAvgRunsConceded.toFixed(0),
-      //         ),
-      //       },
-      //     }
-      //   : null,
+      winnerPrediction: {
+        probability: teamBChance,
+        confidence: GetConfidence(teamBChance),
+        hint: {
+          hintMessage: hintData.team2.message,
+          badgeColor: hintData.team2.badgeColor,
+          color: hintData.team2.color,
+        },
+      },
+      topBatsman: playPerformance(teamB, "bat"),
+      topBowler: playPerformance(teamB, "bowl"),
     },
   };
 
