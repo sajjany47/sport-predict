@@ -395,6 +395,11 @@ export const GetNewAnalysis = async (data: any) => {
       topBatsman: playPerformance(teamB, "bat"),
       topBowler: playPerformance(teamB, "bowl"),
     },
+    recentMatchOnVenue: data?.venueDetails?.recentMatches,
+    venueStats: data?.venueDetails?.stats,
+    venueRecords: data?.venueDetails?.records,
+    venuePaceVsSpin: data?.venueDetails?.paceVsSpin,
+    venueWeather: data?.venueDetails?.weather,
   };
 
   return response;
