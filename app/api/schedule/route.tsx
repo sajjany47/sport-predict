@@ -6,12 +6,13 @@ import dbConnect from "../db";
 
 export async function POST(request: Request) {
   await dbConnect();
+
   try {
     const body = await request.json();
-
     const fromDate = body.fromDate ? new Date(body.fromDate) : new Date();
 
-    const data = await MatchList.aggregate([
+    // 1️⃣ Fetch DB matches
+    const dbMatches = await MatchList.aggregate([
       {
         $match: {
           formatDate: new Date(moment(fromDate).format("YYYY-MM-DD")),
@@ -25,38 +26,51 @@ export async function POST(request: Request) {
       },
     ]);
 
-    let crexData = (await CrexList()).map((item: any) => ({
+    // 2️⃣ Fetch Crex matches (LIVE / UPCOMING)
+    const crexData = (await CrexList()).map((item: any) => ({
       ...item,
       url: NormalizeCrexUrl(item.url),
     }));
 
+    // 3️⃣ Merge DB + Crex (live matches)
     const prepareData = crexData
       .map((item: any) => {
-        const match = data.find((m: any) => m.url === item.url);
-        if (match) {
-          let teamA = match.teams[0];
-          let teamB = match.teams[1];
-          return {
-            ...match,
-            teams: [
-              {
-                ...teamA,
-                teamShortName: item.teams[0].teamShortName,
-              },
-              {
-                ...teamB,
-                teamShortName: item.teams[1].teamShortName,
-              },
-            ],
-            status: item.status,
-            score: item.score,
-          };
-        }
+        const match = dbMatches.find((m: any) => m.url === item.url);
+        if (!match) return null;
+
+        return {
+          ...match,
+          teams: [
+            {
+              ...match.teams[0],
+              teamShortName: item.teams[0].teamShortName,
+            },
+            {
+              ...match.teams[1],
+              teamShortName: item.teams[1].teamShortName,
+            },
+          ],
+          status: item.status,
+          score: item.score,
+        };
       })
       .filter(Boolean);
+
+    // 4️⃣ DB matches NOT in Crex → COMPLETED
+    const completedMatches = dbMatches
+      .filter(
+        (dbMatch: any) =>
+          !prepareData.some((liveMatch: any) => liveMatch.url === dbMatch.url),
+      )
+      .map((item: any) => ({
+        ...item,
+        status: "COMPLETED",
+      }));
+
+    // ✅ Final response
     return Response.json(
       {
-        data: prepareData,
+        data: [...prepareData, ...completedMatches],
         date: moment(fromDate).format("DD-MM-YYYY"),
         success: true,
         message: "Schedule fetched successfully",
