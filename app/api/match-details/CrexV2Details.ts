@@ -2,104 +2,83 @@ import puppeteer from "puppeteer";
 import { CrexPlayerDetails } from "./CrexPlayerDetails";
 
 // Updated CrexPlayerDetails to accept browser instance
+
+/* ======================================
+   PLAYER DETAILS WITH SHARED BROWSER
+====================================== */
+
 export const CrexPlayerDetailsWithBrowser = async (
   url: string,
   browser: any,
-): Promise<any> => {
+) => {
   const page = await browser.newPage();
 
   try {
-    // Set viewport and user agent
     await page.setViewport({ width: 1920, height: 1080 });
     await page.setUserAgent(
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
     );
 
     page.setDefaultTimeout(60000);
 
-    await page.goto(url, {
-      waitUntil: "networkidle2",
-      timeout: 60000,
-    });
+    await page.goto(url, { waitUntil: "networkidle2" });
 
-    // Wait for player name to load
-    await page.waitForSelector(".playerFName", { timeout: 30000 });
+    await page.waitForSelector(".playerFName");
+
+    /* ================= PLAYER BASIC ================= */
 
     const player = await page.evaluate(() => {
-      /* ===============================
-         🧑 PLAYER NAME
-      =============================== */
-      const firstName =
+      const first =
         document.querySelector(".playerFName")?.textContent?.trim() || "";
-      const lastName =
+      const last =
         document.querySelector(".playerLName")?.textContent?.trim() || "";
 
-      const name = `${firstName} ${lastName}`.trim();
-
-      /* ===============================
-         🖼 PLAYER IMAGE
-      =============================== */
-      const image =
-        document.querySelector("#playerWrap img")?.getAttribute("src") || null;
-
-      /* ===============================
-         🏏 BATTING STYLE
-      =============================== */
-      const style =
-        document.querySelector(".btText span")?.textContent?.trim() || "";
-
-      /* ===============================
-         🏅 PLAYER RANK
-      =============================== */
-      const rank =
-        document.querySelector(".playerTop")?.textContent?.trim() || "";
-
       return {
-        name,
-        image,
-        style,
-        rank,
+        name: `${first} ${last}`.trim(),
+        image:
+          document.querySelector("#playerWrap img")?.getAttribute("src") ||
+          null,
+        style:
+          document.querySelector(".btText span")?.textContent?.trim() || null,
+        rank: Array.from(document.querySelectorAll(".playerTop"))
+          .map((x) => x.textContent?.trim())
+          .filter(Boolean),
       };
     });
 
-    // Wait for career stats to load
-    await page.waitForSelector(".careerTitle", { timeout: 30000 });
+    /* ================= WAIT CAREER ================= */
+
+    await page.waitForSelector("section.careerSection");
 
     const stats = await page.evaluate(() => {
-      /* ===============================
-       🔥 RECENT FORM (BATTING)
-    =============================== */
-      const recentBatting = Array.from(
-        document.querySelectorAll("#rfContainer\\ Batting tr.formItems"),
-      ).map((row) => ({
-        match: row.querySelector(".itemSubtext")?.textContent?.trim() || "",
-        score: row.querySelector(".itemText span")?.textContent?.trim() || "",
-        scorecardUrl: row.querySelector(".itemText")?.getAttribute("href")
-          ? "https://crex.com" +
-            row.querySelector(".itemText")?.getAttribute("href")
-          : null,
-      }));
+      /* ============ RECENT FORM ============ */
 
-      /* ===============================
-       🔥 RECENT FORM (BOWLING)
-    =============================== */
-      const recentBowling = Array.from(
-        document.querySelectorAll("#rfContainer\\ Bowling tr.formItems"),
-      ).map((row) => ({
-        match: row.querySelector(".itemSubtext")?.textContent?.trim() || "",
-        figures: row.querySelector(".itemText span")?.textContent?.trim() || "",
-        scorecardUrl: row.querySelector(".itemText")?.getAttribute("href")
-          ? "https://crex.com" +
-            row.querySelector(".itemText")?.getAttribute("href")
-          : null,
-      }));
+      const readRecent = (id: string) =>
+        Array.from(
+          document.querySelectorAll(`#rfContainer\\ ${id} tr.formItems`),
+        ).map((row) => ({
+          match: row.querySelector(".itemSubtext")?.textContent?.trim() || "",
+          score: row.querySelector(".itemText span")?.textContent?.trim() || "",
+          scorecardUrl: row.querySelector(".itemText")?.getAttribute("href")
+            ? "https://crex.com" +
+              row.querySelector(".itemText")?.getAttribute("href")
+            : null,
+        }));
 
-      /* ===============================
-       📊 CAREER STATS – BATTING
-    =============================== */
-      const battingCareer = Array.from(
-        document.querySelectorAll(".careerSection:not(.d-none) table tbody tr"),
-      )
+      const recentForm = {
+        batting: readRecent("Batting"),
+        bowling: readRecent("Bowling"),
+      };
+
+      /* ============ CAREER STATS ============ */
+
+      const sections = document.querySelectorAll("section.careerSection");
+
+      /* ---- Batting ---- */
+
+      const battingRows = sections[0]?.querySelectorAll("table tbody tr") || [];
+
+      const batting = Array.from(battingRows)
         .slice(1)
         .map((row) => {
           const td = row.querySelectorAll("td");
@@ -120,12 +99,11 @@ export const CrexPlayerDetailsWithBrowser = async (
           };
         });
 
-      /* ===============================
-       📊 CAREER STATS – BOWLING
-    =============================== */
-      const bowlingCareer = Array.from(
-        document.querySelectorAll(".careerSection:not(.d-none) table tbody tr"),
-      )
+      /* ---- Bowling ---- */
+
+      const bowlingRows = sections[1]?.querySelectorAll("table tbody tr") || [];
+
+      const bowling = Array.from(bowlingRows)
         .slice(1)
         .map((row) => {
           const td = row.querySelectorAll("td");
@@ -146,21 +124,15 @@ export const CrexPlayerDetailsWithBrowser = async (
         });
 
       return {
-        recentForm: {
-          batting: recentBatting,
-          bowling: recentBowling,
-        },
+        recentForm,
         careerStats: {
-          batting: battingCareer,
-          bowling: bowlingCareer,
+          batting,
+          bowling,
         },
       };
     });
 
     return { player, stats };
-  } catch (error) {
-    console.error(`Error scraping ${url}:`, error);
-    throw error;
   } finally {
     await page.close();
   }
