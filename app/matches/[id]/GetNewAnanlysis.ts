@@ -108,9 +108,9 @@ const getPlayerBattingStats = (player: any) => {
 
   const matches = batting.length;
 
-  const avgRuns = safe(totalRuns / matches);
-  const avgBalls = safe(totalBalls / matches);
-  const strikeRate = safe((avgRuns / avgBalls) * 100);
+  let avgRuns = safe(totalRuns / matches);
+  let avgBalls = safe(totalBalls / matches);
+  let strikeRate = safe((avgRuns / avgBalls) * 100);
 
   /* Role impact */
   let roleMultiplier = 1;
@@ -128,8 +128,28 @@ const getPlayerBattingStats = (player: any) => {
       roleMultiplier = 1;
   }
 
-  const impactRuns = safe(avgRuns * roleMultiplier * (strikeRate / 100));
+  if (player?.careerStats?.batting?.length > 0) {
+    let statsMatch = player?.careerStats?.batting.lenght;
+    let statsTotalRuns = 0;
+    let statsTotalBalls = 0;
+    player?.careerStats?.batting.forEach((match: any) => {
+      const balls = Math.round(
+        safe((Number(match.runs) * 100) / Number(match.strikeRate)),
+      );
+      statsTotalRuns += Number(match.runs);
+      statsTotalBalls += balls;
+    });
 
+    const statsAvgRuns = safe(statsTotalRuns / statsMatch);
+    const statsAvgBalls = safe(statsTotalBalls / statsMatch);
+    const statStrikeRate = safe((statsAvgRuns / statsAvgBalls) * 100);
+    if (statsAvgRuns > 0 && statsAvgBalls > 0 && statStrikeRate > 0) {
+      avgRuns = safe((statsAvgRuns + avgRuns) / 2);
+      avgBalls = safe((statsAvgBalls + avgBalls) / 2);
+      strikeRate = safe((statStrikeRate + strikeRate) / 2);
+    }
+  }
+  let impactRuns = safe(avgRuns * roleMultiplier * (strikeRate / 100));
   return {
     avgRuns,
     avgBalls,
@@ -177,8 +197,8 @@ const getPlayerBowlingStats = (player: any) => {
     };
   }
 
-  const avgRunsConced = safe(totalRuns / validMatches);
-  const avgWickets = safe(totalWickets / validMatches);
+  let avgRunsConced = safe(totalRuns / validMatches);
+  let avgWickets = safe(totalWickets / validMatches);
 
   /* Role impact */
   let roleMultiplier = 1;
@@ -194,11 +214,32 @@ const getPlayerBowlingStats = (player: any) => {
       break;
   }
 
+  if (player?.careerStats?.bowling?.length > 0) {
+    let statsMatch = player?.careerStats?.bowling.lenght;
+    let statsTotalRunsConced = 0;
+    let statsTotalWickets = 0;
+    player?.careerStats?.bowling.forEach((match: any) => {
+      const runsConced = Math.round(
+        safe(Number(match.wickets) * Number(match.average)),
+      );
+      statsTotalWickets += Number(match.wickets);
+      statsTotalRunsConced += runsConced;
+    });
+
+    const statsAvgRunsConced = safe(statsTotalRunsConced / statsMatch);
+    const statsAvgWickets = safe(statsTotalWickets / statsMatch);
+    if (statsTotalWickets > 0 && statsTotalRunsConced > 0) {
+      avgRunsConced = safe((statsAvgRunsConced + avgRunsConced) / 2);
+      avgWickets = safe((statsAvgWickets + avgWickets) / 2);
+    }
+  }
+
   /* Convert to impact wickets */
   const impactWickets = safe(avgWickets * roleMultiplier);
+  const impactRunsConced = safe(avgRunsConced * roleMultiplier);
 
   return {
-    avgRunsConced,
+    avgRunsConced: impactRunsConced,
     avgWickets,
     impactWickets,
   };
