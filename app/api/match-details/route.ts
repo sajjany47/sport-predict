@@ -10,12 +10,37 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const crexOverallStats = body.url ? await CrexV2Details(body.url) : null;
+    const crexOverallStats: any = body.url
+      ? await CrexV2Details(body.url)
+      : null;
+
+    const cleanedSquads = crexOverallStats.squads.map((team: any) => ({
+      ...team,
+      playingPlayers: (team.playingPlayers ?? []).map((player: any) => ({
+        ...player,
+        careerStats: {
+          ...player.careerStats,
+          bowling: (player.careerStats?.bowling ?? []).filter(
+            (item: any) => !item.format?.toLowerCase().includes("debut"),
+          ),
+        },
+      })),
+      benchPlayers: (team.benchPlayers ?? []).map((player: any) => ({
+        ...player,
+        careerStats: {
+          ...player.careerStats,
+          bowling: (player.careerStats?.bowling ?? []).filter(
+            (item: any) => !item.format?.toLowerCase().includes("debut"),
+          ),
+        },
+      })),
+    }));
 
     return Response.json(
       {
         data: {
           ...crexOverallStats,
+          squads: cleanedSquads,
         },
       },
       { status: 200 },
