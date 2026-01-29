@@ -396,10 +396,18 @@ export const GetNewAnalysis = async (data: any) => {
       topBowler: playPerformance(teamB, "bowl"),
     },
     recentMatchOnVenue: data?.venueDetails?.recentMatches,
-    venueStats: data?.venueDetails?.stats,
-    venueRecords: data?.venueDetails?.records,
-    venuePaceVsSpin: data?.venueDetails?.paceVsSpin,
-    venueWeather: data?.venueDetails?.weather,
+    venueStats: data?.venueDetails?.stats?.matches
+      ? data?.venueDetails?.stats
+      : null,
+    venueRecords: data?.venueDetails?.records["Highest Total"]
+      ? data?.venueDetails?.records
+      : null,
+    venuePaceVsSpin: data?.venueDetails?.paceVsSpin?.paceWickets
+      ? data?.venueDetails?.paceVsSpin
+      : null,
+    venueWeather: data?.venueDetails?.weather?.temperature
+      ? data?.venueDetails?.weather
+      : null,
   };
 
   return response;
