@@ -39,18 +39,36 @@ export async function POST(request: Request) {
         const match = dbMatches.find((m: any) => m.url === item.url);
         if (!match) return null;
 
+        const updatedTeams = match.teams.map((dbTeam: any) => {
+          const liveTeam = item.teams.find(
+            (t: any) => t.teamFlagUrl === dbTeam.teamFlagUrl,
+          );
+
+          return {
+            ...dbTeam,
+            teamShortName: liveTeam?.teamShortName ?? dbTeam.teamShortName,
+            cricketScore: liveTeam?.cricketScore ?? null,
+          };
+        });
+
+        // return {
+        //   ...match,
+        //   teams: [
+        //     {
+        //       ...match.teams[0],
+        //       teamShortName: item.teams[0].teamShortName,
+        //     },
+        //     {
+        //       ...match.teams[1],
+        //       teamShortName: item.teams[1].teamShortName,
+        //     },
+        //   ],
+        //   status: item.status,
+        //   score: item.score,
+        // };
         return {
           ...match,
-          teams: [
-            {
-              ...match.teams[0],
-              teamShortName: item.teams[0].teamShortName,
-            },
-            {
-              ...match.teams[1],
-              teamShortName: item.teams[1].teamShortName,
-            },
-          ],
+          teams: updatedTeams,
           status: item.status,
           score: item.score,
         };
@@ -67,19 +85,46 @@ export async function POST(request: Request) {
         ...item,
         status: "COMPLETED",
       }));
+    const completedWithScore = await Promise.all(
+      completedMatches.map(async (item: any) => {
+        const scorecardUrl = item.url.replace(/\/info(\/)?$/i, "/scorecard");
 
-    // const addScore = Promise.all(
-    //   completedMatches.map(async (item: any) => {
-    //     const changeUrl = item.url.replace(/\/info(\/)?$/i, "/scorecard");
-    //     const score = await CrexMatchScorecard(changeUrl);
-    //     const te;
-    //   }),
-    // );
+        const scorecardData: any = await CrexMatchScorecard(scorecardUrl);
+        // assume scorecardData.teams & scorecardData.score
+
+        if (!scorecardData) return item;
+
+        const updatedTeams = item.teams.map((dbTeam: any) => {
+          const scTeam = scorecardData.teams.find(
+            (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
+          );
+
+          return {
+            ...dbTeam,
+            teamShortName: scTeam?.teamShortName ?? dbTeam?.teamShortName,
+            cricketScore: scTeam?.cricketScore ?? dbTeam?.cricketScore ?? null,
+          };
+        });
+
+        return {
+          ...item,
+          teams: updatedTeams,
+          score: {
+            score: scorecardData.score.map((a: any) => ({
+              team: a.name,
+              run: `${a.score} (${a.overs})`,
+            })),
+            result: scorecardData.result,
+          },
+          status: "COMPLETED",
+        };
+      }),
+    );
 
     // ✅ Final response
     return Response.json(
       {
-        data: [...prepareData, ...completedMatches],
+        data: [...prepareData, ...completedWithScore],
         date: moment(fromDate).format("DD-MM-YYYY"),
         success: true,
         message: "Schedule fetched successfully",
