@@ -647,11 +647,9 @@ export const CrexV2Details = async (url: string) => {
     const prepareData: any[] = [];
 
     for (const team of squads) {
-      const playingPlayers = [];
-      const benchPlayers = [];
+      /* ================= ENRICH PLAYER ================= */
 
-      // helper
-      const enrichPlayer = async (player: any, idx: number, total: number) => {
+      const enrichPlayer = async (player: any) => {
         if (!player.playerUrl) {
           return {
             ...player,
@@ -663,19 +661,16 @@ export const CrexV2Details = async (url: string) => {
         }
 
         try {
-          console.log(`Fetching ${idx + 1}/${total}: ${player.name}`);
+          const details = await CrexPlayerDetails(player.playerUrl);
 
-          const playerDetails = await CrexPlayerDetailsWithBrowser(
-            player.playerUrl,
-            browser,
-          );
-
+          if (!details) throw new Error("Empty response");
+          console.log(`fetch data${player.name}`);
           return {
             ...player,
-            style: playerDetails.player.style,
-            rank: playerDetails.player.rank,
-            recentForm: playerDetails.stats.recentForm,
-            careerStats: playerDetails.stats.careerStats,
+            style: details.player.style,
+            rank: details.player.rank,
+            recentForm: details.stats.recentForm,
+            careerStats: details.stats.careerStats,
           };
         } catch (err) {
           console.error(`Failed ${player.name}`, err);
@@ -692,31 +687,15 @@ export const CrexV2Details = async (url: string) => {
 
       /* ================= PLAYING XI ================= */
 
-      for (let i = 0; i < team.playingPlayers.length; i++) {
-        const enriched = await enrichPlayer(
-          team.playingPlayers[i],
-          i,
-          team.playingPlayers.length,
-        );
-
-        playingPlayers.push(enriched);
-
-        if (i < team.playingPlayers.length - 1) await delay(1000);
-      }
+      const playingPlayers = await Promise.all(
+        team.playingPlayers.map(enrichPlayer),
+      );
 
       /* ================= BENCH ================= */
 
-      for (let i = 0; i < team.benchPlayers.length; i++) {
-        const enriched = await enrichPlayer(
-          team.benchPlayers[i],
-          i,
-          team.benchPlayers.length,
-        );
-
-        benchPlayers.push(enriched);
-
-        if (i < team.benchPlayers.length - 1) await delay(1000);
-      }
+      const benchPlayers = await Promise.all(
+        team.benchPlayers.map(enrichPlayer),
+      );
 
       prepareData.push({
         teamName: team.teamName,
