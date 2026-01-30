@@ -34,46 +34,52 @@ export async function POST(request: Request) {
     }));
 
     // 3️⃣ Merge DB + Crex (live matches)
-    const prepareData = crexData
-      .map((item: any) => {
-        const match = dbMatches.find((m: any) => m.url === item.url);
-        if (!match) return null;
 
-        const updatedTeams = match.teams.map((dbTeam: any) => {
-          const liveTeam = item.teams.find(
-            (t: any) => t.teamFlagUrl === dbTeam.teamFlagUrl,
-          );
+    const prepareData = (
+      await Promise.all(
+        crexData.map(async (item: any) => {
+          const match = dbMatches.find((m: any) => m.url === item.url);
+
+          if (!match) return null;
+          const scorecardUrl = item.url.replace(/\/info(\/)?$/i, "/scorecard");
+
+          const scorecardData: any = await CrexMatchScorecard(scorecardUrl);
+
+          const updatedTeams = match.teams.map((dbTeam: any) => {
+            const liveTeam = item.teams.find(
+              (t: any) => t.teamFlagUrl === dbTeam.teamFlagUrl,
+            );
+
+            const scTeam = (scorecardData?.teams ?? []).find(
+              (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
+            );
+
+            return {
+              ...dbTeam,
+              teamShortName: liveTeam?.teamShortName ?? dbTeam.teamShortName,
+              // cricketScore: liveTeam?.cricketScore ?? null,
+              cricketScore:
+                (scTeam
+                  ? `${scTeam.score} (${scTeam.overs})`
+                  : liveTeam?.cricketScore) ?? null,
+            };
+          });
 
           return {
-            ...dbTeam,
-            teamShortName: liveTeam?.teamShortName ?? dbTeam.teamShortName,
-            cricketScore: liveTeam?.cricketScore ?? null,
+            ...match,
+            teams: updatedTeams,
+            status: item.status,
+            score: item.score ?? {
+              score: (scorecardData?.teams ?? []).map((a: any) => ({
+                team: a.name,
+                run: `${a.score} (${a.overs})`,
+              })),
+              result: scorecardData.result ?? "",
+            },
           };
-        });
-
-        // return {
-        //   ...match,
-        //   teams: [
-        //     {
-        //       ...match.teams[0],
-        //       teamShortName: item.teams[0].teamShortName,
-        //     },
-        //     {
-        //       ...match.teams[1],
-        //       teamShortName: item.teams[1].teamShortName,
-        //     },
-        //   ],
-        //   status: item.status,
-        //   score: item.score,
-        // };
-        return {
-          ...match,
-          teams: updatedTeams,
-          status: item.status,
-          score: item.score,
-        };
-      })
-      .filter(Boolean);
+        }),
+      )
+    ).filter(Boolean);
 
     // 4️⃣ DB matches NOT in Crex → COMPLETED
     const completedMatches = dbMatches
@@ -88,7 +94,7 @@ export async function POST(request: Request) {
 
     const completedWithScore = await Promise.all(
       completedMatches.map(async (item: any) => {
-        const scorecardUrl = item.url.replace(/\/info(\/)?$/i, "/scorecard");
+        const scorecardUrl = item?.url.replace(/\/info(\/)?$/i, "/scorecard");
 
         const scorecardData: any = await CrexMatchScorecard(scorecardUrl);
 
@@ -103,7 +109,7 @@ export async function POST(request: Request) {
 
           return {
             ...dbTeam,
-            teamShortName: scTeam?.teamShortName ?? dbTeam?.teamShortName,
+            teamShortName: scTeam?.name ?? dbTeam?.teamShortName,
             // cricketScore: scTeam?.cricketScore ?? dbTeam?.cricketScore ?? null,
             cricketScore: scTeam ? `${scTeam.score} (${scTeam.overs})` : null,
           };
@@ -113,7 +119,7 @@ export async function POST(request: Request) {
           ...item,
           teams: updatedTeams,
           score: {
-            score: (scorecardData?.score ?? []).map((a: any) => ({
+            score: (scorecardData?.teams ?? []).map((a: any) => ({
               team: a.name,
               run: `${a.score} (${a.overs})`,
             })),
