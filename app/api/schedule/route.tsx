@@ -104,7 +104,8 @@ export async function POST(request: Request) {
           return {
             ...dbTeam,
             teamShortName: scTeam?.teamShortName ?? dbTeam?.teamShortName,
-            cricketScore: scTeam?.cricketScore ?? dbTeam?.cricketScore ?? null,
+            // cricketScore: scTeam?.cricketScore ?? dbTeam?.cricketScore ?? null,
+            cricketScore: scTeam ? `${scTeam.score} (${scTeam.overs})` : null,
           };
         });
 
