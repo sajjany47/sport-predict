@@ -85,17 +85,19 @@ export async function POST(request: Request) {
         ...item,
         status: "COMPLETED",
       }));
+
     const completedWithScore = await Promise.all(
       completedMatches.map(async (item: any) => {
         const scorecardUrl = item.url.replace(/\/info(\/)?$/i, "/scorecard");
 
         const scorecardData: any = await CrexMatchScorecard(scorecardUrl);
+
         // assume scorecardData.teams & scorecardData.score
 
         if (!scorecardData) return item;
 
-        const updatedTeams = item.teams.map((dbTeam: any) => {
-          const scTeam = scorecardData.teams.find(
+        const updatedTeams = (item.teams ?? []).map((dbTeam: any) => {
+          const scTeam = (scorecardData?.teams ?? []).find(
             (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
           );
 
@@ -110,11 +112,11 @@ export async function POST(request: Request) {
           ...item,
           teams: updatedTeams,
           score: {
-            score: scorecardData.score.map((a: any) => ({
+            score: (scorecardData?.score ?? []).map((a: any) => ({
               team: a.name,
               run: `${a.score} (${a.overs})`,
             })),
-            result: scorecardData.result,
+            result: scorecardData.result ?? "",
           },
           status: "COMPLETED",
         };
