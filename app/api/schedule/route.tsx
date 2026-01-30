@@ -3,6 +3,7 @@ import moment from "moment-timezone";
 import MatchList from "../corn/daily-match-list/DailyMatchListModel";
 import { CrexList } from "./CrexList";
 import dbConnect from "../db";
+import { CrexMatchScorecard } from "./CrexScore";
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -66,6 +67,14 @@ export async function POST(request: Request) {
         ...item,
         status: "COMPLETED",
       }));
+
+    // const addScore = Promise.all(
+    //   completedMatches.map(async (item: any) => {
+    //     const changeUrl = item.url.replace(/\/info(\/)?$/i, "/scorecard");
+    //     const score = await CrexMatchScorecard(changeUrl);
+    //     const te;
+    //   }),
+    // );
 
     // ✅ Final response
     return Response.json(
