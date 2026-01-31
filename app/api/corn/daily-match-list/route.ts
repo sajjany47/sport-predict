@@ -4,6 +4,7 @@ import { FormatErrorMessage, NormalizeCrexUrl } from "@/lib/utils";
 import { CrexNext3DaysFixturesArray } from "../CrexNext3DayList";
 import moment from "moment";
 import MatchList from "./DailyMatchListModel";
+import { CrexV2Details } from "../../match-details/CrexV2Details";
 
 export const GET = async (req: NextRequest) => {
   await dbConnect();
@@ -20,6 +21,54 @@ export const GET = async (req: NextRequest) => {
       ...item,
       url: NormalizeCrexUrl(item.url),
     }));
+
+    // const fixtures = await CrexNext3DaysFixturesArray();
+    // const day3List = [];
+
+    // for (const item of fixtures) {
+    //   let data = { ...item, url: NormalizeCrexUrl(item.url) };
+
+    //   const crexOverallStats = item.url
+    //     ? await CrexV2Details(NormalizeCrexUrl(item.url))
+    //     : null;
+
+    //   if (crexOverallStats) {
+    //     const cleanedSquads = (crexOverallStats.squads ?? []).map(
+    //       (team: any) => ({
+    //         ...team,
+
+    //         playingPlayers: (team.playingPlayers ?? []).map((player: any) => ({
+    //           ...player,
+    //           careerStats: {
+    //             ...player.careerStats,
+    //             bowling: (player.careerStats?.bowling ?? []).filter(
+    //               (b: any) => !b.format?.toLowerCase().includes("debut"),
+    //             ),
+    //           },
+    //         })),
+
+    //         benchPlayers: (team.benchPlayers ?? []).map((player: any) => ({
+    //           ...player,
+    //           careerStats: {
+    //             ...player.careerStats,
+    //             bowling: (player.careerStats?.bowling ?? []).filter(
+    //               (b: any) => !b.format?.toLowerCase().includes("debut"),
+    //             ),
+    //           },
+    //         })),
+    //       }),
+    //     );
+
+    //     data.details = {
+    //       ...crexOverallStats,
+    //       squads: cleanedSquads,
+    //     };
+
+    //     data.detailsUpdatedAt = new Date();
+    //   }
+
+    //   day3List.push(data);
+    // }
 
     const bulkOps = day3List.map((item: any) => ({
       updateOne: {
