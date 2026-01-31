@@ -60,11 +60,8 @@ interface TopPlayer {
   name: string;
   shortName: string;
   role: string;
-  isWK: boolean;
-  playerUrl: string;
   image: string;
-  style: string;
-  rank: string;
+  playerUrl: string;
   impactRuns: number;
   strikeRate: number;
   avgBalls: number;
@@ -76,7 +73,7 @@ interface TeamData {
   name: string;
   shortName: string;
   flag: string;
-  firstInningScore: {
+  firstInnings: {
     min: number;
     max: number;
     predicted: number;
@@ -205,32 +202,28 @@ const AIPredictionModal: React.FC<{
 
   const getRoleIcon = (role: string) => {
     if (!role) return <Users className="h-4 w-4" />;
-    if (role.toLowerCase().includes("wicket") || role.includes("WK"))
-      return <Award className="h-4 w-4" />;
-    if (
-      role.toLowerCase().includes("batter") ||
-      role.toLowerCase().includes("batsman")
-    )
+    if (role === "Batter") {
       return <TargetIcon className="h-4 w-4" />;
-    if (role.toLowerCase().includes("bowler"))
+    } else if (role === "Bowler") {
       return <Zap className="h-4 w-4" />;
-    if (role.toLowerCase().includes("all")) return <Star className="h-4 w-4" />;
-    return <Users className="h-4 w-4" />;
+    } else if (role === "All Rounder") {
+      return <Star className="h-4 w-4" />;
+    } else {
+      return <Users className="h-4 w-4" />;
+    }
   };
 
   const getRoleColor = (role: string) => {
-    if (!role) return "bg-gray-100 text-gray-800";
-    if (role.toLowerCase().includes("wicket") || role.includes("WK"))
-      return "bg-green-100 text-green-800";
-    if (
-      role.toLowerCase().includes("batter") ||
-      role.toLowerCase().includes("batsman")
-    )
+    if (!role) return "bg-gray-100 text-gray-800 border-gray-300";
+    if (role === "Batter") {
       return "bg-blue-100 text-blue-800";
-    if (role.toLowerCase().includes("bowler")) return "bg-red-100 text-red-800";
-    if (role.toLowerCase().includes("all"))
+    } else if (role === "Bowler") {
+      return "bg-red-100 text-red-800";
+    } else if (role === "All Rounder") {
       return "bg-purple-100 text-purple-800";
-    return "bg-gray-100 text-gray-800";
+    } else {
+      return "bg-gray-100 text-gray-800";
+    }
   };
 
   const getConfidenceClass = (confidence: string) => {
@@ -283,7 +276,10 @@ const AIPredictionModal: React.FC<{
 
   const getWeatherIcon = (condition: string) => {
     if (!condition) return <Cloud className="h-5 w-5 text-blue-500" />;
-    if (condition.toLowerCase().includes("rain"))
+    if (
+      condition.toLowerCase().includes("rain") ||
+      condition.toLowerCase().includes("thunder")
+    )
       return <CloudRain className="h-5 w-5 text-blue-500" />;
     if (
       condition.toLowerCase().includes("sun") ||
@@ -536,9 +532,9 @@ const AIPredictionModal: React.FC<{
                 </p>
                 <div className="text-xs text-gray-600">
                   <strong>Disclaimer:</strong> Cricket predictions are based on
-                  statistical analysis and should be treated as speculative
-                  information only. We are not responsible for any decisions
-                  made based on this information.
+                  statistical analysis and AI algorithms. Cricket is an
+                  unpredictable sport and actual results may vary. We are not
+                  responsible for any decisions made based on this information.
                 </div>
               </div>
             </div>
@@ -583,7 +579,7 @@ const AIPredictionModal: React.FC<{
                         1,
                       )}`}
                     >
-                      {predictionData?.team1?.winnerPrediction?.probability?.toFixed?.(
+                      {predictionData?.team1?.winnerPrediction?.probability?.toFixed(
                         2,
                       ) || "0.00"}
                       %
@@ -620,7 +616,10 @@ const AIPredictionModal: React.FC<{
                     </div>
 
                     <div
-                      className={`mt-3 md:mt-4 text-xs md:text-sm p-2 md:p-3 rounded-lg border ${predictionData?.team1?.winnerPrediction?.hint?.color}`}
+                      className={`mt-3 md:mt-4 text-xs md:text-sm p-2 md:p-3 rounded-lg border ${
+                        predictionData?.team1?.winnerPrediction?.hint?.color ||
+                        "border-gray-200"
+                      }`}
                     >
                       {predictionData?.team1?.winnerPrediction?.hint
                         ?.hintMessage || "No prediction hint available"}
@@ -654,7 +653,7 @@ const AIPredictionModal: React.FC<{
                         2,
                       )}`}
                     >
-                      {predictionData?.team2?.winnerPrediction?.probability?.toFixed?.(
+                      {predictionData?.team2?.winnerPrediction?.probability?.toFixed(
                         2,
                       ) || "0.00"}
                       %
@@ -691,7 +690,10 @@ const AIPredictionModal: React.FC<{
                     </div>
 
                     <div
-                      className={`mt-3 md:mt-4 text-xs md:text-sm p-2 md:p-3 rounded-lg border ${predictionData?.team2?.winnerPrediction?.hint?.color}`}
+                      className={`mt-3 md:mt-4 text-xs md:text-sm p-2 md:p-3 rounded-lg border ${
+                        predictionData?.team2?.winnerPrediction?.hint?.color ||
+                        "border-gray-200"
+                      }`}
                     >
                       {predictionData?.team2?.winnerPrediction?.hint
                         ?.hintMessage || "No prediction hint available"}
@@ -751,23 +753,21 @@ const AIPredictionModal: React.FC<{
                           1,
                         )} mb-3`}
                       >
-                        {predictionData?.team1?.firstInningScore?.predicted ||
-                          0}
+                        {predictionData?.team1?.firstInnings?.predicted || 0}
                       </div>
 
                       <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border mb-2 w-full">
                         Range:{" "}
                         <span className="font-semibold">
-                          {predictionData?.team1?.firstInningScore?.min || 0} -{" "}
-                          {predictionData?.team1?.firstInningScore?.max || 0}
+                          {predictionData?.team1?.firstInnings?.min || 0} -{" "}
+                          {predictionData?.team1?.firstInnings?.max || 0}
                         </span>
                       </div>
 
                       <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border w-full">
                         Predicted Wickets:{" "}
                         <span className="font-semibold text-red-600">
-                          {predictionData?.team1?.firstInningScore?.wickets ||
-                            0}
+                          {predictionData?.team1?.firstInnings?.wickets || 0}
                         </span>
                       </div>
                     </div>
@@ -799,23 +799,21 @@ const AIPredictionModal: React.FC<{
                           2,
                         )} mb-3`}
                       >
-                        {predictionData?.team2?.firstInningScore?.predicted ||
-                          0}
+                        {predictionData?.team2?.firstInnings?.predicted || 0}
                       </div>
 
                       <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border mb-2 w-full">
                         Range:{" "}
                         <span className="font-semibold">
-                          {predictionData?.team2?.firstInningScore?.min || 0} -{" "}
-                          {predictionData?.team2?.firstInningScore?.max || 0}
+                          {predictionData?.team2?.firstInnings?.min || 0} -{" "}
+                          {predictionData?.team2?.firstInnings?.max || 0}
                         </span>
                       </div>
 
                       <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border w-full">
                         Predicted Wickets:{" "}
                         <span className="font-semibold text-red-600">
-                          {predictionData?.team2?.firstInningScore?.wickets ||
-                            0}
+                          {predictionData?.team2?.firstInnings?.wickets || 0}
                         </span>
                       </div>
                     </div>
@@ -859,10 +857,6 @@ const AIPredictionModal: React.FC<{
                               {predictionData?.team1?.topBatsman?.name ||
                                 "Unknown Player"}
                             </h3>
-                            <p className="text-xs text-gray-500 truncate">
-                              {predictionData?.team1?.topBatsman?.rank ||
-                                "Rank not available"}
-                            </p>
                           </div>
                           <Badge
                             className={`${getRoleColor(
@@ -873,9 +867,8 @@ const AIPredictionModal: React.FC<{
                               predictionData?.team1?.topBatsman?.role || "",
                             )}
                             <span className="ml-1 truncate">
-                              {predictionData?.team1?.topBatsman?.role?.split(
-                                " ",
-                              )[0] || "Player"}
+                              {predictionData?.team1?.topBatsman?.role ||
+                                "Player"}
                             </span>
                           </Badge>
                         </div>
@@ -919,19 +912,6 @@ const AIPredictionModal: React.FC<{
                             </div>
                           </div>
                         </div>
-
-                        {/* Style */}
-                        <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                          <div className="text-xs md:text-sm">
-                            <span className="font-semibold text-green-800">
-                              Style:
-                            </span>{" "}
-                            <span className="text-green-600">
-                              {predictionData?.team1?.topBatsman?.style ||
-                                "Not specified"}
-                            </span>
-                          </div>
-                        </div>
                       </div>
                     </div>
 
@@ -958,10 +938,6 @@ const AIPredictionModal: React.FC<{
                               {predictionData?.team2?.topBatsman?.name ||
                                 "Unknown Player"}
                             </h3>
-                            <p className="text-xs text-gray-500 truncate">
-                              {predictionData?.team2?.topBatsman?.rank ||
-                                "Rank not available"}
-                            </p>
                           </div>
                           <Badge
                             className={`${getRoleColor(
@@ -972,9 +948,8 @@ const AIPredictionModal: React.FC<{
                               predictionData?.team2?.topBatsman?.role || "",
                             )}
                             <span className="ml-1 truncate">
-                              {predictionData?.team2?.topBatsman?.role?.split(
-                                " ",
-                              )[0] || "Player"}
+                              {predictionData?.team2?.topBatsman?.role ||
+                                "Player"}
                             </span>
                           </Badge>
                         </div>
@@ -1018,19 +993,6 @@ const AIPredictionModal: React.FC<{
                             </div>
                           </div>
                         </div>
-
-                        {/* Style */}
-                        <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                          <div className="text-xs md:text-sm">
-                            <span className="font-semibold text-green-800">
-                              Style:
-                            </span>{" "}
-                            <span className="text-green-600">
-                              {predictionData?.team2?.topBatsman?.style ||
-                                "Not specified"}
-                            </span>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -1068,10 +1030,6 @@ const AIPredictionModal: React.FC<{
                               {predictionData?.team1?.topBowler?.name ||
                                 "Unknown Player"}
                             </h3>
-                            <p className="text-xs text-gray-500 truncate">
-                              {predictionData?.team1?.topBowler?.rank ||
-                                "Rank not available"}
-                            </p>
                           </div>
                           <Badge
                             className={`${getRoleColor(
@@ -1082,9 +1040,8 @@ const AIPredictionModal: React.FC<{
                               predictionData?.team1?.topBowler?.role || "",
                             )}
                             <span className="ml-1 truncate">
-                              {predictionData?.team1?.topBowler?.role?.split(
-                                " ",
-                              )[0] || "Player"}
+                              {predictionData?.team1?.topBowler?.role ||
+                                "Player"}
                             </span>
                           </Badge>
                         </div>
@@ -1108,26 +1065,13 @@ const AIPredictionModal: React.FC<{
                           </div>
                           <div className="text-center">
                             <div className="text-xs text-gray-500">
-                              Avg Runs Conceded
+                              Runs Conceded
                             </div>
                             <div className="text-sm font-bold text-blue-600">
                               {predictionData?.team1?.topBowler?.avgRunsConced?.toFixed(
                                 1,
                               ) || "0.0"}
                             </div>
-                          </div>
-                        </div>
-
-                        {/* Style */}
-                        <div className="p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
-                          <div className="text-xs md:text-sm">
-                            <span className="font-semibold text-red-800">
-                              Style:
-                            </span>{" "}
-                            <span className="text-red-600">
-                              {predictionData?.team1?.topBowler?.style ||
-                                "Not specified"}
-                            </span>
                           </div>
                         </div>
                       </div>
@@ -1154,10 +1098,6 @@ const AIPredictionModal: React.FC<{
                               {predictionData?.team2?.topBowler?.name ||
                                 "Unknown Player"}
                             </h3>
-                            <p className="text-xs text-gray-500 truncate">
-                              {predictionData?.team2?.topBowler?.rank ||
-                                "Rank not available"}
-                            </p>
                           </div>
                           <Badge
                             className={`${getRoleColor(
@@ -1168,9 +1108,8 @@ const AIPredictionModal: React.FC<{
                               predictionData?.team2?.topBowler?.role || "",
                             )}
                             <span className="ml-1 truncate">
-                              {predictionData?.team2?.topBowler?.role?.split(
-                                " ",
-                              )[0] || "Player"}
+                              {predictionData?.team2?.topBowler?.role ||
+                                "Player"}
                             </span>
                           </Badge>
                         </div>
@@ -1194,26 +1133,13 @@ const AIPredictionModal: React.FC<{
                           </div>
                           <div className="text-center">
                             <div className="text-xs text-gray-500">
-                              Avg Runs Conceded
+                              Runs Conceded
                             </div>
                             <div className="text-sm font-bold text-blue-600">
                               {predictionData?.team2?.topBowler?.avgRunsConced?.toFixed(
                                 1,
                               ) || "0.0"}
                             </div>
-                          </div>
-                        </div>
-
-                        {/* Style */}
-                        <div className="p-2 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
-                          <div className="text-xs md:text-sm">
-                            <span className="font-semibold text-red-800">
-                              Style:
-                            </span>{" "}
-                            <span className="text-red-600">
-                              {predictionData?.team2?.topBowler?.style ||
-                                "Not specified"}
-                            </span>
                           </div>
                         </div>
                       </div>
@@ -1519,7 +1445,7 @@ const AIPredictionModal: React.FC<{
                           <div
                             className="bg-gradient-to-r from-blue-500 to-red-500 h-3 rounded-full"
                             style={{
-                              width: `${parseInt(predictionData.venuePaceVsSpin.pacePercent) || 50}%`,
+                              width: `${parseInt(predictionData.venuePaceVsSpin.spinPercent) || 50}%`,
                             }}
                           />
                         </div>
@@ -1533,10 +1459,10 @@ const AIPredictionModal: React.FC<{
                         <div className="text-xs text-yellow-800">
                           <strong>Analysis:</strong>{" "}
                           {parseInt(
-                            predictionData.venuePaceVsSpin.pacePercent,
+                            predictionData.venuePaceVsSpin.spinPercent,
                           ) > 50
-                            ? "Pace bowling has been more effective at this venue."
-                            : "Spin bowling plays a crucial role at this venue."}
+                            ? "Spin bowling has been more effective at this venue."
+                            : "Pace bowling plays a crucial role at this venue."}
                         </div>
                       </div>
                     </div>

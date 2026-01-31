@@ -86,45 +86,29 @@ interface RecentForm {
 }
 
 const PlayerCard = ({ player }: PlayerCardProps) => {
-  const getPlayerTypeColor = (type: string) => {
-    switch (type?.toUpperCase()) {
-      case "BATTER":
-      case "BAT":
-        return "bg-gradient-to-r from-blue-500 to-blue-600 text-white";
-      case "BOWLER":
-      case "BOWL":
-        return "bg-gradient-to-r from-green-500 to-emerald-600 text-white";
-      case "ALL ROUNDER":
-      case "ALLROUNDER":
-      case "ALL":
-        return "bg-gradient-to-r from-purple-500 to-pink-600 text-white";
-      case "WK-BAT":
-      case "WICKETKEEPER":
-      case "WK":
-        return "bg-gradient-to-r from-orange-500 to-amber-600 text-white";
-      default:
-        return "bg-gradient-to-r from-gray-500 to-gray-600 text-white";
+  const getPlayerTypeColor = (role: string) => {
+    if (!role) return "bg-gray-100 text-gray-800 border-gray-300";
+    if (role === "Batter") {
+      return "bg-gradient-to-r from-blue-500 to-blue-600 text-white";
+    } else if (role === "Bowler") {
+      return "bg-gradient-to-r from-green-500 to-emerald-600 text-white";
+    } else if (role === "All Rounder") {
+      return "bg-gradient-to-r from-purple-500 to-pink-600 text-white";
+    } else {
+      return "bg-gradient-to-r from-gray-500 to-gray-600 text-white";
     }
   };
 
-  const getPlayerTypeIcon = (type: string) => {
-    switch (type?.toUpperCase()) {
-      case "BATTER":
-      case "BAT":
-        return <Target className="h-3 w-3" />;
-      case "BOWLER":
-      case "BOWL":
-        return <Zap className="h-3 w-3" />;
-      case "ALL ROUNDER":
-      case "ALLROUNDER":
-      case "ALL":
-        return <Star className="h-3 w-3" />;
-      case "WK-BAT":
-      case "WICKETKEEPER":
-      case "WK":
-        return <Shield className="h-3 w-3" />;
-      default:
-        return <Users className="h-3 w-3" />;
+  const getPlayerTypeIcon = (role: string) => {
+    if (!role) return <Users className="h-4 w-4" />;
+    if (role === "Batter") {
+      return <TargetIcon className="h-4 w-4" />;
+    } else if (role === "Bowler") {
+      return <Zap className="h-4 w-4" />;
+    } else if (role === "All Rounder") {
+      return <Star className="h-4 w-4" />;
+    } else {
+      return <Users className="h-4 w-4" />;
     }
   };
 
@@ -275,14 +259,14 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
 
                   {/* Player short info */}
                   <div className="mt-2 space-y-1">
-                    <div className="flex items-center gap-1 text-xs text-gray-600">
-                      <span className="font-medium">Short:</span>
-                      <span>{player?.shortName}</span>
-                    </div>
                     {player?.isWK !== undefined && (
                       <div className="flex items-center gap-1 text-xs text-gray-600">
                         <span className="font-medium">WK:</span>
-                        <span>{player.isWK ? "Yes" : "No"}</span>
+                        <span
+                          className={`px-2 py-1 rounded text-sm font-medium ${player.isWK ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                        >
+                          {player.isWK ? "Yes" : "No"}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -636,7 +620,6 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                             (form: RecentForm, index: number) => (
                               <a
                                 key={index}
-                                href={form.scorecardUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="block p-3 bg-gradient-to-r from-white to-blue-50 rounded-lg border border-blue-200 hover:border-blue-300 hover:shadow-sm transition-all"
@@ -652,10 +635,6 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                                       {form.score}
                                     </Badge>
                                   )}
-                                </div>
-                                <div className="text-xs text-gray-500 flex items-center gap-1">
-                                  <Globe className="h-3 w-3" />
-                                  View Scorecard
                                 </div>
                               </a>
                             ),
@@ -682,7 +661,6 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                             (form: RecentForm, index: number) => (
                               <a
                                 key={index}
-                                href={form.scorecardUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="block p-3 bg-gradient-to-r from-white to-green-50 rounded-lg border border-green-200 hover:border-green-300 hover:shadow-sm transition-all"
@@ -693,15 +671,11 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                                       {form.match}
                                     </p>
                                   </div>
-                                  {form.figures && (
+                                  {form.score && (
                                     <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs">
-                                      {form.figures}
+                                      {form.score}
                                     </Badge>
                                   )}
-                                </div>
-                                <div className="text-xs text-gray-500 flex items-center gap-1">
-                                  <Globe className="h-3 w-3" />
-                                  View Scorecard
                                 </div>
                               </a>
                             ),
