@@ -27,10 +27,10 @@ export const CrexNext3DaysFixturesArray = async (): Promise<any[]> => {
   const maxClicks = 15;
   let clicks = 0;
 
-  while (orderedDays.length < 5 && clicks <= maxClicks) {
+  while (orderedDays.length < 3 && clicks <= maxClicks) {
     const pageData = await page.evaluate(() => {
       const blocks = Array.from(
-        document.querySelectorAll(".date-wise-matches-card > div")
+        document.querySelectorAll(".date-wise-matches-card > div"),
       ).filter((b) => b.querySelector(".date"));
 
       return blocks.map((block) => {
@@ -38,7 +38,7 @@ export const CrexNext3DaysFixturesArray = async (): Promise<any[]> => {
           block.querySelector(".date")?.textContent?.trim() || "";
 
         const matchEls = Array.from(
-          block.querySelectorAll("li.match-card-container")
+          block.querySelectorAll("li.match-card-container"),
         );
 
         const matches = matchEls.map((matchEl) => {
@@ -48,15 +48,15 @@ export const CrexNext3DaysFixturesArray = async (): Promise<any[]> => {
               ?.getAttribute("href") || null;
 
           const teamNames = Array.from(
-            matchEl.querySelectorAll(".team-name")
+            matchEl.querySelectorAll(".team-name"),
           ).map((x) => x.textContent?.trim() || "");
 
           const scores = Array.from(
-            matchEl.querySelectorAll(".team-score")
+            matchEl.querySelectorAll(".team-score"),
           ).map((x) => x.textContent?.trim() || "");
 
           const imgs = Array.from(matchEl.querySelectorAll(".team img")).map(
-            (img) => img.getAttribute("src") || null
+            (img) => img.getAttribute("src") || null,
           );
 
           const isLive = !!matchEl.querySelector(".liveTag");
@@ -133,8 +133,8 @@ export const CrexNext3DaysFixturesArray = async (): Promise<any[]> => {
           format: description?.includes("T20")
             ? "T20"
             : description?.includes("ODI")
-            ? "ODI"
-            : null,
+              ? "ODI"
+              : null,
           sport: "cricket",
           teams: [
             {

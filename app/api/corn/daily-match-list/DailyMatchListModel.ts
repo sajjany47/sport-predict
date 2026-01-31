@@ -56,9 +56,9 @@ const MatchSchema = new Schema(
     formatDate: { type: Date, default: null }, // "2026-01-21"
     format: { type: String, default: null }, // T20
     sport: { type: String, default: "cricket" },
-
     teams: { type: [TeamSchema], default: [] },
-
+    details: { type: Object, default: null },
+    detailsUpdatedAt: { type: Date, default: null },
     score: { type: ScoreSchema, default: () => ({ score: [], result: "" }) },
   },
   { timestamps: true },
