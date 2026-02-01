@@ -4,6 +4,8 @@ import MatchList from "../corn/daily-match-list/DailyMatchListModel";
 import { CrexList } from "./CrexList";
 import dbConnect from "../db";
 import { CrexMatchScorecard } from "./CrexScore";
+import { SquadList } from "../match-details/SquadList";
+import { GetNewAnalysis } from "@/app/matches/[id]/GetNewAnanlysis";
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -116,8 +118,16 @@ export async function POST(request: Request) {
           };
         });
 
+        const latestSquad = await SquadList(item.url, item.details.squads);
+
+        const result = await GetNewAnalysis({
+          ...item.details,
+          squads: latestSquad,
+          matchInfo: item,
+        });
+        const { details, ...matchWithoutDetails } = item;
         return {
-          ...item,
+          ...matchWithoutDetails,
           teams: updatedTeams,
           score: {
             score: (scorecardData?.teams ?? []).map((a: any) => ({
@@ -127,6 +137,7 @@ export async function POST(request: Request) {
             result: scorecardData.result ?? "",
           },
           status: "COMPLETED",
+          resultfgdghsd: result,
         };
       }),
     );
