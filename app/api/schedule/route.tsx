@@ -65,8 +65,9 @@ export async function POST(request: Request) {
             };
           });
 
+          const { details, ...matchWithoutDetails } = match;
           return {
-            ...match,
+            ...matchWithoutDetails,
             teams: updatedTeams,
             status: item.status,
             score: item.score ?? {
