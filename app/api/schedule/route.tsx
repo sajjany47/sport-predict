@@ -14,7 +14,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const fromDate = body.fromDate ? new Date(body.fromDate) : new Date();
 
-    // 1️⃣ Fetch DB matches
+    /* ================= DB MATCHES ================= */
+
     const dbMatches = await MatchList.aggregate([
       {
         $match: {
@@ -29,79 +30,93 @@ export async function POST(request: Request) {
       },
     ]);
 
-    // 2️⃣ Fetch Crex matches (LIVE / UPCOMING)
+    /* ================= CREX MATCHES ================= */
+
     const crexData = (await CrexList()).map((item: any) => ({
       ...item,
       url: NormalizeCrexUrl(item.url),
     }));
 
-    // 3️⃣ Merge DB + Crex (live matches)
+    /* ================= SCORECARD CACHE ================= */
 
-    const prepareData = (
-      await Promise.all(
-        crexData.map(async (item: any) => {
-          const match = dbMatches.find((m: any) => m.url === item.url);
+    const scorecardCache = new Map<string, any>();
 
-          if (!match) return null;
-          const scorecardUrl = item.url.replace(/\/info(\/)?$/i, "/scorecard");
+    await Promise.all(
+      [...crexData, ...dbMatches].map(async (m: any) => {
+        if (!m?.url) return;
 
-          const scorecardData: any = await CrexMatchScorecard(scorecardUrl);
+        const scorecardUrl = m.url.replace(/\/info(\/)?$/i, "/scorecard");
 
-          const updatedTeams = match.teams.map((dbTeam: any) => {
-            const liveTeam = item.teams.find(
-              (t: any) => t.teamFlagUrl === dbTeam.teamFlagUrl,
-            );
+        if (!scorecardCache.has(scorecardUrl)) {
+          try {
+            const data = await CrexMatchScorecard(scorecardUrl);
+            scorecardCache.set(scorecardUrl, data);
+          } catch {
+            scorecardCache.set(scorecardUrl, null);
+          }
+        }
+      }),
+    );
 
-            const scTeam = (scorecardData?.teams ?? []).find(
-              (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
-            );
+    /* ================= LIVE / UPCOMING ================= */
 
-            return {
-              ...dbTeam,
-              teamShortName: liveTeam?.teamShortName ?? dbTeam.teamShortName,
-              // cricketScore: liveTeam?.cricketScore ?? null,
-              cricketScore:
-                (scTeam
-                  ? `${scTeam.score} (${scTeam.overs})`
-                  : liveTeam?.cricketScore) ?? null,
-            };
-          });
+    const prepareData = crexData
+      .map((item: any) => {
+        const match = dbMatches.find((m: any) => m.url === item.url);
+        if (!match) return null;
 
-          const { details, ...matchWithoutDetails } = match;
+        const scorecardData = scorecardCache.get(
+          item.url.replace(/\/info(\/)?$/i, "/scorecard"),
+        );
+
+        const updatedTeams = match.teams.map((dbTeam: any) => {
+          const liveTeam = item.teams.find(
+            (t: any) => t.teamFlagUrl === dbTeam.teamFlagUrl,
+          );
+
+          const scTeam = (scorecardData?.teams ?? []).find(
+            (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
+          );
+
           return {
-            ...matchWithoutDetails,
-            teams: updatedTeams,
-            status: item.status,
-            score: item.score ?? {
-              score: (scorecardData?.teams ?? []).map((a: any) => ({
-                team: a.name,
-                run: `${a.score} (${a.overs})`,
-              })),
-              result: scorecardData.result ?? "",
-            },
+            ...dbTeam,
+            teamShortName: liveTeam?.teamShortName ?? dbTeam.teamShortName,
+            cricketScore:
+              (scTeam
+                ? `${scTeam.score} (${scTeam.overs})`
+                : liveTeam?.cricketScore) ?? null,
           };
-        }),
-      )
-    ).filter(Boolean);
+        });
 
-    // 4️⃣ DB matches NOT in Crex → COMPLETED
-    const completedMatches = dbMatches
-      .filter(
-        (dbMatch: any) =>
-          !prepareData.some((liveMatch: any) => liveMatch.url === dbMatch.url),
-      )
-      .map((item: any) => ({
-        ...item,
-        status: "COMPLETED",
-      }));
+        const { details, ...matchWithoutDetails } = match;
+
+        return {
+          ...matchWithoutDetails,
+          teams: updatedTeams,
+          status: item.status,
+          score: item.score ?? {
+            score: (scorecardData?.teams ?? []).map((a: any) => ({
+              team: a.name,
+              run: `${a.score} (${a.overs})`,
+            })),
+            result: scorecardData?.result ?? "",
+          },
+        };
+      })
+      .filter(Boolean);
+
+    /* ================= COMPLETED ================= */
+
+    const completedMatches = dbMatches.filter(
+      (dbMatch: any) =>
+        !prepareData.some((liveMatch: any) => liveMatch.url === dbMatch.url),
+    );
 
     const completedWithScore = await Promise.all(
       completedMatches.map(async (item: any) => {
-        const scorecardUrl = item?.url.replace(/\/info(\/)?$/i, "/scorecard");
-
-        const scorecardData: any = await CrexMatchScorecard(scorecardUrl);
-
-        // assume scorecardData.teams & scorecardData.score
+        const scorecardData = scorecardCache.get(
+          item.url.replace(/\/info(\/)?$/i, "/scorecard"),
+        );
 
         if (!scorecardData) return item;
 
@@ -113,19 +128,19 @@ export async function POST(request: Request) {
           return {
             ...dbTeam,
             teamShortName: scTeam?.name ?? dbTeam?.teamShortName,
-            // cricketScore: scTeam?.cricketScore ?? dbTeam?.cricketScore ?? null,
             cricketScore: scTeam ? `${scTeam.score} (${scTeam.overs})` : null,
           };
         });
 
-        const latestSquad = await SquadList(item.url, item.details.squads);
-
-        const result = await GetNewAnalysis({
+        const latesSquad = await SquadList(item.url, item.details?.squads);
+        const analysis = await GetNewAnalysis({
           ...item.details,
-          squads: latestSquad,
+          squads: latesSquad,
           matchInfo: item,
         });
+
         const { details, ...matchWithoutDetails } = item;
+
         return {
           ...matchWithoutDetails,
           teams: updatedTeams,
@@ -134,15 +149,16 @@ export async function POST(request: Request) {
               team: a.name,
               run: `${a.score} (${a.overs})`,
             })),
-            result: scorecardData.result ?? "",
+            result: scorecardData?.result ?? "",
           },
           status: "COMPLETED",
-          resultfgdghsd: result,
+          prediction: { team1: analysis?.team1, team2: analysis?.team2 },
         };
       }),
     );
 
-    // ✅ Final response
+    /* ================= RESPONSE ================= */
+
     return Response.json(
       {
         data: [...prepareData, ...completedWithScore],
