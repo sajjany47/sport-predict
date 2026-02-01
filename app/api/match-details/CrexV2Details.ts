@@ -17,7 +17,7 @@ export const CrexV2Details = async (url: string) => {
     const page = await browser.newPage();
     page.setDefaultTimeout(60000);
 
-    await page.goto(url, { waitUntil: "domcontentloaded" });
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
 
     // ✅ wait some safe selector
     await page.waitForSelector("body", { timeout: 15000 });
@@ -50,9 +50,14 @@ export const CrexV2Details = async (url: string) => {
 
     // helper → extract currently visible players
     const extractPlayers = async () => {
-      await page.waitForFunction(
-        () => document.querySelectorAll(".playingxi-card-row").length >= 11,
-      );
+      try {
+        await page.waitForFunction(
+          () => document.querySelectorAll(".playingxi-card-row").length > 0,
+          { timeout: 15000 }, // don't wait forever
+        );
+      } catch {
+        console.log("⚠️ Players not loaded, continuing...");
+      }
 
       return page.$$eval(".playingxi-card-row", (rows) =>
         rows.map((row) => {
@@ -103,11 +108,7 @@ export const CrexV2Details = async (url: string) => {
         // wait until bench rows appear (>11)
         await page
           .waitForFunction(
-            () => {
-              return (
-                document.querySelectorAll(".playingxi-card-row").length > 11
-              );
-            },
+            () => document.querySelectorAll(".playingxi-card-row").length > 0,
             { timeout: 5000 },
           )
           .catch(() => {});

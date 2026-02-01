@@ -17,78 +17,104 @@ export const GET = async (req: NextRequest) => {
       formatDate: { $lte: cutoffDate },
     });
 
-    const day3List = (await CrexNext3DaysFixturesArray()).map((item: any) => ({
-      ...item,
-      url: NormalizeCrexUrl(item.url),
-    }));
+    // const day3List = (await CrexNext3DaysFixturesArray()).map((item: any) => ({
+    //   ...item,
+    //   url: NormalizeCrexUrl(item.url),
+    // }));
 
-    // const fixtures = await CrexNext3DaysFixturesArray();
-    // const day3List = [];
+    const chunkArray = (arr: any[], size: number) => {
+      const chunks: any[] = [];
 
-    // for (const item of fixtures) {
-    //   let data = { ...item, url: NormalizeCrexUrl(item.url) };
+      for (let i = 0; i < arr.length; i += size) {
+        chunks.push(arr.slice(i, i + size));
+      }
 
-    //   const crexOverallStats = item.url
-    //     ? await CrexV2Details(NormalizeCrexUrl(item.url))
-    //     : null;
+      return chunks;
+    };
 
-    //   if (crexOverallStats) {
-    //     const cleanedSquads = (crexOverallStats.squads ?? []).map(
-    //       (team: any) => ({
-    //         ...team,
+    const fixtures = await CrexNext3DaysFixturesArray();
+    const day3List: any[] = [];
 
-    //         playingPlayers: (team.playingPlayers ?? []).map((player: any) => ({
-    //           ...player,
-    //           careerStats: {
-    //             ...player.careerStats,
-    //             bowling: (player.careerStats?.bowling ?? []).filter(
-    //               (b: any) => !b.format?.toLowerCase().includes("debut"),
-    //             ),
-    //           },
-    //         })),
+    const chunks = chunkArray(fixtures, 5); // split into groups of 5
 
-    //         benchPlayers: (team.benchPlayers ?? []).map((player: any) => ({
-    //           ...player,
-    //           careerStats: {
-    //             ...player.careerStats,
-    //             bowling: (player.careerStats?.bowling ?? []).filter(
-    //               (b: any) => !b.format?.toLowerCase().includes("debut"),
-    //             ),
-    //           },
-    //         })),
-    //       }),
-    //     );
+    for (const chunk of chunks) {
+      // process 5 fixtures in parallel
+      const results = await Promise.all(
+        chunk.map(async (item: any) => {
+          let data = { ...item, url: NormalizeCrexUrl(item.url) };
 
-    //     data.details = {
-    //       ...crexOverallStats,
-    //       squads: cleanedSquads,
-    //     };
+          const crexOverallStats = item.url
+            ? await CrexV2Details(NormalizeCrexUrl(item.url))
+            : null;
 
-    //     data.detailsUpdatedAt = new Date();
-    //   }
+          if (crexOverallStats) {
+            const cleanedSquads = (crexOverallStats.squads ?? []).map(
+              (team: any) => ({
+                ...team,
 
-    //   day3List.push(data);
-    // }
+                playingPlayers: (team.playingPlayers ?? []).map(
+                  (player: any) => ({
+                    ...player,
+                    careerStats: {
+                      ...player.careerStats,
+                      bowling: (player.careerStats?.bowling ?? []).filter(
+                        (b: any) => !b.format?.toLowerCase().includes("debut"),
+                      ),
+                    },
+                  }),
+                ),
 
-    const bulkOps = day3List.map((item: any) => ({
-      updateOne: {
-        filter: { url: item.url },
-        update: {
-          $set: {
-            details: item.details,
-            detailsUpdatedAt: item.detailsUpdatedAt,
+                benchPlayers: (team.benchPlayers ?? []).map((player: any) => ({
+                  ...player,
+                  careerStats: {
+                    ...player.careerStats,
+                    bowling: (player.careerStats?.bowling ?? []).filter(
+                      (b: any) => !b.format?.toLowerCase().includes("debut"),
+                    ),
+                  },
+                })),
+              }),
+            );
+
+            data.details = {
+              ...crexOverallStats,
+              squads: cleanedSquads,
+            };
+
+            data.detailsUpdatedAt = new Date();
+          }
+
+          return data;
+        }),
+      );
+
+      // push processed 5 into main array
+      day3List.push(...results);
+    }
+
+    const bulkOps = day3List.map((item: any) => {
+      const { details, detailsUpdatedAt, ...rest } = item;
+
+      return {
+        updateOne: {
+          filter: { url: item.url },
+          update: {
+            $set: {
+              details,
+              detailsUpdatedAt,
+            },
+            $setOnInsert: {
+              ...rest,
+              formatDate: moment(item.matchDate, "ddd, DD MMM YYYY").format(
+                "YYYY-MM-DD",
+              ),
+              createdAt: new Date(),
+            },
           },
-          $setOnInsert: {
-            ...item,
-            formatDate: moment(item.matchDate, "ddd, DD MMM YYYY").format(
-              "YYYY-MM-DD",
-            ),
-            createdAt: new Date(),
-          },
+          upsert: true,
         },
-        upsert: true,
-      },
-    }));
+      };
+    });
 
     await MatchList.bulkWrite(bulkOps);
 
