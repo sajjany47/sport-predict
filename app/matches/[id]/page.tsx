@@ -392,7 +392,7 @@ const MatchDetailsPage = () => {
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger
                       value="overview"
-                      className=" text-xs md:text-sm"
+                      className="text-xs md:text-sm"
                     >
                       <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
                       <span className="hidden sm:inline">Overview</span>

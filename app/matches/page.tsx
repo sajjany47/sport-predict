@@ -218,7 +218,7 @@ const MatchesPage = () => {
           <TabsList
             cols={3}
             scrollable
-            className="bg-gray-50 rounded-xl shadow-sm p-1"
+            className="bg-gray-50 rounded-xl shadow-sm p-1 grid w-full grid-cols-3"
           >
             {TAB_CONFIG.map((tab) => {
               const Icon = tab.icon;
@@ -229,8 +229,8 @@ const MatchesPage = () => {
                   key={tab.id}
                   value={tab.id}
                   variant="pill"
-                  size="lg"
-                  className="flex items-center justify-center gap-2 px-3"
+                  // size="lg"
+                  className="px-3 text-xs md:text-sm"
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" />
                   <span className="truncate">{tab.label}</span>
