@@ -65,6 +65,20 @@ export async function POST(request: NextRequest) {
           },
         })),
       }));
+      if (crexOverallStats.squads.length > 0) {
+        await MatchList.updateOne(
+          { _id: new mongoose.Types.ObjectId(body._id) },
+          {
+            $set: {
+              details: {
+                ...crexOverallStats,
+                squads: cleanedSquads,
+              },
+              detailsUpdatedAt: new Date(),
+            },
+          },
+        );
+      }
 
       return Response.json(
         {

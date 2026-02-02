@@ -47,7 +47,7 @@ export const GET = async (req: NextRequest) => {
             ? await CrexV2Details(NormalizeCrexUrl(item.url))
             : null;
 
-          if (crexOverallStats) {
+          if (crexOverallStats && crexOverallStats.squads.length > 0) {
             const cleanedSquads = (crexOverallStats.squads ?? []).map(
               (team: any) => ({
                 ...team,
