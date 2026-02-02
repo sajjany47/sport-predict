@@ -38,7 +38,7 @@ export const CrexV2Details = async (url: string) => {
 
     const squads: {
       teamName: string;
-      toss: string | null;
+      toss: any;
       playingPlayers: any[];
       benchPlayers: any[];
     }[] = [];
