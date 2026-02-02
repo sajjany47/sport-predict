@@ -83,7 +83,7 @@ interface MatchData {
   teams: Team[];
   createdAt: string;
   updatedAt: string;
-  prediction?: Prediction | null;
+  prediction?: any;
 }
 
 interface MatchCardProps {
