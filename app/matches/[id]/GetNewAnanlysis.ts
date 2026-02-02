@@ -1,394 +1,325 @@
-import {
-  FindMatchOver,
-  GetConfidence,
-  GetDefaultRolePrediction,
-  GetHint,
-  MaxMin,
-  PickTop,
-  PickTopBatter,
-  PickTopBowler,
-  SafeDivide,
-} from "./../../../lib/utils";
-import {
-  CalculateBatting,
-  CalculateBattingG,
-  CalculateBowling,
-  CalculateBowlingG,
-  CalculateFantasy,
-  CheckIntValue,
-  playerPredictionScoreCalculate,
-} from "@/lib/utils";
+/* =========================
+   Utility Helpers
+========================= */
 
-export const GetNewAnalysis = async (data: any) => {
-  const playerScoreCalculate = (player: any) => {
-    const fantasyStats = CalculateFantasy(player.fantasyPoints || []);
+import { CheckIntValue, GetConfidence, GetHint } from "@/lib/utils";
 
-    //---------------------------Recent batting & Bowling form stats------------------------
+const safe = (value: number): number =>
+  Number.isFinite(value) && !Number.isNaN(value) ? value : 0;
 
-    const recentBattingFormStats = CalculateBatting(player.battingForm);
+const normalizeRole = (role: string) => {
+  const r = role?.toLowerCase() || "";
+  if (r.includes("keeper")) return "Batter";
+  if (r.includes("all")) return "All Rounder";
+  if (r.includes("bowl")) return "Bowler";
+  return "Batter";
+};
 
-    const recentBowlingFormStats = CalculateBowling(player.bowlingForm || []);
+type MatchOverConfig = {
+  totalOvers: number;
+  ballsPerInnings: number;
+  bowlerOverLimit: number;
+};
 
-    //----------------Finish Recent Batting & Bowling Form Stats-----------------------
+const matchOver = (description: string): MatchOverConfig => {
+  const text = description.toLowerCase();
 
-    //--------------------------- batting & bowling  stats------------------------
+  if (/\btest\b/.test(text)) {
+    return { totalOvers: 90, ballsPerInnings: 540, bowlerOverLimit: 30 };
+  }
 
-    const battingStats = CalculateBattingG(player.battingStats || []);
+  if (/\bodi\b/.test(text)) {
+    return { totalOvers: 50, ballsPerInnings: 300, bowlerOverLimit: 10 };
+  }
 
-    const bowlingStats = CalculateBowlingG(player.bowlingStats || []);
+  if (/\bt10\b/.test(text)) {
+    return { totalOvers: 10, ballsPerInnings: 60, bowlerOverLimit: 2 };
+  }
 
-    //----------------Finish Batting & bowling Stats-----------------------
+  if (/\bt20\b/.test(text)) {
+    return { totalOvers: 20, ballsPerInnings: 120, bowlerOverLimit: 4 };
+  }
 
-    //---------------------------statdium batting  stats------------------------
-    const prepareStadiumBattingStats = (
-      player.stadiumStats.battingStats || []
-    ).map((item: any) => ({
-      ...item,
-      strikeRate: CheckIntValue(item.sr),
-    }));
+  if (text.includes("hundred")) {
+    return { totalOvers: 20, ballsPerInnings: 100, bowlerOverLimit: 5 };
+  }
 
-    const statdiumBattingStats = CalculateBattingG(
-      prepareStadiumBattingStats || []
-    );
+  return { totalOvers: 20, ballsPerInnings: 120, bowlerOverLimit: 4 };
+};
 
-    const prepareStadiumBowlingStats = (
-      player.stadiumStats.bowlingStats || []
-    ).map((item: any) => ({
-      ...item,
-      wicket: CheckIntValue(item.wickets),
-      economy: CheckIntValue(item.econ),
-    }));
-    const statdiumBowlingStats = CalculateBowlingG(prepareStadiumBowlingStats);
+const parseBattingScore = (score: string) => {
+  const match = score?.match(/\d+/g);
+  if (!match || match.length < 2) return { runs: 0, balls: 0 };
+  return { runs: Number(match[0]), balls: Number(match[1]) };
+};
 
-    //----------------Finish statdium Batting Stats-----------------------
+/* =========================
+   Batting Analysis
+========================= */
 
-    return {
-      fantasyStats,
-      recentBattingFormStats,
-      recentBowlingFormStats,
-      battingStats,
-      statdiumBowlingStats,
-      bowlingStats,
-      statdiumBattingStats,
-    };
+const getPlayerBattingStats = (player: any) => {
+  const batting = player?.recentForm?.batting ?? [];
+
+  let totalRuns = 0;
+  let totalBalls = 0;
+
+  batting.forEach((m: any) => {
+    const { runs, balls } = parseBattingScore(m.score);
+    totalRuns += runs;
+    totalBalls += balls;
+  });
+
+  const matches = batting.length || 1;
+
+  let avgRuns = safe(totalRuns / matches);
+  let avgBalls = safe(totalBalls / matches);
+  let strikeRate = avgBalls > 0 ? safe((avgRuns / avgBalls) * 100) : 0;
+
+  const role = normalizeRole(player.role);
+  let roleMultiplier =
+    role === "Batter" ? 1.15 : role === "All Rounder" ? 1.05 : 0.7;
+
+  if (player?.careerStats?.batting?.length) {
+    const career = player.careerStats.batting[0];
+
+    const careerAvgRuns = Number(career.average);
+    const careerStrikeRate = Number(career.strikeRate);
+    const careerAvgBalls =
+      careerStrikeRate > 0 ? (careerAvgRuns * 100) / careerStrikeRate : 0;
+
+    avgRuns = safe((avgRuns + careerAvgRuns) / 2);
+    avgBalls = safe((avgBalls + careerAvgBalls) / 2);
+    strikeRate = safe((strikeRate + careerStrikeRate) / 2);
+  }
+
+  const impactRuns = safe(avgRuns * roleMultiplier * (strikeRate / 100));
+
+  return { avgRuns, avgBalls, strikeRate, impactRuns };
+};
+
+/* =========================
+   Bowling Analysis
+========================= */
+
+const getPlayerBowlingStats = (player: any) => {
+  const bowling = player?.recentForm?.bowling ?? [];
+
+  let totalRuns = 0;
+  let totalWickets = 0;
+  let validMatches = 0;
+
+  bowling.forEach((m: any) => {
+    if (!m?.score?.includes("-")) return;
+    const [w, r] = m.score.split("-").map(Number);
+    if (!Number.isFinite(w) || !Number.isFinite(r)) return;
+
+    totalWickets += w;
+    totalRuns += r;
+    validMatches++;
+  });
+
+  let avgWickets = validMatches ? safe(totalWickets / validMatches) : 0;
+  let avgRunsConced = validMatches ? safe(totalRuns / validMatches) : 0;
+
+  const role = normalizeRole(player.role);
+  let roleMultiplier =
+    role === "Bowler" ? 1.15 : role === "All Rounder" ? 1.05 : 0.6;
+
+  if (player?.careerStats?.bowling?.length) {
+    const career = player.careerStats.bowling[0];
+    const careerAvgWickets =
+      Number(career.wickets) / Number(career.matches || 1);
+
+    const careerAvgRuns = careerAvgWickets * Number(career.average || 0);
+
+    avgWickets = safe((avgWickets + careerAvgWickets) / 2);
+    avgRunsConced = safe((avgRunsConced + careerAvgRuns) / 2);
+  }
+
+  return {
+    avgRunsConced: safe(avgRunsConced * roleMultiplier),
+    avgWickets,
+    impactWickets: safe(avgWickets * roleMultiplier),
   };
-  const matchOverInfo = FindMatchOver(data.matchInfo.format);
+};
 
-  // console.log(playerScoreCalculate(data.squadList[0].benchPlayer[1]));
-  const prepareTeamSquad = data.squadList.map((item: any) => {
-    const processPlayer = (p: any) => {
-      const playerData = playerScoreCalculate(p);
-      const playerPredictScore = playerPredictionScoreCalculate(
-        playerData,
-        matchOverInfo.over
-      );
+/* =========================
+   Squad Analysis
+========================= */
 
-      const batting = playerPredictScore?.batting || {};
-      const bowling = playerPredictScore?.bowling || {};
+const squadAnanlysis = (team: any, matchDescription: string) => {
+  const squad = team?.playingPlayers?.length
+    ? team.playingPlayers
+    : (team?.benchPlayers ?? []);
 
-      const isZero =
-        (!batting.totalRuns || batting.totalRuns === 0) &&
-        (!batting.totalAvgBallFaced || batting.totalAvgBallFaced === 0) &&
-        (!batting.totalAvgStrikeRate || batting.totalAvgStrikeRate === 0) &&
-        (!bowling.totalAvgOvers || bowling.totalAvgOvers === 0) &&
-        (!bowling.totalAvgWickets || bowling.totalAvgWickets === 0) &&
-        (!bowling.totalAvgRunsConceded || bowling.totalAvgRunsConceded === 0);
+  let teamRuns = 0;
+  let teamBalls = 0;
+  let teamRunsConced = 0;
+  let teamWickets = 0;
 
-      let a = {
-        batting: {
-          // fantasyBattingRuns: 0,
-          totalRuns: 0,
-          totalAvgStrikeRate: 0,
-          totalAvgBallFaced: 0,
-        },
-        bowling: {
-          // fantasyBowlingPoints: 0,
-          totalAvgOvers: 0,
-          totalAvgWickets: 0,
-          totalAvgRunsConceded: 0,
-          totalAvgEconomy: 0,
-        },
-      };
+  squad.forEach((p: any) => {
+    const bat = getPlayerBattingStats(p);
+    const bowl = getPlayerBowlingStats(p);
 
-      if (isZero) {
-        const def =
-          GetDefaultRolePrediction(p.role, data.matchInfo.format) || {};
-        a = {
-          batting: {
-            // fantasyBattingRuns: def.battingPoint || 0,
-            totalRuns: def.runs || 0,
-            totalAvgStrikeRate: def.strikeRate || 0,
-            totalAvgBallFaced: def.totalBallsFaced || 0,
-          },
-          bowling: {
-            // fantasyBowlingPoints: def.bowlingPoint || 0,
-            totalAvgOvers: def.overs || 0,
-            totalAvgWickets: def.wkts || 0,
-            totalAvgRunsConceded: def.runsConceded || 0,
-            totalAvgEconomy: def.economy || 0,
-          },
-        };
-      } else {
-        a = {
-          ...playerPredictScore,
-          batting: {
-            ...playerPredictScore.batting,
-          },
-        };
-      }
+    teamRuns += bat.impactRuns;
+    teamBalls += bat.avgBalls;
+    teamRunsConced += bowl.avgRunsConced;
+    teamWickets += bowl.impactWickets;
+  });
 
-      return {
-        name: p.name,
-        image: p.image,
-        role: p.role,
-        ...a,
-      };
-    };
+  const runRate = teamBalls > 0 ? safe(teamRuns / teamBalls) : 0;
+  const overs = matchOver(matchDescription);
 
-    const playingPlayer = (item.playingPlayer || []).map(processPlayer);
-    const benchPlayer = (item.benchPlayer || []).map(processPlayer);
+  return {
+    predictedScore: safe(runRate * overs.ballsPerInnings),
+    totalTeamRunsConced:
+      teamWickets > 0 ? safe((teamRunsConced / teamWickets) * 10) : 0,
+    teamWicket: teamWickets,
+  };
+};
 
-    const selectPlayerList =
-      Array.isArray(item.playingPlayer) && item.playingPlayer.length > 0
-        ? playingPlayer
-        : benchPlayer;
+const getTopPlayer = (team: any, type: "bat" | "bowl") => {
+  const squad =
+    team?.playingPlayers?.length > 0
+      ? team.playingPlayers
+      : (team?.benchPlayers ?? []);
 
-    const count = selectPlayerList.length;
+  if (!squad.length) return null;
 
-    const totals = selectPlayerList.reduce(
-      (acc: any, pl: any) => {
-        acc.battingRunsTotal += Number(pl.batting.totalRuns || 0);
-        acc.wicketsTotal += Number(pl.bowling.totalAvgWickets || 0);
-        acc.oversTotal += Number(pl.bowling.totalAvgOvers || 0);
-        acc.runsConcededTotal += Number(pl.bowling.totalAvgRunsConceded || 0);
-        return acc;
-      },
-      {
-        battingRunsTotal: 0,
-        wicketsTotal: 0,
-        oversTotal: 0,
-        runsConcededTotal: 0,
-      }
-    );
-
-    const safePredict = () => {
-      if (count === 0) {
-        return {
-          totalBattingRuns: 0,
-          totalOvers: 0,
-          totalRunsConceded: 0,
-          totalWickets: 0,
-        };
-      }
-
-      const avgBattingRuns = SafeDivide(totals.battingRunsTotal, count);
-      const avgOvers = SafeDivide(totals.oversTotal, count);
-      const avgRunsConceded = SafeDivide(totals.runsConcededTotal, count);
-      const avgWickets = SafeDivide(totals.wicketsTotal, count);
-
-      const totalBattingRuns = CheckIntValue(avgBattingRuns * 11, 0);
-      const totalOvers = CheckIntValue(avgOvers * 11, 2);
-      const totalRunsConceded = CheckIntValue(avgRunsConceded * 11, 2);
-
-      let totalWickets = CheckIntValue(avgWickets * 11, 2);
-      // if (totalWickets > 10) totalWickets = 10;
-
-      return {
-        totalBattingRuns,
-        totalOvers,
-        totalRunsConceded,
-        totalWickets,
-      };
-    };
+  const players = squad.map((p: any) => {
+    const bat = getPlayerBattingStats(p);
+    const bowl = getPlayerBowlingStats(p);
 
     return {
-      ...item,
-      playingPlayer,
-      benchPlayer,
-      predict: safePredict(),
+      name: p.name,
+      shortName: p.shortName,
+      role: p.role,
+      image: p.image,
+      playerUrl: p.playerUrl,
+      impactRuns: Math.round(bat.impactRuns),
+      strikeRate: Math.round(bat.strikeRate),
+      avgBalls: Math.round(bat.avgBalls),
+      impactWickets: Math.round(bowl.impactWickets),
+      avgRunsConced: Math.round(bowl.avgRunsConced),
     };
   });
 
-  //.............................................................................
-  const teamPredictCalculate = (teamA: any, teamB: any) => {
-    let wkt_rate = 5;
+  return players.reduce((best: any, curr: any) => {
+    if (type === "bat") {
+      return curr.impactRuns > best.impactRuns ? curr : best;
+    }
+    return curr.impactWickets > best.impactWickets ? curr : best;
+  });
+};
 
-    const teamAFirstInningScore = CheckIntValue(
-      SafeDivide(
-        teamA.predict.totalBattingRuns + teamB.predict.totalRunsConceded,
-        2
-      ) -
-        teamB.predict.totalWickets * wkt_rate
-    );
+/* =========================
+   Final Match Analysis
+========================= */
 
-    const teamBFirstInningScore = CheckIntValue(
-      SafeDivide(
-        teamB.predict.totalBattingRuns + teamA.predict.totalRunsConceded,
-        2
-      ) -
-        teamA.predict.totalWickets * wkt_rate
-    );
+export const GetNewAnalysis = async (data: any) => {
+  const teamA = data.squads[0];
+  const teamB = data.squads[1];
 
-    const totalBothTeamScore = teamAFirstInningScore + teamBFirstInningScore;
+  const matchDescription = data.matchInfo.matchDescription;
 
-    const teamAChance =
-      totalBothTeamScore > 0
-        ? CheckIntValue((teamAFirstInningScore / totalBothTeamScore) * 100)
-        : Number("50.00");
-    const teamBChance =
-      totalBothTeamScore > 0
-        ? CheckIntValue((teamBFirstInningScore / totalBothTeamScore) * 100)
-        : Number("50.00");
+  const teamAScore = squadAnanlysis(teamA, matchDescription);
+  const teamBScore = squadAnanlysis(teamB, matchDescription);
 
-    const hintData = GetHint(teamAChance, teamBChance);
+  let teamAPredicted =
+    (teamAScore.predictedScore + teamBScore.totalTeamRunsConced) / 2 -
+    teamBScore.teamWicket * 5;
 
-    // choose active list (playingPlayer if exists else benchPlayer)
-    // helpers to pick the top batsman/bowler without mutating arrays
+  let teamBPredicted =
+    (teamBScore.predictedScore + teamAScore.totalTeamRunsConced) / 2 -
+    teamAScore.teamWicket * 5;
 
-    const t1Players =
-      teamA.playingPlayer && teamA.playingPlayer.length
-        ? teamA.playingPlayer.slice()
-        : teamA.benchPlayer.slice();
-    const t2Players =
-      teamB.playingPlayer && teamB.playingPlayer.length
-        ? teamB.playingPlayer.slice()
-        : teamB.benchPlayer.slice();
+  teamAPredicted = Math.max(teamAPredicted, 80);
+  teamBPredicted = Math.max(teamBPredicted, 80);
 
-    // top batsman by batting.totalRuns and top bowler by bowling.totalAvgWickets
-    const team1TopBatsman = PickTopBatter(t1Players);
+  /* =========================
+     Winner Probability
+  ========================= */
 
-    const team2TopBatsman = PickTopBatter(t2Players);
+  const totalScore = teamAPredicted + teamBPredicted;
 
-    const team1TopBowler = PickTopBowler(
-      t1Players,
-      matchOverInfo.bowlerOverLimit
-    );
+  const teamAChance =
+    totalScore > 0 ? CheckIntValue((teamAPredicted / totalScore) * 100) : 50;
 
-    const team2TopBowler = PickTopBowler(
-      t2Players,
-      matchOverInfo.bowlerOverLimit
-    );
+  const teamBChance =
+    totalScore > 0 ? CheckIntValue((teamBPredicted / totalScore) * 100) : 50;
 
-    const response = {
-      team1: {
-        name: teamA.name,
-        shortName: teamA.shortName,
-        flag: teamA.flag,
-        firstInningScore: {
-          ...MaxMin(teamAFirstInningScore, teamB.predict.totalWickets),
-        },
-        winnerPrediction: {
-          probability: teamAChance,
-          confidence: GetConfidence(teamAChance),
-          hint: {
-            hintMessage: hintData.team1.message,
-            badgeColor: hintData.team1.badgeColor,
-            color: hintData.team1.color,
-          },
-        },
-        topBatsman: team1TopBatsman
-          ? {
-              name: team1TopBatsman.name,
-              image: team1TopBatsman.image,
-              role: team1TopBatsman.role,
-              batting: {
-                totalRuns: CheckIntValue(
-                  team1TopBatsman.batting.totalRuns.toFixed(0)
-                ),
-                totalAvgStrikeRate: CheckIntValue(
-                  SafeDivide(
-                    team1TopBatsman.batting.totalRuns,
-                    team1TopBatsman.batting.totalAvgBallFaced
-                  ) * 100
-                ),
-                totalAvgBallFaced: CheckIntValue(
-                  team1TopBatsman.batting.totalAvgBallFaced.toFixed(0)
-                ),
-              },
-            }
-          : null,
-        topBowler: team1TopBowler
-          ? {
-              name: team1TopBowler.name,
-              image: team1TopBowler.image,
-              role: team1TopBowler.role,
-              bowling: {
-                totalAvgEconomy: team1TopBowler.bowling.totalAvgEconomy,
-                totalAvgOvers: CheckIntValue(
-                  team1TopBowler.bowling.totalAvgOvers.toFixed(0)
-                ),
-                totalAvgWickets: CheckIntValue(
-                  team1TopBowler.bowling.totalAvgWickets.toFixed(0)
-                ),
-                totalAvgRunsConceded: CheckIntValue(
-                  team1TopBowler.bowling.totalAvgRunsConceded.toFixed(0)
-                ),
-              },
-            }
-          : null,
+  const hintData = GetHint(teamAChance, teamBChance);
+
+  return {
+    team1: {
+      name: data.matchInfo.teams[0].teamName,
+      shortName: teamA.teamName,
+      flag: data.matchInfo.teams[0].teamFlagUrl,
+
+      firstInnings: {
+        min: Math.round(teamAPredicted * 0.9),
+        max: Math.round(teamAPredicted * 1.1),
+        predicted: Math.round(teamAPredicted),
+        wickets:
+          Math.round(teamBScore.teamWicket * 0.4) > 10
+            ? 10
+            : Math.round(teamBScore.teamWicket * 0.4),
       },
-      team2: {
-        name: teamB.name,
-        shortName: teamB.shortName,
-        flag: teamB.flag,
-        firstInningScore: {
-          ...MaxMin(teamBFirstInningScore, teamA.predict.totalWickets),
+      winnerPrediction: {
+        probability: teamAChance,
+        confidence: GetConfidence(teamAChance),
+        hint: {
+          hintMessage: hintData.team1.message,
+          badgeColor: hintData.team1.badgeColor,
+          color: hintData.team1.color,
         },
-        winnerPrediction: {
-          probability: teamBChance,
-          confidence: GetConfidence(teamBChance),
-          hint: {
-            hintMessage: hintData.team2.message,
-            badgeColor: hintData.team2.badgeColor,
-            color: hintData.team2.color,
-          },
-        },
-        topBatsman: team2TopBatsman
-          ? {
-              name: team2TopBatsman.name,
-              image: team2TopBatsman.image,
-              role: team2TopBatsman.role,
-              batting: {
-                totalRuns: CheckIntValue(
-                  team2TopBatsman.batting.totalRuns.toFixed(0)
-                ),
-                totalAvgStrikeRate: CheckIntValue(
-                  SafeDivide(
-                    team2TopBatsman.batting.totalRuns,
-                    team2TopBatsman.batting.totalAvgBallFaced
-                  ) * 100
-                ),
-                totalAvgBallFaced: CheckIntValue(
-                  team2TopBatsman.batting.totalAvgBallFaced.toFixed(0)
-                ),
-              },
-            }
-          : null,
-        topBowler: team2TopBowler
-          ? {
-              name: team2TopBowler.name,
-              image: team2TopBowler.image,
-              role: team2TopBowler.role,
-              bowling: {
-                totalAvgEconomy: team2TopBowler.bowling.totalAvgEconomy,
-                totalAvgOvers: CheckIntValue(
-                  team2TopBowler.bowling.totalAvgOvers.toFixed(0)
-                ),
-                totalAvgWickets: CheckIntValue(
-                  team2TopBowler.bowling.totalAvgWickets.toFixed(0)
-                ),
-                totalAvgRunsConceded: CheckIntValue(
-                  team2TopBowler.bowling.totalAvgRunsConceded.toFixed(0)
-                ),
-              },
-            }
-          : null,
       },
-    };
+      topBatsman: getTopPlayer(teamA, "bat"),
+      topBowler: getTopPlayer(teamA, "bowl"),
+    },
 
-    return response;
+    team2: {
+      name: data.matchInfo.teams[1].teamName,
+      shortName: teamB.teamName,
+      flag: data.matchInfo.teams[1].teamFlagUrl,
+
+      firstInnings: {
+        min: Math.round(teamBPredicted * 0.9),
+        max: Math.round(teamBPredicted * 1.1),
+        predicted: Math.round(teamBPredicted),
+        wickets:
+          Math.round(teamAScore.teamWicket * 0.4) > 10
+            ? 10
+            : Math.round(teamAScore.teamWicket * 0.4),
+      },
+      winnerPrediction: {
+        probability: teamBChance,
+        confidence: GetConfidence(teamBChance),
+        hint: {
+          hintMessage: hintData.team2.message,
+          badgeColor: hintData.team2.badgeColor,
+          color: hintData.team2.color,
+        },
+      },
+      topBatsman: getTopPlayer(teamB, "bat"),
+      topBowler: getTopPlayer(teamB, "bowl"),
+    },
+    recentMatchOnVenue: data?.venueDetails?.recentMatches ?? null,
+
+    venueStats: data?.venueDetails?.stats?.matches
+      ? data.venueDetails.stats
+      : null,
+
+    venueRecords: data?.venueDetails?.records?.["Highest Total"]
+      ? data.venueDetails.records
+      : null,
+
+    venuePaceVsSpin: data?.venueDetails?.paceVsSpin?.paceWickets
+      ? data.venueDetails.paceVsSpin
+      : null,
+
+    venueWeather: data?.venueDetails?.weather?.temperature
+      ? data.venueDetails.weather
+      : null,
   };
-  //.............................................................................
-  const result = teamPredictCalculate(prepareTeamSquad[0], prepareTeamSquad[1]);
-  return result;
 };

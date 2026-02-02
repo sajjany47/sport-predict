@@ -30,6 +30,11 @@ import {
   TargetIcon,
   Info,
   X as XIcon,
+  Trophy,
+  Flag,
+  Globe,
+  Calendar,
+  Home,
 } from "lucide-react";
 import {
   Tooltip,
@@ -42,68 +47,95 @@ interface PlayerCardProps {
   player: any;
 }
 
+interface BattingStat {
+  format: string;
+  matches: string;
+  innings: string;
+  runs: string;
+  hundreds: string;
+  fifties: string;
+  highScore: string;
+  strikeRate: string;
+  average: string;
+  fours: string;
+  sixes: string;
+  ducks: string;
+  rank: string;
+}
+
+interface BowlingStat {
+  format: string;
+  matches: string;
+  innings: string;
+  wickets: string;
+  economy: string;
+  average: string;
+  best: string;
+  threeWickets: string;
+  fiveWickets: string;
+  strikeRate: string;
+  maidens: string;
+  rank: string;
+}
+
+interface RecentForm {
+  match: string;
+  score?: string;
+  figures?: string;
+  scorecardUrl: string;
+}
+
 const PlayerCard = ({ player }: PlayerCardProps) => {
-  const getPlayerTypeColor = (type: string) => {
-    switch (type?.toUpperCase()) {
-      case "BAT":
-      case "BATTER":
-        return "bg-gradient-to-r from-blue-500 to-blue-600 text-white";
-      case "BOWL":
-      case "BOWLER":
-        return "bg-gradient-to-r from-green-500 to-emerald-600 text-white";
-      case "ALL":
-      case "ALLROUNDER":
-        return "bg-gradient-to-r from-purple-500 to-pink-600 text-white";
-      case "WK":
-      case "WK-BAT":
-        return "bg-gradient-to-r from-orange-500 to-amber-600 text-white";
-      default:
-        return "bg-gradient-to-r from-gray-500 to-gray-600 text-white";
-    }
-  };
-
-  const getPlayerTypeIcon = (type: string) => {
-    switch (type?.toUpperCase()) {
-      case "BAT":
-      case "BATTER":
-        return <Target className="h-3 w-3" />;
-      case "BOWL":
-      case "BOWLER":
-        return <Zap className="h-3 w-3" />;
-      case "ALL":
-      case "ALLROUNDER":
-        return <Star className="h-3 w-3" />;
-      case "WK":
-      case "WK-BAT":
-        return <Shield className="h-3 w-3" />;
-      default:
-        return <Users className="h-3 w-3" />;
-    }
-  };
-
-  const getStatsColor = (value: number, type: "batting" | "bowling") => {
-    if (type === "batting") {
-      if (value >= 150) return "text-green-600 bg-green-50";
-      if (value >= 120) return "text-blue-600 bg-blue-50";
-      if (value >= 100) return "text-yellow-600 bg-yellow-50";
-      return "text-gray-600 bg-gray-50";
+  const getPlayerTypeColor = (role: string) => {
+    if (!role) return "bg-gray-100 text-gray-800 border-gray-300";
+    if (role === "Batter") {
+      return "bg-gradient-to-r from-blue-500 to-blue-600 text-white";
+    } else if (role === "Bowler") {
+      return "bg-gradient-to-r from-green-500 to-emerald-600 text-white";
+    } else if (role === "All Rounder") {
+      return "bg-gradient-to-r from-purple-500 to-pink-600 text-white";
     } else {
-      if (value <= 6) return "text-green-600 bg-green-50";
-      if (value <= 8) return "text-blue-600 bg-blue-50";
-      if (value <= 10) return "text-yellow-600 bg-yellow-50";
-      return "text-red-600 bg-red-50";
+      return "bg-gradient-to-r from-gray-500 to-gray-600 text-white";
+    }
+  };
+
+  const getPlayerTypeIcon = (role: string) => {
+    if (!role) return <Users className="h-4 w-4" />;
+    if (role === "Batter") {
+      return <TargetIcon className="h-4 w-4" />;
+    } else if (role === "Bowler") {
+      return <Zap className="h-4 w-4" />;
+    } else if (role === "All Rounder") {
+      return <Star className="h-4 w-4" />;
+    } else {
+      return <Users className="h-4 w-4" />;
+    }
+  };
+
+  const getFormatColor = (format: string) => {
+    switch (format?.toUpperCase()) {
+      case "ODI":
+        return "bg-gradient-to-r from-blue-500 to-blue-600";
+      case "T20I":
+        return "bg-gradient-to-r from-green-500 to-emerald-600";
+      case "TEST":
+        return "bg-gradient-to-r from-red-500 to-red-600";
+      case "IPL":
+        return "bg-gradient-to-r from-purple-500 to-purple-600";
+      case "BBL":
+        return "bg-gradient-to-r from-orange-500 to-amber-600";
+      case "WC ODI":
+        return "bg-gradient-to-r from-indigo-500 to-indigo-600";
+      default:
+        return "bg-gradient-to-r from-gray-500 to-gray-600";
     }
   };
 
   const calculateDataCompleteness = (player: any) => {
     const fields = [
-      { key: "battingStats", weight: 2 },
-      { key: "bowlingStats", weight: 2 },
-      { key: "battingForm", weight: 1.5 },
-      { key: "bowlingForm", weight: 1.5 },
-      { key: "overallStats", weight: 2 },
-      { key: "stadiumStats", weight: 1 },
-      { key: "againstTeamsStats", weight: 1 },
+      { key: "careerStats", weight: 3 },
+      { key: "recentForm", weight: 2 },
+      { key: "rank", weight: 1 },
     ];
 
     let totalWeight = 0;
@@ -111,13 +143,26 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
 
     fields.forEach((field) => {
       totalWeight += field.weight;
-      if (
-        player[field.key] &&
-        ((Array.isArray(player[field.key]) && player[field.key].length > 0) ||
-          (typeof player[field.key] === "object" &&
-            Object.keys(player[field.key]).length > 0))
-      ) {
-        completedWeight += field.weight;
+      const value = player[field.key];
+
+      if (value) {
+        if (field.key === "careerStats") {
+          if (
+            (value.batting && value.batting.length > 0) ||
+            (value.bowling && value.bowling.length > 0)
+          ) {
+            completedWeight += field.weight;
+          }
+        } else if (field.key === "recentForm") {
+          if (
+            (value.batting && value.batting.length > 0) ||
+            (value.bowling && value.bowling.length > 0)
+          ) {
+            completedWeight += field.weight;
+          }
+        } else if (field.key === "rank") {
+          completedWeight += field.weight;
+        }
       }
     });
 
@@ -125,6 +170,23 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
   };
 
   const dataCompleteness = calculateDataCompleteness(player);
+
+  // Separate batting and bowling stats
+  const battingStats =
+    player?.careerStats?.batting?.filter(
+      (stat: BattingStat) =>
+        !stat?.format?.includes("--") && stat?.matches !== "57",
+    ) || [];
+
+  const bowlingStats =
+    player?.careerStats?.bowling?.filter(
+      (stat: BowlingStat) =>
+        !stat?.format?.includes("--") && stat?.wickets !== "57",
+    ) || [];
+
+  // Parse recent form
+  const battingForm = player?.recentForm?.batting || [];
+  const bowlingForm = player?.recentForm?.bowling || [];
 
   return (
     <TooltipProvider>
@@ -150,13 +212,13 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                       </h3>
                       <Badge
                         className={`px-2 py-0.5 text-xs font-bold shadow-sm ${getPlayerTypeColor(
-                          player?.type || player?.role
+                          player?.role || player?.style,
                         )} w-fit`}
                       >
                         <span className="flex items-center gap-1">
-                          {getPlayerTypeIcon(player?.type || player?.role)}
+                          {getPlayerTypeIcon(player?.role || player?.style)}
                           <span className="truncate">
-                            {player?.type || player?.role}
+                            {player?.role || player?.style}
                           </span>
                         </span>
                       </Badge>
@@ -164,6 +226,19 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
 
                     {/* Icons aligned to top right */}
                     <div className="flex items-start gap-2 flex-shrink-0">
+                      {player?.rank && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-xs px-2 py-0.5">
+                              <Trophy className="h-2.5 w-2.5 mr-1" />
+                              Rank
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">{player.rank}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                       {dataCompleteness < 100 && (
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -182,7 +257,21 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                     </div>
                   </div>
 
-                  {/* Data completeness bar below */}
+                  {/* Player short info */}
+                  <div className="mt-2 space-y-1">
+                    {player?.isWK !== undefined && (
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <span className="font-medium">WK:</span>
+                        <span
+                          className={`px-2 py-1 rounded text-sm font-medium ${player.isWK ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                        >
+                          {player.isWK ? "Yes" : "No"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Data completeness bar */}
                   <div className="mt-3 space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="text-gray-500">Data Completeness</span>
@@ -192,18 +281,6 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                       value={dataCompleteness}
                       className="h-1.5 bg-gray-200"
                     />
-                  </div>
-
-                  {/* Player styles */}
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                    <div className="text-gray-600 truncate">
-                      <span className="font-medium">Bat:</span>{" "}
-                      {player?.batStyle || "N/A"}
-                    </div>
-                    <div className="text-gray-600 truncate">
-                      <span className="font-medium">Bowl:</span>{" "}
-                      {player?.bowlStyle || "N/A"}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -226,35 +303,41 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                     {player?.name}
                     <Badge
                       className={`px-2 py-1 text-xs font-bold shadow-sm ${getPlayerTypeColor(
-                        player?.type || player?.role
+                        player?.role || player?.style,
                       )} flex-shrink-0`}
                     >
                       <span className="flex items-center gap-1">
-                        {getPlayerTypeIcon(player?.type || player?.role)}
+                        {getPlayerTypeIcon(player?.role || player?.style)}
                         <span className="hidden sm:inline">
-                          {player?.type || player?.role}
+                          {player?.role || player?.style}
                         </span>
                         <span className="sm:hidden">
-                          {(player?.type || player?.role)
+                          {(player?.role || player?.style)
                             ?.charAt(0)
                             ?.toUpperCase()}
                         </span>
                       </span>
                     </Badge>
+                    {player?.rank && (
+                      <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-xs px-2 py-1">
+                        <Trophy className="h-3 w-3 mr-1" />
+                        {player.rank}
+                      </Badge>
+                    )}
                   </DialogTitle>
                   <DialogDescription className="flex flex-wrap items-center gap-1 sm:gap-3 mt-1 sm:mt-2 text-xs sm:text-sm">
                     <span className="flex items-center gap-1">
-                      <TargetIcon className="h-3 w-3" />
-                      {player?.batStyle}
+                      <Users className="h-3 w-3" />
+                      {player?.shortName}
                     </span>
-                    {player?.bowlStyle && (
+                    {player?.isWK !== undefined && (
                       <>
                         <span className="text-gray-300 hidden sm:inline">
                           •
                         </span>
                         <span className="flex items-center gap-1">
-                          <Zap className="h-3 w-3" />
-                          {player?.bowlStyle}
+                          <Shield className="h-3 w-3" />
+                          {player.isWK ? "Wicket Keeper" : "Non Wicket Keeper"}
                         </span>
                       </>
                     )}
@@ -281,8 +364,8 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                           {dataCompleteness >= 80
                             ? "Good"
                             : dataCompleteness >= 60
-                            ? "Average"
-                            : "Limited"}
+                              ? "Average"
+                              : "Limited"}
                         </span>
                       </div>
                       <Progress
@@ -295,14 +378,14 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
               </div>
             )}
 
-            <Tabs defaultValue="overview" className="w-full">
+            <Tabs defaultValue="career" className="w-full">
               <TabsList className="grid grid-cols-3 mb-4 sm:mb-6 w-full overflow-x-auto">
                 <TabsTrigger
-                  value="overview"
+                  value="career"
                   className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                 >
-                  <BarChart3 className="h-4 w-4" />
-                  <span>Stats</span>
+                  <Trophy className="h-4 w-4" />
+                  <span>Career</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="form"
@@ -320,35 +403,42 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Overview Tab */}
-              <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+              {/* Career Tab */}
+              <TabsContent value="career" className="space-y-4 sm:space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* Batting Stats */}
                   <Card>
                     <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100">
                       <CardTitle className="flex items-center gap-2 text-sm sm:text-lg">
                         <Target className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-                        <span>Batting Statistics</span>
+                        <span>Career Batting Statistics</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 sm:pt-6">
-                      {!player?.battingStats?.length ? (
+                      {battingStats.length === 0 ? (
                         <EmptyState message="Batting statistics data not available" />
                       ) : (
                         <div className="space-y-3 sm:space-y-4">
-                          {player.battingStats.map(
-                            (stat: any, index: number) => (
+                          {battingStats.map(
+                            (stat: BattingStat, index: number) => (
                               <div
                                 key={index}
                                 className="p-3 sm:p-4 bg-gradient-to-r from-white to-blue-50 rounded-xl border border-blue-100"
                               >
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
-                                  <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white w-fit">
-                                    {stat.mode}
+                                  <Badge
+                                    className={`${getFormatColor(stat.format)} text-white w-fit`}
+                                  >
+                                    {stat.format}
                                   </Badge>
-                                  <span className="text-xs sm:text-sm text-gray-600">
-                                    {stat.matches} matches
-                                  </span>
+                                  <div className="flex flex-wrap gap-2">
+                                    <span className="text-xs sm:text-sm text-gray-600">
+                                      Matches: {stat.matches}
+                                    </span>
+                                    <span className="text-xs sm:text-sm text-gray-600">
+                                      Innings: {stat.innings}
+                                    </span>
+                                  </div>
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                                   <StatCard
@@ -376,8 +466,36 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                                     bgColor="bg-orange-50"
                                   />
                                 </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mt-2">
+                                  <StatCard
+                                    label="100s/50s"
+                                    value={`${stat.hundreds}/${stat.fifties}`}
+                                    color="text-indigo-600"
+                                    bgColor="bg-indigo-50"
+                                  />
+                                  <StatCard
+                                    label="4s/6s"
+                                    value={`${stat.fours}/${stat.sixes}`}
+                                    color="text-pink-600"
+                                    bgColor="bg-pink-50"
+                                  />
+                                  <StatCard
+                                    label="Ducks"
+                                    value={stat.ducks}
+                                    color="text-red-600"
+                                    bgColor="bg-red-50"
+                                  />
+                                  {stat.rank && stat.rank !== "--" && (
+                                    <StatCard
+                                      label="Rank"
+                                      value={stat.rank}
+                                      color="text-yellow-600"
+                                      bgColor="bg-yellow-50"
+                                    />
+                                  )}
+                                </div>
                               </div>
-                            )
+                            ),
                           )}
                         </div>
                       )}
@@ -389,56 +507,91 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                     <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-100">
                       <CardTitle className="flex items-center gap-2 text-sm sm:text-lg">
                         <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                        <span>Bowling Statistics</span>
+                        <span>Career Bowling Statistics</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 sm:pt-6">
-                      {!player?.bowlingStats?.length ? (
+                      {bowlingStats.length === 0 ? (
                         <EmptyState message="Bowling statistics data not available" />
                       ) : (
                         <div className="space-y-3 sm:space-y-4">
-                          {player.bowlingStats.map(
-                            (stat: any, index: number) => (
+                          {bowlingStats.map(
+                            (stat: BowlingStat, index: number) => (
                               <div
                                 key={index}
                                 className="p-3 sm:p-4 bg-gradient-to-r from-white to-green-50 rounded-xl border border-green-100"
                               >
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
-                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white w-fit">
-                                    {stat.mode}
+                                  <Badge
+                                    className={`${getFormatColor(stat.format)} text-white w-fit`}
+                                  >
+                                    {stat.format}
                                   </Badge>
-                                  <span className="text-xs sm:text-sm text-gray-600">
-                                    {stat.matches} matches
-                                  </span>
+                                  <div className="flex flex-wrap gap-2">
+                                    <span className="text-xs sm:text-sm text-gray-600">
+                                      Matches: {stat.matches}
+                                    </span>
+                                    <span className="text-xs sm:text-sm text-gray-600">
+                                      Innings: {stat.innings}
+                                    </span>
+                                  </div>
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                                   <StatCard
                                     label="Wickets"
-                                    value={stat.wicket}
+                                    value={stat.wickets}
                                     color="text-green-600"
                                     bgColor="bg-green-50"
                                   />
                                   <StatCard
                                     label="Average"
-                                    value={stat.average || "N/A"}
+                                    value={stat.average}
                                     color="text-blue-600"
                                     bgColor="bg-blue-50"
                                   />
                                   <StatCard
                                     label="Economy"
-                                    value={stat.economy || "N/A"}
+                                    value={stat.economy}
                                     color="text-yellow-600"
                                     bgColor="bg-yellow-50"
                                   />
                                   <StatCard
+                                    label="Best"
+                                    value={stat.best}
+                                    color="text-orange-600"
+                                    bgColor="bg-orange-50"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mt-2">
+                                  <StatCard
+                                    label="3W/5W"
+                                    value={`${stat.threeWickets}/${stat.fiveWickets}`}
+                                    color="text-indigo-600"
+                                    bgColor="bg-indigo-50"
+                                  />
+                                  <StatCard
                                     label="Strike Rate"
-                                    value={stat.strikeRate || "N/A"}
+                                    value={stat.strikeRate}
                                     color="text-purple-600"
                                     bgColor="bg-purple-50"
                                   />
+                                  <StatCard
+                                    label="Maidens"
+                                    value={stat.maidens || "0"}
+                                    color="text-pink-600"
+                                    bgColor="bg-pink-50"
+                                  />
+                                  {stat.rank && stat.rank !== "--" && (
+                                    <StatCard
+                                      label="Rank"
+                                      value={stat.rank}
+                                      color="text-yellow-600"
+                                      bgColor="bg-yellow-50"
+                                    />
+                                  )}
                                 </div>
                               </div>
-                            )
+                            ),
                           )}
                         </div>
                       )}
@@ -459,72 +612,32 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 sm:pt-6">
-                      {!player?.battingForm?.length ? (
-                        <EmptyState message="Batting form data not available" />
+                      {battingForm.length === 0 ? (
+                        <EmptyState message="Recent batting form data not available" />
                       ) : (
                         <div className="space-y-2 sm:space-y-3">
-                          {player.battingForm.map(
-                            (form: any, index: number) => (
-                              <div
+                          {battingForm.map(
+                            (form: RecentForm, index: number) => (
+                              <a
                                 key={index}
-                                className="p-3 bg-gradient-to-r from-white to-blue-50 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block p-3 bg-gradient-to-r from-white to-blue-50 rounded-lg border border-blue-200 hover:border-blue-300 hover:shadow-sm transition-all"
                               >
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
                                   <div className="min-w-0">
                                     <p className="font-medium text-gray-900 text-sm truncate">
                                       {form.match}
                                     </p>
-                                    <p className="text-xs text-gray-600">
-                                      {form.date}
-                                    </p>
                                   </div>
-                                  <div
-                                    className={`px-2 py-1 rounded ${getStatsColor(
-                                      parseFloat(form.sr || 0),
-                                      "batting"
-                                    )}`}
-                                  >
-                                    <span className="text-xs font-bold">
-                                      SR: {form.sr}
-                                    </span>
-                                  </div>
+                                  {form.score && (
+                                    <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs">
+                                      {form.score}
+                                    </Badge>
+                                  )}
                                 </div>
-                                <div className="grid grid-cols-4 gap-1 sm:gap-2 text-sm">
-                                  <div className="text-center p-1">
-                                    <div className="text-xs text-gray-500">
-                                      Runs
-                                    </div>
-                                    <div className="font-bold text-sm">
-                                      {form.run}
-                                    </div>
-                                  </div>
-                                  <div className="text-center p-1">
-                                    <div className="text-xs text-gray-500">
-                                      4s/6s
-                                    </div>
-                                    <div className="font-bold text-sm">
-                                      {form.fours_sixes}
-                                    </div>
-                                  </div>
-                                  <div className="text-center p-1">
-                                    <div className="text-xs text-gray-500">
-                                      Out
-                                    </div>
-                                    <div className="font-bold text-sm">
-                                      {form.out}
-                                    </div>
-                                  </div>
-                                  <div className="text-center p-1">
-                                    <div className="text-xs text-gray-500">
-                                      Balls
-                                    </div>
-                                    <div className="font-bold text-sm">
-                                      {form.balls}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )
+                              </a>
+                            ),
                           )}
                         </div>
                       )}
@@ -540,72 +653,32 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 sm:pt-6">
-                      {!player?.bowlingForm?.length ? (
-                        <EmptyState message="Bowling form data not available" />
+                      {bowlingForm.length === 0 ? (
+                        <EmptyState message="Recent bowling form data not available" />
                       ) : (
                         <div className="space-y-2 sm:space-y-3">
-                          {player.bowlingForm.map(
-                            (form: any, index: number) => (
-                              <div
+                          {bowlingForm.map(
+                            (form: RecentForm, index: number) => (
+                              <a
                                 key={index}
-                                className="p-3 bg-gradient-to-r from-white to-green-50 rounded-lg border border-green-200 hover:border-green-300 transition-colors"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block p-3 bg-gradient-to-r from-white to-green-50 rounded-lg border border-green-200 hover:border-green-300 hover:shadow-sm transition-all"
                               >
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
                                   <div className="min-w-0">
                                     <p className="font-medium text-gray-900 text-sm truncate">
                                       {form.match}
                                     </p>
-                                    <p className="text-xs text-gray-600">
-                                      {form.date}
-                                    </p>
                                   </div>
-                                  <div
-                                    className={`px-2 py-1 rounded ${getStatsColor(
-                                      parseFloat(form.eco || 10),
-                                      "bowling"
-                                    )}`}
-                                  >
-                                    <span className="text-xs font-bold">
-                                      Econ: {form.eco}
-                                    </span>
-                                  </div>
+                                  {form.score && (
+                                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs">
+                                      {form.score}
+                                    </Badge>
+                                  )}
                                 </div>
-                                <div className="grid grid-cols-4 gap-1 sm:gap-2 text-sm">
-                                  <div className="text-center p-1">
-                                    <div className="text-xs text-gray-500">
-                                      Overs
-                                    </div>
-                                    <div className="font-bold text-sm">
-                                      {form.o}
-                                    </div>
-                                  </div>
-                                  <div className="text-center p-1">
-                                    <div className="text-xs text-gray-500">
-                                      Wickets
-                                    </div>
-                                    <div className="font-bold text-sm">
-                                      {form.w}
-                                    </div>
-                                  </div>
-                                  <div className="text-center p-1">
-                                    <div className="text-xs text-gray-500">
-                                      Runs
-                                    </div>
-                                    <div className="font-bold text-sm">
-                                      {form.r}
-                                    </div>
-                                  </div>
-                                  <div className="text-center p-1">
-                                    <div className="text-xs text-gray-500">
-                                      Maidens
-                                    </div>
-                                    <div className="font-bold text-sm">
-                                      {form.maidens || 0}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )
+                              </a>
+                            ),
                           )}
                         </div>
                       )}
@@ -629,16 +702,29 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                       <div className="space-y-3 sm:space-y-4">
                         <InfoRow label="Full Name" value={player?.name} />
                         <InfoRow label="Role" value={player?.role} highlight />
-                        <InfoRow
-                          label="Batting Style"
-                          value={player?.batStyle}
-                        />
-                        <InfoRow
-                          label="Bowling Style"
-                          value={player?.bowlStyle || "N/A"}
-                        />
                         <InfoRow label="Short Name" value={player?.shortName} />
-                        <InfoRow label="Team" value={player?.team} />
+                        <InfoRow
+                          label="Wicket Keeper"
+                          value={player?.isWK ? "Yes" : "No"}
+                        />
+                        <InfoRow label="Style" value={player?.style} />
+                        <InfoRow
+                          label="Rank"
+                          value={player?.rank || "Not ranked"}
+                        />
+                        {player?.playerUrl && (
+                          <div className="pt-2">
+                            <a
+                              href={player.playerUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                            >
+                              <Globe className="h-4 w-4" />
+                              View Player Profile on Crex
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -654,41 +740,32 @@ const PlayerCard = ({ player }: PlayerCardProps) => {
                     <CardContent className="pt-4 sm:pt-6">
                       <div className="space-y-2 sm:space-y-3">
                         <DataStatus
-                          label="Batting Stats"
-                          available={!!player?.battingStats?.length}
+                          label="Career Batting Stats"
+                          available={battingStats.length > 0}
                         />
                         <DataStatus
-                          label="Bowling Stats"
-                          available={!!player?.bowlingStats?.length}
+                          label="Career Bowling Stats"
+                          available={bowlingStats.length > 0}
                         />
                         <DataStatus
-                          label="Batting Form"
-                          available={!!player?.battingForm?.length}
+                          label="Recent Batting Form"
+                          available={battingForm.length > 0}
                         />
                         <DataStatus
-                          label="Bowling Form"
-                          available={!!player?.bowlingForm?.length}
+                          label="Recent Bowling Form"
+                          available={bowlingForm.length > 0}
                         />
                         <DataStatus
-                          label="Overall Stats"
-                          available={
-                            !!player?.overallStats &&
-                            Object.keys(player.overallStats).length > 0
-                          }
+                          label="Player Rank"
+                          available={!!player?.rank}
                         />
                         <DataStatus
-                          label="Stadium Stats"
-                          available={
-                            !!player?.stadiumStats &&
-                            Object.keys(player.stadiumStats).length > 0
-                          }
+                          label="Player Image"
+                          available={!!player?.image}
                         />
                         <DataStatus
-                          label="Against Teams"
-                          available={
-                            !!player?.againstTeamsStats &&
-                            Object.keys(player.againstTeamsStats).length > 0
-                          }
+                          label="Player Profile URL"
+                          available={!!player?.playerUrl}
                         />
                       </div>
                     </CardContent>

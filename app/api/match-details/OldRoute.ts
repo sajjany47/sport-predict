@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     const squadList = rowSquadList.map((item: any) => {
       const matchedTeam = body.teams.find(
-        (elm: any) => elm.teamShortName === item.shortName
+        (elm: any) => elm.teamShortName === item.shortName,
       );
 
       return {
@@ -79,13 +79,13 @@ export async function POST(request: NextRequest) {
       name: string,
       stadiumName?: string,
       teamName?: string,
-      originalName?: string
+      originalName?: string,
     ) => {
       const playerData = await NewPlayerDetails(
         name,
         stadiumName || "",
         teamName || "",
-        originalName || ""
+        originalName || "",
       );
       return playerData;
     };
@@ -100,13 +100,13 @@ export async function POST(request: NextRequest) {
                   CleanName(elm?.name),
                   stadiumDetails?.name || "",
                   squadList[index === 0 ? 1 : 0].shortName,
-                  elm?.name
+                  elm?.name,
                 );
                 return {
                   ...elm,
                   ...playerData,
                 };
-              })
+              }),
             )
           : [];
 
@@ -117,13 +117,13 @@ export async function POST(request: NextRequest) {
                   elm.name,
                   stadiumDetails.name || "",
                   squadList[index === 0 ? 1 : 0].shortName,
-                  elm.name
+                  elm.name,
                 );
                 return {
                   ...elm,
                   ...playerData,
                 };
-              })
+              }),
             )
           : [];
 
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
           playingPlayer: playingPlayers,
           benchPlayer: benchPlayers,
         };
-      })
+      }),
     );
 
     // --- NEW: fetch team stats in a deduplicated, cached, fault-tolerant way ---
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
 
     // Kick off fetches for unique teams
     const uniqueTeamNames = Array.from(uniqueTeamNameMap.values()).map(
-      (v) => v.teamName
+      (v) => v.teamName,
     );
 
     const fetchPromises = uniqueTeamNames.map(async (name) => {
@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
         // We don't have the team name here; skip - nothing to set
         console.error(
           "Unexpected rejection while fetching team stats:",
-          payload
+          payload,
         );
       }
     }
@@ -352,12 +352,12 @@ export async function POST(request: NextRequest) {
           crexOverallStats: crexOverallStats,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: any) {
     return Response.json(
       { success: false, error: FormatErrorMessage(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -15,36 +15,31 @@ import {
   Trophy,
   Calendar,
   MapPin,
-  TrendingUp,
   BarChart3,
   Clock,
   Zap,
   ArrowLeft,
   Users,
-  Target,
   Activity,
   Radio,
   Home,
   Shield,
   Star,
-  Award,
-  Flame,
-  TargetIcon,
 } from "lucide-react";
 
 import CustomLoader from "@/components/ui/CustomLoader";
 import AIPredictionModal from "./ai-prediction-modal";
 import { FetchMatchDetails } from "../MatchService";
 import toast from "react-hot-toast";
-import OverviewTab from "./OverviewTab";
 import CrexOverviewTab from "./CrexOverviewTab";
 import PlayerCard from "./SquadDialoge";
+import { DummyData } from "@/lib/DummyData";
 
 const MatchDetailsPage = () => {
   const params = useParams();
   const router = useRouter();
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
   const { selectedMatch } = useSelector((state: RootState) => state.matches);
   const [matchData, setMatchData] = useState<any>(null);
@@ -71,28 +66,8 @@ const MatchDetailsPage = () => {
         router.push("/matches");
         setIsLoading(false);
       });
+    // setMatchData({ ...DummyData });
   }, [params.id, selectedMatch, router]);
-
-  // Parse score function
-  const parseScore = (scoreString: string) => {
-    const match = scoreString.match(/(\d+)(?:\(([\d.]+)\))?/);
-    if (match) {
-      return {
-        runs: parseInt(match[1]),
-        overs: match[2] || "0",
-      };
-    }
-    return { runs: 0, overs: "0" };
-  };
-
-  // Get team score
-  const getTeamScore = (teamShortName: string) => {
-    if (!matchData?.matchInfo?.score?.score) return null;
-    const scoreEntry = matchData.matchInfo.score.score.find(
-      (s: any) => s.team === teamShortName
-    );
-    return scoreEntry ? parseScore(scoreEntry.run) : null;
-  };
 
   const handleGetPrediction = () => {
     if (!isAuthenticated) {
@@ -106,27 +81,6 @@ const MatchDetailsPage = () => {
     setIsPredictionModalOpen(true);
   };
 
-  // Format time
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
-  // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   // Get match status color
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -134,7 +88,7 @@ const MatchDetailsPage = () => {
         return "bg-red-500 text-white animate-pulse";
       case "COMPLETED":
         return "bg-green-500 text-white";
-      case "NOT_STARTED":
+      case "UPCOMING":
         return "bg-blue-500 text-white";
       case "ABANDONED":
         return "bg-gray-500 text-white";
@@ -162,8 +116,6 @@ const MatchDetailsPage = () => {
 
   const team1 = matchData.matchInfo.teams[0];
   const team2 = matchData.matchInfo.teams[1];
-  const team1Score = getTeamScore(team1.teamShortName);
-  const team2Score = getTeamScore(team2.teamShortName);
   const matchStatus = matchData.matchInfo.status;
 
   return (
@@ -191,7 +143,7 @@ const MatchDetailsPage = () => {
                   <div className="flex items-center gap-3 mb-3">
                     <Trophy className="h-5 w-5 text-yellow-300" />
                     <h1 className="text-2xl md:text-3xl font-bold text-white">
-                      {matchData.matchInfo.tourName}
+                      {matchData.matchInfo.matchDescription}
                     </h1>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
@@ -200,13 +152,13 @@ const MatchDetailsPage = () => {
                     </Badge>
                     <Badge
                       className={`px-4 py-1.5 font-bold ${getStatusColor(
-                        matchStatus
+                        matchStatus,
                       )}`}
                     >
                       {matchStatus === "LIVE" && (
                         <Activity className="h-3 w-3 mr-1 animate-pulse" />
                       )}
-                      {matchStatus === "NOT_STARTED" ? "UPCOMING" : matchStatus}
+                      {matchStatus}
                     </Badge>
                     <span className="text-white/90 text-sm">
                       {matchData.matchInfo.matchDescription}
@@ -253,31 +205,11 @@ const MatchDetailsPage = () => {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      {team1.isWinner && (
-                        <div className="absolute -top-2 -right-2">
-                          <Award className="h-8 w-8 text-yellow-500 fill-yellow-500/20" />
-                        </div>
-                      )}
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-1">
                       {team1.teamName}
                     </h3>
                     <p className="text-gray-600 mb-4">{team1.teamShortName}</p>
-
-                    {team1Score && (
-                      <div className="space-y-2">
-                        <div className="text-4xl font-bold text-blue-600">
-                          {team1Score.runs}
-                          <span className="text-lg text-gray-500 ml-2">
-                            runs
-                          </span>
-                        </div>
-                        <div className="text-gray-600">
-                          <TargetIcon className="h-4 w-4 inline mr-1" />
-                          {team1Score.overs} overs
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* VS & Match Info - Desktop */}
@@ -311,13 +243,13 @@ const MatchDetailsPage = () => {
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <Calendar className="h-5 w-5 text-blue-600 mx-auto mb-2" />
                         <p className="text-sm font-medium text-gray-700">
-                          {formatDate(matchData.matchInfo.startTime)}
+                          {matchData.matchInfo.matchDate}
                         </p>
                       </div>
                       <div className="p-3 bg-purple-50 rounded-lg">
                         <Clock className="h-5 w-5 text-purple-600 mx-auto mb-2" />
                         <p className="text-sm font-medium text-gray-700">
-                          {formatTime(matchData.matchInfo.startTime)}
+                          {matchData.matchInfo.startTime}
                         </p>
                       </div>
                     </div>
@@ -333,31 +265,11 @@ const MatchDetailsPage = () => {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      {team2.isWinner && (
-                        <div className="absolute -top-2 -right-2">
-                          <Award className="h-8 w-8 text-yellow-500 fill-yellow-500/20" />
-                        </div>
-                      )}
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-1">
                       {team2.teamName}
                     </h3>
                     <p className="text-gray-600 mb-4">{team2.teamShortName}</p>
-
-                    {team2Score && (
-                      <div className="space-y-2">
-                        <div className="text-4xl font-bold text-red-600">
-                          {team2Score.runs}
-                          <span className="text-lg text-gray-500 ml-2">
-                            runs
-                          </span>
-                        </div>
-                        <div className="text-gray-600">
-                          <TargetIcon className="h-4 w-4 inline mr-1" />
-                          {team2Score.overs} overs
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -384,16 +296,6 @@ const MatchDetailsPage = () => {
                           {team1.teamName}
                         </p>
                       </div>
-                      {team1Score && (
-                        <div className="mt-1">
-                          <div className="text-lg font-bold text-blue-600">
-                            {team1Score.runs}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {team1Score.overs} ov
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     {/* VS Separator */}
@@ -430,16 +332,6 @@ const MatchDetailsPage = () => {
                           {team2.teamName}
                         </p>
                       </div>
-                      {team2Score && (
-                        <div className="mt-1">
-                          <div className="text-lg font-bold text-red-600">
-                            {team2Score.runs}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {team2Score.overs} ov
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -450,7 +342,7 @@ const MatchDetailsPage = () => {
                       <div className="text-left">
                         <p className="text-xs text-gray-500">Date</p>
                         <p className="text-sm font-medium text-gray-700">
-                          {formatDate(matchData.matchInfo.startTime)}
+                          {matchData.matchInfo.matchDate}
                         </p>
                       </div>
                     </div>
@@ -459,7 +351,7 @@ const MatchDetailsPage = () => {
                       <div className="text-left">
                         <p className="text-xs text-gray-500">Time</p>
                         <p className="text-sm font-medium text-gray-700">
-                          {formatTime(matchData.matchInfo.startTime)}
+                          {matchData.matchInfo.startTime}
                         </p>
                       </div>
                     </div>
@@ -479,64 +371,7 @@ const MatchDetailsPage = () => {
                     <div>
                       <p className="text-sm text-gray-500">Venue</p>
                       <p className="font-medium text-gray-900 text-sm md:text-base">
-                        {matchData.matchInfo.venue.ground}
-                      </p>
-                      <p className="text-xs md:text-sm text-gray-600">
-                        {matchData.matchInfo.venue.city},{" "}
-                        {matchData.matchInfo.venue.country}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border border-gray-200 shadow-sm">
-                  <CardContent className="p-4 flex items-center space-x-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Home className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Tournament</p>
-                      <p className="font-medium text-gray-900 text-sm md:text-base">
-                        {matchData.matchInfo.tour}
-                      </p>
-                      <p className="text-xs md:text-sm text-gray-600">
-                        {matchData.matchInfo.format}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border border-gray-200 shadow-sm">
-                  <CardContent className="p-4 flex items-center space-x-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <Shield className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Match Status</p>
-                      <p className="font-medium text-gray-900 text-sm md:text-base">
-                        {matchData.matchInfo.status === "NOT_STARTED"
-                          ? "UPCOMING"
-                          : matchData.matchInfo.status}
-                      </p>
-                      <p className="text-xs md:text-sm text-gray-600">
-                        {matchData.matchInfo.format}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border border-gray-200 shadow-sm">
-                  <CardContent className="p-4 flex items-center space-x-3">
-                    <div className="p-2 bg-amber-100 rounded-lg">
-                      <Clock className="h-6 w-6 text-amber-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Timezone</p>
-                      <p className="font-medium text-gray-900 text-sm md:text-base">
-                        GMT {matchData.matchInfo.venue.timezone}
-                      </p>
-                      <p className="text-xs md:text-sm text-gray-600">
-                        Local Time
+                        {matchData.venueDetails.name}
                       </p>
                     </div>
                   </CardContent>
@@ -557,7 +392,7 @@ const MatchDetailsPage = () => {
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger
                       value="overview"
-                      className=" text-xs md:text-sm"
+                      className="text-xs md:text-sm"
                     >
                       <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
                       <span className="hidden sm:inline">Overview</span>
@@ -579,8 +414,8 @@ const MatchDetailsPage = () => {
                   </TabsList>
 
                   <TabsContent value="overview" className="mt-6">
-                    {matchData.crexOverallStats ? (
-                      <CrexOverviewTab matchData={matchData.crexOverallStats} />
+                    {matchData ? (
+                      <CrexOverviewTab matchData={matchData} />
                     ) : (
                       <div className="text-center py-8">
                         <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -596,15 +431,15 @@ const MatchDetailsPage = () => {
                   </TabsContent>
 
                   <TabsContent value="squads" className="mt-6">
-                    {matchData?.squadList ? (
-                      matchData.squadList.map((squad: any) => (
-                        <Card key={squad.shortName} className="mb-6">
+                    {matchData?.squads ? (
+                      matchData.squads.map((squad: any) => (
+                        <Card key={squad.teamName} className="mb-6">
                           <CardHeader className="bg-gradient-to-r from-gray-50 to-white p-4">
                             <CardTitle className="flex items-center space-x-3">
                               <div className="relative">
                                 <img
                                   src={squad.flag}
-                                  alt={squad.shortName}
+                                  alt={squad.teamName}
                                   className="w-8 h-8 md:w-10 md:h-10 rounded-full"
                                 />
                                 <div className="absolute -bottom-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-blue-500 rounded-full flex items-center justify-center">
@@ -613,10 +448,10 @@ const MatchDetailsPage = () => {
                               </div>
                               <div>
                                 <span className="text-lg md:text-xl font-bold">
-                                  {squad.shortName} Squad
+                                  {squad.teamName} Squad
                                 </span>
                                 <p className="text-xs md:text-sm text-gray-500">
-                                  {squad.fullName}
+                                  {squad.teamName}
                                 </p>
                               </div>
                             </CardTitle>
@@ -632,7 +467,7 @@ const MatchDetailsPage = () => {
                                     <Users className="h-3 w-3 md:h-4 md:w-4" />
                                     <span>
                                       Playing (
-                                      {squad.playingPlayer?.length || 0})
+                                      {squad.playingPlayers?.length || 0})
                                     </span>
                                   </div>
                                 </TabsTrigger>
@@ -643,23 +478,23 @@ const MatchDetailsPage = () => {
                                   <div className="flex items-center gap-2">
                                     <Users className="h-3 w-3 md:h-4 md:w-4" />
                                     <span>
-                                      Bench ({squad.benchPlayer?.length || 0})
+                                      Bench ({squad.benchPlayers?.length || 0})
                                     </span>
                                   </div>
                                 </TabsTrigger>
                               </TabsList>
 
                               <TabsContent value="playing" className="mt-4">
-                                {squad.playingPlayer &&
-                                squad.playingPlayer.length > 0 ? (
+                                {squad.playingPlayers &&
+                                squad.playingPlayers.length > 0 ? (
                                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 md:gap-4">
-                                    {squad.playingPlayer.map(
+                                    {squad.playingPlayers.map(
                                       (player: any, index: number) => (
                                         <PlayerCard
                                           key={index}
                                           player={player}
                                         />
-                                      )
+                                      ),
                                     )}
                                   </div>
                                 ) : (
@@ -673,22 +508,19 @@ const MatchDetailsPage = () => {
                               </TabsContent>
 
                               <TabsContent value="bench" className="mt-4">
-                                {squad.benchPlayer &&
-                                squad.benchPlayer.length > 0 ? (
+                                {squad.benchPlayers &&
+                                squad.benchPlayers.length > 0 ? (
                                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
-                                    {squad.benchPlayer.map(
+                                    {squad.benchPlayers.map(
                                       (player: any, index: any) => (
                                         <PlayerCard
                                           key={index}
                                           player={player}
                                         />
-                                      )
+                                      ),
                                     )}
                                   </div>
                                 ) : (
-                                  // <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                                  //   <SquadDialoge data={squad.benchPlayer} />
-                                  // </div>
                                   <div className="text-center py-6">
                                     <Users className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mx-auto mb-3" />
                                     <p className="text-gray-500 text-sm">
@@ -722,19 +554,19 @@ const MatchDetailsPage = () => {
                           <span className="text-lg md:text-xl">
                             Stadium Analysis:{" "}
                             <span className="text-blue-600">
-                              {matchData.matchInfo.venue.ground}
+                              {matchData.venueDetails.name}
                             </span>
                           </span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-4 md:p-6">
-                        {matchData?.stadiumStats ? (
+                        {matchData?.venueDetails.recentMatches ? (
                           <div className="space-y-6">
                             <h3 className="font-semibold text-lg">
                               Recent Matches at this Venue
                             </h3>
                             <div className="space-y-3">
-                              {matchData.stadiumStats
+                              {matchData.venueDetails.recentMatches
                                 .slice(0, 10)
                                 .map((match: any, index: number) => (
                                   <div
@@ -744,28 +576,30 @@ const MatchDetailsPage = () => {
                                     <div className="flex justify-between items-start mb-2">
                                       <div className="flex-1">
                                         <p className="font-medium text-gray-900 text-sm md:text-base">
-                                          {match.matchTitle}
+                                          {match.series}
                                         </p>
                                         <p className="text-xs md:text-sm text-gray-600">
-                                          {match.date}
+                                          {match.result}
                                         </p>
                                       </div>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-sm">
                                       <div className="p-2 bg-blue-50 rounded">
                                         <div className="font-medium text-blue-700 text-xs md:text-sm">
-                                          Team 1
+                                          {match.team1}
                                         </div>
                                         <div className="text-gray-700 text-sm md:text-base">
-                                          {match.inn1Score}
+                                          {match.team1Score} ({match.team1Overs}
+                                          )
                                         </div>
                                       </div>
                                       <div className="p-2 bg-red-50 rounded">
                                         <div className="font-medium text-red-700 text-xs md:text-sm">
-                                          Team 2
+                                          {match.team2}
                                         </div>
                                         <div className="text-gray-700 text-sm md:text-base">
-                                          {match.inn2Score}
+                                          {match.team2Score} ({match.team2Overs}
+                                          )
                                         </div>
                                       </div>
                                     </div>

@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Trophy,
   TrendingUp,
@@ -10,16 +9,15 @@ import {
   Target,
   Users,
   Award,
-  Flame,
   Home,
-  Shield,
 } from "lucide-react";
 
-interface Team {
+interface TeamFormData {
   teamId: string;
   teamName: string;
   teamFlag: string;
-  recent5: Match[];
+  last5: string[];
+  matches: Match[];
 }
 
 interface Match {
@@ -27,38 +25,65 @@ interface Match {
   series: string;
   result: string;
   teams: {
-    team: string;
+    name: string;
     score: string;
     overs: string;
     flag: string;
   }[];
-  url: string;
+  matchUrl: string;
 }
 
-interface H2HMatch {
+interface H2HData {
   team1: {
     name: string;
-    score: string;
-    overs: string;
+    logo: string;
+    wins: number;
   };
   team2: {
     name: string;
-    score: string;
-    overs: string;
+    logo: string;
+    wins: number;
   };
-  result: string;
-  series: string;
-  url: string;
+  matches: H2HMatch[];
 }
 
-interface PointsTable {
+interface H2HMatch {
+  matchUrl: string;
+  team1: string;
+  team1Score: string;
+  team1Overs: string;
+  team2: string;
+  team2Score: string;
+  team2Overs: string;
+  result: string;
+  series: string;
+}
+
+interface PointsTableData {
   team: string;
-  flag: string;
-  played: string;
-  won: string;
-  lost: string;
+  logo: string | null;
+  played: number | null;
+  wins: number | null;
+  losses: number | null;
   nrr: string;
-  points: string;
+  points: number;
+}
+
+interface ComparisonData {
+  teams: {
+    team1: {
+      name: string;
+      logo: string;
+    };
+    team2: {
+      name: string;
+      logo: string;
+    };
+  };
+  comparison: {
+    overall: TeamComparison[];
+    venue: TeamComparison[];
+  };
 }
 
 interface TeamComparison {
@@ -67,43 +92,90 @@ interface TeamComparison {
   team2: string;
 }
 
+interface VenueDetails {
+  name: string;
+  weather: {
+    temperature: string;
+    condition: string;
+    humidity: string;
+    rainChance: string;
+  };
+  stats: {
+    matches: string;
+    winBatFirst: string;
+    winBowlFirst: string;
+    avg1stInns: string;
+    avg2ndInns: string;
+  };
+  records: {
+    "Highest Total": {
+      vs: string;
+      score: string;
+    };
+    "Lowest Total": {
+      vs: string;
+      score: string;
+    };
+    "Highest Chased": {
+      vs: string;
+      score: string;
+    };
+    "Lowest Defended": {
+      vs: string;
+      score: string;
+    };
+  };
+  paceVsSpin: {
+    paceWickets: string;
+    spinWickets: string;
+    pacePercent: string;
+    spinPercent: string;
+  };
+  recentMatches: VenueMatch[];
+}
+
+interface VenueMatch {
+  team1: string;
+  team1Score: string;
+  team1Overs: string;
+  team2: string;
+  team2Score: string;
+  team2Overs: string;
+  result: string;
+  series: string;
+  url: string;
+}
+
 interface OverviewTabProps {
   matchData: {
-    teams: Team[];
-    h2h: H2HMatch[];
-    pointsTable: PointsTable[];
-    teamComparison: TeamComparison[];
-    venueRecentMatches?: any[];
+    teamForm: TeamFormData[];
+    h2h: H2HData;
+    pointsTable: PointsTableData[];
+    comparision: ComparisonData;
+    venueDetails: VenueDetails;
   };
 }
 
 const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
-  const team1 = matchData.teams[0];
-  const team2 = matchData.teams[1];
+  const team1Data = matchData.teamForm[0];
+  const team2Data = matchData.teamForm[1];
 
-  // Calculate form from recent5 matches
-  const calculateForm = (team: Team) => {
-    return team.recent5.map((match) => {
-      const result = match.result;
+  // Calculate form from last5 matches
+  const calculateForm = (team: TeamFormData) => {
+    return team.last5.slice(1).map((result) => {
       if (result === "W") return "win";
       if (result === "L") return "loss";
       return "draw";
     });
   };
 
-  // Calculate H2H stats
-  const calculateH2HStats = () => {
-    let team1Wins = 0;
-    let team2Wins = 0;
-    let draws = 0;
-
-    matchData.h2h.forEach((match) => {
-      if (match.result.includes(team1.teamId)) team1Wins++;
-      else if (match.result.includes(team2.teamId)) team2Wins++;
-      else draws++;
-    });
-
-    return { team1Wins, team2Wins, draws };
+  // Get H2H stats
+  const getH2HStats = () => {
+    return {
+      team1Wins: matchData.h2h.team1.wins,
+      team2Wins: matchData.h2h.team2.wins,
+      draws: 0, // Assuming no draws in the provided data
+    };
   };
 
   // Get points table data
@@ -111,28 +183,21 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
     return matchData.pointsTable.find((pt) => pt.team === teamId);
   };
 
-  const team1Form = calculateForm(team1);
-  const team2Form = calculateForm(team2);
-  const h2hStats = calculateH2HStats();
-  const team1Points = getPointsTableData(team1.teamId);
-  const team2Points = getPointsTableData(team2.teamId);
+  const team1Form = calculateForm(team1Data);
+  const team2Form = calculateForm(team2Data);
+  const h2hStats = getH2HStats();
+  const team1Points = getPointsTableData(team1Data.teamId);
+  const team2Points = getPointsTableData(team2Data.teamId);
 
   // Calculate win percentages for comparison
-  const calculateWinPercentage = (team: Team) => {
-    const wins = team.recent5.filter((m) => m.result === "W").length;
-    return Math.round((wins / team.recent5.length) * 100);
+  const calculateWinPercentage = (team: TeamFormData) => {
+    const wins = team.last5.slice(1).filter((m) => m === "W").length;
+    return Math.round((wins / (team.last5.length - 1)) * 100);
   };
 
   // Calculate wins in last 5 matches
-  const calculateWinsInLast5 = (team: Team) => {
-    return team.recent5.filter((m) => m.result === "W").length;
-  };
-
-  const getNumericValue = (value: string): number => {
-    if (value.includes("%")) {
-      return parseInt(value);
-    }
-    return 0;
+  const calculateWinsInLast5 = (team: TeamFormData) => {
+    return team.last5.slice(1).filter((m) => m === "W").length;
   };
 
   // Define metrics with icons and colors
@@ -180,17 +245,19 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
             <div className="flex flex-col items-center text-center space-y-3 flex-1">
               <div className="relative">
                 <img
-                  src={team1.teamFlag}
-                  alt={team1.teamName}
+                  src={team1Data.teamFlag}
+                  alt={team1Data.teamName}
                   className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white shadow-lg"
                 />
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
                   <Badge className="bg-blue-600 text-xs px-2 py-1">
-                    {team1.teamId}
+                    {team1Data.teamId}
                   </Badge>
                 </div>
               </div>
-              <h2 className="text-lg md:text-xl font-bold">{team1.teamName}</h2>
+              <h2 className="text-lg md:text-xl font-bold">
+                {team1Data.teamName}
+              </h2>
               {team1Points && (
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -223,24 +290,28 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                   {h2hStats.team2Wins}
                 </span>
               </div>
-              <p className="text-xs text-gray-400">Last 5 meetings</p>
+              <p className="text-xs text-gray-400">
+                Last {matchData.h2h.matches.length} meetings
+              </p>
             </div>
 
             {/* Team 2 */}
             <div className="flex flex-col items-center text-center space-y-3 flex-1">
               <div className="relative">
                 <img
-                  src={team2.teamFlag}
-                  alt={team2.teamName}
+                  src={team2Data.teamFlag}
+                  alt={team2Data.teamName}
                   className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white shadow-lg"
                 />
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
                   <Badge className="bg-red-600 text-xs px-2 py-1">
-                    {team2.teamId}
+                    {team2Data.teamId}
                   </Badge>
                 </div>
               </div>
-              <h2 className="text-lg md:text-xl font-bold">{team2.teamName}</h2>
+              <h2 className="text-lg md:text-xl font-bold">
+                {team2Data.teamName}
+              </h2>
               {team2Points && (
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -264,18 +335,18 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
               <div className="flex flex-col items-center text-center flex-1">
                 <div className="relative mb-2">
                   <img
-                    src={team1.teamFlag}
-                    alt={team1.teamName}
+                    src={team1Data.teamFlag}
+                    alt={team1Data.teamName}
                     className="w-12 h-12 rounded-full border-2 border-white shadow-md"
                   />
                   <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-blue-600 text-[10px] px-1 py-0.5">
-                      {team1.teamId}
+                      {team1Data.teamId}
                     </Badge>
                   </div>
                 </div>
                 <h3 className="text-xs font-bold text-gray-900 truncate max-w-[80px]">
-                  {team1.teamName}
+                  {team1Data.teamName}
                 </h3>
                 {team1Points && (
                   <div className="mt-1">
@@ -310,18 +381,18 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
               <div className="flex flex-col items-center text-center flex-1">
                 <div className="relative mb-2">
                   <img
-                    src={team2.teamFlag}
-                    alt={team2.teamName}
+                    src={team2Data.teamFlag}
+                    alt={team2Data.teamName}
                     className="w-12 h-12 rounded-full border-2 border-white shadow-md"
                   />
                   <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-red-600 text-[10px] px-1 py-0.5">
-                      {team2.teamId}
+                      {team2Data.teamId}
                     </Badge>
                   </div>
                 </div>
                 <h3 className="text-xs font-bold text-gray-900 truncate max-w-[80px]">
-                  {team2.teamName}
+                  {team2Data.teamName}
                 </h3>
                 {team2Points && (
                   <div className="mt-1">
@@ -372,22 +443,22 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <img
-                    src={team1.teamFlag}
-                    alt={team1.teamName}
+                    src={team1Data.teamFlag}
+                    alt={team1Data.teamName}
                     className="w-8 h-8 rounded-full"
                   />
                   <div>
                     <span className="font-semibold text-base">
-                      {team1.teamName}
+                      {team1Data.teamName}
                     </span>
-                    <p className="text-sm text-gray-500">{team1.teamId}</p>
+                    <p className="text-sm text-gray-500">{team1Data.teamId}</p>
                   </div>
                 </div>
                 <Badge
                   variant="outline"
                   className="bg-green-50 text-green-700 border-green-200"
                 >
-                  Win Rate: {calculateWinPercentage(team1)}%
+                  Win Rate: {calculateWinPercentage(team1Data)}%
                 </Badge>
               </div>
 
@@ -400,8 +471,8 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                       form === "win"
                         ? "bg-green-500 text-white"
                         : form === "loss"
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-400 text-white"
+                          ? "bg-red-500 text-white"
+                          : "bg-gray-400 text-white"
                     }`}
                   >
                     {form === "win" ? "W" : form === "loss" ? "L" : "D"}
@@ -419,12 +490,12 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                     </span>
                   </div>
                   <span className="font-bold text-lg text-blue-700">
-                    {calculateWinsInLast5(team1)} Wins
+                    {calculateWinsInLast5(team1Data)} Wins
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">
-                  {calculateWinsInLast5(team1)} wins,{" "}
-                  {5 - calculateWinsInLast5(team1)} losses in last 5 matches
+                  {calculateWinsInLast5(team1Data)} wins,{" "}
+                  {5 - calculateWinsInLast5(team1Data)} losses in last 5 matches
                 </p>
               </div>
             </div>
@@ -434,22 +505,22 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <img
-                    src={team2.teamFlag}
-                    alt={team2.teamName}
+                    src={team2Data.teamFlag}
+                    alt={team2Data.teamName}
                     className="w-8 h-8 rounded-full"
                   />
                   <div>
                     <span className="font-semibold text-base">
-                      {team2.teamName}
+                      {team2Data.teamName}
                     </span>
-                    <p className="text-sm text-gray-500">{team2.teamId}</p>
+                    <p className="text-sm text-gray-500">{team2Data.teamId}</p>
                   </div>
                 </div>
                 <Badge
                   variant="outline"
                   className="bg-green-50 text-green-700 border-green-200"
                 >
-                  Win Rate: {calculateWinPercentage(team2)}%
+                  Win Rate: {calculateWinPercentage(team2Data)}%
                 </Badge>
               </div>
 
@@ -462,8 +533,8 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                       form === "win"
                         ? "bg-green-500 text-white"
                         : form === "loss"
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-400 text-white"
+                          ? "bg-red-500 text-white"
+                          : "bg-gray-400 text-white"
                     }`}
                   >
                     {form === "win" ? "W" : form === "loss" ? "L" : "D"}
@@ -481,12 +552,12 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                     </span>
                   </div>
                   <span className="font-bold text-lg text-red-700">
-                    {calculateWinsInLast5(team2)} Wins
+                    {calculateWinsInLast5(team2Data)} Wins
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">
-                  {calculateWinsInLast5(team2)} wins,{" "}
-                  {5 - calculateWinsInLast5(team2)} losses in last 5 matches
+                  {calculateWinsInLast5(team2Data)} wins,{" "}
+                  {5 - calculateWinsInLast5(team2Data)} losses in last 5 matches
                 </p>
               </div>
             </div>
@@ -501,12 +572,12 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
           <div className="flex justify-between items-center mb-8">
             <div className="flex flex-col items-center gap-1">
               <img
-                src={team1.teamFlag}
-                alt={team1.teamName}
+                src={team1Data.teamFlag}
+                alt={team1Data.teamName}
                 className="w-10 h-10 rounded-full"
               />
               <div className="font-bold text-lg text-blue-600">
-                {team1.teamId}
+                {team1Data.teamId}
               </div>
               <div className="text-xs text-gray-500">vs all teams</div>
             </div>
@@ -515,17 +586,17 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
               <div className="text-lg font-bold text-gray-600">
                 Team Comparison
               </div>
-              <div className="text-sm text-gray-400">Last 10 Matches</div>
+              <div className="text-sm text-gray-400">Overall Stats</div>
             </div>
 
             <div className="flex flex-col items-center gap-1">
               <img
-                src={team2.teamFlag}
-                alt={team2.teamName}
+                src={team2Data.teamFlag}
+                alt={team2Data.teamName}
                 className="w-10 h-10 rounded-full"
               />
               <div className="font-bold text-lg text-red-600">
-                {team2.teamId}
+                {team2Data.teamId}
               </div>
               <div className="text-xs text-gray-500">vs all teams</div>
             </div>
@@ -533,7 +604,7 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
 
           {/* Comparison Metrics - Simple Table */}
           <div className="space-y-6">
-            {matchData.teamComparison.map((item, index) => {
+            {matchData.comparision.comparison.overall.map((item, index) => {
               const metric = metrics.find((m) => m.key === item.metric);
               if (!metric) return null;
 
@@ -615,64 +686,81 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {matchData.pointsTable.map((team, index) => (
-                <div
-                  key={index}
-                  className={`p-4 rounded-lg border ${
-                    team.team === team1.teamId
-                      ? "border-blue-200 bg-gradient-to-r from-blue-50 to-white"
-                      : team.team === team2.teamId
-                      ? "border-red-200 bg-gradient-to-r from-red-50 to-white"
-                      : "border-gray-200"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <img
-                          src={team.flag}
-                          alt={team.team}
-                          className="w-10 h-10"
-                        />
-                        <div
-                          className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-                            team.team === team1.teamId
-                              ? "bg-blue-500 text-white"
-                              : team.team === team2.teamId
-                              ? "bg-red-500 text-white"
-                              : "bg-gray-500 text-white"
-                          }`}
-                        >
-                          {index + 1}
+              {matchData.pointsTable
+                .filter(
+                  (team) =>
+                    team.team === team1Data.teamId ||
+                    team.team === team2Data.teamId,
+                )
+                .map((team, index) => (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border ${
+                      team.team === team1Data.teamId
+                        ? "border-blue-200 bg-gradient-to-r from-blue-50 to-white"
+                        : team.team === team2Data.teamId
+                          ? "border-red-200 bg-gradient-to-r from-red-50 to-white"
+                          : "border-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          {team.logo ? (
+                            <img
+                              src={team.logo}
+                              alt={team.team}
+                              className="w-10 h-10"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                              <span className="text-xs font-bold">
+                                {team.team}
+                              </span>
+                            </div>
+                          )}
+                          <div
+                            className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                              team.team === team1Data.teamId
+                                ? "bg-blue-500 text-white"
+                                : team.team === team2Data.teamId
+                                  ? "bg-red-500 text-white"
+                                  : "bg-gray-500 text-white"
+                            }`}
+                          >
+                            {index + 1}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="font-bold">{team.team}</p>
+                          {team.played !== null && (
+                            <p className="text-sm text-gray-500">
+                              {team.wins}W - {team.losses}L ({team.played}{" "}
+                              played)
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <div>
-                        <p className="font-bold">{team.team}</p>
-                        <p className="text-sm text-gray-500">
-                          {team.won}W - {team.lost}L ({team.played} played)
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold">{team.points}</p>
-                      <p className="text-sm text-gray-500">Points</p>
-                      <div className="mt-1">
-                        <Badge
-                          className={`text-xs ${
-                            parseFloat(team.nrr) > 0
-                              ? "bg-green-100 text-green-800"
-                              : parseFloat(team.nrr) < 0
-                              ? "bg-red-100 text-red-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          NRR: {team.nrr}
-                        </Badge>
+                      <div className="text-right">
+                        <p className="text-xl font-bold">{team.points}</p>
+                        <p className="text-sm text-gray-500">Points</p>
+                        <div className="mt-1">
+                          <Badge
+                            className={`text-xs ${
+                              team.nrr && parseFloat(team.nrr) > 0
+                                ? "bg-green-100 text-green-800"
+                                : team.nrr && parseFloat(team.nrr) < 0
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {team.nrr ? `NRR: ${team.nrr}` : "No NRR"}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </CardContent>
         </Card>
@@ -693,7 +781,7 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                     {h2hStats.team1Wins}
                   </div>
                   <div className="text-sm font-medium text-gray-700">
-                    {team1.teamId} Wins
+                    {team1Data.teamId} Wins
                   </div>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -707,7 +795,7 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                     {h2hStats.team2Wins}
                   </div>
                   <div className="text-sm font-medium text-gray-700">
-                    {team2.teamId} Wins
+                    {team2Data.teamId} Wins
                   </div>
                 </div>
               </div>
@@ -716,7 +804,7 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                 <p className="font-semibold text-sm text-gray-700">
                   Recent Head to Head Matches:
                 </p>
-                {matchData.h2h.slice(0, 3).map((match, index) => (
+                {matchData.h2h.matches.slice(0, 3).map((match, index) => (
                   <div
                     key={index}
                     className="p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border-l-4 border-purple-500 shadow-sm"
@@ -726,47 +814,47 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                       <div className="flex items-center gap-2">
                         <span
                           className={`text-sm font-bold ${
-                            match.result.includes(team1.teamId)
+                            match.result.includes(team1Data.teamId)
                               ? "text-blue-600"
                               : "text-gray-700"
                           }`}
                         >
-                          {match.team1.name}
+                          {match.team1}
                         </span>
                         <span className="text-sm font-medium">
-                          {match.team1.score}
+                          {match.team1Score}
                         </span>
                       </div>
                       <div className="text-xs font-bold text-gray-400">VS</div>
                       <div className="flex items-center gap-2">
                         <span
                           className={`text-sm font-bold ${
-                            match.result.includes(team2.teamId)
+                            match.result.includes(team2Data.teamId)
                               ? "text-red-600"
                               : "text-gray-700"
                           }`}
                         >
-                          {match.team2.name}
+                          {match.team2}
                         </span>
                         <span className="text-sm font-medium">
-                          {match.team2.score}
+                          {match.team2Score}
                         </span>
                       </div>
                     </div>
                     <div className="mt-2 flex items-center justify-between">
                       <Badge
                         className={`text-xs ${
-                          match.result.includes(team1.teamId)
+                          match.result.includes(team1Data.teamId)
                             ? "bg-blue-100 text-blue-800"
-                            : match.result.includes(team2.teamId)
-                            ? "bg-red-100 text-red-800"
-                            : "bg-gray-100 text-gray-800"
+                            : match.result.includes(team2Data.teamId)
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-800"
                         }`}
                       >
                         {match.result}
                       </Badge>
                       <span className="text-xs text-gray-500">
-                        {match.team1.overs}
+                        {match.team1Overs}
                       </span>
                     </div>
                   </div>
@@ -791,23 +879,23 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
             <div>
               <div className="flex items-center gap-3 mb-4 p-3 bg-gradient-to-r from-blue-50 to-white rounded-lg">
                 <img
-                  src={team1.teamFlag}
-                  alt={team1.teamName}
+                  src={team1Data.teamFlag}
+                  alt={team1Data.teamName}
                   className="w-8 h-8 rounded-full"
                 />
                 <div>
-                  <h3 className="font-bold">{team1.teamName}</h3>
+                  <h3 className="font-bold">{team1Data.teamName}</h3>
                   <p className="text-xs text-gray-500">
                     Last 5 matches performance
                   </p>
                 </div>
                 <Badge className="ml-auto bg-blue-100 text-blue-800">
-                  {calculateWinsInLast5(team1)}W -{" "}
-                  {5 - calculateWinsInLast5(team1)}L
+                  {calculateWinsInLast5(team1Data)}W -{" "}
+                  {5 - calculateWinsInLast5(team1Data)}L
                 </Badge>
               </div>
               <div className="space-y-3">
-                {team1.recent5.map((match, index) => (
+                {team1Data.matches.slice(0, 5).map((match, index) => (
                   <div
                     key={index}
                     className={`p-3 rounded-lg border ${
@@ -840,15 +928,17 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                           <div className="flex items-center gap-2">
                             <img
                               src={team.flag}
-                              alt={team.team}
+                              alt={team.name}
                               className="w-4 h-4"
                             />
                             <span
                               className={
-                                team.team === team1.teamId ? "font-medium" : ""
+                                team.name === team1Data.teamId
+                                  ? "font-medium"
+                                  : ""
                               }
                             >
-                              {team.team}
+                              {team.name}
                             </span>
                           </div>
                           <div className="text-right">
@@ -869,23 +959,23 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
             <div>
               <div className="flex items-center gap-3 mb-4 p-3 bg-gradient-to-r from-red-50 to-white rounded-lg">
                 <img
-                  src={team2.teamFlag}
-                  alt={team2.teamName}
+                  src={team2Data.teamFlag}
+                  alt={team2Data.teamName}
                   className="w-8 h-8 rounded-full"
                 />
                 <div>
-                  <h3 className="font-bold">{team2.teamName}</h3>
+                  <h3 className="font-bold">{team2Data.teamName}</h3>
                   <p className="text-xs text-gray-500">
                     Last 5 matches performance
                   </p>
                 </div>
                 <Badge className="ml-auto bg-red-100 text-red-800">
-                  {calculateWinsInLast5(team2)}W -{" "}
-                  {5 - calculateWinsInLast5(team2)}L
+                  {calculateWinsInLast5(team2Data)}W -{" "}
+                  {5 - calculateWinsInLast5(team2Data)}L
                 </Badge>
               </div>
               <div className="space-y-3">
-                {team2.recent5.map((match, index) => (
+                {team2Data.matches.slice(0, 5).map((match, index) => (
                   <div
                     key={index}
                     className={`p-3 rounded-lg border ${
@@ -918,15 +1008,17 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                           <div className="flex items-center gap-2">
                             <img
                               src={team.flag}
-                              alt={team.team}
+                              alt={team.name}
                               className="w-4 h-4"
                             />
                             <span
                               className={
-                                team.team === team2.teamId ? "font-medium" : ""
+                                team.name === team2Data.teamId
+                                  ? "font-medium"
+                                  : ""
                               }
                             >
-                              {team.team}
+                              {team.name}
                             </span>
                           </div>
                           <div className="text-right">
