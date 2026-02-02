@@ -131,13 +131,16 @@ export async function POST(request: Request) {
             cricketScore: scTeam ? `${scTeam.score} (${scTeam.overs})` : null,
           };
         });
+        let analysis = null;
 
-        const latesSquad = await SquadList(item.url, item.details?.squads);
-        const analysis = await GetNewAnalysis({
-          ...item.details,
-          squads: latesSquad,
-          matchInfo: item,
-        });
+        if (item.details) {
+          const latesSquad = await SquadList(item.url, item.details?.squads);
+          analysis = await GetNewAnalysis({
+            ...item.details,
+            squads: latesSquad,
+            matchInfo: item,
+          });
+        }
 
         const { details, ...matchWithoutDetails } = item;
 
@@ -152,7 +155,9 @@ export async function POST(request: Request) {
             result: scorecardData?.result ?? "",
           },
           status: "COMPLETED",
-          prediction: { team1: analysis?.team1, team2: analysis?.team2 },
+          prediction: analysis
+            ? { team1: analysis?.team1, team2: analysis?.team2 }
+            : null,
         };
       }),
     );
