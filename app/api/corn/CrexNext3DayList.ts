@@ -1,12 +1,15 @@
-import puppeteer from "puppeteer";
+// import puppeteer from "puppeteer";
+
+import { getBrowser } from "@/lib/browser";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const CrexNext3DaysFixturesArray = async (): Promise<any[]> => {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
+  // const browser = await puppeteer.launch({
+  //   headless: true,
+  //   args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  // });
+  const browser = await getBrowser();
 
   const page = await browser.newPage();
   page.setDefaultTimeout(60000);

@@ -617,7 +617,7 @@ const MatchCard = ({
           : null;
 
       return (
-        <React.Fragment key={team.teamShortName}>
+        <React.Fragment key={index}>
           <div
             className={`flex items-center justify-between p-3 rounded-lg ${
               match.status === "UPCOMING"

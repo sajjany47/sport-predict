@@ -1,10 +1,13 @@
-import puppeteer from "puppeteer";
+// import puppeteer from "puppeteer";
+
+import { getBrowser } from "@/lib/browser";
 
 export const SquadList = async (url: string, squad: any[]) => {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
+  // const browser = await puppeteer.launch({
+  //   headless: true,
+  //   args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  // });
+  const browser = await getBrowser();
 
   const page = await browser.newPage();
 

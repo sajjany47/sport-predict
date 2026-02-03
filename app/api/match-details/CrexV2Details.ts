@@ -1,4 +1,5 @@
-import puppeteer from "puppeteer";
+// import puppeteer from "puppeteer";
+import { getBrowser } from "@/lib/browser";
 import { CrexPlayerDetails } from "./CrexPlayerDetails";
 
 // Rate limiting helper
@@ -7,10 +8,11 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const CrexV2Details = async (url: string) => {
   let browser;
   try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+    // browser = await puppeteer.launch({
+    //   headless: true,
+    //   args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    // });
+    const browser = await getBrowser();
 
     const page = await browser.newPage();
     page.setDefaultTimeout(60000);
