@@ -10,6 +10,7 @@ export const GET = async (req: NextRequest) => {
   await dbConnect();
 
   try {
+    console.log("CRON HIT ✅", new Date().toISOString());
     //delete old matches
     const cutoffDate = moment().subtract(2, "days").format("YYYY-MM-DD");
 
