@@ -17,11 +17,6 @@ export const GET = async (req: NextRequest) => {
       formatDate: { $lte: cutoffDate },
     });
 
-    // const day3List = (await CrexNext3DaysFixturesArray()).map((item: any) => ({
-    //   ...item,
-    //   url: NormalizeCrexUrl(item.url),
-    // }));
-
     const chunkArray = (arr: any[], size: number) => {
       const chunks: any[] = [];
 
