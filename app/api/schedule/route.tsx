@@ -37,6 +37,24 @@ export async function POST(request: Request) {
       url: NormalizeCrexUrl(item.url),
     }));
 
+    /* ================= New logic to separate live and upcoming matches ================= */
+
+    // const upcomingMatches = dbMatches.filter((item: any) =>
+    //   moment(
+    //     `${item.matchDate} ${item.startTime}`,
+    //     "ddd, DD MMM YYYY h:mm A",
+    //   ).isAfter(moment()),
+    // );
+
+    // const liveMatches = dbMatches.filter((item: any) =>
+    //   moment(
+    //     `${item.matchDate} ${item.startTime}`,
+    //     "ddd, DD MMM YYYY h:mm A",
+    //   ).isBefore(moment()),
+    // );
+
+    /* =================End  New logic ================= */
+
     /* ================= SCORECARD CACHE ================= */
 
     const scorecardCache = new Map<string, any>();
