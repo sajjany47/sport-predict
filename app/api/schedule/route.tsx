@@ -78,6 +78,7 @@ export async function POST(request: Request) {
 
             filterLiveMatches.push({
               ...matchWithoutDetails,
+              status: "LIVE",
               teams: updatedTeams,
               score: crexMatch.score,
             });
