@@ -232,7 +232,7 @@ const MatchesPage = () => {
                   // size="lg"
                   className="px-3 text-xs md:text-sm"
                 >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
+                  {/* <Icon className="h-4 w-4 flex-shrink-0" /> */}
                   <span className="truncate">{tab.label}</span>
                   <span
                     className={`px-2 py-0.5 text-xs rounded-full ${tab.colorScheme.count} font-semibold`}
