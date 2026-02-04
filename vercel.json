@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/daily-match-list",
+      "path": "/api/corn/daily-match-list",
       "schedule": "30 20 * * *"
     }
   ]

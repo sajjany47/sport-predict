@@ -139,7 +139,10 @@ export async function POST(request: Request) {
             : null,
         };
         if (result.includes("abandoned") || result.includes("won")) {
-          filterLiveMatches.push({ ...a, status: "COMPLETED" });
+          filterLiveMatches.push({
+            ...a,
+            status: result.includes("abandoned") ? "ABANDONED" : "COMPLETED",
+          });
         } else {
           filterCompletedMatches.push({ ...a, status: "LIVE" });
         }
