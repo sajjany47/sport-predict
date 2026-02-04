@@ -155,49 +155,55 @@ const AIPredictionModal: React.FC<{
   );
 
   const handleGetPrediction = async () => {
-    setIsLoading(true);
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
-
-    if (!user || user.credits < 1) {
-      toast.error("Insufficient credits. Please purchase more credits.");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const data: any = await GetNewAnalysis(match);
-      console.log(data);
+      setIsLoading(true);
+
+      if (!isAuthenticated) {
+        router.push("/auth/login");
+        return;
+      }
+
+      if (!user || user.credits < 1) {
+        toast.error("Insufficient credits. Please purchase more credits.");
+        return;
+      }
+
+      if (!selectedMatch?._id) {
+        toast.error("Match not selected");
+        return;
+      }
+
+      const payload = {
+        ordertype: "prediction",
+        userId: user.id,
+        credits: 1,
+        status: "completed",
+        paymentStatus: true,
+        paymentMode: "DEDUCTION",
+        paymentDate: new Date(),
+        matchId: selectedMatch._id, // MUST be string
+      };
+
+      // 1️⃣ create order + deduct credit
+      const res = await UserOrderCredit(payload);
+
+      dispatch(updateCredits(user.credits - (res?.credits ?? 1)));
+
+      // 2️⃣ small delay (backend consistency)
+      await new Promise((r) => setTimeout(r, 300));
+
+      // 3️⃣ generate prediction
+      const data: any = await GetNewAnalysis(selectedMatch);
+
       setPredictionData(data);
-    } catch (error) {
-      toast.error("Failed to generate prediction data.");
+
+      toast.success("AI Prediction generated successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate prediction. Please try again.");
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    let payload = {
-      ordertype: "prediction",
-      userId: user!.id,
-      credits: 1,
-      status: "completed",
-      paymentStatus: true,
-      paymentMode: "DEDUCTION",
-      paymentDate: new Date(),
-      matchId: selectedMatch?.matchId,
-    };
-
-    await UserOrderCredit(payload)
-      .then((res) => {
-        dispatch(updateCredits(user.credits - (res.credits ?? 1)));
-        toast.success("AI Prediction generated successfully!");
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        toast.error("Failed to generate prediction. Please try again.");
-        setIsLoading(false);
-      });
   };
 
   const getRoleIcon = (role: string) => {

@@ -9,7 +9,11 @@ const OrderSchema = new Schema(
       default: "purchase",
     },
     price: { type: Number, default: null },
-    matchId: { type: Number, default: null },
+    matchId: {
+      type: Schema.Types.ObjectId,
+      ref: "MatchList", // 👈 your match model name
+      default: null,
+    },
     userId: Schema.Types.ObjectId,
     credits: { type: Number, default: null },
     paymentStatus: { type: Boolean, default: false },
@@ -28,7 +32,7 @@ const OrderSchema = new Schema(
     paymentDetails: { type: Array, default: null },
     paymentDate: { type: Date, default: null },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);

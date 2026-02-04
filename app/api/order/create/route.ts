@@ -24,7 +24,7 @@ export const POST = async (req: NextRequest) => {
     if (!findUser) {
       return NextResponse.json(
         { success: false, message: "User not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -32,12 +32,12 @@ export const POST = async (req: NextRequest) => {
       const existingPrediction = await Order.findOne({
         userId: new mongoose.Types.ObjectId(loggedInUser._id),
         paymentMode: "DEDUCTION",
-        matchId: Number(data.matchId),
+        matchId: new mongoose.Types.ObjectId(data.matchId),
       });
       if (existingPrediction) {
         return NextResponse.json(
           { message: "Already subscribe this match", credits: 0 },
-          { status: 200 }
+          { status: 200 },
         );
       }
 
@@ -46,7 +46,7 @@ export const POST = async (req: NextRequest) => {
       if (!hasSufficientCredit) {
         return NextResponse.json(
           { success: false, message: "Not sufficient credits for purchase" },
-          { status: 402 }
+          { status: 402 },
         );
       }
     }
@@ -63,7 +63,7 @@ export const POST = async (req: NextRequest) => {
       if (checkDailyCredit) {
         return NextResponse.json(
           { success: false, message: "Already claimed today's free credit." },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -80,7 +80,7 @@ export const POST = async (req: NextRequest) => {
             success: false,
             message: "Duplicate payment intent ID.",
           },
-          { status: 500 }
+          { status: 500 },
         );
       }
       const headers = {
@@ -95,7 +95,7 @@ export const POST = async (req: NextRequest) => {
         {
           headers,
           timeout: 10000,
-        }
+        },
       );
       const orderBody = response.data;
       const orderStatus = (
@@ -111,7 +111,7 @@ export const POST = async (req: NextRequest) => {
         try {
           const paymentsResp = await axios.get(
             `${process.env.NEXT_PUBLIC_CASH_URL}/orders/${response.data.order_id}/payments`,
-            { headers, timeout: 10000 }
+            { headers, timeout: 10000 },
           );
           paymentDetails = paymentsResp.data;
           prepareData.paymentStatus = true;
@@ -120,7 +120,7 @@ export const POST = async (req: NextRequest) => {
           // Do not fail processing if payments fetch fails; we still mark PAID but log.
           console.warn(
             "Could not fetch payment details:",
-            e?.response?.data || e.message
+            e?.response?.data || e.message,
           );
         }
         // prepareData.paymentStatus = true;
@@ -158,12 +158,12 @@ export const POST = async (req: NextRequest) => {
             message: "Order already exists",
             data: existingOrder,
           },
-          { status: 200 }
+          { status: 200 },
         );
       }
       const orderData = await Order.create(
         [{ ...prepareData, _id: new mongoose.Types.ObjectId() }],
-        { session }
+        { session },
       );
       const createdOrder = orderData[0];
       if (createdOrder.ordertype === "prediction") {
@@ -174,7 +174,7 @@ export const POST = async (req: NextRequest) => {
               credits: -(createdOrder.paymentStatus ? createdOrder.credits : 0),
             },
           },
-          { session }
+          { session },
         );
       } else if (createdOrder.ordertype === "credit") {
         await User.updateOne(
@@ -184,7 +184,7 @@ export const POST = async (req: NextRequest) => {
               credits: createdOrder.paymentStatus ? createdOrder.credits : 0,
             },
           },
-          { session }
+          { session },
         );
       } else if (
         createdOrder.ordertype === "purchase" &&
@@ -198,7 +198,7 @@ export const POST = async (req: NextRequest) => {
               credits: createdOrder.paymentStatus ? createdOrder.credits : 0,
             },
           },
-          { session }
+          { session },
         );
       }
       await session.commitTransaction();
@@ -209,7 +209,7 @@ export const POST = async (req: NextRequest) => {
           message: "Order created successfully",
           data: createdOrder,
         },
-        { status: 200 }
+        { status: 200 },
       );
     } catch (txnErr) {
       await session.abortTransaction();
@@ -217,13 +217,13 @@ export const POST = async (req: NextRequest) => {
 
       return NextResponse.json(
         { success: false, message: FormatErrorMessage(txnErr) },
-        { status: 500 }
+        { status: 500 },
       );
     }
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: FormatErrorMessage(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };

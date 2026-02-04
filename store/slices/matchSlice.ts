@@ -25,7 +25,8 @@ interface Tour {
 }
 
 interface Match {
-  matchId: number;
+  _id: string;
+  matchId: string;
   matchName: string;
   matchDescription: string;
   startTime: string;
