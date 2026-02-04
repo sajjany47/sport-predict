@@ -100,6 +100,7 @@ export async function POST(request: Request) {
         /* ---------- COMPLETED ---------- */
         const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
         const scoreCard: any = await CrexMatchScorecard(scoreCardUrl);
+        const result = scoreCard?.result?.toLowerCase() ?? "";
 
         const updatedTeams = (match.teams ?? []).map((dbTeam: any) => {
           const scTeam = (scoreCard?.teams ?? []).find(
@@ -114,6 +115,7 @@ export async function POST(request: Request) {
         });
 
         let analysis = null;
+
         if (details) {
           const latestSquad = await SquadList(match.url, details.squads);
           analysis = await GetNewAnalysis({
@@ -122,30 +124,45 @@ export async function POST(request: Request) {
             matchInfo: match,
           });
         }
-        const result = scoreCard?.result?.toLowerCase() ?? "";
-        let a = {
+
+        const basePayload = {
           ...matchWithoutDetails,
           teams: updatedTeams,
           score: {
-            score: (scoreCard?.teams ?? []).map((a: any) => ({
-              team: a.name,
-              run: `${a.score} (${a.overs})`,
+            score: (scoreCard?.teams ?? []).map((t: any) => ({
+              team: t.name,
+              run: `${t.score} (${t.overs})`,
             })),
             result: scoreCard?.result ?? "",
           },
-          status: "COMPLETED",
           prediction: analysis
             ? { team1: analysis.team1, team2: analysis.team2 }
             : null,
         };
-        if (result.includes("abandoned") || result.includes("won")) {
-          filterLiveMatches.push({
-            ...a,
-            status: result.includes("abandoned") ? "ABANDONED" : "COMPLETED",
+
+        /* ================= FINAL STATUS ROUTING ================= */
+
+        if (result.includes("abandoned")) {
+          filterCompletedMatches.push({
+            ...basePayload,
+            status: "ABANDONED",
           });
-        } else {
-          filterCompletedMatches.push({ ...a, status: "LIVE" });
+          return;
         }
+
+        if (result.includes("won")) {
+          filterCompletedMatches.push({
+            ...basePayload,
+            status: "COMPLETED",
+          });
+          return;
+        }
+
+        // still live (no result yet)
+        filterLiveMatches.push({
+          ...basePayload,
+          status: "LIVE",
+        });
       }),
     );
     /* =================End  New logic ================= */
