@@ -9,9 +9,9 @@ const safe = (value: number): number =>
 
 const normalizeRole = (role: string) => {
   const r = role?.toLowerCase() || "";
-  if (r.includes("keeper")) return "Batter";
-  if (r.includes("all")) return "All Rounder";
-  if (r.includes("bowl")) return "Bowler";
+  if (r?.includes("keeper")) return "Batter";
+  if (r?.includes("all")) return "All Rounder";
+  if (r?.includes("bowl")) return "Bowler";
   return "Batter";
 };
 
@@ -22,7 +22,7 @@ type MatchOverConfig = {
 };
 
 const matchOver = (description: string): MatchOverConfig => {
-  const text = description.toLowerCase();
+  const text = description?.toLowerCase();
 
   if (/\btest\b/.test(text)) {
     return { totalOvers: 90, ballsPerInnings: 540, bowlerOverLimit: 30 };
@@ -40,7 +40,7 @@ const matchOver = (description: string): MatchOverConfig => {
     return { totalOvers: 20, ballsPerInnings: 120, bowlerOverLimit: 4 };
   }
 
-  if (text.includes("hundred")) {
+  if (text?.includes("hundred")) {
     return { totalOvers: 20, ballsPerInnings: 100, bowlerOverLimit: 5 };
   }
 
