@@ -78,6 +78,7 @@ export async function POST(request: Request) {
 
             filterLiveMatches.push({
               ...matchWithoutDetails,
+              status: "LIVE",
               teams: updatedTeams,
               score: crexMatch.score,
             });
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
 
         /* ---------- COMPLETED ---------- */
         const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
-        const scoreCard = await CrexMatchScorecard(scoreCardUrl);
+        const scoreCard: any = await CrexMatchScorecard(scoreCardUrl);
 
         const updatedTeams = (match.teams ?? []).map((dbTeam: any) => {
           const scTeam = (scoreCard?.teams ?? []).find(
@@ -121,8 +122,8 @@ export async function POST(request: Request) {
             matchInfo: match,
           });
         }
-
-        filterCompletedMatches.push({
+        const result = scoreCard?.result?.toLowerCase() ?? "";
+        let a = {
           ...matchWithoutDetails,
           teams: updatedTeams,
           score: {
@@ -136,7 +137,12 @@ export async function POST(request: Request) {
           prediction: analysis
             ? { team1: analysis.team1, team2: analysis.team2 }
             : null,
-        });
+        };
+        if (result.includes("abandoned") || result.includes("won")) {
+          filterLiveMatches.push({ ...a, status: "COMPLETED" });
+        } else {
+          filterCompletedMatches.push({ ...a, status: "LIVE" });
+        }
       }),
     );
     /* =================End  New logic ================= */
