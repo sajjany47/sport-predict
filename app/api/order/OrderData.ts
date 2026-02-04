@@ -31,7 +31,9 @@ export function PrepareOrderData(formData: any, isEdit = false) {
     credits: formData.credits !== undefined ? Number(formData.credits) : null,
 
     paymentStatus:
-      formData.ordertype === "credit" ? true : formData.paymentStatus ?? false,
+      formData.ordertype === "credit"
+        ? true
+        : (formData.paymentStatus ?? false),
 
     status:
       formData.ordertype === "credit"
@@ -42,6 +44,8 @@ export function PrepareOrderData(formData: any, isEdit = false) {
     paymentMode: formData.paymentMode || null,
     paymentDate: formData.paymentDate ? new Date(formData.paymentDate) : null,
 
-    matchId: formData.matchId ? Number(formData.matchId) : null,
+    matchId: formData.matchId
+      ? new mongoose.Types.ObjectId(formData.matchId)
+      : null,
   };
 }
