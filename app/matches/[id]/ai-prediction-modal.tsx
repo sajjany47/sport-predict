@@ -193,7 +193,7 @@ const AIPredictionModal: React.FC<{
       await new Promise((r) => setTimeout(r, 300));
 
       // 3️⃣ generate prediction
-      const data: any = await GetNewAnalysis(selectedMatch);
+      const data: any = await GetNewAnalysis(match);
 
       setPredictionData(data);
 
