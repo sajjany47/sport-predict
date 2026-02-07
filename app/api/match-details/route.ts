@@ -1,84 +1,79 @@
 import { NextRequest } from "next/server";
-import { FormatErrorMessage } from "@/lib/utils";
+import mongoose from "mongoose";
 
 import dbConnect from "../db";
+import { FormatErrorMessage } from "@/lib/utils";
 
 import { CrexV2Details } from "./CrexV2Details";
-import MatchList from "../corn/daily-match-list/DailyMatchListModel";
-import mongoose from "mongoose";
 import { SquadList } from "./SquadList";
+import MatchDetails from "./MatchDetailsModel";
+
+const cleanPlayer = (player: any) => ({
+  ...player,
+  careerStats: {
+    ...player.careerStats,
+    bowling: (player.careerStats?.bowling ?? []).filter(
+      (item: any) => !item.format?.toLowerCase().includes("debut"),
+    ),
+  },
+});
 
 export async function POST(request: NextRequest) {
   await dbConnect();
+
   try {
     const body = await request.json();
 
-    const findMatch = await MatchList.findOne({
-      _id: new mongoose.Types.ObjectId(body._id),
-    });
-
-    if (!findMatch) {
+    if (!body?._id) {
       return Response.json(
-        { success: false, message: "Match not found" },
-        { status: 404 },
+        { success: false, error: "Match id required" },
+        { status: 400 },
       );
     }
 
-    if (findMatch.details) {
-      const latestSquad = await SquadList(
-        findMatch.url,
-        findMatch.details.squads,
-      );
+    const matchId = new mongoose.Types.ObjectId(body._id);
 
-      return Response.json(
-        {
-          data: {
-            ...findMatch.details,
-            squads: latestSquad,
-          },
+    const [findMatch] = await MatchDetails.aggregate([
+      { $match: { _id: matchId } },
+      {
+        $lookup: {
+          from: "matches",
+          localField: "matchId",
+          foreignField: "_id",
+          as: "match",
         },
-        { status: 200 },
-      );
-    } else {
-      const crexOverallStats: any = body.url
-        ? await CrexV2Details(body.url)
-        : null;
+      },
+      {
+        $unwind: {
+          path: "$match",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $limit: 1 },
+    ]);
 
-      const cleanedSquads = crexOverallStats.squads.map((team: any) => ({
-        ...team,
-        playingPlayers: (team.playingPlayers ?? []).map((player: any) => ({
-          ...player,
-          careerStats: {
-            ...player.careerStats,
-            bowling: (player.careerStats?.bowling ?? []).filter(
-              (item: any) => !item.format?.toLowerCase().includes("debut"),
-            ),
-          },
-        })),
-        benchPlayers: (team.benchPlayers ?? []).map((player: any) => ({
-          ...player,
-          careerStats: {
-            ...player.careerStats,
-            bowling: (player.careerStats?.bowling ?? []).filter(
-              (item: any) => !item.format?.toLowerCase().includes("debut"),
-            ),
-          },
-        })),
-      }));
-      if (crexOverallStats.squads.length > 0) {
-        await MatchList.updateOne(
-          { _id: new mongoose.Types.ObjectId(body._id) },
-          {
-            $set: {
-              details: {
-                ...crexOverallStats,
-                squads: cleanedSquads,
-              },
-              detailsUpdatedAt: new Date(),
-            },
-          },
+    /**
+     * ===============================
+     * IF MATCH NOT FOUND → SCRAPE
+     * ===============================
+     */
+    if (!findMatch) {
+      if (!body?.url) {
+        return Response.json(
+          { success: false, error: "Match url required" },
+          { status: 400 },
         );
       }
+
+      const crexOverallStats: any = await CrexV2Details(body.url);
+
+      const cleanedSquads = (crexOverallStats?.squads ?? []).map(
+        (team: any) => ({
+          ...team,
+          playingPlayers: (team.playingPlayers ?? []).map(cleanPlayer),
+          benchPlayers: (team.benchPlayers ?? []).map(cleanPlayer),
+        }),
+      );
 
       return Response.json(
         {
@@ -90,6 +85,23 @@ export async function POST(request: NextRequest) {
         { status: 200 },
       );
     }
+
+    /**
+     * ===============================
+     * IF MATCH FOUND → UPDATE SQUAD
+     * ===============================
+     */
+    const latestSquad = await SquadList(findMatch.match?.url, findMatch.squads);
+
+    return Response.json(
+      {
+        data: {
+          ...findMatch,
+          squads: latestSquad,
+        },
+      },
+      { status: 200 },
+    );
   } catch (error: any) {
     return Response.json(
       { success: false, error: FormatErrorMessage(error) },

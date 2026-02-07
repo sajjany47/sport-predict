@@ -37,6 +37,7 @@ const MatchSchema = new Schema(
     format: { type: String, default: null }, // T20
     sport: { type: String, default: "cricket" },
     teams: { type: [TeamSchema], default: [] },
+    isPlayingPlayerFetched: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },
     isDetailsFetched: { type: Boolean, default: false },
     matchResult: { type: String, default: null },
