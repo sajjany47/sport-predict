@@ -59,7 +59,7 @@ export const GET = async (_req: NextRequest) => {
       const matchBulkOps: any[] = [];
 
       for (const match of chunk) {
-        console.log("Processing match:", (match as any)._id);
+        // console.log("Processing match:", (match as any)._id);
         try {
           const matchDetails = await MatchDetails.findOne({
             matchId: new mongoose.Types.ObjectId((match as any)._id.toString()),
