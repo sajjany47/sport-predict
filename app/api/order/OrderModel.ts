@@ -11,7 +11,7 @@ const OrderSchema = new Schema(
     price: { type: Number, default: null },
     matchId: {
       type: Schema.Types.ObjectId,
-      ref: "MatchList", // 👈 your match model name
+      // ref: "Match", // 👈 your match model name
       default: null,
     },
     userId: Schema.Types.ObjectId,
