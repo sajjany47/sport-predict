@@ -1366,6 +1366,14 @@ export const NormalizeCrexUrl = (url: string) => {
 };
 
 // {
-//   "path": "/api/corn/daily-match-list",
-//   "schedule": "30 19 * * *"
+//   "crons": [
+//     {
+//       "path": "/api/corn/match-status",
+//       "schedule": "0 * * * *"
+//     },
+//         {
+//       "path": "/api/corn/daily-match-list",
+//       "schedule": "30 19 * * *"
+//     }
+//   ]
 // }
