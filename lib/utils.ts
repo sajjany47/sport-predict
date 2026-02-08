@@ -1364,3 +1364,16 @@ export const NormalizeCrexUrl = (url: string) => {
     .replace(/\/(live|scorecard)(\/)?$/i, "/info") // live or scorecard => info
     .replace(/\/info(\/)?$/i, "/info"); // ensure ending clean
 };
+
+// {
+//   "crons": [
+//     {
+//       "path": "/api/corn/match-status",
+//       "schedule": "0 * * * *"
+//     },
+//         {
+//       "path": "/api/corn/daily-match-list",
+//       "schedule": "30 19 * * *"
+//     }
+//   ]
+// }
