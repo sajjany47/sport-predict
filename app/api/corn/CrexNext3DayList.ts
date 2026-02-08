@@ -137,7 +137,9 @@ export const CrexNext3DaysFixturesArray = async (): Promise<any[]> => {
             ? "T20"
             : description?.includes("ODI")
               ? "ODI"
-              : null,
+              : description?.includes("T10")
+                ? "T10"
+                : null,
           sport: "cricket",
           teams: [
             {
