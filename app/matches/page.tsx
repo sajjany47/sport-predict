@@ -85,14 +85,8 @@ const MatchesPage = () => {
     queryKey: ["match-list", selectedDate],
     queryFn: async () => {
       const response = await FetchMatchList(selectedDate);
-      const filteredMatches = response.data.filter((match: any) => {
-        const team1 = match.teams[0].teamName;
-        const team2 = match.teams[1].teamShortName;
-        const searchTermLower = "Team 1 (TBC)";
 
-        return team1 !== searchTermLower || team2 !== "Team";
-      });
-      return filteredMatches;
+      return response.data;
     },
     enabled: !!selectedDate,
   });

@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
     /* ================= DB MATCHES ================= */
 
-    const dbMatches = await Match.aggregate([
+    const a = await Match.aggregate([
       {
         $match: {
           formatDate: new Date(moment(fromDate).format("YYYY-MM-DD")),
@@ -32,6 +32,14 @@ export async function POST(request: Request) {
         },
       },
     ]);
+
+    const dbMatches = a.filter((match: any) => {
+      const team1 = match.teams[0].teamName;
+      const team2 = match.teams[1].teamShortName;
+      const searchTermLower = "Team 1 (TBC)";
+
+      return team1 !== searchTermLower || team2 !== "Team";
+    });
 
     /* ================= CREX MATCHES ================= */
 
