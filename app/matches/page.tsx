@@ -237,7 +237,7 @@ const MatchesPage = () => {
                   value={tab.id}
                   variant="pill"
                   // size="lg"
-                  className="px-3 text-xs md:text-sm"
+                  className="px-3 text-xs md:text-sm gap-1"
                 >
                   {/* <Icon className="h-4 w-4 flex-shrink-0" /> */}
                   <span className="truncate">{tab.label}</span>
