@@ -46,6 +46,10 @@ import {
   BarChart,
   Info,
   HelpCircle,
+  Download,
+  Smartphone,
+  Apple,
+  ExternalLink,
 } from "lucide-react";
 import MarqueeNotice from "../ui/marquee-notice";
 import { usePathname } from "next/navigation";
@@ -57,7 +61,7 @@ const Header = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -68,9 +72,23 @@ const Header = () => {
     isSuccess: null,
   });
 
+  // App download links - Replace with your actual links
+  const appDownloadLinks = {
+    android:
+      "https://drive.google.com/file/d/1rKrI2IMsONcscbvsiRvjqv-xjWZa4J5-/view?usp=drive_link", // Replace with your Android app Google Drive link
+    ios: "https://drive.google.com/your-ios-app-link", // Replace with your iOS app Google Drive link
+  };
+
   const handleLogout = () => {
     dispatch(logout());
     router.push("/");
+  };
+
+  const handleAppDownload = (platform: "android" | "ios") => {
+    const link = appDownloadLinks[platform];
+    if (link) {
+      window.open(link, "_blank", "noopener,noreferrer");
+    }
   };
 
   const navItems = [
@@ -166,6 +184,67 @@ const Header = () => {
                   </Link>
                 );
               })}
+
+              {/* Desktop App Download Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="ml-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border-blue-200 hover:border-blue-300 hover:bg-blue-50"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download App
+                    <ChevronDown className="ml-2 h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64" align="end">
+                  <DropdownMenuLabel className="flex items-center">
+                    <Smartphone className="h-4 w-4 mr-2 text-blue-500" />
+                    Download Mobile App
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => handleAppDownload("android")}
+                    className="cursor-pointer py-3 hover:bg-green-50"
+                  >
+                    <div className="flex items-center w-full">
+                      <div className="bg-green-100 p-2 rounded-lg mr-3">
+                        <svg
+                          className="h-4 w-4 text-green-600"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-1.995 3.458c-1.443-1.031-3.1993-1.63-5.1256-1.63-1.9276 0-3.6845.6-5.1278 1.631l-1.996-3.458a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592c-2.572 1.756-4.3058 4.755-4.3058 8.152 0 .552.4477 1 1 1h16.9998c.5523 0 1-.448 1-1 0-3.397-1.7338-6.396-4.3058-8.152" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium">Android App</div>
+                        <div className="text-xs text-gray-500">
+                          Download for Android devices
+                        </div>
+                      </div>
+                      <ExternalLink className="h-3 w-3 text-gray-400" />
+                    </div>
+                  </DropdownMenuItem>
+                  {/* <DropdownMenuItem
+                    onClick={() => handleAppDownload("ios")}
+                    className="cursor-pointer py-3 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center w-full">
+                      <div className="bg-gray-100 p-2 rounded-lg mr-3">
+                        <Apple className="h-4 w-4 text-gray-700" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium">iOS App</div>
+                        <div className="text-xs text-gray-500">
+                          Download for iPhone & iPad
+                        </div>
+                      </div>
+                      <ExternalLink className="h-3 w-3 text-gray-400" />
+                    </div>
+                  </DropdownMenuItem> */}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
 
             {/* Auth Section */}
@@ -260,6 +339,22 @@ const Header = () => {
                         </div>
                       </DropdownMenuItem>
 
+                      {/* App Download in User Dropdown */}
+                      <DropdownMenuItem
+                        className="cursor-pointer flex items-center py-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all"
+                        onClick={() => handleAppDownload("android")}
+                      >
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-2 rounded-lg mr-3">
+                          <Download className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <div className="font-medium">Download App</div>
+                          <div className="text-xs text-gray-500">
+                            Get mobile app for better experience
+                          </div>
+                        </div>
+                      </DropdownMenuItem>
+
                       {user.role === "admin" && (
                         <DropdownMenuItem asChild>
                           <Link
@@ -311,6 +406,53 @@ const Header = () => {
                 </>
               ) : (
                 <>
+                  {/* Desktop App Download Button for Non-Authenticated Users */}
+                  <div className="hidden lg:block">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-gray-600 hover:text-blue-600 hover:bg-gray-50 border border-gray-200"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          App
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56" align="end">
+                        <DropdownMenuLabel className="flex items-center">
+                          <Smartphone className="h-4 w-4 mr-2" />
+                          Download Mobile App
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleAppDownload("android")}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex items-center w-full">
+                            <svg
+                              className="h-4 w-4 mr-2 text-green-600"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-1.995 3.458c-1.443-1.031-3.1993-1.63-5.1256-1.63-1.9276 0-3.6845.6-5.1278 1.631l-1.996-3.458a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592c-2.572 1.756-4.3058 4.755-4.3058 8.152 0 .552.4477 1 1 1h16.9998c.5523 0 1-.448 1-1 0-3.397-1.7338-6.396-4.3058-8.152" />
+                            </svg>
+                            <span>Android App</span>
+                          </div>
+                        </DropdownMenuItem>
+                        {/* <DropdownMenuItem
+                          onClick={() => handleAppDownload("ios")}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex items-center w-full">
+                            <Apple className="h-4 w-4 mr-2" />
+                            <span>iOS App</span>
+                          </div>
+                        </DropdownMenuItem> */}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
                   {/* Mobile Auth Buttons - IN ROW */}
                   <div className="flex items-center space-x-2">
                     <Button
@@ -425,6 +567,60 @@ const Header = () => {
                             </Link>
                           );
                         })}
+
+                        {/* Mobile App Download Section */}
+                        <div className="p-3 mx-2 border-t mt-4">
+                          <div className="flex items-center mb-2">
+                            <Download className="h-5 w-5 text-blue-600 mr-2" />
+                            <span className="font-semibold text-gray-900">
+                              Download App
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            <button
+                              onClick={() => {
+                                handleAppDownload("android");
+                                setMobileMenuOpen(false);
+                              }}
+                              className="flex items-center justify-between w-full p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+                            >
+                              <div className="flex items-center">
+                                <svg
+                                  className="h-5 w-5 text-green-600 mr-3"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                >
+                                  <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-1.995 3.458c-1.443-1.031-3.1993-1.63-5.1256-1.63-1.9276 0-3.6845.6-5.1278 1.631l-1.996-3.458a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592c-2.572 1.756-4.3058 4.755-4.3058 8.152 0 .552.4477 1 1 1h16.9998c.5523 0 1-.448 1-1 0-3.397-1.7338-6.396-4.3058-8.152" />
+                                </svg>
+                                <div>
+                                  <div className="font-medium">Android App</div>
+                                  <div className="text-xs text-gray-600">
+                                    Google Play / APK
+                                  </div>
+                                </div>
+                              </div>
+                              <ExternalLink className="h-4 w-4 text-gray-400" />
+                            </button>
+                            {/* <button
+                              onClick={() => {
+                                handleAppDownload("ios");
+                                setMobileMenuOpen(false);
+                              }}
+                              className="flex items-center justify-between w-full p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+                            >
+                              <div className="flex items-center">
+                                <Apple className="h-5 w-5 text-gray-700 mr-3" />
+                                <div>
+                                  <div className="font-medium">iOS App</div>
+                                  <div className="text-xs text-gray-600">
+                                    App Store
+                                  </div>
+                                </div>
+                              </div>
+                              <ExternalLink className="h-4 w-4 text-gray-400" />
+                            </button> */}
+                          </div>
+                        </div>
                       </div>
 
                       {/* Mobile Auth Actions */}
