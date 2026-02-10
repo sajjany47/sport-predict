@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
 import { FormatErrorMessage, NormalizeCrexUrl } from "@/lib/utils";
 import { CrexNext3DaysFixturesArray } from "../CrexNext3DayList";
-import moment from "moment";
+// import moment from "moment";
 import Match from "../../schedule/MatchModel";
 import { CrexV2Details } from "../../match-details/CrexV2Details";
 import MatchDetails from "../../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
+import moment from "moment-timezone";
 
 const CHUNK_SIZE = 10;
+
+// https://drive.google.com/uc?export=download&id=1rKrI2IMsONcscbvsiRvjqv-xjWZa4J5-
 
 export const GET = async (req: NextRequest) => {
   await dbConnect();
@@ -17,7 +20,23 @@ export const GET = async (req: NextRequest) => {
     console.log("CRON HIT ✅", new Date().toISOString());
 
     // ---------------- DELETE OLD MATCHES ----------------
-    const cutoffDate = moment().subtract(3, "days").format("YYYY-MM-DD");
+    const cutoffDate = moment()
+      .tz("Asia/Kolkata")
+      .subtract(3, "days")
+      .format("YYYY-MM-DD");
+    const a = await CrexNext3DaysFixturesArray();
+    const fixtures = a.map((item: any) => ({
+      ...item,
+      matchDate: moment(item.matchDate, "ddd, DD MMM YYYY")
+        .tz("Asia/Kolkata")
+        .format("ddd, DD MMM YYYY"),
+      startTime: moment(item.startTime, "hh:mm A")
+        .tz("Asia/Kolkata")
+        .format("hh:mm A"),
+      url: NormalizeCrexUrl(item.url),
+    }));
+    console.log("FIXTURES COUNT:", a.length);
+
     // 1️⃣ Old matches list
     const oldMatchList = await Match.find(
       { formatDate: { $lte: cutoffDate } },
@@ -37,7 +56,6 @@ export const GET = async (req: NextRequest) => {
     });
 
     // ---------------- FETCH FIXTURES ----------------
-    const fixtures = await CrexNext3DaysFixturesArray();
 
     if (!fixtures?.length) {
       return NextResponse.json({ success: true, message: "No fixtures found" });
