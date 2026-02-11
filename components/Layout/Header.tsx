@@ -107,7 +107,7 @@ const Header = () => {
     // if (link) {
     //   window.open(link, "_blank", "noopener,noreferrer");
     // }
-    window.location.href = "/apps/android.apk";
+    window.location.href = "/apps/sport-predict-android.apk";
   };
 
   const navItems = [
