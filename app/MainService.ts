@@ -9,7 +9,7 @@ export const SubscriptionCreate = async (payload: any) => {
       payload,
       {
         headers: getHeadersWithToken(),
-      }
+      },
     );
     return response.data;
   } catch (error: any) {
@@ -23,7 +23,7 @@ export const SubscriptionUpdate = async (payload: any) => {
       payload,
       {
         headers: getHeadersWithToken(),
-      }
+      },
     );
     return response.data;
   } catch (error: any) {
@@ -92,7 +92,7 @@ export const UserCreditUpdate = async (payload: any) => {
       payload,
       {
         headers: getHeadersWithToken(),
-      }
+      },
     );
     return response.data;
   } catch (error: any) {
@@ -118,7 +118,7 @@ export const UserResetPassword = async (payload: any) => {
       payload,
       {
         headers: getHeaders(),
-      }
+      },
     );
     return response.data;
   } catch (error: any) {
@@ -162,6 +162,28 @@ export const TicketUpdate = async (payload: any) => {
 export const TicketList = async (payload: any) => {
   try {
     const response = await privateApi.post("/api/support/list", payload, {
+      headers: getHeadersWithToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
+
+export const CornMatchList = async () => {
+  try {
+    const response = await privateApi.get(`/api/corn/daily-match-list`, {
+      headers: getHeadersWithToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
+
+export const CornMatchStatus = async () => {
+  try {
+    const response = await privateApi.get(`/api/corn/match-status`, {
       headers: getHeadersWithToken(),
     });
     return response.data;

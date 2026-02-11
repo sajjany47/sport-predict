@@ -84,6 +84,38 @@ export async function POST(request: NextRequest) {
         },
         { status: 200 },
       );
+    } else {
+      if (findMatch.match.isPlayingPlayerFetched) {
+        const latestSquad = await SquadList(
+          findMatch.match?.url,
+          findMatch.squads,
+        );
+
+        return Response.json(
+          {
+            data: {
+              ...findMatch,
+              // squads: latestSquad,
+            },
+          },
+          { status: 200 },
+        );
+      } else {
+        const latestSquad = await SquadList(
+          findMatch.match?.url,
+          findMatch.squads,
+        );
+
+        return Response.json(
+          {
+            data: {
+              ...findMatch,
+              squads: latestSquad,
+            },
+          },
+          { status: 200 },
+        );
+      }
     }
 
     /**
@@ -91,17 +123,6 @@ export async function POST(request: NextRequest) {
      * IF MATCH FOUND → UPDATE SQUAD
      * ===============================
      */
-    const latestSquad = await SquadList(findMatch.match?.url, findMatch.squads);
-
-    return Response.json(
-      {
-        data: {
-          ...findMatch,
-          squads: latestSquad,
-        },
-      },
-      { status: 200 },
-    );
   } catch (error: any) {
     return Response.json(
       { success: false, error: FormatErrorMessage(error) },

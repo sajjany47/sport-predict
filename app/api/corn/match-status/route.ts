@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
 import { FormatErrorMessage } from "@/lib/utils";
-import moment from "moment";
+import moment from "moment-timezone";
 import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
 import { SquadList } from "../../match-details/SquadList";
@@ -14,7 +14,10 @@ export const GET = async (_req: NextRequest) => {
 
   try {
     console.log("CRON HIT ✅", new Date().toISOString());
-    const cutoffDate = moment().subtract(1, "days").format("YYYY-MM-DD");
+    const cutoffDate = moment()
+      .tz("Asia/Kolkata")
+      .subtract(1, "days")
+      .format("YYYY-MM-DD");
     /* ================= FETCH UNPROCESSED MATCHES ================= */
 
     const fixtures = await Match.find({
@@ -37,9 +40,9 @@ export const GET = async (_req: NextRequest) => {
       const matchStartDateTime = moment(
         `${match.matchDate} ${match.startTime}`,
         "ddd, D MMM YYYY h:mm A",
-      );
+      ).tz("Asia/Kolkata");
 
-      return matchStartDateTime.isSameOrBefore(moment());
+      return matchStartDateTime.isSameOrBefore(moment().tz("Asia/Kolkata"));
     });
 
     if (!startedMatches.length) {
