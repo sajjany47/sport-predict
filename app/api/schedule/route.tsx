@@ -1,10 +1,8 @@
 import { FormatErrorMessage, NormalizeCrexUrl } from "@/lib/utils";
 import moment from "moment-timezone";
-import MatchList from "../corn/daily-match-list/DailyMatchListModel";
 import { CrexList } from "./CrexList";
 import dbConnect from "../db";
 import { CrexMatchScorecard } from "./CrexScore";
-import { SquadList } from "../match-details/SquadList";
 import { GetNewAnalysis } from "@/app/matches/[id]/GetNewAnanlysis";
 import Match from "./MatchModel";
 import MatchDetails from "../match-details/MatchDetailsModel";
@@ -15,14 +13,18 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const fromDate = body.fromDate ? new Date(body.fromDate) : new Date();
+    const fromDate = body.fromDate
+      ? moment(body.fromDate).tz("Asia/Kolkata")
+      : moment().tz("Asia/Kolkata");
 
     /* ================= DB MATCHES ================= */
 
     const a = await Match.aggregate([
       {
         $match: {
-          formatDate: new Date(moment(fromDate).format("YYYY-MM-DD")),
+          formatDate: new Date(
+            moment(fromDate).tz("Asia/Kolkata").format("YYYY-MM-DD"),
+          ),
         },
       },
       {
@@ -100,7 +102,7 @@ export async function POST(request: Request) {
         const isUpcoming = moment(
           `${match.matchDate} ${match.startTime}`,
           "ddd, DD MMM YYYY h:mm A",
-        ).isAfter(moment());
+        ).isAfter(moment().tz("Asia/Kolkata"));
 
         let analysis: any = null;
         if (isUpcoming) {
