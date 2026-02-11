@@ -14,21 +14,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   Menu,
   Trophy,
-  User,
-  Settings,
   CreditCard,
   LogOut,
   Home,
@@ -37,18 +28,12 @@ import {
   SwitchCamera,
   HandCoins,
   Sparkles,
-  Bell,
   ChevronDown,
   Shield,
-  Crown,
-  Target,
-  Users,
-  BarChart,
   Info,
   HelpCircle,
   Download,
   Smartphone,
-  Apple,
   ExternalLink,
   RefreshCcw,
 } from "lucide-react";
@@ -62,6 +47,8 @@ import {
   UserOrderCredit,
 } from "@/app/MainService";
 import toast from "react-hot-toast";
+import { set } from "mongoose";
+import CustomLoader from "../ui/CustomLoader";
 
 const Header = () => {
   const pathname = usePathname();
@@ -73,6 +60,7 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotice, setShowNotice] = useState(true);
   const [dailyCredit, setDailyCredit] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [dailyCreditRes, setDailyCreditRes] = useState<any>({
     message: "",
     isSuccess: null,
@@ -158,11 +146,14 @@ const Header = () => {
   };
 
   const handelMatchListCorn = () => {
+    setLoading(true);
     CornMatchList()
       .then((res) => {
+        setLoading(false);
         toast.success(res.message);
       })
       .catch((error) => {
+        setLoading(false);
         toast.error(
           error.message || "Failed to update status. Please try again.",
         );
@@ -171,6 +162,7 @@ const Header = () => {
 
   return (
     <>
+      {loading && <CustomLoader message="Loading to insert matchlist" />}
       {showNotice && !pathname.startsWith("/admin") && (
         <MarqueeNotice onClose={() => setShowNotice(false)} />
       )}

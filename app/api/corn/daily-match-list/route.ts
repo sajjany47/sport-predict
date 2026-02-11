@@ -35,7 +35,6 @@ export const GET = async (req: NextRequest) => {
         .format("hh:mm A"),
       url: NormalizeCrexUrl(item.url),
     }));
-    console.log("FIXTURES COUNT:", a.length);
 
     // 1️⃣ Old matches list
     const oldMatchList = await Match.find(
@@ -69,12 +68,15 @@ export const GET = async (req: NextRequest) => {
         updateOne: {
           filter: { url },
           update: {
-            $set: { ...item, url },
+            // $set: { ...item, url },
             $setOnInsert: {
-              formatDate: moment(item.matchDate, "ddd, DD MMM YYYY").format(
-                "YYYY-MM-DD",
-              ),
+              ...item,
+              url,
+              formatDate: moment(item.matchDate, "ddd, DD MMM YYYY")
+                .tz("Asia/Kolkata")
+                .format("YYYY-MM-DD"),
               createdAt: new Date(),
+              isDetailsFetched: false,
             },
           },
           upsert: true,

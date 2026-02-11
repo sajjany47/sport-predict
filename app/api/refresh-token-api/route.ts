@@ -12,15 +12,15 @@ export const POST = async (request: NextRequest) => {
     if (!refreshToken) {
       return NextResponse.json(
         { status: false, message: "No refresh token provided" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const { payload } = await jwtVerify(refreshToken, SECRET_KEY);
 
-    const newAccessToken = await generateToken({ ...payload }, "15m");
+    const newAccessToken = await generateToken({ ...payload }, "1d");
 
-    const newRefreshToken = await generateToken({ ...payload }, "1d");
+    const newRefreshToken = await generateToken({ ...payload }, "10d");
 
     // set refresh token in secure cookie
     const cookie = serialize("refreshToken", newRefreshToken, {
@@ -36,14 +36,14 @@ export const POST = async (request: NextRequest) => {
         accessToken: newAccessToken,
         message: "Token generated successfully",
       },
-      { status: 200 }
+      { status: 200 },
     );
     response.headers.set("Set-Cookie", cookie);
     return response;
   } catch (error: any) {
     return NextResponse.json(
       { status: false, message: FormatErrorMessage(error) },
-      { status: 403 }
+      { status: 403 },
     );
   }
 };
