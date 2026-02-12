@@ -22,9 +22,7 @@ export async function POST(request: Request) {
     const a = await Match.aggregate([
       {
         $match: {
-          formatDate: new Date(
-            moment(fromDate).tz("Asia/Kolkata").format("YYYY-MM-DD"),
-          ),
+          formatDate: new Date(moment(fromDate).format("YYYY-MM-DD")),
         },
       },
       {
@@ -102,7 +100,9 @@ export async function POST(request: Request) {
         const isUpcoming = moment(
           `${match.matchDate} ${match.startTime}`,
           "ddd, DD MMM YYYY h:mm A",
-        ).isAfter(moment().tz("Asia/Kolkata"));
+        )
+          .tz("Asia/Kolkata")
+          .isAfter(moment().tz("Asia/Kolkata"));
 
         let analysis: any = null;
         if (isUpcoming) {
