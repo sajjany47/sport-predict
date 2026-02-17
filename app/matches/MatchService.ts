@@ -15,6 +15,7 @@ export const FetchMatchDetails = async (payload: any) => {
 
 export const FetchMatchList = async (date: any) => {
   try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const response = await axios.post(
       "/api/schedule",
       {
@@ -22,7 +23,9 @@ export const FetchMatchList = async (date: any) => {
         toDate: moment(date).add(1, "days").format("YYYY-MM-DD"),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
-      { headers: { "Content-Type": "application/json" } }
+      {
+        headers: { "Content-Type": "application/json", "x-timezone": timezone },
+      },
     );
 
     return response.data;

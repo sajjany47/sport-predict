@@ -125,30 +125,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
 import { FormatErrorMessage } from "@/lib/utils";
-import moment from "moment";
+import moment from "moment-timezone";
 import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
 import { SquadList } from "../../match-details/SquadList";
 import mongoose from "mongoose";
+import { getRequestNowUTC } from "@/lib/time/requestNowUTC";
 
 const CHUNK_SIZE = 10;
 
-export const GET = async (_req: NextRequest) => {
+export const GET = async (req: NextRequest) => {
   await dbConnect();
 
   try {
-    console.log("CRON HIT ✅", new Date().toISOString());
+    console.log("CRON / MANUAL HIT ✅", new Date().toISOString());
 
     // =====================================================
-    // 🗓 UTC Cutoff Date (1 day back)
+    // Detect caller timezone (optional)
     // =====================================================
+    const timezone = req.headers.get("x-timezone");
+    const nowUtc = getRequestNowUTC(timezone);
 
+    console.log("Timezone:", timezone || "UTC");
+    console.log("UTC Used:", nowUtc.toISOString());
+
+    // =====================================================
+    // UTC Cutoff Date (1 day back)
+    // =====================================================
     const cutoffDate = moment.utc().subtract(1, "days").startOf("day").toDate();
 
-    /* ================= FETCH UNPROCESSED MATCHES ================= */
-
+    // =====================================================
+    // Fetch matches not processed yet
+    // =====================================================
     const fixtures = await Match.find({
-      formatDate: { $gte: cutoffDate }, // formatDate must be stored as UTC Date
+      formatDate: { $gte: cutoffDate },
       isPlayingPlayerFetched: false,
     }).lean();
 
@@ -159,20 +169,12 @@ export const GET = async (_req: NextRequest) => {
       });
     }
 
-    /* ================= FILTER ONLY STARTED MATCHES (UTC SAFE) ================= */
-
-    const nowUtc = moment.utc();
-
+    // =====================================================
+    // Check match started (PURE UTC COMPARISON)
+    // =====================================================
     const startedMatches = fixtures.filter((match: any) => {
-      if (!match.matchDate || !match.startTime) return false;
-
-      // Convert stored string into UTC datetime
-      const matchStartDateTime = moment.utc(
-        `${match.matchDate} ${match.startTime}`,
-        "ddd, D MMM YYYY h:mm A",
-      );
-
-      return matchStartDateTime.isSameOrBefore(nowUtc);
+      if (!match.formatDate) return false;
+      return new Date(match.formatDate) <= nowUtc;
     });
 
     if (!startedMatches.length) {
@@ -184,11 +186,11 @@ export const GET = async (_req: NextRequest) => {
 
     let processed = 0;
 
-    /* ================= CHUNK PROCESSING ================= */
-
+    // =====================================================
+    // CHUNK PROCESSING
+    // =====================================================
     for (let i = 0; i < startedMatches.length; i += CHUNK_SIZE) {
       const chunk: any = startedMatches.slice(i, i + CHUNK_SIZE);
-
       const matchBulkOps: any[] = [];
 
       for (const match of chunk) {
@@ -207,14 +209,14 @@ export const GET = async (_req: NextRequest) => {
             { $set: { squads: latestSquad } },
           );
 
-          // Mark match as processed
+          // Mark match processed
           matchBulkOps.push({
             updateOne: {
               filter: { _id: match._id },
               update: {
                 $set: {
                   isPlayingPlayerFetched: true,
-                  playingXiFetchedAt: new Date(), // UTC automatically
+                  playingXiFetchedAt: new Date(), // UTC always
                 },
               },
             },
@@ -231,11 +233,15 @@ export const GET = async (_req: NextRequest) => {
       }
     }
 
+    // =====================================================
+    // RESPONSE
+    // =====================================================
     return NextResponse.json({
       success: true,
       totalFound: fixtures.length,
       startedMatches: startedMatches.length,
       processed,
+      usedUtcTime: nowUtc.toISOString(),
     });
   } catch (error: any) {
     console.error("CRON ERROR ❌", error);

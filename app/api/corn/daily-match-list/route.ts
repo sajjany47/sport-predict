@@ -192,6 +192,7 @@ import { CrexV2Details } from "../../match-details/CrexV2Details";
 import MatchDetails from "../../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
 import moment from "moment";
+import { normalizeCrexMatchTime } from "@/lib/time/crexNormalizeTime";
 
 const CHUNK_SIZE = 10;
 
@@ -243,16 +244,12 @@ export const GET = async (req: NextRequest) => {
     const fixtures = rawFixtures.map((item: any) => {
       const url = NormalizeCrexUrl(item.url);
 
-      // Convert matchDate string → UTC Date object
-      const utcDate = moment
-        .utc(item.matchDate, "ddd, DD MMM YYYY")
-        .startOf("day")
-        .toDate();
+      const time = normalizeCrexMatchTime(item.matchDate, item.startTime);
 
       return {
         ...item,
+        ...time,
         url,
-        formatDate: utcDate,
       };
     });
 
