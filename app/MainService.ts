@@ -172,8 +172,9 @@ export const TicketList = async (payload: any) => {
 
 export const CornMatchList = async () => {
   try {
-    const response = await privateApi.get(`/api/corn/daily-match-list`, {
-      headers: getHeadersWithToken(),
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const response = await publicApi.get(`/api/corn/daily-match-list`, {
+      headers: { "Content-Type": "application/json", "x-timezone": timezone },
     });
     return response.data;
   } catch (error: any) {
@@ -183,8 +184,9 @@ export const CornMatchList = async () => {
 
 export const CornMatchStatus = async () => {
   try {
-    const response = await privateApi.get(`/api/corn/match-status`, {
-      headers: getHeadersWithToken(),
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const response = await publicApi.get(`/api/corn/match-status`, {
+      headers: { "Content-Type": "application/json", "x-timezone": timezone },
     });
     return response.data;
   } catch (error: any) {
