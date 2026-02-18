@@ -215,89 +215,93 @@ import Match from "./MatchModel";
 import MatchDetails from "../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
 import moment from "moment-timezone";
-import { utcToUser } from "@/lib/time/utcToUser";
+
+import {
+  getUserTimezone,
+  getUserDayUtcRange,
+  utcToUser,
+  getMatchStatus,
+} from "@/lib/time/timezone";
 
 export async function POST(request: Request) {
   await dbConnect();
 
   try {
     const body = await request.json();
-    const userTimezone = body?.timezone || "UTC";
 
-    /* ================= USER DAY RANGE → UTC ================= */
+    /* ======================================================
+       🌍 USER TIMEZONE
+    ====================================================== */
+    const userTimezone = getUserTimezone(body, request);
 
-    const fromDate = body?.fromDate
-      ? moment.tz(body.fromDate, userTimezone)
-      : moment.tz(userTimezone);
+    /* ======================================================
+       📅 USER DAY RANGE → UTC
+    ====================================================== */
+    const { startUtc, endUtc, userMoment } = getUserDayUtcRange(
+      body?.fromDate,
+      userTimezone,
+    );
 
-    const todayStart = fromDate.clone().startOf("day").utc().toDate();
-    const todayEnd = fromDate.clone().endOf("day").utc().toDate();
-
-    /* ================= DB MATCHES (UTC) ================= */
-
+    /* ======================================================
+       🧠 FETCH MATCHES (WIDE RANGE FOR RUNNING MATCHES)
+    ====================================================== */
     const dbMatches = await Match.aggregate([
       {
         $match: {
-          formatDate: { $gte: todayStart, $lte: todayEnd },
+          formatDate: {
+            $gte: moment(startUtc).subtract(12, "hours").toDate(),
+            $lte: moment(endUtc).add(12, "hours").toDate(),
+          },
         },
       },
       { $sort: { formatDate: 1 } },
     ]);
 
-    const filteredDbMatches = dbMatches.filter((match: any) => {
-      if (!match?.teams?.length) return false;
-      return (
-        match.teams[0]?.teamName !== "Team 1 (TBC)" &&
-        match.teams[1]?.teamShortName !== "Team"
-      );
-    });
-
-    /* ================= CREX LIVE STATUS ================= */
-
+    /* ======================================================
+       CREX LIVE STATUS MAP
+    ====================================================== */
     const crexRaw = await CrexList();
 
     const crexMap = new Map<string, any>();
     crexRaw.forEach((item: any) => {
-      const normalizedUrl = NormalizeCrexUrl(item.url);
-      crexMap.set(normalizedUrl, { ...item, url: normalizedUrl });
+      crexMap.set(NormalizeCrexUrl(item.url), item);
     });
 
-    /* ================= BUCKETS ================= */
-
+    /* ======================================================
+       RESULT BUCKETS
+    ====================================================== */
     const upcoming: any[] = [];
     const live: any[] = [];
     const completed: any[] = [];
 
-    const nowUtc = moment.utc();
-
-    /* ================= MAIN LOOP ================= */
-
+    /* ======================================================
+       MAIN LOOP
+    ====================================================== */
     await Promise.all(
-      filteredDbMatches.map(async (match: any) => {
+      dbMatches.map(async (match: any) => {
         try {
-          const crexMatch = crexMap.get(match.url);
+          // ensure same user day
+          const isSameDay = moment
+            .utc(match.formatDate)
+            .tz(userTimezone)
+            .isSame(userMoment, "day");
 
-          // 🔥 ONLY SOURCE OF TRUTH
-          const matchUtc = moment.utc(match.formatDate);
-          const time = utcToUser(match.formatDate, userTimezone);
+          if (!isSameDay) return;
+
+          const crexMatch = crexMap.get(match.url);
+          const userTime = utcToUser(match.formatDate, userTimezone);
 
           let scoreCard: any = null;
           let result = "";
-          let analysis: any = null;
 
-          /* ===== COMPLETED CHECK ===== */
-
-          if (matchUtc.isBefore(nowUtc)) {
-            const scoreCardUrl = match.url.replace(
-              /\/info(\/)?$/i,
-              "/scorecard",
-            );
-            scoreCard = await CrexMatchScorecard(scoreCardUrl);
-            result = scoreCard?.result?.toLowerCase() ?? "";
+          /* ===== SCORECARD FETCH ONLY IF STARTED ===== */
+          if (moment.utc(match.formatDate).isBefore(moment.utc())) {
+            const scoreUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
+            scoreCard = await CrexMatchScorecard(scoreUrl);
+            result = scoreCard?.result ?? "";
           }
 
-          /* ===== UPDATE TEAMS ===== */
-
+          /* ===== TEAMS UPDATE ===== */
           const updatedTeams = (match.teams ?? []).map((dbTeam: any) => {
             const scTeam = scoreCard?.teams?.find(
               (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
@@ -311,25 +315,38 @@ export async function POST(request: Request) {
           });
 
           /* ===== ANALYSIS ===== */
-
+          let prediction = null;
           const details = await MatchDetails.findOne({
             matchId: new mongoose.Types.ObjectId(match._id),
           });
 
           if (details) {
-            analysis = await GetNewAnalysis({
+            const analysis = await GetNewAnalysis({
               ...details,
               squads: details.squads,
               matchInfo: match,
             });
+
+            prediction = analysis
+              ? { team1: analysis.team1, team2: analysis.team2 }
+              : null;
           }
 
-          const basePayload = {
+          /* ===== STATUS ENGINE ===== */
+          const status = getMatchStatus(
+            match.formatDate,
+            crexMatch?.status,
+            result,
+          );
+
+          const payload = {
             ...match,
-            matchDate: time.matchDate,
-            startTime: time.startTime,
-            matchDateTimeUser: time.matchDateTime,
+            matchDate: userTime.matchDate,
+            startTime: userTime.startTime,
+            matchDateTimeUser: userTime.matchDateTime,
             teams: updatedTeams,
+            status,
+            prediction,
             score: scoreCard
               ? {
                   score: (scoreCard.teams ?? []).map((t: any) => ({
@@ -339,65 +356,24 @@ export async function POST(request: Request) {
                   result: scoreCard?.result ?? "",
                 }
               : null,
-            prediction: analysis
-              ? { team1: analysis.team1, team2: analysis.team2 }
-              : null,
           };
 
-          /* ===== RESULT STATUS ===== */
-
-          if (result.includes("abandoned")) {
-            completed.push({ ...basePayload, status: "ABANDONED" });
-            return;
-          }
-
-          if (result.includes("won")) {
-            completed.push({ ...basePayload, status: "COMPLETED" });
-            return;
-          }
-
-          /* ===== LIVE ===== */
-
-          if (crexMatch?.status === "LIVE") {
-            live.push({
-              ...basePayload,
-              status: "LIVE",
-              score: crexMatch?.score ?? basePayload.score,
-            });
-            return;
-          }
-
-          /* ===== UPCOMING ===== */
-
-          if (matchUtc.isAfter(nowUtc)) {
-            upcoming.push({
-              ...basePayload,
-              status: "UPCOMING",
-            });
-            return;
-          }
-
-          /* ===== FALLBACK ===== */
-
-          live.push({ ...basePayload, status: "LIVE" });
-        } catch (innerError) {
-          console.error("Match process error:", innerError);
+          if (status === "UPCOMING") upcoming.push(payload);
+          else if (status === "LIVE") live.push(payload);
+          else completed.push(payload);
+        } catch (err) {
+          console.error("Match process error:", err);
         }
       }),
     );
 
-    const fullData = [...upcoming, ...live, ...completed];
-
-    return Response.json(
-      {
-        data: fullData,
-        date: fromDate.tz(userTimezone).format("DD-MM-YYYY"),
-        timezone: userTimezone,
-        success: true,
-        message: "Schedule fetched successfully",
-      },
-      { status: 200 },
-    );
+    return Response.json({
+      success: true,
+      timezone: userTimezone,
+      date: userMoment.format("DD-MM-YYYY"),
+      data: [...upcoming, ...live, ...completed],
+      message: "Schedule fetched successfully",
+    });
   } catch (error: any) {
     console.error(error);
     return Response.json(
