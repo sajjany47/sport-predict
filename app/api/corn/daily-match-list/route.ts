@@ -185,14 +185,15 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
-import { FormatErrorMessage, NormalizeCrexUrl } from "@/lib/utils";
-import { CrexNext3DaysFixturesArray } from "../CrexNext3DayList";
 import Match from "../../schedule/MatchModel";
-import { CrexV2Details } from "../../match-details/CrexV2Details";
 import MatchDetails from "../../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
 import moment from "moment";
-import { normalizeCrexMatchTime } from "@/lib/time/crexNormalizeTime";
+import { FormatErrorMessage, NormalizeCrexUrl } from "@/lib/utils";
+import { CrexNext3DaysFixturesArray } from "../CrexNext3DayList";
+import { CrexV2Details } from "../../match-details/CrexV2Details";
+
+import { getRequestTimezone, crexToUTC } from "@/lib/time/crex-time";
 
 const CHUNK_SIZE = 10;
 
@@ -202,13 +203,17 @@ export const GET = async (req: NextRequest) => {
   try {
     console.log("CRON HIT ✅", new Date().toISOString());
 
-    // =====================================================
-    // 🗑 DELETE OLD MATCHES (UTC BASED)
-    // =====================================================
+    // =========================================
+    // 🌍 Detect timezone
+    // =========================================
+    const requestTimezone = getRequestTimezone(req);
+    console.log("SOURCE TIMEZONE:", requestTimezone);
 
+    // =========================================
+    // 🗑 DELETE OLD MATCHES (UTC SAFE)
+    // =========================================
     const cutoffDate = moment.utc().subtract(3, "days").startOf("day").toDate();
 
-    // 1️⃣ Find old matches
     const oldMatchList = await Match.find(
       { formatDate: { $lte: cutoffDate } },
       { _id: 1 },
@@ -216,54 +221,46 @@ export const GET = async (req: NextRequest) => {
 
     const matchIds = oldMatchList.map((m) => m._id);
 
-    // 2️⃣ Delete related MatchDetails
-    if (matchIds.length > 0) {
-      await MatchDetails.deleteMany({
-        matchId: { $in: matchIds },
-      });
+    if (matchIds.length) {
+      await MatchDetails.deleteMany({ matchId: { $in: matchIds } });
     }
 
-    // 3️⃣ Delete old matches
-    await Match.deleteMany({
-      formatDate: { $lte: cutoffDate },
-    });
+    await Match.deleteMany({ formatDate: { $lte: cutoffDate } });
 
-    // =====================================================
-    // 📥 FETCH FIXTURES (Already UTC from Vercel)
-    // =====================================================
-
+    // =========================================
+    // 📥 FETCH FIXTURES
+    // =========================================
     const rawFixtures = await CrexNext3DaysFixturesArray();
 
-    if (!rawFixtures?.length) {
-      return NextResponse.json({
-        success: true,
-        message: "No fixtures found",
-      });
-    }
+    if (!rawFixtures?.length)
+      return NextResponse.json({ success: true, message: "No fixtures found" });
 
     const fixtures = rawFixtures.map((item: any) => {
       const url = NormalizeCrexUrl(item.url);
 
-      const time = normalizeCrexMatchTime(item.matchDate, item.startTime);
+      // ⭐ timezone aware conversion
+      const time = crexToUTC(item.matchDate, item.startTime, requestTimezone);
 
       return {
         ...item,
-        ...time,
         url,
+        formatDate: time.utcDate,
+        matchDate: time.utcMatchDate,
+        startTime: time.utcStartTime,
+        sourceTimezone: time.sourceTimezone,
       };
     });
 
-    // =====================================================
+    // =========================================
     // 🔁 UPSERT MATCHES
-    // =====================================================
-
+    // =========================================
     const bulkOps = fixtures.map((item: any) => ({
       updateOne: {
         filter: { url: item.url },
         update: {
           $setOnInsert: {
             ...item,
-            createdAt: new Date(), // always UTC in JS
+            createdAt: new Date(),
             isDetailsFetched: false,
           },
         },
@@ -273,27 +270,22 @@ export const GET = async (req: NextRequest) => {
 
     await Match.bulkWrite(bulkOps);
 
-    // =====================================================
+    // =========================================
     // 📌 FETCH UNPROCESSED MATCHES
-    // =====================================================
+    // =========================================
+    const dbMatches = await Match.find({ isDetailsFetched: false }).lean();
 
-    const dbMatches = await Match.find({
-      isDetailsFetched: false,
-    }).lean();
-
-    if (!dbMatches.length) {
+    if (!dbMatches.length)
       return NextResponse.json({
         success: true,
         message: "No pending match details",
       });
-    }
 
     const successIds: mongoose.Types.ObjectId[] = [];
 
-    // =====================================================
-    // ⚡ PROCESS DETAILS IN CHUNKS
-    // =====================================================
-
+    // =========================================
+    // ⚡ DETAILS SCRAPER
+    // =========================================
     for (let i = 0; i < dbMatches.length; i += CHUNK_SIZE) {
       const chunk: any = dbMatches.slice(i, i + CHUNK_SIZE);
       const detailOps: any[] = [];
@@ -301,7 +293,6 @@ export const GET = async (req: NextRequest) => {
       for (const match of chunk) {
         try {
           const crexOverallStats = await CrexV2Details(match.url);
-
           if (!crexOverallStats) continue;
 
           const squads = (crexOverallStats.squads ?? []).map((team: any) => ({
@@ -334,7 +325,7 @@ export const GET = async (req: NextRequest) => {
                   matchId: match._id,
                   ...crexOverallStats,
                   squads,
-                  updatedAt: new Date(), // UTC
+                  updatedAt: new Date(),
                 },
               },
               upsert: true,
@@ -347,24 +338,16 @@ export const GET = async (req: NextRequest) => {
         }
       }
 
-      if (detailOps.length) {
-        await MatchDetails.bulkWrite(detailOps);
-      }
+      if (detailOps.length) await MatchDetails.bulkWrite(detailOps);
     }
 
-    // =====================================================
-    // ✅ MARK MATCHES AS FETCHED
-    // =====================================================
-
+    // =========================================
+    // ✅ MARK FETCHED
+    // =========================================
     if (successIds.length) {
       await Match.updateMany(
         { _id: { $in: successIds } },
-        {
-          $set: {
-            isDetailsFetched: true,
-            detailsFetchedAt: new Date(), // UTC
-          },
-        },
+        { $set: { isDetailsFetched: true, detailsFetchedAt: new Date() } },
       );
     }
 
@@ -372,6 +355,7 @@ export const GET = async (req: NextRequest) => {
       success: true,
       fixturesInserted: fixtures.length,
       detailsFetched: successIds.length,
+      timezoneUsed: requestTimezone,
     });
   } catch (error) {
     console.error("CRON ERROR ❌", error);
