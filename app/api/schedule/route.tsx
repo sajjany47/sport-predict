@@ -6,18 +6,22 @@ import { GetNewAnalysis } from "@/app/matches/[id]/GetNewAnanlysis";
 import Match from "./MatchModel";
 import MatchDetails from "../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
-import moment from "@/lib/moment";
+import moment from "moment-timezone";
 
 export async function POST(request: Request) {
   await dbConnect();
 
   try {
     const body = await request.json();
+    const timezone = body?.timezone || "UTC";
 
     const fromDate = body?.fromDate ? moment(body.fromDate) : moment();
+    const base = body?.fromDate
+      ? moment.tz(body?.fromDate, timezone)
+      : moment.tz(timezone);
 
-    const todayStart = moment(fromDate).startOf("day").toDate();
-    const todayEnd = moment(fromDate).endOf("day").toDate();
+    const todayStart = base.startOf("day").toDate();
+    const todayEnd = base.endOf("day").toDate();
 
     /* ================= DB MATCHES ================= */
 
@@ -66,10 +70,17 @@ export async function POST(request: Request) {
         try {
           const crexMatch = crexMap.get(match.url);
 
-          const matchDateTime = moment(
-            `${match.matchDate} ${match.startTime}`,
-            "ddd, DD MMM YYYY h:mm A",
-          );
+          // const matchDateTime = moment(
+          //   `${match.matchDate} ${match.startTime}`,
+          //   "ddd, DD MMM YYYY h:mm A",
+          // );
+
+          const matchDateTime = moment
+            .utc(
+              `${match.matchDate} ${match.startTime}`,
+              "ddd, DD MMM YYYY h:mm A",
+            )
+            .tz(timezone);
 
           let scoreCard: any = null;
           let result = "";
@@ -117,6 +128,9 @@ export async function POST(request: Request) {
 
           const basePayload = {
             ...match,
+            matchDate: matchDateTime.format("ddd, DD MMM YYYY"),
+            startTime: matchDateTime.format("hh:mm A"),
+            matchDateTimeUser: matchDateTime.format("DD MMM YYYY, hh:mm A"),
             teams: updatedTeams,
             score: scoreCard
               ? {
@@ -187,10 +201,20 @@ export async function POST(request: Request) {
     );
 
     /* ================= RESPONSE ================= */
+    const sortedUpcoming = upcoming.sort((a, b) =>
+      moment(a.matchDateTimeUser).diff(moment(b.matchDateTimeUser)),
+    );
+
+    const sortedLive = live.sort((a, b) =>
+      moment(a.matchDateTimeUser).diff(moment(b.matchDateTimeUser)),
+    );
+    const sortedCompleted = completed.sort((a, b) =>
+      moment(b.matchDateTimeUser).diff(moment(a.matchDateTimeUser)),
+    );
 
     return Response.json(
       {
-        data: [...upcoming, ...live, ...completed],
+        data: [...sortedUpcoming, ...sortedLive, ...sortedCompleted],
         date: moment(fromDate).format("DD-MM-YYYY"),
         success: true,
         message: "Schedule fetched successfully",
