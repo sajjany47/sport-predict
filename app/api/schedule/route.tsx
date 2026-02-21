@@ -6,8 +6,8 @@ import { GetNewAnalysis } from "@/app/matches/[id]/GetNewAnanlysis";
 import Match from "./MatchModel";
 import MatchDetails from "../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
-// import moment from "moment-timezone";
-import moment from "moment";
+import moment from "moment-timezone";
+// import moment from "moment";
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -17,11 +17,11 @@ export async function POST(request: Request) {
     const timezone = body?.timezone || "UTC";
 
     const fromDate = body?.fromDate ? moment(body.fromDate) : moment();
-    // const base = body?.fromDate
-    //   ? moment.tz(body?.fromDate, timezone)
-    //   : moment.tz(timezone);
+    const base = body?.fromDate
+      ? moment.tz(body?.fromDate, timezone)
+      : moment.tz(timezone);
 
-    const base = body?.fromDate ? moment(body?.fromDate) : moment();
+    // const base = body?.fromDate ? moment(body?.fromDate) : moment();
 
     const todayStart = base.startOf("day").toDate();
     const todayEnd = base.endOf("day").toDate();
@@ -73,17 +73,17 @@ export async function POST(request: Request) {
         try {
           const crexMatch = crexMap.get(match.url);
 
-          const matchDateTime = moment(
-            `${match.matchDate} ${match.startTime}`,
-            "ddd, DD MMM YYYY h:mm A",
-          );
+          // const matchDateTime = moment(
+          //   `${match.matchDate} ${match.startTime}`,
+          //   "ddd, DD MMM YYYY h:mm A",
+          // );
 
-          // const matchDateTime = moment
-          //   .utc(
-          //     `${match.matchDate} ${match.startTime}`,
-          //     "ddd, DD MMM YYYY h:mm A",
-          //   )
-          //   .tz(timezone);
+          const matchDateTime = moment
+            .utc(
+              `${match.matchDate} ${match.startTime}`,
+              "ddd, DD MMM YYYY h:mm A",
+            )
+            .tz(timezone);
 
           let scoreCard: any = null;
           let result = "";
