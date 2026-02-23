@@ -7,6 +7,7 @@ import Match from "./MatchModel";
 import MatchDetails from "../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
 import moment from "moment-timezone";
+import { TeamRank } from "../match-details/TeamRank";
 // import moment from "moment";
 
 export async function POST(request: Request) {
@@ -15,7 +16,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const timezone = body?.timezone || "UTC";
-
+    // const a = await TeamRank("India Women", "WOMEN", "ODI");
+    // console.log(a);
     const fromDate = body?.fromDate ? moment(body.fromDate) : moment();
     const base = body?.fromDate
       ? moment.tz(body?.fromDate, timezone)

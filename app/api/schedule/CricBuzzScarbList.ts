@@ -1,7 +1,7 @@
 import { GetHtml } from "@/lib/utils";
 import moment from "moment-timezone";
 
-const extractKeyObject = (text: any, key: any) => {
+export const ExtractKeyObject = (text: any, key: any) => {
   if (!text || !key) return null;
 
   // find the key (try with quotes)
@@ -58,7 +58,7 @@ const extractKeyObject = (text: any, key: any) => {
             try {
               const alt = cleaned.replace(
                 /(['"])?([a-zA-Z0-9_]+)(['"])?:/g,
-                '"$2":'
+                '"$2":',
               );
               return JSON.parse(alt);
             } catch (e2) {
@@ -88,12 +88,12 @@ const extractKeyObject = (text: any, key: any) => {
 /* ---------- New helper functions for robust parsing ---------- */
 
 /** Find matching close char for an opener (supports nested, respects strings/escapes) */
-function findMatchingClose(
+export const FindMatchingClose = (
   text: string,
   startIdx: number,
   openChar = "[",
-  closeChar = "]"
-) {
+  closeChar = "]",
+) => {
   let i = startIdx;
   let depth = 0;
   let inString = false;
@@ -123,10 +123,10 @@ function findMatchingClose(
     prevChar = ch;
   }
   return -1;
-}
+};
 
 /** Split top-level array contents into items (handles nested arrays/objects and strings) */
-function splitTopLevelArrayItems(arrayText: string): string[] {
+export const SplitTopLevelArrayItems = (arrayText: string) => {
   const txt = arrayText.trim().replace(/^\[/, "").replace(/\]$/, "");
   const items: string[] = [];
 
@@ -166,10 +166,10 @@ function splitTopLevelArrayItems(arrayText: string): string[] {
   const last = txt.slice(start).trim();
   if (last.length) items.push(last);
   return items;
-}
+};
 
 /** Unescape a JS string literal (single- or double-quoted). Returns null if not a quoted string */
-function unescapeJsStringLiteral(item: string): string | null {
+export const UnescapeJsStringLiteral = (item: string): string | null => {
   const trimmed = item.trim();
   if (!trimmed) return null;
   const first = trimmed[0];
@@ -190,16 +190,16 @@ function unescapeJsStringLiteral(item: string): string | null {
     }
   }
   return null;
-}
+};
 
 /* ---------- Updated main function ---------- */
 
 export async function extractAndTransformSchedule(
   fromDate: Date | null,
-  timeZone: string = "Asia/Kolkata"
+  timeZone: string = "Asia/Kolkata",
 ): Promise<any> {
   const $: any = await GetHtml(
-    "https://www.cricbuzz.com/cricket-schedule/upcoming-series/all"
+    "https://www.cricbuzz.com/cricket-schedule/upcoming-series/all",
   );
 
   let scheduleData: any = null;
@@ -224,23 +224,23 @@ export async function extractAndTransformSchedule(
     const firstBracket = scriptContent.indexOf("[", pushIdx);
     if (firstBracket === -1) return;
 
-    const bracketClose = findMatchingClose(
+    const bracketClose = FindMatchingClose(
       scriptContent,
       firstBracket,
       "[",
-      "]"
+      "]",
     );
     if (bracketClose === -1) return;
 
     const arrayText = scriptContent.slice(firstBracket, bracketClose + 1);
 
     // split into top-level items
-    const items = splitTopLevelArrayItems(arrayText);
+    const items = SplitTopLevelArrayItems(arrayText);
 
     // try to unescape any quoted item containing matchScheduleMap
     let candidateStr: string | null = null;
     for (let it of items) {
-      const un = unescapeJsStringLiteral(it);
+      const un = UnescapeJsStringLiteral(it);
       if (un && un.includes("matchScheduleMap")) {
         candidateStr = un;
         break;
@@ -266,7 +266,7 @@ export async function extractAndTransformSchedule(
 
     // Now attempt to find scheduleData object in candidateStr
     const key = "scheduleData";
-    const parsed = extractKeyObject(candidateStr, key);
+    const parsed = ExtractKeyObject(candidateStr, key);
     if (parsed) {
       // extractKeyObject returns parsed object when key is found
       scheduleData = parsed;
@@ -287,7 +287,7 @@ export async function extractAndTransformSchedule(
         try {
           const alt = sdMatch[1].replace(
             /(['"])?([a-zA-Z0-9_]+)(['"])?:/g,
-            '"$2":'
+            '"$2":',
           );
           scheduleData = JSON.parse(alt);
           return false;
@@ -371,7 +371,7 @@ export async function extractAndTransformSchedule(
           tour: series.seriesCategory ?? null,
           format: series.seriesName?.toLowerCase().includes("t10")
             ? "T10"
-            : match.matchFormat ?? null,
+            : (match.matchFormat ?? null),
           sport: "cricket",
           teams: [makeTeam(match.team1 || {}), makeTeam(match.team2 || {})],
         };
@@ -385,7 +385,7 @@ export async function extractAndTransformSchedule(
     ? matches.filter(
         (item: any) =>
           moment(item.startTime, "DD MMM YYYY, HH:mm").format("YYYY-MM-DD") ===
-          moment(fromDate).format("YYYY-MM-DD")
+          moment(fromDate).format("YYYY-MM-DD"),
       )
     : matches;
   return filterData;
