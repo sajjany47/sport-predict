@@ -1368,42 +1368,50 @@ export const NormalizeCrexUrl = (url: string) => {
 export const GetTeamShortName = (teamName: string): string => {
   if (!teamName || typeof teamName !== "string") return "";
 
-  const isWomen = teamName.toLowerCase().includes("women");
+  let name = teamName.toUpperCase().trim();
 
-  // Remove "Women"
-  const cleanName = teamName.replace(/women/i, "").trim();
+  /* ---------- detect women ---------- */
+  const isWomen = /\bWOMEN\b|\bW\b/.test(name);
 
-  // ✅ Official ICC country codes
-  const countryCodes: Record<string, string> = {
-    "South Africa": "SA",
-    India: "IND",
-    Pakistan: "PAK",
-    Australia: "AUS",
-    England: "ENG",
-    "New Zealand": "NZ",
-    "Sri Lanka": "SL",
-    Bangladesh: "BAN",
-    "West Indies": "WI",
-    Afghanistan: "AFG",
-    Zimbabwe: "ZIM",
-    Netherlands: "NED",
-    Ireland: "IRE",
-  };
+  name = name
+    .replace(/\bWOMEN\b|\bW\b/g, "")
+    .replace(/[^A-Z\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  // 1️⃣ If international team → use official code
-  if (countryCodes[cleanName]) {
-    return isWomen ? `${countryCodes[cleanName]}-W` : countryCodes[cleanName];
+  const words = name.split(" ").filter(Boolean);
+
+  let code = "";
+
+  /* ---------- multi word countries ---------- */
+  if (words.length >= 2) {
+    // take first letter of each word
+    code = words.map((w) => w[0]).join("");
+
+    // if more than 2 letters keep 2 (SL, NZ, SA, WI, HK)
+    if (code.length > 2) code = code.slice(0, 2);
+  } else if (words.length === 1) {
+    /* ---------- single word countries ---------- */
+    const w = words[0];
+
+    // remove vowels except first
+    const consonants = w[0] + w.slice(1).replace(/[AEIOU]/g, "");
+
+    code = consonants.slice(0, 3);
+
+    // if still small, pad from name
+    if (code.length < 3) code = w.slice(0, 3);
   }
 
-  // 2️⃣ Otherwise generate initials for domestic/franchise teams
-  const words = cleanName.split(" ").filter((word) => word.length > 0);
+  /* ---------- franchise fallback ---------- */
+  if (!code) {
+    code = words
+      .map((w) => w[0])
+      .join("")
+      .slice(0, 3);
+  }
 
-  const initials = words
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
-
-  return isWomen ? `${initials}-W` : initials;
+  return isWomen ? `${code}-W` : code;
 };
 
 // {

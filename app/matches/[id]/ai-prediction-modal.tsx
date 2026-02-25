@@ -194,6 +194,7 @@ const AIPredictionModal: React.FC<{
 
       // 3️⃣ generate prediction
       const data: any = await GetNewAnalysis(match);
+      console.log(data);
 
       setPredictionData(data);
 
