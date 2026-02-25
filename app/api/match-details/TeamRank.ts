@@ -63,29 +63,32 @@ export const TeamRank = async (
     type === "MEN"
       ? "https://www.cricbuzz.com/cricket-stats/icc-rankings/men/teams"
       : "https://www.cricbuzz.com/cricket-stats/icc-rankings/women/teams";
+  try {
+    const $: any = await GetHtml(url);
 
-  const $: any = await GetHtml(url);
+    const data = extractRankingData($);
+    if (!data) return null;
 
-  const data = extractRankingData($);
-  if (!data) return null;
+    const formatKey = mode.toLowerCase();
+    const rankingArray = data?.[formatKey]?.rank;
+    if (!rankingArray) return null;
 
-  const formatKey = mode.toLowerCase();
-  const rankingArray = data?.[formatKey]?.rank;
-  if (!rankingArray) return null;
+    const team = rankingArray.find(
+      (t: any) => t.name.toLowerCase() === teamName.toLowerCase(),
+    );
 
-  const team = rankingArray.find(
-    (t: any) => t.name.toLowerCase() === teamName.toLowerCase(),
-  );
+    if (!team) return null;
 
-  if (!team) return null;
-
-  return {
-    rank: Number(team.rank),
-    team: team.name,
-    rating: Number(team.rating) || 0,
-    points: Number(team.points) || 0,
-    matches: Number(team.matches) || 0,
-    mode,
-    type,
-  };
+    return {
+      rank: Number(team.rank),
+      team: team.name,
+      rating: Number(team.rating) || 0,
+      points: Number(team.points) || 0,
+      matches: Number(team.matches) || 0,
+      mode,
+      type,
+    };
+  } catch (error) {
+    return null;
+  }
 };

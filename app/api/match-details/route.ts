@@ -1,19 +1,18 @@
 import { NextRequest } from "next/server";
 import mongoose from "mongoose";
-
 import dbConnect from "../db";
 import { FormatErrorMessage } from "@/lib/utils";
-
 import { CrexV2Details } from "./CrexV2Details";
 import { SquadList } from "./SquadList";
 import MatchDetails from "./MatchDetailsModel";
+import { TeamRank } from "./TeamRank";
 
 const cleanPlayer = (player: any) => ({
   ...player,
   careerStats: {
-    ...player.careerStats,
-    bowling: (player.careerStats?.bowling ?? []).filter(
-      (item: any) => !item.format?.toLowerCase().includes("debut"),
+    ...player?.careerStats,
+    bowling: (player?.careerStats?.bowling ?? []).filter(
+      (item: any) => !item?.format?.toLowerCase()?.includes("debut"),
     ),
   },
 });
@@ -24,6 +23,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // ✅ Validate Match ID
     if (!body?._id) {
       return Response.json(
         { success: false, error: "Match id required" },
@@ -33,8 +33,9 @@ export async function POST(request: NextRequest) {
 
     const matchId = new mongoose.Types.ObjectId(body._id);
 
+    // ✅ Find Match
     const [findMatch] = await MatchDetails.aggregate([
-      { $match: { _id: matchId } },
+      { $match: { matchId: matchId } },
       {
         $lookup: {
           from: "matches",
@@ -49,29 +50,50 @@ export async function POST(request: NextRequest) {
           preserveNullAndEmptyArrays: true,
         },
       },
-      { $limit: 1 },
     ]);
+
+    /**
+     * ===============================
+     * PREPARE TEAM WITH RANK
+     * ===============================
+     */
+
+    const matchFormat = body?.format;
+
+    const prepareTeam = await Promise.all(
+      (body?.teams ?? []).map(async (team: any) => {
+        const teamRank = await TeamRank(
+          team.teamName,
+          team.teamName?.includes("Women") ? "WOMEN" : "MEN",
+          matchFormat,
+        );
+
+        return {
+          ...team,
+          teamRank,
+        };
+      }),
+    );
+
+    const matchInfo = {
+      ...body,
+      teams: prepareTeam,
+    };
 
     /**
      * ===============================
      * IF MATCH NOT FOUND → SCRAPE
      * ===============================
      */
-    if (!findMatch) {
-      if (!body?.url) {
-        return Response.json(
-          { success: false, error: "Match url required" },
-          { status: 400 },
-        );
-      }
 
+    if (!findMatch) {
       const crexOverallStats: any = await CrexV2Details(body.url);
 
       const cleanedSquads = (crexOverallStats?.squads ?? []).map(
         (team: any) => ({
           ...team,
-          playingPlayers: (team.playingPlayers ?? []).map(cleanPlayer),
-          benchPlayers: (team.benchPlayers ?? []).map(cleanPlayer),
+          playingPlayers: (team?.playingPlayers ?? []).map(cleanPlayer),
+          benchPlayers: (team?.benchPlayers ?? []).map(cleanPlayer),
         }),
       );
 
@@ -80,49 +102,47 @@ export async function POST(request: NextRequest) {
           data: {
             ...crexOverallStats,
             squads: cleanedSquads,
+            matchInfo,
           },
         },
         { status: 200 },
       );
-    } else {
-      if (findMatch.match.isPlayingPlayerFetched) {
-        const latestSquad = await SquadList(
-          findMatch.match?.url,
-          findMatch.squads,
-        );
-
-        return Response.json(
-          {
-            data: {
-              ...findMatch,
-              // squads: latestSquad,
-            },
-          },
-          { status: 200 },
-        );
-      } else {
-        const latestSquad = await SquadList(
-          findMatch.match?.url,
-          findMatch.squads,
-        );
-
-        return Response.json(
-          {
-            data: {
-              ...findMatch,
-              squads: latestSquad,
-            },
-          },
-          { status: 200 },
-        );
-      }
     }
 
     /**
      * ===============================
-     * IF MATCH FOUND → UPDATE SQUAD
+     * IF MATCH FOUND
      * ===============================
      */
+
+    if (findMatch?.match?.isPlayingPlayerFetched) {
+      return Response.json(
+        {
+          data: {
+            ...findMatch,
+            matchInfo,
+          },
+        },
+        { status: 200 },
+      );
+    }
+
+    // 🔄 Fetch Latest Squad
+    const latestSquad = await SquadList(
+      findMatch?.match?.url,
+      findMatch?.squads,
+    );
+
+    return Response.json(
+      {
+        data: {
+          ...findMatch,
+          squads: latestSquad,
+          matchInfo,
+        },
+      },
+      { status: 200 },
+    );
   } catch (error: any) {
     return Response.json(
       { success: false, error: FormatErrorMessage(error) },

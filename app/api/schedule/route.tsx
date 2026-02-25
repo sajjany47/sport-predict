@@ -1,4 +1,8 @@
-import { FormatErrorMessage, NormalizeCrexUrl } from "@/lib/utils";
+import {
+  FormatErrorMessage,
+  GetTeamShortName,
+  NormalizeCrexUrl,
+} from "@/lib/utils";
 import { CrexList } from "./CrexList";
 import dbConnect from "../db";
 import { CrexMatchScorecard } from "./CrexScore";
@@ -7,8 +11,6 @@ import Match from "./MatchModel";
 import MatchDetails from "../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
 import moment from "moment-timezone";
-import { TeamRank } from "../match-details/TeamRank";
-// import moment from "moment";
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -112,7 +114,7 @@ export async function POST(request: Request) {
 
             return {
               ...dbTeam,
-              teamShortName: scTeam?.name ?? dbTeam.teamShortName,
+              teamShortName: scTeam?.name ?? GetTeamShortName(dbTeam.teamName),
               cricketScore: scTeam ? `${scTeam.score} (${scTeam.overs})` : null,
             };
           });

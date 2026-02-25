@@ -1365,6 +1365,47 @@ export const NormalizeCrexUrl = (url: string) => {
     .replace(/\/info(\/)?$/i, "/info"); // ensure ending clean
 };
 
+export const GetTeamShortName = (teamName: string): string => {
+  if (!teamName || typeof teamName !== "string") return "";
+
+  const isWomen = teamName.toLowerCase().includes("women");
+
+  // Remove "Women"
+  const cleanName = teamName.replace(/women/i, "").trim();
+
+  // ✅ Official ICC country codes
+  const countryCodes: Record<string, string> = {
+    "South Africa": "SA",
+    India: "IND",
+    Pakistan: "PAK",
+    Australia: "AUS",
+    England: "ENG",
+    "New Zealand": "NZ",
+    "Sri Lanka": "SL",
+    Bangladesh: "BAN",
+    "West Indies": "WI",
+    Afghanistan: "AFG",
+    Zimbabwe: "ZIM",
+    Netherlands: "NED",
+    Ireland: "IRE",
+  };
+
+  // 1️⃣ If international team → use official code
+  if (countryCodes[cleanName]) {
+    return isWomen ? `${countryCodes[cleanName]}-W` : countryCodes[cleanName];
+  }
+
+  // 2️⃣ Otherwise generate initials for domestic/franchise teams
+  const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+  const initials = words
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+
+  return isWomen ? `${initials}-W` : initials;
+};
+
 // {
 //   "crons": [
 //     {

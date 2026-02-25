@@ -55,9 +55,9 @@ const MatchDetailsPage = () => {
       .then((res) => {
         setMatchData({
           ...res.data,
-          matchInfo: {
-            ...selectedMatch,
-          },
+          // matchInfo: {
+          //   ...selectedMatch,
+          // },
         });
         setIsLoading(false);
       })
