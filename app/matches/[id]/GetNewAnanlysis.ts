@@ -77,7 +77,7 @@ const getPlayerBattingStats = (player: any) => {
 
   const role = normalizeRole(player.role);
   let roleMultiplier =
-    role === "Batter" ? 1.15 : role === "All Rounder" ? 1.05 : 0.7;
+    role === "Batter" ? 1.8 : role === "All Rounder" ? 1.2 : 0.3;
 
   if (player?.careerStats?.batting?.length) {
     const career = player.careerStats.batting[0];
@@ -123,7 +123,7 @@ const getPlayerBowlingStats = (player: any) => {
 
   const role = normalizeRole(player.role);
   let roleMultiplier =
-    role === "Bowler" ? 1.15 : role === "All Rounder" ? 1.05 : 0.6;
+    role === "Bowler" ? 1.8 : role === "All Rounder" ? 1.2 : 0.1;
 
   if (player?.careerStats?.bowling?.length) {
     const career = player.careerStats.bowling[0];
@@ -173,7 +173,7 @@ const squadAnanlysis = (team: any, matchDescription: string) => {
   return {
     predictedScore: safe(runRate * overs.ballsPerInnings),
     totalTeamRunsConced:
-      teamWickets > 0 ? safe((teamRunsConced / teamWickets) * 10) : 0,
+      teamWickets > 0 ? safe((teamRunsConced / teamWickets) * 5) : 0,
     teamWicket: teamWickets,
   };
 };
@@ -220,18 +220,58 @@ export const GetNewAnalysis = async (data: any) => {
   const teamA = data.squads[0];
   const teamB = data.squads[1];
 
+  const teamRank = data.matchInfo.teams;
+
   const matchDescription = data.matchInfo.matchDescription;
 
-  const teamAScore = squadAnanlysis(teamA, matchDescription);
-  const teamBScore = squadAnanlysis(teamB, matchDescription);
+  let teamAScore = squadAnanlysis(teamA, matchDescription);
+  let teamBScore = squadAnanlysis(teamB, matchDescription);
+
+  //------------Factor added to prediction----------------
+
+  let teamARankFactor = 1;
+  let teamBRankFactor = 1;
+
+  if (teamRank[0]?.teamRank && teamRank[1]?.teamRank) {
+    const findTeamARank = teamRank.find(
+      (item: any) => item.teamShortName === teamA.teamName,
+    );
+
+    const findTeamBRank = teamRank.find(
+      (item: any) => item.teamShortName === teamB.teamName,
+    );
+
+    if (findTeamARank && findTeamBRank) {
+      const aRank = Number(findTeamARank.teamRank.rank);
+      const bRank = Number(findTeamBRank.teamRank.rank);
+
+      // convert rank to strength
+      const strengthA = 1 / aRank;
+      const strengthB = 1 / bRank;
+
+      const totalStrength = strengthA + strengthB;
+
+      const probA = strengthA / totalStrength;
+      const probB = strengthB / totalStrength;
+
+      // control how much rank affects match (20% recommended)
+      const RANK_IMPACT_WEIGHT = 0.9;
+
+      // final factor around 1
+      teamARankFactor = 1 + (probA - 0.5) * 2 * RANK_IMPACT_WEIGHT;
+      teamBRankFactor = 1 + (probB - 0.5) * 2 * RANK_IMPACT_WEIGHT;
+    }
+  }
+
+  if (data?.teamForm && data?.teamForm.length > 0) {
+  }
+
+  //-----------------close-------Factor added to prediction-------------
 
   let teamAPredicted =
-    (teamAScore.predictedScore + teamBScore.totalTeamRunsConced) / 2 -
-    teamBScore.teamWicket * 5;
-
+    (teamAScore.predictedScore + teamBScore.totalTeamRunsConced) / 2;
   let teamBPredicted =
-    (teamBScore.predictedScore + teamAScore.totalTeamRunsConced) / 2 -
-    teamAScore.teamWicket * 5;
+    (teamBScore.predictedScore + teamAScore.totalTeamRunsConced) / 2;
 
   teamAPredicted = Math.max(teamAPredicted, 80);
   teamBPredicted = Math.max(teamBPredicted, 80);
