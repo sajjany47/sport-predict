@@ -249,6 +249,18 @@ export const CalculateTeamFormStats = (team: any) => {
   };
 };
 
+const getRankFactor = (rank: number) => {
+  if (!rank || rank <= 1) return 1;
+
+  const k = 0.045;
+  const p = 1.15;
+
+  const factor = Math.exp(-k * Math.pow(rank - 1, p));
+
+  // safety clamp
+  return Math.max(0.1, Math.min(1, factor));
+};
+
 /* =========================
    Final Match Analysis
 ========================= */
@@ -288,24 +300,17 @@ export const GetNewAnalysis = async (data: any) => {
       const aRank = Number(findTeamARank.teamRank.rank);
       const bRank = Number(findTeamBRank.teamRank.rank);
 
-      // convert rank to strength
-      const strengthA = 1 / aRank;
-      const strengthB = 1 / bRank;
+      const factorA = getRankFactor(aRank);
+      const factorB = getRankFactor(bRank);
 
-      const totalStrength = strengthA + strengthB;
+      // normalize inside same match level
+      const matchBaseline = (factorA + factorB) / 2;
 
-      const probA = strengthA / totalStrength;
-      const probB = strengthB / totalStrength;
+      const normalizedA = factorA / matchBaseline;
+      const normalizedB = factorB / matchBaseline;
 
-      // control how much rank affects match (20% recommended)
-      const RANK_IMPACT_WEIGHT = 0.9;
-
-      // final factor around 1
-      teamARankFactor = 1 + (probA - 0.5) * 2 * RANK_IMPACT_WEIGHT;
-      teamBRankFactor = 1 + (probB - 0.5) * 2 * RANK_IMPACT_WEIGHT;
-
-      // teamAPredicted = teamAPredicted * teamARankFactor;
-      // teamBPredicted = teamBPredicted * teamBRankFactor;
+      teamAPredicted *= normalizedA;
+      teamBPredicted *= normalizedB;
     }
   }
 
@@ -331,6 +336,7 @@ export const GetNewAnalysis = async (data: any) => {
         (teamBFormStats.avgScore + teamAFormStats.avgConceded) / 2) /
       2;
   }
+
   return { teamAPredicted, teamBPredicted };
 
   //-----------------close-------Factor added to prediction-------------
