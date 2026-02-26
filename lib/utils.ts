@@ -1395,9 +1395,9 @@ export const GetTeamShortName = (teamName: string): string => {
     const w = words[0];
 
     // remove vowels except first
-    const consonants = w[0] + w.slice(1).replace(/[AEIOU]/g, "");
+    // const consonants = w[0] + w.slice(1).replace(/[AEIOU]/g, "");
 
-    code = consonants.slice(0, 3);
+    code = w.slice(0, 3);
 
     // if still small, pad from name
     if (code.length < 3) code = w.slice(0, 3);
