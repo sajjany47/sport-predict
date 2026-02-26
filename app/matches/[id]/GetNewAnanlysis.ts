@@ -212,6 +212,43 @@ const getTopPlayer = (team: any, type: "bat" | "bowl") => {
   });
 };
 
+export const CalculateTeamFormStats = (team: any) => {
+  let totalScored = 0;
+  let totalConceded = 0;
+  let totalMatches = 0;
+  let wins = 0;
+
+  team.matches.forEach((match: any) => {
+    const teamData = match.teams.find((t: any) => t.name === team.teamId);
+
+    const opponentData = match.teams.find((t: any) => t.name !== team.teamId);
+
+    if (teamData && opponentData) {
+      const scoredRuns = parseInt(teamData.score.split("/")[0]);
+      const concededRuns = parseInt(opponentData.score.split("/")[0]);
+
+      totalScored += scoredRuns;
+      totalConceded += concededRuns;
+      totalMatches++;
+
+      if (match.result === "W") {
+        wins++;
+      }
+    }
+  });
+
+  const avgScore = totalScored / totalMatches;
+  const avgConceded = totalConceded / totalMatches;
+  const winPercentage = (wins / totalMatches) * 100;
+
+  return {
+    avgScore,
+    avgConceded,
+    winPercentage,
+    totalMatches,
+  };
+};
+
 /* =========================
    Final Match Analysis
 ========================= */
@@ -227,10 +264,16 @@ export const GetNewAnalysis = async (data: any) => {
   let teamAScore = squadAnanlysis(teamA, matchDescription);
   let teamBScore = squadAnanlysis(teamB, matchDescription);
 
-  //------------Factor added to prediction----------------
+  let teamAPredicted =
+    (teamAScore.predictedScore + teamBScore.totalTeamRunsConced) / 2;
+  let teamBPredicted =
+    (teamBScore.predictedScore + teamAScore.totalTeamRunsConced) / 2;
 
+  //------------Factor added to prediction----------------
   let teamARankFactor = 1;
   let teamBRankFactor = 1;
+  let teamAWinPercentage = 50;
+  let teamBWinPercentage = 50;
 
   if (teamRank[0]?.teamRank && teamRank[1]?.teamRank) {
     const findTeamARank = teamRank.find(
@@ -260,18 +303,37 @@ export const GetNewAnalysis = async (data: any) => {
       // final factor around 1
       teamARankFactor = 1 + (probA - 0.5) * 2 * RANK_IMPACT_WEIGHT;
       teamBRankFactor = 1 + (probB - 0.5) * 2 * RANK_IMPACT_WEIGHT;
+
+      // teamAPredicted = teamAPredicted * teamARankFactor;
+      // teamBPredicted = teamBPredicted * teamBRankFactor;
     }
   }
 
   if (data?.teamForm && data?.teamForm.length > 0) {
+    const findTeamAForm = data.teamForm.find(
+      (e: any) => e.teamId === teamA.teamName,
+    );
+    const findTeamBForm = data.teamForm.find(
+      (e: any) => e.teamId === teamB.teamName,
+    );
+    const teamAFormStats = CalculateTeamFormStats(findTeamAForm);
+    const teamBFormStats = CalculateTeamFormStats(findTeamBForm);
+
+    teamAWinPercentage = teamAFormStats.winPercentage;
+    teamBWinPercentage = teamBFormStats.winPercentage;
+
+    teamAPredicted =
+      (teamAPredicted +
+        (teamAFormStats.avgScore + teamBFormStats.avgConceded) / 2) /
+      2;
+    teamBPredicted =
+      (teamBPredicted +
+        (teamBFormStats.avgScore + teamAFormStats.avgConceded) / 2) /
+      2;
   }
+  return { teamAPredicted, teamBPredicted };
 
   //-----------------close-------Factor added to prediction-------------
-
-  let teamAPredicted =
-    (teamAScore.predictedScore + teamBScore.totalTeamRunsConced) / 2;
-  let teamBPredicted =
-    (teamBScore.predictedScore + teamAScore.totalTeamRunsConced) / 2;
 
   teamAPredicted = Math.max(teamAPredicted, 80);
   teamBPredicted = Math.max(teamBPredicted, 80);
