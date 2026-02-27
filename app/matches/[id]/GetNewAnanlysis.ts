@@ -282,8 +282,7 @@ export const GetNewAnalysis = async (data: any) => {
     (teamBScore.predictedScore + teamAScore.totalTeamRunsConced) / 2;
 
   //------------Factor added to prediction----------------
-  let teamARankFactor = 1;
-  let teamBRankFactor = 1;
+
   let teamAWinPercentage = 50;
   let teamBWinPercentage = 50;
 
@@ -323,9 +322,14 @@ export const GetNewAnalysis = async (data: any) => {
     );
     const teamAFormStats = CalculateTeamFormStats(findTeamAForm);
     const teamBFormStats = CalculateTeamFormStats(findTeamBForm);
+    const totalWinPercentage =
+      CheckIntValue(teamAFormStats.winPercentage) +
+      CheckIntValue(teamBFormStats.winPercentage);
 
-    teamAWinPercentage = teamAFormStats.winPercentage;
-    teamBWinPercentage = teamBFormStats.winPercentage;
+    teamAWinPercentage =
+      (CheckIntValue(teamAFormStats.winPercentage) / totalWinPercentage) * 100;
+    teamBWinPercentage =
+      (CheckIntValue(teamBFormStats.winPercentage) / totalWinPercentage) * 100;
 
     teamAPredicted =
       (teamAPredicted +
@@ -337,7 +341,7 @@ export const GetNewAnalysis = async (data: any) => {
       2;
   }
 
-  return { teamAPredicted, teamBPredicted };
+  return { teamAWinPercentage, teamBWinPercentage };
 
   //-----------------close-------Factor added to prediction-------------
 
