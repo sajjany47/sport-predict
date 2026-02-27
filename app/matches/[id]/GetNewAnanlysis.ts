@@ -178,7 +178,11 @@ const squadAnanlysis = (team: any, matchDescription: string) => {
   };
 };
 
-const getTopPlayer = (team: any, type: "bat" | "bowl") => {
+const getTopPlayer = (
+  team: any,
+  type: "bat" | "bowl",
+  rankNormalized: number,
+) => {
   const squad =
     team?.playingPlayers?.length > 0
       ? team.playingPlayers
@@ -196,11 +200,14 @@ const getTopPlayer = (team: any, type: "bat" | "bowl") => {
       role: p.role,
       image: p.image,
       playerUrl: p.playerUrl,
-      impactRuns: Math.round(bat.impactRuns),
+      impactRuns:
+        Math.round(
+          ((bat.strikeRate * bat.avgBalls) / 100 + bat.impactRuns) / 2,
+        ) * rankNormalized,
       strikeRate: Math.round(bat.strikeRate),
       avgBalls: Math.round(bat.avgBalls),
-      impactWickets: Math.round(bowl.impactWickets),
-      avgRunsConced: Math.round(bowl.avgRunsConced),
+      impactWickets: Math.round(bowl.impactWickets * rankNormalized),
+      avgRunsConced: Math.round(bowl.avgRunsConced * rankNormalized),
     };
   });
 
@@ -523,8 +530,8 @@ export const GetNewAnalysis = async (data: any) => {
           color: hintData.team1.color,
         },
       },
-      topBatsman: getTopPlayer(teamA, "bat"),
-      topBowler: getTopPlayer(teamA, "bowl"),
+      topBatsman: getTopPlayer(teamA, "bat", teamARankNormalised),
+      topBowler: getTopPlayer(teamA, "bowl", teamARankNormalised),
     },
 
     team2: {
@@ -550,8 +557,8 @@ export const GetNewAnalysis = async (data: any) => {
           color: hintData.team2.color,
         },
       },
-      topBatsman: getTopPlayer(teamB, "bat"),
-      topBowler: getTopPlayer(teamB, "bowl"),
+      topBatsman: getTopPlayer(teamB, "bat", teamBRankNormalised),
+      topBowler: getTopPlayer(teamB, "bowl", teamBRankNormalised),
     },
     recentMatchOnVenue: data?.venueDetails?.recentMatches ?? null,
 
