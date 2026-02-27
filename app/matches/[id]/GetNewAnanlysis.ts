@@ -288,6 +288,9 @@ export const GetNewAnalysis = async (data: any) => {
   const teamA = data.squads[0];
   const teamB = data.squads[1];
 
+  let teamARankNormalised = 1;
+  let teamBRankNormalised = 1;
+
   const teamRank = data.matchInfo.teams;
 
   const matchDescription = data.matchInfo.matchDescription;
@@ -326,6 +329,9 @@ export const GetNewAnalysis = async (data: any) => {
 
       const normalizedA = factorA / matchBaseline;
       const normalizedB = factorB / matchBaseline;
+
+      teamARankNormalised = normalizedA;
+      teamBRankNormalised = normalizedB;
 
       teamAPredicted *= normalizedA;
       teamBPredicted *= normalizedB;
