@@ -261,6 +261,25 @@ const getRankFactor = (rank: number) => {
   return Math.max(0.1, Math.min(1, factor));
 };
 
+const CalculateTeamWinningPercentage = (a: any, b: any) => {
+  const teamA = CheckIntValue(a);
+  const teamB = CheckIntValue(b);
+  const totalOverallWinPercentage = teamA + teamB;
+
+  const teamAOverallWinPercentage = (teamA / totalOverallWinPercentage) * 100;
+
+  const teamBOverallWinPercentage = (teamB / totalOverallWinPercentage) * 100;
+
+  return { teamA: teamAOverallWinPercentage, teamB: teamBOverallWinPercentage };
+};
+const avgValue = (value1: any, value2: any) => {
+  const a = CheckIntValue(value1);
+  const b = CheckIntValue(value2);
+  let c = (a + b) / 2;
+
+  return c;
+};
+
 /* =========================
    Final Match Analysis
 ========================= */
@@ -322,14 +341,13 @@ export const GetNewAnalysis = async (data: any) => {
     );
     const teamAFormStats = CalculateTeamFormStats(findTeamAForm);
     const teamBFormStats = CalculateTeamFormStats(findTeamBForm);
-    const totalWinPercentage =
-      CheckIntValue(teamAFormStats.winPercentage) +
-      CheckIntValue(teamBFormStats.winPercentage);
+    const winPercentage = CalculateTeamWinningPercentage(
+      teamAFormStats.winPercentage ?? 50,
+      teamBFormStats.winPercentage ?? 50,
+    );
 
-    teamAWinPercentage =
-      (CheckIntValue(teamAFormStats.winPercentage) / totalWinPercentage) * 100;
-    teamBWinPercentage =
-      (CheckIntValue(teamBFormStats.winPercentage) / totalWinPercentage) * 100;
+    teamAWinPercentage = avgValue(teamAWinPercentage, winPercentage.teamA);
+    teamBWinPercentage = avgValue(teamBWinPercentage, winPercentage.teamB);
 
     teamAPredicted =
       (teamAPredicted +
@@ -341,26 +359,139 @@ export const GetNewAnalysis = async (data: any) => {
       2;
   }
 
-  return { teamAWinPercentage, teamBWinPercentage };
+  if (data?.comparision?.comparison) {
+    const getMetricValue = (arr: any, metric: any, teamKey: any) => {
+      const item = arr.find((m: any) => m.metric === metric);
+      if (!item) return 0;
+
+      let value = item[teamKey];
+
+      // remove % if exists
+      if (typeof value === "string" && value.includes("%")) {
+        return Number(value.replace("%", ""));
+      }
+
+      return Number(value);
+    };
+    const buildTeamComparisonData = (
+      comparisonData: any,
+      teamKey: "team1" | "team2",
+    ) => {
+      return {
+        overallWinningPercentage: getMetricValue(
+          comparisonData.overall,
+          "Win",
+          teamKey,
+        ),
+        overallInningsScore: getMetricValue(
+          comparisonData.overall,
+          "Avg Score",
+          teamKey,
+        ),
+        venueWinningPercentage: getMetricValue(
+          comparisonData.venue,
+          "Win",
+          teamKey,
+        ),
+        venueInningsScore: getMetricValue(
+          comparisonData.venue,
+          "Avg Score",
+          teamKey,
+        ),
+      };
+    };
+    const getTeamKey = (teamName: string) => {
+      return Object.keys(data.comparision.teams).find(
+        (key) => data.comparision.teams[key].name === teamName,
+      ) as "team1" | "team2";
+    };
+    const comparisonData = data.comparision.comparison;
+
+    const teamAKey = getTeamKey(teamA.teamName);
+    const teamBKey = getTeamKey(teamB.teamName);
+
+    const teamAComparisionData = buildTeamComparisonData(
+      comparisonData,
+      teamAKey,
+    );
+
+    const teamBComparisionData = buildTeamComparisonData(
+      comparisonData,
+      teamBKey,
+    );
+    const overallWinPercentage = CalculateTeamWinningPercentage(
+      teamAComparisionData.overallWinningPercentage ?? 50,
+      teamBComparisionData.overallWinningPercentage ?? 50,
+    );
+    const venueWinPercentage = CalculateTeamWinningPercentage(
+      teamAComparisionData?.venueWinningPercentage ?? 50,
+      teamBComparisionData?.venueWinningPercentage ?? 50,
+    );
+
+    const combinedWinPercentage = CalculateTeamWinningPercentage(
+      overallWinPercentage.teamA + venueWinPercentage.teamA,
+      overallWinPercentage.teamB + venueWinPercentage.teamB,
+    );
+
+    teamAPredicted = avgValue(
+      teamAPredicted,
+      (teamAComparisionData.overallInningsScore +
+        teamAComparisionData.venueInningsScore) /
+        2,
+    );
+
+    teamBPredicted = avgValue(
+      teamBPredicted,
+      (teamBComparisionData.overallInningsScore +
+        teamBComparisionData.venueInningsScore) /
+        2,
+    );
+
+    teamAWinPercentage = avgValue(
+      teamAWinPercentage,
+      combinedWinPercentage.teamA,
+    );
+    teamBWinPercentage = avgValue(
+      teamBWinPercentage,
+      combinedWinPercentage.teamB,
+    );
+  }
+
+  if (data?.venueDetails?.stats) {
+    const venueStats = data?.venueDetails?.stats;
+    const combineScore = avgValue(venueStats.avg1stInns, venueStats.avg2ndInns);
+    teamAPredicted = avgValue(teamAPredicted, combineScore);
+    teamBPredicted = avgValue(teamBPredicted, combineScore);
+  }
 
   //-----------------close-------Factor added to prediction-------------
 
-  teamAPredicted = Math.max(teamAPredicted, 80);
-  teamBPredicted = Math.max(teamBPredicted, 80);
+  // teamAPredicted = Math.max(teamAPredicted, 80);
+  // teamBPredicted = Math.max(teamBPredicted, 80);
 
   /* =========================
      Winner Probability
   ========================= */
 
-  const totalScore = teamAPredicted + teamBPredicted;
+  // const totalScore = teamAPredicted + teamBPredicted;
 
-  const teamAChance =
-    totalScore > 0 ? CheckIntValue((teamAPredicted / totalScore) * 100) : 50;
+  // const teamAChance =
+  //   totalScore > 0 ? CheckIntValue((teamAPredicted / totalScore) * 100) : 50;
 
-  const teamBChance =
-    totalScore > 0 ? CheckIntValue((teamBPredicted / totalScore) * 100) : 50;
+  // const teamBChance =
+  //   totalScore > 0 ? CheckIntValue((teamBPredicted / totalScore) * 100) : 50;
 
-  const hintData = GetHint(teamAChance, teamBChance);
+  const teamChance = CalculateTeamWinningPercentage(
+    teamAPredicted,
+    teamBPredicted,
+  );
+
+  const avgWinningChance = CalculateTeamWinningPercentage(
+    teamChance.teamA + teamAWinPercentage,
+    teamChance.teamB + teamBWinPercentage,
+  );
+
+  const hintData = GetHint(avgWinningChance.teamA, avgWinningChance.teamB);
 
   return {
     team1: {
@@ -378,8 +509,8 @@ export const GetNewAnalysis = async (data: any) => {
             : Math.round(teamBScore.teamWicket * 0.4),
       },
       winnerPrediction: {
-        probability: teamAChance,
-        confidence: GetConfidence(teamAChance),
+        probability: avgWinningChance.teamA,
+        confidence: GetConfidence(avgWinningChance.teamA),
         hint: {
           hintMessage: hintData.team1.message,
           badgeColor: hintData.team1.badgeColor,
@@ -405,8 +536,8 @@ export const GetNewAnalysis = async (data: any) => {
             : Math.round(teamAScore.teamWicket * 0.4),
       },
       winnerPrediction: {
-        probability: teamBChance,
-        confidence: GetConfidence(teamBChance),
+        probability: avgWinningChance.teamB,
+        confidence: GetConfidence(avgWinningChance.teamB),
         hint: {
           hintMessage: hintData.team2.message,
           badgeColor: hintData.team2.badgeColor,
