@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
           success: false,
           message: "Email and password are required.",
         } as ApiResponse,
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
           success: false,
           message: "User not found!",
         } as ApiResponse,
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
           success: false,
           message: "Invalid password.",
         } as ApiResponse,
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         ...prepareResponse,
         _id: user._id,
       },
-      "15m"
+      "15m",
     );
 
     const refreshToken = await generateToken(
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
         ...prepareResponse,
         _id: user._id,
       },
-      "1d"
+      "20d",
     );
 
     const cookie = serialize("refreshToken", refreshToken, {
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production" ? true : false, // allow insecure on localhost
       sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // safe for local dev
       path: "/",
-      maxAge: 60 * 60 * 24, // 1 day
+      maxAge: 60 * 60 * 24 * 20, // 20 day
     });
 
     return NextResponse.json(
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       {
         status: 200,
         headers: { "Set-Cookie": cookie, "Content-Type": "application/json" },
-      }
+      },
     );
   } catch (error) {
     return NextResponse.json(
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         success: false,
         message: FormatErrorMessage(error),
       } as ApiResponse,
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

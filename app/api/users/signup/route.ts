@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
           success: false,
           message: message,
         },
-        { status: 409 }
+        { status: 409 },
       );
     } else {
       // ✅ Create new user
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
             success: true,
             message: "OTP sent successfully.",
           },
-          { status: 200 }
+          { status: 200 },
         );
 
         response.cookies.set({
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
               success: false,
               message: newOtpToken.message,
             },
-            { status: newOtpToken.code }
+            { status: newOtpToken.code },
           );
         }
 
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
             success: true,
             message: "OTP sent successfully.",
           },
-          { status: 200 }
+          { status: 200 },
         );
 
         response.cookies.set({
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
               success: false,
               message: checkOtpToken.message || "OTP not verified!",
             },
-            { status: checkOtpToken.code || 400 }
+            { status: checkOtpToken.code || 400 },
           );
         }
 
@@ -172,13 +172,13 @@ export async function POST(request: NextRequest) {
           // const token = await generateToken({ ...userData });
           const accessToken = await generateToken({ ...userData }, "15m");
 
-          const refreshToken = await generateToken({ ...userData }, "1d");
+          const refreshToken = await generateToken({ ...userData }, "20d");
           const cookie = serialize("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             path: "/",
-            maxAge: 60 * 60 * 24, // 1 day
+            maxAge: 60 * 60 * 24 * 20, // 20 days
           });
 
           await MailSend({
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
               email: userData.email || "",
               username: userData.username,
               joinDate: moment(userData.createdAt).format(
-                "MMMM DD, YYYY HH:mm"
+                "MMMM DD, YYYY HH:mm",
               ),
               mobileNumber: userData.mobileNumber || "NA",
             }),
@@ -209,13 +209,13 @@ export async function POST(request: NextRequest) {
                 "Set-Cookie": cookie,
                 "Content-Type": "application/json",
               },
-            }
+            },
           );
         }
       } else {
         return NextResponse.json(
           { success: false, message: "Invalid request." },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
         success: false,
         message: FormatErrorMessage(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
