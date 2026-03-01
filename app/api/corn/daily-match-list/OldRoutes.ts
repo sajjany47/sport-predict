@@ -2,109 +2,79 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
 import { FormatErrorMessage, NormalizeCrexUrl } from "@/lib/utils";
 import { CrexNext3DaysFixturesArray } from "../CrexNext3DayList";
-import moment from "moment";
-import MatchList from "./DailyMatchListModel";
+import Match from "../../schedule/MatchModel";
 import { CrexV2Details } from "../../match-details/CrexV2Details";
+import MatchDetails from "../../match-details/MatchDetailsModel";
+import mongoose from "mongoose";
+// import moment from "moment-timezone";
+import moment from "moment";
+
+const CHUNK_SIZE = 10;
 
 export const GET = async (req: NextRequest) => {
   await dbConnect();
 
   try {
-    console.log("CRON HIT ✅", new Date().toISOString());
-    //delete old matches
-    const cutoffDate = moment().subtract(2, "days").format("YYYY-MM-DD");
+    console.log("CRON HIT ✅", new Date());
 
-    await MatchList.deleteMany({
+    // ---------------- DELETE OLD MATCHES ----------------
+    const cutoffDate = moment().subtract(3, "days").format("YYYY-MM-DD");
+    const fixtures = await CrexNext3DaysFixturesArray();
+    // const fixtures = a.map((item: any) => ({
+    //   ...item,
+    //   matchDate: moment(item.matchDate, "ddd, DD MMM YYYY")
+    //     .tz("Asia/Kolkata")
+    //     .format("ddd, DD MMM YYYY"),
+    //   startTime: moment(item.startTime, "hh:mm A")
+    //     .tz("Asia/Kolkata")
+    //     .format("hh:mm A"),
+    //   url: NormalizeCrexUrl(item.url),
+    // }));
+
+    // 1️⃣ Old matches list
+    const oldMatchList = await Match.find(
+      { formatDate: { $lte: cutoffDate } },
+      { _id: 1 },
+    );
+
+    const matchIds = oldMatchList.map((m) => m._id);
+    // 2️⃣ MatchDetails delete
+    if (matchIds.length > 0) {
+      await MatchDetails.deleteMany({
+        matchId: { $in: matchIds },
+      });
+    }
+
+    await Match.deleteMany({
       formatDate: { $lte: cutoffDate },
     });
 
-    const chunkArray = (arr: any[], size: number) => {
-      const chunks: any[] = [];
+    // ---------------- FETCH FIXTURES ----------------
 
-      for (let i = 0; i < arr.length; i += size) {
-        chunks.push(arr.slice(i, i + size));
-      }
-
-      return chunks;
-    };
-
-    const fixtures = await CrexNext3DaysFixturesArray();
-    const day3List: any[] = [];
-
-    const chunks = chunkArray(fixtures, 5); // split into groups of 5
-
-    for (const chunk of chunks) {
-      // process 5 fixtures in parallel
-      const results = await Promise.all(
-        chunk.map(async (item: any) => {
-          let data = { ...item, url: NormalizeCrexUrl(item.url) };
-
-          const crexOverallStats = item.url
-            ? await CrexV2Details(NormalizeCrexUrl(item.url))
-            : null;
-
-          if (crexOverallStats && crexOverallStats.squads.length > 0) {
-            const cleanedSquads = (crexOverallStats.squads ?? []).map(
-              (team: any) => ({
-                ...team,
-
-                playingPlayers: (team.playingPlayers ?? []).map(
-                  (player: any) => ({
-                    ...player,
-                    careerStats: {
-                      ...player.careerStats,
-                      bowling: (player.careerStats?.bowling ?? []).filter(
-                        (b: any) => !b.format?.toLowerCase().includes("debut"),
-                      ),
-                    },
-                  }),
-                ),
-
-                benchPlayers: (team.benchPlayers ?? []).map((player: any) => ({
-                  ...player,
-                  careerStats: {
-                    ...player.careerStats,
-                    bowling: (player.careerStats?.bowling ?? []).filter(
-                      (b: any) => !b.format?.toLowerCase().includes("debut"),
-                    ),
-                  },
-                })),
-              }),
-            );
-
-            data.details = {
-              ...crexOverallStats,
-              squads: cleanedSquads,
-            };
-
-            data.detailsUpdatedAt = new Date();
-          }
-
-          return data;
-        }),
-      );
-
-      // push processed 5 into main array
-      day3List.push(...results);
+    if (!fixtures?.length) {
+      return NextResponse.json({ success: true, message: "No fixtures found" });
     }
 
-    const bulkOps = day3List.map((item: any) => {
-      const { details, detailsUpdatedAt, ...rest } = item;
+    // ---------------- UPSERT MATCHES ----------------
+    const bulkOps = fixtures.map((item: any) => {
+      const url = NormalizeCrexUrl(item.url);
 
       return {
         updateOne: {
-          filter: { url: item.url },
+          filter: { url },
           update: {
-            $set: {
-              details,
-              detailsUpdatedAt,
-            },
+            // $set: { ...item, url },
             $setOnInsert: {
-              ...rest,
+              ...item,
+              url,
+              // formatDate: moment(item.matchDate, "ddd, DD MMM YYYY")
+              //   .tz("Asia/Kolkata")
+              //   .format("YYYY-MM-DD"),
               formatDate: moment(item.matchDate, "ddd, DD MMM YYYY").format(
                 "YYYY-MM-DD",
               ),
               createdAt: new Date(),
+              isDetailsFetched: false,
             },
           },
           upsert: true,
@@ -112,17 +82,101 @@ export const GET = async (req: NextRequest) => {
       };
     });
 
-    await MatchList.bulkWrite(bulkOps);
+    await Match.bulkWrite(bulkOps);
 
-    return NextResponse.json(
-      {
+    // ---------------- FETCH UNPROCESSED MATCHES ----------------
+    const dbMatches = await Match.find({ isDetailsFetched: false });
+
+    if (!dbMatches.length) {
+      return NextResponse.json({
         success: true,
-        message: "Daily match list updated successfully",
-        data: day3List,
-      },
-      { status: 200 },
-    );
+        message: "No pending match details",
+      });
+    }
+
+    const successIds: mongoose.Types.ObjectId[] = [];
+
+    // ---------------- PROCESS IN CHUNKS ----------------
+    for (let i = 0; i < dbMatches.length; i += CHUNK_SIZE) {
+      const chunk: any = dbMatches.slice(i, i + CHUNK_SIZE);
+
+      const detailOps: any[] = [];
+
+      for (const match of chunk) {
+        try {
+          const crexOverallStats = await CrexV2Details(match.url);
+
+          if (!crexOverallStats) continue;
+
+          const squads = (crexOverallStats.squads ?? []).map((team: any) => ({
+            ...team,
+            playingPlayers: (team.playingPlayers ?? []).map((p: any) => ({
+              ...p,
+              careerStats: {
+                ...p.careerStats,
+                bowling: (p.careerStats?.bowling ?? []).filter(
+                  (b: any) => !b.format?.toLowerCase().includes("debut"),
+                ),
+              },
+            })),
+            benchPlayers: (team.benchPlayers ?? []).map((p: any) => ({
+              ...p,
+              careerStats: {
+                ...p.careerStats,
+                bowling: (p.careerStats?.bowling ?? []).filter(
+                  (b: any) => !b.format?.toLowerCase().includes("debut"),
+                ),
+              },
+            })),
+          }));
+
+          detailOps.push({
+            updateOne: {
+              filter: { matchId: match._id },
+              update: {
+                $set: {
+                  matchId: match._id,
+                  ...crexOverallStats,
+                  squads,
+                  updatedAt: new Date(),
+                },
+              },
+              upsert: true,
+            },
+          });
+
+          successIds.push(match._id);
+        } catch (err) {
+          console.error("DETAIL FETCH FAILED:", match.url);
+        }
+      }
+
+      if (detailOps.length) {
+        await MatchDetails.bulkWrite(detailOps);
+      }
+    }
+
+    // ---------------- MARK FETCHED ----------------
+    if (successIds.length) {
+      await Match.updateMany(
+        { _id: { $in: successIds } },
+        {
+          $set: {
+            isDetailsFetched: true,
+            detailsFetchedAt: new Date(),
+          },
+        },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      fixtures: fixtures.length,
+      detailsFetched: successIds.length,
+    });
   } catch (error) {
+    console.error("CRON ERROR ❌", error);
+
     return NextResponse.json(
       { success: false, message: FormatErrorMessage(error) },
       { status: 500 },

@@ -26,6 +26,7 @@ export const GET = async (_req: NextRequest) => {
     const fixtures = await Match.find({
       formatDate: { $gte: cutoffDate },
       isPlayingPlayerFetched: false,
+      isDetailsFetched: true,
     });
 
     if (!fixtures.length) {
@@ -66,66 +67,45 @@ export const GET = async (_req: NextRequest) => {
       });
     }
 
-    let processed = 0;
+    for (let index = 0; index < startedMatches.length; index++) {
+      const match = startedMatches[index];
 
-    /* ================= CHUNK PROCESSING ================= */
+      const matchDetails = await MatchDetails.findOne({
+        matchId: new mongoose.Types.ObjectId(match._id.toString()),
+      });
 
-    for (let i = 0; i < startedMatches.length; i += CHUNK_SIZE) {
-      const chunk = startedMatches.slice(i, i + CHUNK_SIZE);
+      const latestSquad = await SquadList(match.url, matchDetails.squads);
 
-      const matchBulkOps: any[] = [];
-
-      for (const match of chunk) {
-        // console.log("Processing match:", (match as any)._id);
-        try {
-          const matchDetails = await MatchDetails.findOne({
-            matchId: new mongoose.Types.ObjectId((match as any)._id.toString()),
-          });
-
-          if (!matchDetails?.squads?.length) continue;
-
-          const latestSquad = await SquadList(match.url, matchDetails.squads);
-
-          // Update squads
-          await MatchDetails.updateOne(
+      try {
+        const updateMatchDetails = await MatchDetails.updateOne(
+          {
+            matchId: new mongoose.Types.ObjectId(match._id.toString()),
+          },
+          { $set: { squads: latestSquad } },
+        );
+        if (updateMatchDetails) {
+          await Match.updateOne(
+            { _id: new mongoose.Types.ObjectId(match._id.toString()) },
             {
-              matchId: new mongoose.Types.ObjectId(
-                (match as any)._id.toString(),
-              ),
-            },
-            { $set: { squads: latestSquad } },
-          );
-
-          // Mark match as processed
-          matchBulkOps.push({
-            updateOne: {
-              filter: { _id: match._id },
-              update: {
-                $set: {
-                  isPlayingPlayerFetched: true,
-                  playingXiFetchedAt: new Date(),
-                },
+              $set: {
+                isPlayingPlayerFetched: true,
+                playingXiFetchedAt: new Date(),
               },
             },
-          });
-
-          processed++;
-        } catch (err) {
-          console.error("❌ Squad update failed:", match.url);
+          );
         }
-      }
-
-      if (matchBulkOps.length) {
-        await Match.bulkWrite(matchBulkOps);
+      } catch (err) {
+        if (err) continue;
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      totalFound: fixtures.length,
-      startedMatches: startedMatches.length,
-      processed,
-    });
+    return Response.json(
+      {
+        success: true,
+        message: "Match status updated successfully",
+      },
+      { status: 200 },
+    );
   } catch (error: any) {
     console.error("CRON ERROR ❌", error);
 
