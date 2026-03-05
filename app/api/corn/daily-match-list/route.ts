@@ -61,15 +61,20 @@ export const GET = async (req: NextRequest) => {
         console.log("Match already exists, skipping:", url);
         continue;
       }
+      const matchStartUTC = moment.utc(
+        `${match.matchDate} ${match.startTime}`,
+        "ddd, DD MMM YYYY h:mm A",
+      );
 
       await Match.insertOne({
         ...match,
         isCompleted: false,
         isPlayingPlayerFetched: false,
         isDetailsFetched: false,
-        formatDate: moment(match.matchDate, "ddd, DD MMM YYYY").format(
-          "YYYY-MM-DD",
-        ),
+        // formatDate: moment(match.matchDate, "ddd, DD MMM YYYY").format(
+        //   "YYYY-MM-DD",
+        // ),
+        formatDate: matchStartUTC.toDate(),
         url,
         createdAt: new Date(),
       });
