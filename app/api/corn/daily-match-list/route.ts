@@ -16,7 +16,7 @@ export const GET = async (req: NextRequest) => {
     console.log("CRON HIT ✅", new Date());
 
     // ---------------- DELETE OLD MATCHES ----------------
-    const cutoffDate = moment().subtract(3, "days").format("YYYY-MM-DD");
+    const cutoffDate = moment().subtract(7, "days").format("YYYY-MM-DD");
     const fixtures = await CrexNext3DaysFixturesArray();
 
     // 1️⃣ Old matches list
