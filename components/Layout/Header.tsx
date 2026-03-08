@@ -66,17 +66,17 @@ const Header = () => {
     isSuccess: null,
   });
 
-  useEffect(() => {
-    CornMatchStatus()
-      .then((res) => {
-        console.log(res.message);
-      })
-      .catch((error) => {
-        console.log(
-          error.message || "Failed to update status. Please try again.",
-        );
-      });
-  }, []);
+  // useEffect(() => {
+  //   CornMatchStatus()
+  //     .then((res) => {
+  //       console.log(res.message);
+  //     })
+  //     .catch((error) => {
+  //       console.log(
+  //         error.message || "Failed to update status. Please try again.",
+  //       );
+  //     });
+  // }, []);
 
   // App download links - Replace with your actual links
   const appDownloadLinks = {
