@@ -153,7 +153,7 @@ export const GET = async (_req: NextRequest) => {
                 isCompleted:
                   result.includes("abandoned") ||
                   result.includes("won") ||
-                  result.includes("match drawn")
+                  result.includes("match drawn") || result.includes("no result")
                     ? true
                     : false,
               },
