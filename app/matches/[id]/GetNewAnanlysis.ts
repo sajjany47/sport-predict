@@ -509,7 +509,7 @@ export const GetNewAnalysis = async (data: any) => {
   return {
     team1: {
       name: data.matchInfo.teams[0].teamName,
-      shortName: teamA.teamName,
+      shortName: teamA?.teamName,
       flag: data.matchInfo.teams[0].teamFlagUrl,
 
       firstInnings: {
@@ -522,7 +522,7 @@ export const GetNewAnalysis = async (data: any) => {
             : Math.round(teamBScore.teamWicket * 0.4),
       },
       winnerPrediction: {
-        probability: avgWinningChance.teamA,
+        probability: avgWinningChance.teamA || 50,
         confidence: GetConfidence(avgWinningChance.teamA),
         hint: {
           hintMessage: hintData.team1.message,
@@ -536,7 +536,7 @@ export const GetNewAnalysis = async (data: any) => {
 
     team2: {
       name: data.matchInfo.teams[1].teamName,
-      shortName: teamB.teamName,
+      shortName: teamB?.teamName,
       flag: data.matchInfo.teams[1].teamFlagUrl,
 
       firstInnings: {
@@ -549,7 +549,7 @@ export const GetNewAnalysis = async (data: any) => {
             : Math.round(teamAScore.teamWicket * 0.4),
       },
       winnerPrediction: {
-        probability: avgWinningChance.teamB,
+        probability: avgWinningChance.teamB || 50,
         confidence: GetConfidence(avgWinningChance.teamB),
         hint: {
           hintMessage: hintData.team2.message,
