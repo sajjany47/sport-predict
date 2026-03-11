@@ -10,16 +10,18 @@ import { RootState } from "@/store";
 
 import { DummyData } from "@/lib/DummyData";
 import { GetNewAnalysis } from "../matches/[id]/GetNewAnanlysis";
+import { Prediction } from "../api/order/Prediction";
 
 const SupportPage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const a = await GetNewAnalysis(DummyData);
-      console.log(a);
-    };
-    fetchData();
+    // const fetchData = async () => {
+    //   const a = await GetNewAnalysis(DummyData);
+    //   console.log(a);
+    // };
+    // fetchData();
+    Prediction(DummyData);
   }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-10 px-4 md:px-8">
