@@ -99,14 +99,38 @@ const squadAnanlysis = (team: any, matchDescription: string) => {
   };
 };
 
-const PrepareScore = (teamA: any, teamB: any) => {
-  const teamAScore =
+const PrepareScore = (
+  teamA: any,
+  teamB: any,
+  teamARank?: any,
+  teamBRank?: any,
+) => {
+  const maxRank = 147;
+
+  let rankMultiplierA = 1;
+  let rankMultiplierB = 1;
+
+  if (teamARank?.teamRank?.rank && teamBRank?.teamRank?.rank) {
+    const aRank = Number(teamARank.teamRank.rank);
+    const bRank = Number(teamBRank.teamRank.rank);
+
+    const rankFactorA = (maxRank - aRank + 1) / maxRank;
+    const rankFactorB = (maxRank - bRank + 1) / maxRank;
+
+    rankMultiplierA = 0.8 + rankFactorA * 0.4;
+    rankMultiplierB = 0.8 + rankFactorB * 0.4;
+  }
+
+  const baseAScore =
     (teamA.totalImpactRun + teamB.totalImpactRunConced) / 2 -
     teamB.totalImpactWicket * 5;
 
-  const teamBScore =
+  const baseBScore =
     (teamB.totalImpactRun + teamA.totalImpactRunConced) / 2 -
     teamA.totalImpactWicket * 5;
+
+  const teamAScore = baseAScore * rankMultiplierA;
+  const teamBScore = baseBScore * rankMultiplierB;
 
   const roundedAScore = Math.round(teamAScore);
   const roundedBScore = Math.round(teamBScore);
@@ -137,6 +161,160 @@ const PrepareScore = (teamA: any, teamB: any) => {
     teamBWinChance: Number(teamBWinChance),
   };
 };
+
+const getTopPerformers = (team: any, teamRank?: any) => {
+  const squad = team?.playingPlayers?.length
+    ? team.playingPlayers
+    : (team?.benchPlayers ?? []);
+
+  let rankMultiplier = 1;
+
+  if (teamRank?.teamRank?.rank) {
+    const maxRank = 147;
+    const rank = Number(teamRank.teamRank.rank);
+
+    const rankFactor = (maxRank - rank + 1) / maxRank;
+
+    rankMultiplier = 0.9 + rankFactor * 0.2;
+  }
+
+  const players = squad.map((player: any) => {
+    const stats = getPlayerStats(player);
+
+    return {
+      name: player.name,
+      shortName: player.shortName,
+      role: player.role,
+      isWK: player.isWK,
+      image: player.image,
+      style: player.style,
+      impactRun: stats.impactRun * rankMultiplier,
+      impactWicket: stats.impactWicket * rankMultiplier,
+    };
+  });
+
+  const topRunner = [...players].sort((a, b) => b.impactRun - a.impactRun)[0];
+
+  const topWicketTaker = [...players].sort(
+    (a, b) => b.impactWicket - a.impactWicket,
+  )[0];
+
+  return {
+    topRunner,
+    topWicketTaker,
+  };
+};
+
+const generateDream11Team = (
+  teamA: any,
+  teamB: any,
+  teamARank?: any,
+  teamBRank?: any,
+) => {
+  const getPlayers = (team: any, teamRank?: any) => {
+    const squad = team?.playingPlayers?.length
+      ? team.playingPlayers
+      : (team?.benchPlayers ?? []);
+
+    let rankMultiplier = 1;
+
+    if (teamRank?.teamRank?.rank) {
+      const maxRank = 147;
+      const rank = Number(teamRank.teamRank.rank);
+      const rankFactor = (maxRank - rank + 1) / maxRank;
+
+      rankMultiplier = 0.9 + rankFactor * 0.2;
+    }
+
+    return squad.map((player: any) => {
+      const stats = getPlayerStats(player);
+
+      const impactRun = stats.impactRun * rankMultiplier;
+      const impactWicket = stats.impactWicket * rankMultiplier;
+
+      return {
+        name: player.name,
+        shortName: player.shortName,
+        role: player.role,
+        isWK: player.isWK,
+        team: team.teamName,
+        impactRun,
+        impactWicket,
+        impactScore: impactRun + impactWicket * 25,
+      };
+    });
+  };
+
+  const teamAPlayers = getPlayers(teamA, teamARank);
+  const teamBPlayers = getPlayers(teamB, teamBRank);
+
+  const allPlayers = [...teamAPlayers, ...teamBPlayers].sort(
+    (a, b) => b.impactScore - a.impactScore,
+  );
+
+  const wk = allPlayers.filter((p) => p.isWK).slice(0, 2);
+  const bat = allPlayers.filter((p) => p.role === "Batter").slice(0, 4);
+  const ar = allPlayers.filter((p) => p.role === "All Rounder").slice(0, 2);
+  const bowl = allPlayers.filter((p) => p.role === "Bowler").slice(0, 3);
+
+  let team = [...wk, ...bat, ...ar, ...bowl];
+
+  team = team.slice(0, 11);
+
+  const captain = [...team].sort((a, b) => b.impactScore - a.impactScore)[0];
+  const viceCaptain = [...team]
+    .filter((p) => p.name !== captain.name)
+    .sort((a, b) => b.impactScore - a.impactScore)[0];
+
+  return {
+    team,
+    captain,
+    viceCaptain,
+  };
+};
+
+const getKeyPlayers = (team: any, teamRank?: any) => {
+  const squad = team?.playingPlayers?.length
+    ? team.playingPlayers
+    : (team?.benchPlayers ?? []);
+
+  let rankMultiplier = 1;
+
+  if (teamRank?.teamRank?.rank) {
+    const maxRank = 147;
+    const rank = Number(teamRank.teamRank.rank);
+    const rankFactor = (maxRank - rank + 1) / maxRank;
+
+    rankMultiplier = 0.9 + rankFactor * 0.2;
+  }
+
+  const players = squad.map((player: any) => {
+    const stats = getPlayerStats(player);
+
+    const impactRun = stats.impactRun * rankMultiplier;
+    const impactWicket = stats.impactWicket * rankMultiplier;
+
+    const impactScore = impactRun + impactWicket * 25;
+
+    return {
+      name: player.name,
+      shortName: player.shortName,
+      role: player.role,
+      isWK: player.isWK,
+      image: player.image,
+      style: player.style,
+      impactRun,
+      impactWicket,
+      impactScore,
+    };
+  });
+
+  const keyPlayers = players
+    .sort((a: any, b: any) => b.impactScore - a.impactScore)
+    .slice(0, 5);
+
+  return keyPlayers;
+};
 export const Prediction = (data: any): any => {
   const teamA = data.squads[0];
   const teamB = data.squads[1];
@@ -146,7 +324,35 @@ export const Prediction = (data: any): any => {
   let teamAScore = squadAnanlysis(teamA, matchDescription);
   let teamBScore = squadAnanlysis(teamB, matchDescription);
 
-  const teamPrediction = PrepareScore(teamAScore, teamBScore);
+  const teamRank = data.matchInfo.teams;
 
-  console.log("teamPrediction===>", teamPrediction);
+  const findTeamARank = teamRank.find(
+    (item: any) => item.teamShortName === teamA.teamName,
+  );
+
+  const findTeamBRank = teamRank.find(
+    (item: any) => item.teamShortName === teamB.teamName,
+  );
+
+  const teamPrediction = PrepareScore(
+    teamAScore,
+    teamBScore,
+    findTeamARank,
+    findTeamBRank,
+  );
+
+  const teamATopPerformer = getTopPerformers(teamA, findTeamARank);
+  const teamBTopPerformer = getTopPerformers(teamB, findTeamBRank);
+
+  const dream11Team = generateDream11Team(
+    teamA,
+    teamB,
+    findTeamARank,
+    findTeamBRank,
+  );
+
+  const teamAKeyPlayers = getKeyPlayers(teamA, findTeamARank);
+  const teamBKeyPlayers = getKeyPlayers(teamB, findTeamBRank);
+
+  console.log("teamAKeyPlayers===>", teamAKeyPlayers);
 };
