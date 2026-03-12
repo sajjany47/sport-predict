@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
 import { FormatErrorMessage, GetTeamShortName } from "@/lib/utils";
-// import moment from "moment-timezone";
 import moment from "moment";
 import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
@@ -15,20 +14,8 @@ export const GET = async (_req: NextRequest) => {
 
   try {
     console.log("CRON HIT ✅", new Date());
-    // const cutoffDate = moment()
-    //   .tz("Asia/Kolkata")
-    //   .subtract(1, "days")
-    //   .format("YYYY-MM-DD");
 
-    // const cutoffDate = moment().subtract(1, "days").format("YYYY-MM-DD");
-    /* ================= FETCH UNPROCESSED MATCHES ================= */
-
-    const fixtures = await Match.find({
-      // formatDate: { $gte: cutoffDate },
-      // isPlayingPlayerFetched: false,
-      // isDetailsFetched: true,
-      isCompleted: false,
-    });
+    const fixtures = await Match.find({ isCompleted: false });
 
     if (!fixtures.length) {
       return NextResponse.json({
@@ -37,31 +24,16 @@ export const GET = async (_req: NextRequest) => {
       });
     }
 
-    /* ================= FILTER ONLY STARTED MATCHES ================= */
-
-    // const startedMatches = fixtures.filter((match: any) => {
-    //   if (!match.matchDate || !match.startTime) return false;
-
-    //   const matchStartDateTime = moment(
-    //     `${match.matchDate} ${match.startTime}`,
-    //     "ddd, D MMM YYYY h:mm A",
-    //   ).tz("Asia/Kolkata");
-
-    //   return matchStartDateTime.isSameOrBefore(moment().tz("Asia/Kolkata"));
-    // });
-
     const startedMatches = fixtures.filter((match: any) => {
       if (!match.matchDate || !match.startTime) return false;
 
       const matchStartDateTime = moment(
         `${match.matchDate} ${match.startTime}`,
-        "ddd, D MMM YYYY h:mm A",
+        "ddd, DD MMM YYYY h:mm A",
       );
 
       return matchStartDateTime.isSameOrBefore(moment());
     });
-
-    // const startedMatches = fixtures;
 
     if (!startedMatches.length) {
       return NextResponse.json({
@@ -70,47 +42,46 @@ export const GET = async (_req: NextRequest) => {
       });
     }
 
-    for (let index = 0; index < startedMatches.length; index++) {
-      let match = startedMatches[index];
+    for (const match of startedMatches) {
+      try {
+        /* ================= FETCH MATCH DETAILS ================= */
 
-      if (!match.isDetailsFetched) {
-        try {
-          const crexOverallStats = await CrexV2Details(match.url);
+        if (!match.isDetailsFetched) {
+          try {
+            const crexOverallStats = await CrexV2Details(match.url);
+            if (!crexOverallStats) continue;
 
-          if (!crexOverallStats) continue;
+            const squads = (crexOverallStats.squads ?? []).map((team: any) => ({
+              ...team,
+              playingPlayers: (team.playingPlayers ?? []).map((p: any) => ({
+                ...p,
+                careerStats: {
+                  ...p.careerStats,
+                  bowling: (p.careerStats?.bowling ?? []).filter(
+                    (b: any) => !b.format?.toLowerCase().includes("debut"),
+                  ),
+                },
+              })),
+              benchPlayers: (team.benchPlayers ?? []).map((p: any) => ({
+                ...p,
+                careerStats: {
+                  ...p.careerStats,
+                  bowling: (p.careerStats?.bowling ?? []).filter(
+                    (b: any) => !b.format?.toLowerCase().includes("debut"),
+                  ),
+                },
+              })),
+            }));
 
-          const squads = (crexOverallStats.squads ?? []).map((team: any) => ({
-            ...team,
-            playingPlayers: (team.playingPlayers ?? []).map((p: any) => ({
-              ...p,
-              careerStats: {
-                ...p.careerStats,
-                bowling: (p.careerStats?.bowling ?? []).filter(
-                  (b: any) => !b.format?.toLowerCase().includes("debut"),
-                ),
-              },
-            })),
-            benchPlayers: (team.benchPlayers ?? []).map((p: any) => ({
-              ...p,
-              careerStats: {
-                ...p.careerStats,
-                bowling: (p.careerStats?.bowling ?? []).filter(
-                  (b: any) => !b.format?.toLowerCase().includes("debut"),
-                ),
-              },
-            })),
-          }));
+            await MatchDetails.insertOne({
+              matchId: match._id,
+              ...crexOverallStats,
+              squads,
+              updatedAt: new Date(),
+            });
 
-          const insertMatchDetails = await MatchDetails.insertOne({
-            matchId: match._id,
-            ...crexOverallStats,
-            squads,
-            updatedAt: new Date(),
-          });
-
-          if (insertMatchDetails) {
             await Match.updateOne(
-              { _id: new mongoose.Types.ObjectId(match._id) },
+              { _id: match._id },
               {
                 $set: {
                   isDetailsFetched: true,
@@ -118,37 +89,48 @@ export const GET = async (_req: NextRequest) => {
                 },
               },
             );
+          } catch {
+            continue;
           }
-        } catch (err) {
-          if (err) continue;
         }
-      }
 
-      try {
+        /* ================= PLAYING XI ================= */
+
         if (!match.isPlayingPlayerFetched) {
           const matchDetails = await MatchDetails.findOne({
-            matchId: new mongoose.Types.ObjectId(match._id.toString()),
+            matchId: match._id,
           });
 
-          const latestSquad = await SquadList(match.url, matchDetails.squads);
-          const updateMatchDetails = await MatchDetails.updateOne(
-            {
-              matchId: new mongoose.Types.ObjectId(match._id.toString()),
-            },
-            {
-              $set: {
-                squads: latestSquad,
-                isPlayingPlayerFetched: true,
-                playingXiFetchedAt: new Date(),
+          if (matchDetails) {
+            const latestSquad = await SquadList(match.url, matchDetails.squads);
+
+            await MatchDetails.updateOne(
+              { matchId: match._id },
+              {
+                $set: {
+                  squads: latestSquad,
+                  isPlayingPlayerFetched: true,
+                  playingXiFetchedAt: new Date(),
+                },
               },
-            },
-          );
+            );
+          }
         }
 
-        const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
-        const scoreCard = await CrexMatchScorecard(scoreCardUrl);
+        /* ================= SCORECARD ================= */
+
+        let scoreCard: any = null;
+
+        try {
+          const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
+
+          scoreCard = await CrexMatchScorecard(scoreCardUrl);
+        } catch {
+          scoreCard = null;
+        }
 
         const result = scoreCard?.result?.toLowerCase() ?? "";
+
         const updatedTeams = (match.teams ?? []).map((dbTeam: any) => {
           const scTeam = scoreCard?.teams?.find(
             (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
@@ -160,6 +142,7 @@ export const GET = async (_req: NextRequest) => {
             cricketScore: scTeam ? `${scTeam.score} (${scTeam.overs})` : null,
           };
         });
+
         const matchDateTime = moment(match.formatDate);
 
         const status = matchDateTime.isAfter(moment())
@@ -171,39 +154,39 @@ export const GET = async (_req: NextRequest) => {
                 result.includes("no result")
               ? "COMPLETED"
               : "LIVE";
+
         await Match.updateOne(
-          { _id: new mongoose.Types.ObjectId(match._id.toString()) },
+          { _id: match._id },
           {
             $set: {
               isCompleted:
                 result.includes("abandoned") ||
                 result.includes("won") ||
                 result.includes("match drawn") ||
-                result.includes("no result")
-                  ? true
-                  : false,
+                result.includes("no result"),
               teams: updatedTeams,
-              status: status,
+              status,
             },
           },
         );
       } catch (err) {
-        if (err) continue;
+        console.error("Match processing error:", err);
+        continue;
       }
     }
 
-    return Response.json(
-      {
-        success: true,
-        message: "Match status updated successfully",
-      },
-      { status: 200 },
-    );
+    return NextResponse.json({
+      success: true,
+      message: "Match status updated successfully",
+    });
   } catch (error: any) {
     console.error("CRON ERROR ❌", error);
 
     return NextResponse.json(
-      { success: false, error: FormatErrorMessage(error) },
+      {
+        success: false,
+        error: FormatErrorMessage(error),
+      },
       { status: 500 },
     );
   }
