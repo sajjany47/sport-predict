@@ -12,7 +12,7 @@ const protectedPaths: any = [
   "/api/order/list",
   "/api/order/create",
   "/api/order/update",
-  "api/order/:id",
+  "/api/order/:id",
   "/api/subscription/create",
   "/api/subscription/update",
   "/api/users/credit-update",
@@ -24,6 +24,7 @@ const protectedPaths: any = [
   "/api/support/:id",
   "/api/payment-intent",
   "/api/users/add-offer-credit",
+  "/api/match-details",
 ];
 
 export async function middleware(request: NextRequest) {
@@ -31,7 +32,7 @@ export async function middleware(request: NextRequest) {
 
   // Check if path is protected
   const isProtected = protectedPaths.some((path: any) =>
-    pathname.startsWith(path)
+    pathname.startsWith(path),
   );
   if (isProtected) {
     // Get token from header or cookie
@@ -40,7 +41,7 @@ export async function middleware(request: NextRequest) {
       // return NextResponse.redirect(new URL("/auth/login", request.url));
       return NextResponse.json(
         { message: "Unauthorized - No token provided" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -61,7 +62,7 @@ export async function middleware(request: NextRequest) {
           success: false,
           message: FormatErrorMessage(error),
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
   } else {

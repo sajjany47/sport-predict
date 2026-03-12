@@ -48,6 +48,10 @@ const MatchDetailsPage = () => {
   const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
     setIsLoading(true);
     FetchMatchDetails({
       ...selectedMatch,

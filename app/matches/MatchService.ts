@@ -1,10 +1,11 @@
+import { getHeadersWithToken } from "@/lib/utils";
 import axios from "axios";
 import moment from "moment";
 
 export const FetchMatchDetails = async (payload: any) => {
   try {
     const response = await axios.post("/api/match-details", payload, {
-      headers: { "Content-Type": "application/json" },
+      headers: getHeadersWithToken(),
     });
 
     return response.data;
