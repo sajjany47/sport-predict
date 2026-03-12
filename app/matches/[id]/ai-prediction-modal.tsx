@@ -9,10 +9,8 @@ import {
   Star,
   Zap,
   BarChart3,
-  Award,
   Sparkles,
   Brain,
-  InfoIcon,
   Shield,
   Target,
   Wifi,
@@ -23,16 +21,9 @@ import {
   Cloud,
   CloudRain,
   Sun,
-  MapPin,
   Droplets,
-  Wind,
   BarChart4,
-  PieChart,
-  History,
   Thermometer,
-  Gauge,
-  TrendingDown,
-  Flame,
   Users2,
   TargetIcon,
 } from "lucide-react";
@@ -52,9 +43,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { UserOrderCredit } from "@/app/MainService";
-import { GetNewAnalysis } from "./GetNewAnanlysis";
 import { Prediction } from "@/app/api/order/Prediction";
 
 // Interfaces based on the actual JSON structure
@@ -136,18 +125,6 @@ interface PredictionData {
     rainChance: string;
   };
   recentMatchOnVenue?: RecentMatch[];
-  venueRecords?: {
-    "Highest Total": VenueRecord;
-    "Lowest Total": VenueRecord;
-    "Highest Chased": VenueRecord;
-    "Lowest Defended": VenueRecord;
-  };
-  venuePaceVsSpin?: {
-    paceWickets: string;
-    spinWickets: string;
-    pacePercent: string;
-    spinPercent: string;
-  };
 }
 
 const AIPredictionModal: React.FC<{
