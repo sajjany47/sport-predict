@@ -46,15 +46,16 @@ export async function POST(request: Request) {
 
     const now = moment().tz(timezone);
 
-    const completedMatch = filteredMatches
-      .filter((item: any) => item.status === "COMPLETED")
-      .map((item: any) => ({
-        ...item,
-        teams: item.teams.map((team: any) => ({
-          ...team,
-          teamShortName: GetTeamShortName(team.teamName),
-        })),
-      }));
+    const completedMatch = filteredMatches.filter(
+      (item: any) => item.status === "COMPLETED",
+    );
+    // .map((item: any) => ({
+    //   ...item,
+    //   teams: item.teams.map((team: any) => ({
+    //     ...team,
+    //     teamShortName: GetTeamShortName(team.teamName),
+    //   })),
+    // }));
 
     const upcomingMatch = filteredMatches
       .filter((item: any) =>
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
     });
 
     const processedLiveMatches = await Promise.all(
-      liveMatches.map(async (match: any) => {
+      [...liveMatches, ...completedMatch].map(async (match: any) => {
         let scoreCard: any = null;
         let result = "";
 
@@ -112,6 +113,7 @@ export async function POST(request: Request) {
           ...match,
           teams: updatedTeams,
           status,
+
           score: scoreCard
             ? {
                 score: (scoreCard.teams ?? []).map((t: any) => ({
@@ -126,7 +128,7 @@ export async function POST(request: Request) {
     );
 
     const sortedData = [
-      ...completedMatch,
+      // ...completedMatch,
       ...upcomingMatch,
       ...processedLiveMatches,
     ]
