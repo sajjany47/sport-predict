@@ -15,7 +15,12 @@ export const GET = async (_req: NextRequest) => {
   try {
     console.log("CRON HIT ✅", new Date());
 
-    const fixtures = await Match.find({ isCompleted: false });
+    const now = moment();
+
+    const fixtures = await Match.find({
+      isCompleted: false,
+      formatDate: { $lte: now },
+    });
 
     if (!fixtures.length) {
       return NextResponse.json({
