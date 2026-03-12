@@ -8,6 +8,7 @@ import MatchDetails from "../../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
 // import moment from "moment-timezone";
 import moment from "moment";
+import { TeamRank } from "../../match-details/TeamRank";
 
 export const GET = async (req: NextRequest) => {
   await dbConnect();
@@ -66,8 +67,24 @@ export const GET = async (req: NextRequest) => {
         "ddd, DD MMM YYYY h:mm A",
       );
 
+      const prepareTeam = await Promise.all(
+        (match?.teams ?? []).map(async (team: any) => {
+          const teamRank = await TeamRank(
+            team.teamName,
+            team.teamName?.includes("Women") ? "WOMEN" : "MEN",
+            match.format,
+          );
+
+          return {
+            ...team,
+            teamRank,
+          };
+        }),
+      );
+
       await Match.insertOne({
         ...match,
+        teams: prepareTeam,
         isCompleted: false,
         isPlayingPlayerFetched: false,
         isDetailsFetched: false,

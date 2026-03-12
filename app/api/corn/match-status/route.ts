@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
-import { FormatErrorMessage } from "@/lib/utils";
+import { FormatErrorMessage, GetTeamShortName } from "@/lib/utils";
 // import moment from "moment-timezone";
 import moment from "moment";
 import Match from "../../schedule/MatchModel";
@@ -9,8 +9,6 @@ import { SquadList } from "../../match-details/SquadList";
 import mongoose from "mongoose";
 import { CrexMatchScorecard } from "../../schedule/CrexScore";
 import { CrexV2Details } from "../../match-details/CrexV2Details";
-
-const CHUNK_SIZE = 10;
 
 export const GET = async (_req: NextRequest) => {
   await dbConnect();
@@ -27,7 +25,7 @@ export const GET = async (_req: NextRequest) => {
 
     const fixtures = await Match.find({
       // formatDate: { $gte: cutoffDate },
-      isPlayingPlayerFetched: false,
+      // isPlayingPlayerFetched: false,
       // isDetailsFetched: true,
       isCompleted: false,
     });
@@ -126,40 +124,69 @@ export const GET = async (_req: NextRequest) => {
         }
       }
 
-      const matchDetails = await MatchDetails.findOne({
-        matchId: new mongoose.Types.ObjectId(match._id.toString()),
-      });
-
-      const latestSquad = await SquadList(match.url, matchDetails.squads);
-
       try {
-        const updateMatchDetails = await MatchDetails.updateOne(
-          {
+        if (!match.isPlayingPlayerFetched) {
+          const matchDetails = await MatchDetails.findOne({
             matchId: new mongoose.Types.ObjectId(match._id.toString()),
-          },
-          { $set: { squads: latestSquad } },
-        );
-        if (updateMatchDetails) {
-          const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
+          });
 
-          const scoreCard = await CrexMatchScorecard(scoreCardUrl);
-          const result = scoreCard?.result?.toLowerCase() ?? "";
-          await Match.updateOne(
-            { _id: new mongoose.Types.ObjectId(match._id.toString()) },
+          const latestSquad = await SquadList(match.url, matchDetails.squads);
+          const updateMatchDetails = await MatchDetails.updateOne(
+            {
+              matchId: new mongoose.Types.ObjectId(match._id.toString()),
+            },
             {
               $set: {
+                squads: latestSquad,
                 isPlayingPlayerFetched: true,
                 playingXiFetchedAt: new Date(),
-                isCompleted:
-                  result.includes("abandoned") ||
-                  result.includes("won") ||
-                  result.includes("match drawn") || result.includes("no result")
-                    ? true
-                    : false,
               },
             },
           );
         }
+
+        const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
+        const scoreCard = await CrexMatchScorecard(scoreCardUrl);
+
+        const result = scoreCard?.result?.toLowerCase() ?? "";
+        const updatedTeams = (match.teams ?? []).map((dbTeam: any) => {
+          const scTeam = scoreCard?.teams?.find(
+            (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
+          );
+
+          return {
+            ...dbTeam,
+            teamShortName: scTeam?.name ?? GetTeamShortName(dbTeam.teamName),
+            cricketScore: scTeam ? `${scTeam.score} (${scTeam.overs})` : null,
+          };
+        });
+        const matchDateTime = moment(match.formatDate);
+
+        const status = matchDateTime.isAfter(moment())
+          ? "UPCOMING"
+          : result.includes("abandoned")
+            ? "ABANDONED"
+            : result.includes("won") ||
+                result.includes("match drawn") ||
+                result.includes("no result")
+              ? "COMPLETED"
+              : "LIVE";
+        await Match.updateOne(
+          { _id: new mongoose.Types.ObjectId(match._id.toString()) },
+          {
+            $set: {
+              isCompleted:
+                result.includes("abandoned") ||
+                result.includes("won") ||
+                result.includes("match drawn") ||
+                result.includes("no result")
+                  ? true
+                  : false,
+              teams: updatedTeams,
+              status: status,
+            },
+          },
+        );
       } catch (err) {
         if (err) continue;
       }

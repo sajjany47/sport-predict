@@ -1,9 +1,4 @@
-import {
-  FormatErrorMessage,
-  GetTeamShortName,
-  NormalizeCrexUrl,
-} from "@/lib/utils";
-import { CrexList } from "./CrexList";
+import { FormatErrorMessage, GetTeamShortName } from "@/lib/utils";
 import dbConnect from "../db";
 import { CrexMatchScorecard } from "./CrexScore";
 import { GetNewAnalysis } from "@/app/matches/[id]/GetNewAnanlysis";
@@ -25,18 +20,14 @@ export async function POST(request: Request) {
 
     const todayStart = base.clone().startOf("day").utc().toDate();
     const todayEnd = base.clone().endOf("day").utc().toDate();
+    const selectedDate = base.format("YYYY-MM-DD");
 
     const dbMatches = await Match.aggregate([
       {
         $match: {
           $or: [
-            {
-              formatDate: { $gte: todayStart, $lte: todayEnd }, // today's matches
-            },
-            {
-              formatDate: { $lt: todayStart }, // previous matches
-              isCompleted: false, // only if still live
-            },
+            { formatDate: { $gte: todayStart, $lte: todayEnd } },
+            { formatDate: { $lt: todayStart }, isCompleted: false },
           ],
         },
       },
@@ -45,6 +36,7 @@ export async function POST(request: Request) {
 
     const filteredMatches = dbMatches.filter((match: any) => {
       if (!match?.teams?.length) return false;
+
       return (
         match.teams[0]?.teamName !== "Team 1 (TBC)" &&
         match.teams[1]?.teamShortName !== "Team"
@@ -53,86 +45,103 @@ export async function POST(request: Request) {
 
     const now = moment().tz(timezone);
 
-    const preparedMatches = await Promise.all(
-      filteredMatches.map(async (match: any) => {
-        const matchDateTime = moment.utc(match.formatDate).tz(timezone);
+    const completedMatch = filteredMatches
+      .filter((item: any) => item.status === "COMPLETED")
+      .map((item: any) => ({
+        ...item,
+        teams: item.teams.map((team: any) => ({
+          ...team,
+          teamShortName: GetTeamShortName(team.teamName),
+        })),
+      }));
 
-        let status = "UPCOMING";
+    const upcomingMatch = filteredMatches
+      .filter((item: any) =>
+        moment.utc(item.formatDate).tz(timezone).isAfter(now),
+      )
+      .map((item: any) => ({
+        ...item,
+        status: "UPCOMING",
+        teams: item.teams.map((team: any) => ({
+          ...team,
+          teamShortName: GetTeamShortName(team.teamName),
+        })),
+      }));
 
-        if (!matchDateTime.isAfter(now)) {
-          try {
-            const scoreCardUrl = match.url.replace(
-              /\/info(\/)?$/i,
-              "/scorecard",
-            );
+    const liveMatches = filteredMatches.filter((item: any) => {
+      const matchDateTime = moment.utc(item.formatDate).tz(timezone);
+      return matchDateTime.isBefore(now) && item.status !== "COMPLETED";
+    });
 
-            const scoreCard = await CrexMatchScorecard(scoreCardUrl);
-            const result = scoreCard?.result?.toLowerCase() ?? "";
+    const processedLiveMatches = await Promise.all(
+      liveMatches.map(async (match: any) => {
+        let scoreCard: any = null;
+        let result = "";
 
-            const updatedTeams = (match.teams ?? []).map((dbTeam: any) => {
-              const scTeam = scoreCard?.teams?.find(
-                (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
-              );
-
-              return {
-                ...dbTeam,
-                teamShortName:
-                  scTeam?.name ?? GetTeamShortName(dbTeam.teamName),
-                cricketScore: scTeam
-                  ? `${scTeam.score} (${scTeam.overs})`
-                  : null,
-              };
-            });
-
-            match.teams = updatedTeams;
-
-            match.score = scoreCard
-              ? {
-                  score: (scoreCard.teams ?? []).map((t: any) => ({
-                    team: t.name,
-                    run: `${t.score} (${t.overs})`,
-                  })),
-                  result: scoreCard?.result ?? "",
-                }
-              : null;
-
-            status =
-              result.includes("won") || result.includes("match drawn")
-                ? "COMPLETED"
-                : result.includes("abandoned")
-                  ? "ABANDONED"
-                  : "LIVE";
-          } catch {
-            status = "LIVE";
-          }
+        try {
+          const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
+          scoreCard = await CrexMatchScorecard(scoreCardUrl);
+          result = scoreCard?.result?.toLowerCase() ?? "";
+        } catch {
+          scoreCard = null;
         }
+
+        const updatedTeams = (match.teams ?? []).map((dbTeam: any) => {
+          const scTeam = scoreCard?.teams?.find(
+            (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
+          );
+
+          return {
+            ...dbTeam,
+            teamShortName: scTeam?.name ?? GetTeamShortName(dbTeam.teamName),
+            cricketScore: scTeam ? `${scTeam.score} (${scTeam.overs})` : null,
+          };
+        });
+
+        const status =
+          result.includes("won") ||
+          result.includes("match drawn") ||
+          result.includes("no result")
+            ? "COMPLETED"
+            : result.includes("abandoned")
+              ? "ABANDONED"
+              : "LIVE";
 
         return {
           ...match,
+          teams: updatedTeams,
           status,
-          matchDate: matchDateTime.format("ddd, DD MMM YYYY"),
-          startTime: matchDateTime.format("hh:mm A"),
-          matchDateTimeUser: matchDateTime.format("DD MMM YYYY, hh:mm A"),
+          score: scoreCard
+            ? {
+                score: (scoreCard.teams ?? []).map((t: any) => ({
+                  team: t.name,
+                  run: `${t.score} (${t.overs})`,
+                })),
+                result: scoreCard?.result ?? "",
+              }
+            : null,
         };
       }),
     );
 
-    const selectedDate = base.format("YYYY-MM-DD");
-
-    const sortedData = preparedMatches
+    const sortedData = [
+      ...completedMatch,
+      ...upcomingMatch,
+      ...processedLiveMatches,
+    ]
+      .filter(Boolean)
       .sort(
         (a, b) =>
           new Date(a.formatDate).getTime() - new Date(b.formatDate).getTime(),
       )
       .filter((item: any) => {
-        const matchDate = moment(item.formatDate)
+        const matchDate = moment
+          .utc(item.formatDate)
           .tz(timezone)
           .format("YYYY-MM-DD");
 
-        // show all LIVE matches (even from previous day)
         if (item.status === "LIVE") return true;
 
-        // show UPCOMING + COMPLETED only for selected date
         if (
           (item.status === "UPCOMING" || item.status === "COMPLETED") &&
           matchDate === selectedDate
@@ -145,6 +154,7 @@ export async function POST(request: Request) {
     const finalPrepareData = await Promise.all(
       sortedData.map(async (item: any) => {
         let data = { ...item, prediction: null };
+
         if (item.status === "COMPLETED") {
           const details = await MatchDetails.findOne({
             matchId: new mongoose.Types.ObjectId(item._id),
@@ -156,6 +166,7 @@ export async function POST(request: Request) {
               squads: details.squads,
               matchInfo: item,
             });
+
             data.prediction = analysis;
           }
         }
@@ -166,7 +177,7 @@ export async function POST(request: Request) {
 
     return Response.json(
       {
-        data: [...finalPrepareData],
+        data: finalPrepareData,
         success: true,
         message: "Schedule fetched successfully",
       },
@@ -174,8 +185,12 @@ export async function POST(request: Request) {
     );
   } catch (error: any) {
     console.error(error);
+
     return Response.json(
-      { success: false, error: FormatErrorMessage(error) },
+      {
+        success: false,
+        error: FormatErrorMessage(error),
+      },
       { status: 500 },
     );
   }
