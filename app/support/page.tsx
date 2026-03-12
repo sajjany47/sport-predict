@@ -21,7 +21,8 @@ const SupportPage = () => {
     //   console.log(a);
     // };
     // fetchData();
-    Prediction(DummyData);
+    const a = Prediction(DummyData);
+    console.log(a);
   }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-10 px-4 md:px-8">

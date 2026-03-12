@@ -1,3 +1,5 @@
+import { GetConfidence, GetHint } from "@/lib/utils";
+
 const squadAnanlysis = (team: any) => {
   const squad = team?.players;
 
@@ -140,23 +142,25 @@ const generateDream11Team = (teamA: any, teamB: any) => {
       if (roleCount.BOWL < 3) addPlayer(p, "BOWL");
     });
 
-  // Fill remaining slots with best players
+  // Fill remaining slots
   for (const p of allPlayers) {
     if (team.length >= 11) break;
     addPlayer(p, "BAT");
   }
 
-  const captain = [...team].sort((a, b) => b.impactScore - a.impactScore)[0];
+  // Find captain & vice captain
+  const sortedTeam = [...team].sort((a, b) => b.impactScore - a.impactScore);
 
-  const viceCaptain = [...team]
-    .filter((p) => p.name !== captain.name)
-    .sort((a, b) => b.impactScore - a.impactScore)[0];
+  const captainName = sortedTeam[0]?.name;
+  const viceCaptainName = sortedTeam[1]?.name;
 
-  return {
-    team,
-    captain,
-    viceCaptain,
-  };
+  const finalTeam = team.map((player) => ({
+    ...player,
+    isCaptain: player.name === captainName,
+    isViceCaptain: player.name === viceCaptainName,
+  }));
+
+  return finalTeam;
 };
 
 export const Prediction = (data: any): any => {
@@ -276,4 +280,75 @@ export const Prediction = (data: any): any => {
   const teamBTopPerformer = getTopPerformers(teamB);
 
   const dream11Team = generateDream11Team(teamA, teamB);
+
+  const hintData = GetHint(
+    teamPrediction.teamAWinChance,
+    teamPrediction.teamBWinChance,
+  );
+
+  return {
+    team1: {
+      name: data?.matchInfo?.teams[0]?.teamName ?? teamA.teamName,
+      shortName: teamA?.teamName,
+      flag: data?.matchInfo?.teams[0]?.teamFlagUrl,
+
+      firstInnings: {
+        min: Math.round(teamPrediction.teamAPredictedScore.score * 0.9),
+        max: Math.round(teamPrediction.teamAPredictedScore.score * 1.1),
+        predicted: teamPrediction.teamAPredictedScore.score,
+        wickets: teamPrediction.teamAPredictedScore.wicket,
+      },
+
+      winnerPrediction: {
+        probability: teamPrediction.teamAWinChance || 50,
+        confidence: GetConfidence(teamPrediction.teamAWinChance || 50),
+        hint: {
+          hintMessage: hintData.team1.message,
+          badgeColor: hintData.team1.badgeColor,
+          color: hintData.team1.color,
+        },
+      },
+
+      topBatsman: teamATopPerformer.topRunner,
+      topBowler: teamATopPerformer.topWicketTaker,
+      keyPlayers: teamATopPerformer.keyPlayers,
+    },
+
+    team2: {
+      name: data?.matchInfo?.teams[1]?.teamName ?? teamB.teamName,
+      shortName: teamB.teamName,
+      flag: data?.matchInfo?.teams[1]?.teamFlagUrl,
+
+      firstInnings: {
+        min: Math.round(teamPrediction.teamBPredictedScore.score * 0.9),
+        max: Math.round(teamPrediction.teamBPredictedScore.score * 1.1),
+        predicted: teamPrediction.teamBPredictedScore.score,
+        wickets: teamPrediction.teamBPredictedScore.wicket,
+      },
+
+      winnerPrediction: {
+        probability: teamPrediction.teamBWinChance || 50,
+        confidence: GetConfidence(teamPrediction.teamBWinChance || 50),
+        hint: {
+          hintMessage: hintData.team1.message,
+          badgeColor: hintData.team1.badgeColor,
+          color: hintData.team1.color,
+        },
+      },
+
+      topBatsman: teamBTopPerformer.topRunner,
+      topBowler: teamBTopPerformer.topWicketTaker,
+      keyPlayers: teamBTopPerformer.keyPlayers,
+    },
+
+    dream11Team,
+
+    venueStats: data?.venueDetails?.stats?.matches
+      ? data.venueDetails.stats
+      : null,
+
+    venueWeather: data?.venueDetails?.weather?.temperature
+      ? data.venueDetails.weather
+      : null,
+  };
 };
