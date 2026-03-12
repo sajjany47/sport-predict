@@ -6,6 +6,7 @@ import Match from "./MatchModel";
 import MatchDetails from "../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
 import moment from "moment-timezone";
+import { Prediction } from "../order/Prediction";
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -161,7 +162,7 @@ export async function POST(request: Request) {
           });
 
           if (details) {
-            const analysis = await GetNewAnalysis({
+            const analysis = await Prediction({
               ...details,
               squads: details.squads,
               matchInfo: item,
