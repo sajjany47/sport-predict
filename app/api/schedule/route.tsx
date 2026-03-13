@@ -156,7 +156,16 @@ export async function POST(request: Request) {
 
     const finalPrepareData = await Promise.all(
       sortedData.map(async (item: any) => {
-        let data = { ...item, prediction: null };
+        const matchDateTime = moment
+          .utc(`${item.matchDate} ${item.startTime}`, "ddd, DD MMM YYYY h:mm A")
+          .tz(timezone);
+        let data = {
+          ...item,
+          prediction: null,
+          matchDate: matchDateTime.format("ddd, DD MMM YYYY"),
+          startTime: matchDateTime.format("hh:mm A"),
+          matchDateTimeUser: matchDateTime.format("DD MMM YYYY, hh:mm A"),
+        };
 
         if (item.status === "COMPLETED") {
           const details = await MatchDetails.findOne({
