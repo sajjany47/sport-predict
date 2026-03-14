@@ -29,7 +29,7 @@ export const DailyCreditAd = ({
   const [isCompleted, setIsCompleted] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const countdownRef = useRef<NodeJS.Timeout>();
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Reset all states when dialog closes
   useEffect(() => {
@@ -48,7 +48,9 @@ export const DailyCreditAd = ({
     countdownRef.current = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          clearInterval(countdownRef.current);
+          if (countdownRef.current) {
+            clearInterval(countdownRef.current);
+          }
           setIsCompleted(true);
           onCreditAdd?.();
           return 0;
@@ -62,8 +64,14 @@ export const DailyCreditAd = ({
     setIsWatching(false);
     setIsCompleted(false);
     setCountdown(30);
-    clearInterval(countdownRef.current);
+
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+
     videoRef.current?.pause();
+
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
     }
@@ -71,7 +79,9 @@ export const DailyCreditAd = ({
 
   useEffect(() => {
     return () => {
-      clearInterval(countdownRef.current);
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+      }
     };
   }, []);
 
