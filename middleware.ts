@@ -25,6 +25,7 @@ const protectedPaths: any = [
   "/api/payment-intent",
   "/api/users/add-offer-credit",
   "/api/match-details/:id",
+  "/api/match-details",
 ];
 
 export async function middleware(request: NextRequest) {

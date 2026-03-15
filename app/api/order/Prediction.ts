@@ -1,7 +1,7 @@
 import { GetConfidence, GetHint } from "@/lib/utils";
 
 const squadAnanlysis = (team: any) => {
-  const squad = team?.players;
+  const squad = team?.players ?? [];
 
   let totalImpactRun = 0;
   let totalImpactWicket = 0;
@@ -60,7 +60,7 @@ const PrepareScore = (teamA: any, teamB: any) => {
 };
 
 const getTopPerformers = (team: any) => {
-  const squad = team?.players;
+  const squad = team?.players ?? [];
 
   const topRunner = [...squad].sort((a, b) => b.impactRun - a.impactRun)[0];
 
@@ -80,12 +80,12 @@ const getTopPerformers = (team: any) => {
 };
 
 const generateDream11Team = (teamA: any, teamB: any) => {
-  const teamAPlayers = teamA.players.map((p: any) => ({
+  const teamAPlayers = (teamA?.players ?? []).map((p: any) => ({
     ...p,
     team: teamA.teamName,
   }));
 
-  const teamBPlayers = teamB.players.map((p: any) => ({
+  const teamBPlayers = (teamB?.players ?? []).map((p: any) => ({
     ...p,
     team: teamB.teamName,
   }));
@@ -316,7 +316,7 @@ export const Prediction = (data: any): any => {
 
     team2: {
       name: data?.matchInfo?.teams[1]?.teamName ?? teamB.teamName,
-      shortName: teamB.teamName,
+      shortName: teamB?.teamName,
       flag: data?.matchInfo?.teams[1]?.teamFlagUrl,
 
       firstInnings: {
