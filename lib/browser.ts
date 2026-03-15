@@ -7,9 +7,20 @@ const isProd = process.env.NEXT_PUBLIC_NODE_ENV === "production";
 export async function getBrowser() {
   if (isProd) {
     // ✅ PROD (Vercel): puppeteer-core + sparticuz
+    // return puppeteerCore.launch({
+    //   args: chromium.args,
+    //   executablePath: await chromium.executablePath(),
+    //   headless: true,
+    //   defaultViewport: { width: 1280, height: 800 },
+    // });
+
+    chromium.setGraphicsMode = false;
+
+    const executablePath = await chromium.executablePath();
+
     return puppeteerCore.launch({
       args: chromium.args,
-      executablePath: await chromium.executablePath(),
+      executablePath,
       headless: true,
       defaultViewport: { width: 1280, height: 800 },
     });
