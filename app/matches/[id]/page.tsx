@@ -66,8 +66,9 @@ const MatchDetailsPage = () => {
         setIsLoading(false);
       })
       .catch((err) => {
+        console.log(err);
         // toast.error(err.message || "Failed to fetch match details.");
-        router.push("/auth/login");
+        // router.push("/auth/login");
         setIsLoading(false);
       });
     // setMatchData({ ...DummyData });
