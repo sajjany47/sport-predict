@@ -4,7 +4,6 @@ import publicApi from "./publicAxiosClient";
 const privateApi = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
-  timeout: 300000,
 });
 
 privateApi.interceptors.request.use((config) => {
