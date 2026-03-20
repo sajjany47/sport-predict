@@ -25,6 +25,7 @@ import toast from "react-hot-toast";
 import { setOrderHistory, setPlans } from "@/store/slices/subscriptionSlice";
 import { DailyCreditAd } from "@/components/GetDailyCredit";
 import {
+  CheckBoostToken,
   PaymentCreate,
   SubscriptionList,
   UserOrderCredit,
@@ -36,7 +37,7 @@ import * as Icons from "lucide-react";
 
 const SubscriptionPage = () => {
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
   const dispatch = useDispatch();
   const router = useRouter();
@@ -49,6 +50,7 @@ const SubscriptionPage = () => {
   const [dailyFreeCredit, setDailyFreeCredit] = useState(0);
   const [loading, setLoading] = useState(false);
   const [tokenPackages, setTokenPackages] = useState([]);
+  const [isPurchasable, setIsPurchasable] = useState(false);
 
   // useEffect(() => {
   //   if (!isAuthenticated) {
@@ -59,14 +61,28 @@ const SubscriptionPage = () => {
   // }, []);
 
   useEffect(() => {
+    if (user?.id) {
+      userBoostToken(user?.id);
+    }
     planList();
   }, []);
+
+  const userBoostToken = (id: any) => {
+    CheckBoostToken(id)
+      .then((res) => {
+        setIsPurchasable(res.data.isBuyAble);
+      })
+      .catch((error) => {
+        toast.error(error.message || "Failed to get list. Please try again.");
+      });
+  };
 
   const planList = () => {
     setLoading(true);
     SubscriptionList()
       .then((res) => {
-        setTokenPackages(res.data);
+        const a = res.data.filter((item: any) => item.isActive);
+        setTokenPackages(a);
         setLoading(false);
       })
       .catch((error) => {
@@ -109,7 +125,7 @@ const SubscriptionPage = () => {
   const handlePurchase = async (
     packageId: string,
     tokens: number,
-    price: number
+    price: number,
   ) => {
     if (!isAuthenticated) {
       router.push("/auth/login");
@@ -123,13 +139,18 @@ const SubscriptionPage = () => {
       return;
     }
 
+    if (packageId === "starter" && !isPurchasable) {
+      toast.error("Only 1 time per day per user");
+      return;
+    }
+
     if (packageId === "custom" && customTokens < 1) {
       toast.error("Please select at least 1 token");
       return;
     }
 
     const packageData: any = tokenPackages.find(
-      (pkg: any) => pkg.type === packageId
+      (pkg: any) => pkg.type === packageId,
     );
     if (!packageData) return;
 
@@ -143,7 +164,7 @@ const SubscriptionPage = () => {
     };
     const { icon, ...serializableData }: any = prepareData;
 
-    dispatch(setPlans(serializableData));
+    // dispatch(setPlans(serializableData));
     initiatePayment({
       _id: packageData._id,
       type: packageData.type,
@@ -368,12 +389,15 @@ const SubscriptionPage = () => {
                         pkg.price === 0
                           ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
                           : pkg.popular
-                          ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                          : "bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600"
+                            ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                            : "bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600"
                       } text-white font-semibold py-3`}
-                      onClick={() =>
-                        handlePurchase(pkg.type, pkg.credits, pkg.price)
-                      }
+                      onClick={() => {
+                        handlePurchase(pkg.type, pkg.credits, pkg.price);
+                        const { icon, ...serializableData }: any = pkg;
+
+                        dispatch(setPlans(serializableData));
+                      }}
                     >
                       {pkg.price === 0 ? (
                         <>

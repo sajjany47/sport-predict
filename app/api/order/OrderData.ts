@@ -27,6 +27,7 @@ export function PrepareOrderData(formData: any, isEdit = false) {
     price: formData.price !== undefined ? Number(formData.price) : null,
 
     userId: new mongoose.Types.ObjectId(formData.userId),
+    subscriptionId: new mongoose.Types.ObjectId(formData.subscriptionId),
 
     credits: formData.credits !== undefined ? Number(formData.credits) : null,
 

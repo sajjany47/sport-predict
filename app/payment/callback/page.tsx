@@ -27,10 +27,10 @@ export default function PaymentCallback() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { orderHistory, plans } = useSelector(
-    (state: RootState) => state.subscription
+    (state: RootState) => state.subscription,
   );
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   const [paymentStatus, setPaymentStatus] = useState<{
@@ -78,6 +78,8 @@ export default function PaymentCallback() {
       status: "completed",
       price: Number(orderHistory?.order_amount) || 0,
       paymentIntentId: orderHistory?.order_id,
+      subscriptionId: plans?._id,
+      subscriptionType: plans?.type,
     };
 
     UserOrderCredit(payload)

@@ -42,6 +42,21 @@ export const SubscriptionList = async () => {
   }
 };
 
+export const CheckBoostToken = async (id: any) => {
+  try {
+    const response = await publicApi.post(
+      "/api/subscription/boost-token-check",
+      { _id: id },
+      {
+        headers: getHeaders(),
+      },
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
+
 export const UserLogin = async (payload: any) => {
   try {
     const response = await publicApi.post("/api/users/sigin", payload, {

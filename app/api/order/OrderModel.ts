@@ -14,6 +14,10 @@ const OrderSchema = new Schema(
       // ref: "Match", // 👈 your match model name
       default: null,
     },
+    subscriptionId: {
+      type: Schema.Types.ObjectId,
+      default: null,
+    },
     userId: Schema.Types.ObjectId,
     credits: { type: Number, default: null },
     paymentStatus: { type: Boolean, default: false },

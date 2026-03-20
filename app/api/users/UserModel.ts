@@ -24,13 +24,14 @@ const UserSchema = new Schema(
       type: Date,
       default: null,
     },
+    dailyBoostTokenPurchaseDate: { type: Date, default: null },
     role: {
       type: String,
       enum: ["admin", "user", "employee"], // 👈 Allowed roles
       default: "user", // 👈 Optional: default role
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const User = mongoose.models.User || mongoose.model("User", UserSchema);

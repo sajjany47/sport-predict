@@ -138,6 +138,9 @@ export const POST = async (req: NextRequest) => {
       if (orderStatus === "PAID") {
         prepareData.paymentStatus = true;
         prepareData.status = "completed";
+        prepareData.subscriptionId = new mongoose.Types.ObjectId(
+          data.subscriptionId,
+        );
 
         prepareData.paymentDate = orderBody?.order_time
           ? new Date(orderBody.order_time)
@@ -147,6 +150,9 @@ export const POST = async (req: NextRequest) => {
       } else {
         prepareData.paymentStatus = false;
         prepareData.status = "failed";
+        prepareData.subscriptionId = new mongoose.Types.ObjectId(
+          data.subscriptionId,
+        );
       }
     }
 
@@ -197,7 +203,13 @@ export const POST = async (req: NextRequest) => {
       ) {
         await User.updateOne(
           { _id: userId },
-          { $inc: { credits: createdOrder.credits } },
+          {
+            $inc: { credits: createdOrder.credits },
+            $set: {
+              dailyBoostTokenPurchaseDate:
+                data.subscriptionType === "starter" ? new Date() : null,
+            },
+          },
         );
       }
     }

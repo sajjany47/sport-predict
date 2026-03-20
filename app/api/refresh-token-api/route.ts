@@ -18,9 +18,9 @@ export const POST = async (request: NextRequest) => {
 
     const { payload } = await jwtVerify(refreshToken, SECRET_KEY);
 
-    const newAccessToken = await generateToken({ ...payload }, "1d");
+    const newAccessToken = await generateToken({ ...payload }, "20d");
 
-    const newRefreshToken = await generateToken({ ...payload }, "10d");
+    const newRefreshToken = await generateToken({ ...payload }, "30d");
 
     // set refresh token in secure cookie
     const cookie = serialize("refreshToken", newRefreshToken, {
