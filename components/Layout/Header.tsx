@@ -66,18 +66,21 @@ const Header = () => {
     isSuccess: null,
   });
 
-  // useEffect(() => {
-  //   CornMatchStatus()
-  //     .then((res) => {
-  //       console.log(res.message);
-  //     })
-  //     .catch((error) => {
-  //       console.log(
-  //         error.message || "Failed to update status. Please try again.",
-  //       );
-  //     });
-  // }, []);
+  useEffect(() => {
+    matchStatusUpdate();
+  }, []);
 
+  const matchStatusUpdate = () => {
+    CornMatchStatus()
+      .then((res) => {
+        console.log(res.message);
+      })
+      .catch((error) => {
+        console.log(
+          error.message || "Failed to update status. Please try again.",
+        );
+      });
+  };
   // App download links - Replace with your actual links
   const appDownloadLinks = {
     android:
@@ -336,7 +339,7 @@ const Header = () => {
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
 
-                      <DropdownMenuItem
+                      {/* <DropdownMenuItem
                         className="cursor-pointer flex items-center py-2.5 sm:py-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all"
                         onClick={() => {
                           setTimeout(() => setDailyCredit(true), 50);
@@ -353,7 +356,7 @@ const Header = () => {
                             Claim your free daily credits
                           </div>
                         </div>
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
 
                       {/* App Download in User Dropdown */}
                       <DropdownMenuItem
@@ -409,6 +412,25 @@ const Header = () => {
                               </div>
                               <div className="text-xs text-gray-500">
                                 Daily match list insert corn
+                              </div>
+                            </div>
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem
+                            className="cursor-pointer flex items-center py-2.5 sm:py-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all"
+                            onClick={() => {
+                              setTimeout(() => matchStatusUpdate(), 50);
+                            }}
+                          >
+                            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
+                              <RefreshCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-sm sm:text-base">
+                                Match Status update
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Daily match status update corn
                               </div>
                             </div>
                           </DropdownMenuItem>
@@ -638,7 +660,7 @@ const Header = () => {
                       {/* Mobile Auth Actions */}
                       {isAuthenticated && user ? (
                         <div className="mt-4 sm:mt-6 space-y-1.5 sm:space-y-2 px-1 sm:px-2">
-                          <button
+                          {/* <button
                             onClick={() => {
                               setMobileMenuOpen(false);
                               setTimeout(() => setDailyCredit(true), 50);
@@ -660,7 +682,7 @@ const Header = () => {
                               <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                               Free
                             </Badge>
-                          </button>
+                          </button> */}
 
                           <button
                             onClick={handleLogout}
