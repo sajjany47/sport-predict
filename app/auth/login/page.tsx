@@ -58,21 +58,21 @@ const LoginPage = () => {
           token: res.data.token,
           subscription: res.data.user.subscription ?? [],
         };
-        sessionStorage.setItem("token", res.data.token);
+        localStorage.setItem("token", res.data.token);
         dispatch(loginSuccess(userData));
         setIsLoading(false);
         toast.success("Login successful!");
 
-        const storedPath = sessionStorage.getItem("currentPath");
+        const storedPath = localStorage.getItem("currentPath");
 
         if (
           storedPath === "/auth/register" ||
           storedPath === "/auth/forgot-password"
         ) {
-          sessionStorage.setItem("currentPath", "");
+          localStorage.setItem("currentPath", "");
           router.push("/matches");
         } else {
-          sessionStorage.setItem("currentPath", "");
+          localStorage.setItem("currentPath", "");
           // router.back();
           router.push("/matches");
         }

@@ -36,7 +36,7 @@ const ForgotPasswordPage = () => {
   const [resData, setResData] = useState<any>(null);
 
   useEffect(() => {
-    sessionStorage.setItem("currentPath", pathname);
+    localStorage.setItem("currentPath", pathname);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const resetPassword = async (payload: any) => {

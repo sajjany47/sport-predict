@@ -88,7 +88,7 @@ const registrationSchema = Yup.object({
 
   agreeToTerms: Yup.boolean().oneOf(
     [true],
-    "You must accept the terms and conditions"
+    "You must accept the terms and conditions",
   ),
 });
 
@@ -106,7 +106,7 @@ const RegisterPage = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    sessionStorage.setItem("currentPath", pathname);
+    localStorage.setItem("currentPath", pathname);
   }, [pathname]);
 
   // Handle OTP input change
@@ -226,7 +226,7 @@ const RegisterPage = () => {
         subscription: res.data.user.subscription ?? [],
       };
 
-      sessionStorage.setItem("token", res.data.token);
+      localStorage.setItem("token", res.data.token);
       dispatch(loginSuccess(userData));
       toast.success("Account created successfully!");
       setUserData(userData);
@@ -446,7 +446,7 @@ const RegisterPage = () => {
                             onChange={(e: any) =>
                               setFieldValue(
                                 "username",
-                                e?.target?.value?.trim()
+                                e?.target?.value?.trim(),
                               )
                             }
                             icon={

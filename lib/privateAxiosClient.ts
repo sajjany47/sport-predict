@@ -7,7 +7,7 @@ const privateApi = axios.create({
 });
 
 privateApi.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -24,12 +24,12 @@ privateApi.interceptors.response.use(
 
     // Or from body (refresh-token-api)
     if (response.data?.accessToken) {
-      sessionStorage.setItem("token", response.data.accessToken);
+      localStorage.setItem("token", response.data.accessToken);
     } else if (newAccessToken) {
       const token = newAccessToken.startsWith("Bearer ")
         ? newAccessToken.split(" ")[1]
         : newAccessToken;
-      sessionStorage.setItem("token", token);
+      localStorage.setItem("token", token);
     }
 
     return response;
@@ -42,14 +42,14 @@ privateApi.interceptors.response.use(
         const newToken = refreshRes.data.accessToken;
 
         if (newToken) {
-          sessionStorage.setItem("token", newToken);
+          localStorage.setItem("token", newToken);
 
           // retry original request
           error.config.headers["Authorization"] = `Bearer ${newToken}`;
           return privateApi.request(error.config);
         }
       } catch (err) {
-        sessionStorage.removeItem("token");
+        localStorage.removeItem("token");
         window.location.href = "/auth/login";
       }
     }
