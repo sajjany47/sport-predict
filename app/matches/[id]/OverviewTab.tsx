@@ -12,7 +12,7 @@ const OverviewTab = ({ matchData }: any) => {
   const calculateH2HStats = (
     h2hMatches: any[],
     team1Name: string,
-    team2Name: string
+    team2Name: string,
   ) => {
     if (!h2hMatches || h2hMatches.length === 0) {
       return [
@@ -26,12 +26,12 @@ const OverviewTab = ({ matchData }: any) => {
     const findTeam1Name = selectedMatch?.teams.find(
       (item: any) =>
         item.teamShortName.toLowerCase() ===
-        h2hMatches[0]?.team1?.name.toLowerCase()
+        h2hMatches[0]?.team1?.name.toLowerCase(),
     );
     const findTeam2Name = selectedMatch?.teams.find(
       (item: any) =>
         item.teamShortName.toLowerCase() ===
-        h2hMatches[0]?.team2?.name.toLowerCase()
+        h2hMatches[0]?.team2?.name.toLowerCase(),
     );
     const team1 = findTeam1Name?.teamName;
     const team2 = findTeam2Name?.teamName;
@@ -75,19 +75,19 @@ const OverviewTab = ({ matchData }: any) => {
     if (!matches) return 0;
     const prepareData = FindWinner(matches, selectedMatch, teamName);
     const wins = prepareData.filter(
-      (item: any) => item.winner === "W" && item.teamName === teamName
+      (item: any) => item.winner === "W" && item.teamName === teamName,
     );
     const losses = prepareData.filter(
-      (item: any) => item.winner === "L" && item.teamName === teamName
+      (item: any) => item.winner === "L" && item.teamName === teamName,
     );
     const noResult = prepareData.filter(
-      (item: any) => item.winner === "A" && item.teamName === teamName
+      (item: any) => item.winner === "A" && item.teamName === teamName,
     );
     const battingFirstWins = wins.filter(
-      (item: any) => item.winnerType === "batting"
+      (item: any) => item.winnerType === "batting",
     );
     const bowlingFirstWins = wins.filter(
-      (item: any) => item.winnerType === "bowling"
+      (item: any) => item.winnerType === "bowling",
     );
     return {
       wins: wins.length || 0,
@@ -100,7 +100,7 @@ const OverviewTab = ({ matchData }: any) => {
 
   const getRecentMatchesWithScores = (team: any, teamName: string) => {
     if (!team?.matches) return [];
-    const prepareData = FindWinner(team.matches, selectedMatch, teamName);
+    const prepareData = FindWinner(team.matches, selectedMatch, teamName) ?? [];
 
     return prepareData;
   };
@@ -110,12 +110,12 @@ const OverviewTab = ({ matchData }: any) => {
     const team1 = selectedMatch?.teams.find(
       (item: any) =>
         item.teamShortName.toLowerCase() ===
-        h2hMatches[0]?.team1?.name.toLowerCase()
+        h2hMatches[0]?.team1?.name.toLowerCase(),
     )?.teamName;
     const team2 = selectedMatch?.teams.find(
       (item: any) =>
         item.teamShortName.toLowerCase() ===
-        h2hMatches[0]?.team2?.name.toLowerCase()
+        h2hMatches[0]?.team2?.name.toLowerCase(),
     )?.teamName;
     const prepareData = h2hMatches.map((match: any) => {
       if (match.result.toLowerCase().includes("abandoned")) {
@@ -174,8 +174,8 @@ const OverviewTab = ({ matchData }: any) => {
                 <div className="text-center w-full md:w-auto">
                   <div className="flex justify-center flex-wrap gap-1 mb-2">
                     {getRecentMatchesWithScores(
-                      matchData.overview.fullStats.team1,
-                      matchData.overview.fullStats.team1.teamName
+                      matchData?.overview?.fullStats?.team1,
+                      matchData?.overview?.fullStats?.team1?.teamName,
                     )
                       .slice(0, 10)
                       .map((match: any, index: any) => (
@@ -185,8 +185,8 @@ const OverviewTab = ({ matchData }: any) => {
                             match.winner === "W"
                               ? "bg-green-500"
                               : match.winner === "A"
-                              ? "bg-gray-400"
-                              : "bg-red-500"
+                                ? "bg-gray-400"
+                                : "bg-red-500"
                           }`}
                         >
                           {match.winner}
@@ -206,7 +206,7 @@ const OverviewTab = ({ matchData }: any) => {
                   <div className="flex justify-center flex-wrap gap-1 mb-2">
                     {getRecentMatchesWithScores(
                       matchData.overview.fullStats.team2,
-                      matchData.overview.fullStats.team2.teamName
+                      matchData.overview.fullStats.team2.teamName,
                     )
                       .slice(0, 10)
                       .map((match: any, index: any) => (
@@ -216,8 +216,8 @@ const OverviewTab = ({ matchData }: any) => {
                             match.winner === "W"
                               ? "bg-green-500"
                               : match.winner === "A"
-                              ? "bg-gray-400"
-                              : "bg-red-500"
+                                ? "bg-gray-400"
+                                : "bg-red-500"
                           }`}
                         >
                           {match.winner}
@@ -246,7 +246,7 @@ const OverviewTab = ({ matchData }: any) => {
                 {calculateH2HStats(
                   matchData.overview.fullStats.h2h,
                   matchData.overview.fullStats.team1.teamName,
-                  matchData.overview.fullStats.team2.teamName
+                  matchData.overview.fullStats.team2.teamName,
                 ).map((stat, index) => (
                   <div key={index} className="text-center">
                     <div
@@ -254,8 +254,8 @@ const OverviewTab = ({ matchData }: any) => {
                         stat.label === "No Result"
                           ? "text-yellow-500"
                           : stat.label === "Total"
-                          ? "text-gray-700"
-                          : "text-blue-600"
+                            ? "text-gray-700"
+                            : "text-blue-600"
                       }`}
                     >
                       {stat.wins}
@@ -291,7 +291,7 @@ const OverviewTab = ({ matchData }: any) => {
                 bowlingFirstWins,
               }: any = analyzeTeamMatches(
                 team.matches?.slice(0, 10),
-                team.teamName
+                team.teamName,
               );
 
               const totalMatches = wins + losses + noResult;
@@ -405,8 +405,8 @@ const OverviewTab = ({ matchData }: any) => {
                             match.winner === "W"
                               ? "#10B981"
                               : match.winner === "A"
-                              ? "#6B7280"
-                              : "#EF4444",
+                                ? "#6B7280"
+                                : "#EF4444",
                         }}
                       >
                         <div className="flex justify-between items-start mb-2">
@@ -424,8 +424,8 @@ const OverviewTab = ({ matchData }: any) => {
                               match.winner === "W"
                                 ? "bg-green-50 text-green-700 border-green-200"
                                 : match.winner === "A"
-                                ? "bg-gray-50 text-gray-700 border-gray-200"
-                                : "bg-red-50 text-red-700 border-red-200"
+                                  ? "bg-gray-50 text-gray-700 border-gray-200"
+                                  : "bg-red-50 text-red-700 border-red-200"
                             }`}
                           >
                             {match.winner}
@@ -450,7 +450,7 @@ const OverviewTab = ({ matchData }: any) => {
                           </div>
                         </div>
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               </div>
@@ -523,7 +523,7 @@ const OverviewTab = ({ matchData }: any) => {
                     </div>
                   )}
                 </div>
-              )
+              ),
             )}
           </div>
         </CardContent>

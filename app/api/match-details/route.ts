@@ -6,6 +6,7 @@ import { CrexV2Details } from "./CrexV2Details";
 import { SquadList } from "./SquadList";
 import MatchDetails from "./MatchDetailsModel";
 import { TeamRank } from "./TeamRank";
+import Match from "../schedule/MatchModel";
 
 const cleanPlayer = (player: any) => ({
   ...player,
@@ -96,6 +97,25 @@ export async function POST(request: NextRequest) {
           benchPlayers: (team?.benchPlayers ?? []).map(cleanPlayer),
         }),
       );
+
+      const insertMatchDetails = await MatchDetails.insertOne({
+        matchId: matchId,
+        ...crexOverallStats,
+        squads: cleanedSquads,
+        updatedAt: new Date(),
+      });
+
+      if (insertMatchDetails) {
+        await Match.updateOne(
+          { _id: matchId },
+          {
+            $set: {
+              isDetailsFetched: true,
+              detailsFetchedAt: new Date(),
+            },
+          },
+        );
+      }
 
       return Response.json(
         {
