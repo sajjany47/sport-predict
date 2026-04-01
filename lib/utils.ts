@@ -8,6 +8,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// export const BASE_URL =
+//   process.env.NEXT_PUBLIC_BASE_URL || "https://sport-predict-aejs.onrender.com";
+export const BASE_URL = " ";
+
 export const CustomStyles = {
   headCells: {
     style: {

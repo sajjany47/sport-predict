@@ -1,8 +1,9 @@
 import axios from "axios";
 import publicApi from "./publicAxiosClient";
+import { BASE_URL } from "./utils";
 
 const privateApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: BASE_URL,
   withCredentials: true,
 });
 

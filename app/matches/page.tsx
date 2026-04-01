@@ -12,8 +12,8 @@ import { useRouter } from "next/navigation";
 import CustomLoader from "@/components/ui/CustomLoader";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useQuery } from "@tanstack/react-query";
-import { FetchMatchList } from "./MatchService";
 import MatchCard from "./MatchCard";
+import { FetchMatchList } from "../MainService";
 
 // Enhanced Tab configuration
 const TAB_CONFIG = [

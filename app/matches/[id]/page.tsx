@@ -29,11 +29,11 @@ import {
 
 import CustomLoader from "@/components/ui/CustomLoader";
 import AIPredictionModal from "./ai-prediction-modal";
-import { FetchMatchDetails } from "../MatchService";
 import toast from "react-hot-toast";
 import CrexOverviewTab from "./CrexOverviewTab";
 import PlayerCard from "./SquadDialoge";
 import { DummyData } from "@/lib/DummyData";
+import { FetchMatchDetails } from "@/app/MainService";
 
 const MatchDetailsPage = () => {
   const params = useParams();

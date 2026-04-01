@@ -1,6 +1,7 @@
 import privateApi from "@/lib/privateAxiosClient";
 import publicApi from "@/lib/publicAxiosClient";
 import { getHeaders, getHeadersWithToken } from "@/lib/utils";
+import moment from "moment";
 
 export const SubscriptionCreate = async (payload: any) => {
   try {
@@ -228,5 +229,38 @@ export const PaymentCreate = async (payload: any) => {
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message);
+  }
+};
+
+export const FetchMatchDetails = async (payload: any) => {
+  try {
+    const response = await privateApi.post("/api/match-details", payload, {
+      headers: getHeadersWithToken(),
+    });
+
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
+
+export const FetchMatchList = async (date: any) => {
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const response = await publicApi.post(
+      "/api/schedule",
+      {
+        fromDate: moment(date).format("YYYY-MM-DD"),
+        toDate: moment(date).add(1, "days").format("YYYY-MM-DD"),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      },
+      {
+        headers: { "Content-Type": "application/json", "x-timezone": timezone },
+      },
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.message);
   }
 };
