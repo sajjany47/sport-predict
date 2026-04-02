@@ -7,12 +7,12 @@ import {
 } from "@/lib/utils";
 import { CrexNext3DaysFixturesArray } from "../CrexNext3DayList";
 import Match from "../../schedule/MatchModel";
-import { CrexV2Details } from "../../match-details/CrexV2Details";
 import MatchDetails from "../../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
 // import moment from "moment-timezone";
 import moment from "moment";
 import { TeamRank } from "../../match-details/TeamRank";
+import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
 
 export const GET = async (req: NextRequest) => {
   await dbConnect();
@@ -107,36 +107,15 @@ export const GET = async (req: NextRequest) => {
     for (let index = 0; index < dbMatches.length; index++) {
       const match = dbMatches[index];
       try {
-        const crexOverallStats = await CrexV2Details(match.url);
+        const crexOverallStats = await ExtractMatchDetails(
+          `${match.url}/match-details`,
+        );
 
         if (!crexOverallStats) continue;
-
-        const squads = (crexOverallStats.squads ?? []).map((team: any) => ({
-          ...team,
-          playingPlayers: (team.playingPlayers ?? []).map((p: any) => ({
-            ...p,
-            careerStats: {
-              ...p.careerStats,
-              bowling: (p.careerStats?.bowling ?? []).filter(
-                (b: any) => !b.format?.toLowerCase().includes("debut"),
-              ),
-            },
-          })),
-          benchPlayers: (team.benchPlayers ?? []).map((p: any) => ({
-            ...p,
-            careerStats: {
-              ...p.careerStats,
-              bowling: (p.careerStats?.bowling ?? []).filter(
-                (b: any) => !b.format?.toLowerCase().includes("debut"),
-              ),
-            },
-          })),
-        }));
 
         const insertMatchDetails = await MatchDetails.insertOne({
           matchId: match._id,
           ...crexOverallStats,
-          squads,
           updatedAt: new Date(),
         });
 

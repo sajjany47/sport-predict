@@ -1,7 +1,6 @@
 import { FormatErrorMessage, GetTeamShortName } from "@/lib/utils";
 import dbConnect from "../db";
 import { CrexMatchScorecard } from "./CrexScore";
-import { GetNewAnalysis } from "@/app/matches/[id]/GetNewAnanlysis";
 import Match from "./MatchModel";
 import MatchDetails from "../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
@@ -81,7 +80,9 @@ export async function POST(request: Request) {
         let result = "";
 
         try {
-          const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
+          // const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
+          const scoreCardUrl = `${match.url}/match-scorecard`;
+
           scoreCard = await CrexMatchScorecard(scoreCardUrl);
           result = scoreCard?.result?.toLowerCase() ?? "";
         } catch {

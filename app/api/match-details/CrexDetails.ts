@@ -1,199 +1,199 @@
 import { GetHtml } from "@/lib/utils";
 
-export const CrexDetails = async (url: string): Promise<any> => {
+export const CrexDetails = async (url: string) => {
   const $: any = await GetHtml(url);
 
-  /* =====================================================
-     1️⃣ TEAMS (DYNAMIC) + RECENT 5 MATCHES
-  ====================================================== */
+  /* ===============================
+     🧑‍🤝‍🧑 TEAM FORM (MATCH YOUR UI)
+  =============================== */
 
-  const teamsMap: Record<string, any> = {};
+  const teamForm: any[] = [];
 
-  $(".format-match-exp").each((_: any, el: any) => {
-    const teamId = $(el).attr("id");
-    const header = $(el).prev(".format-match");
+  $(".format-match").each((_: any, el: any) => {
+    const teamId = $(el)
+      .find("img[id$='arrow']")
+      .attr("id")
+      ?.replace("arrow", "");
 
-    if (!teamId) return;
+    const last5 = $(el)
+      .find(".match span")
+      .map((_: any, e: any) => $(e).text().trim())
+      .get();
 
-    teamsMap[teamId] = {
+    teamForm.push({
       teamId,
-      teamName: header.find(".form-team-name").text().trim(),
-      teamFlag: header.find(".form-team-img").attr("src") || null,
-      recent5: [],
-    };
+      teamName: $(el).find(".form-team-name").text().trim(),
+      teamFlag: $(el).find(".form-team-img").attr("src") || null,
+      last5,
+      matches: [], // fill next
+    });
   });
 
-  const getTeamRecentMatches = (teamId: string) => {
-    const matches: any[] = [];
+  // expand details
+  $(".format-match-exp").each((_: any, section: any) => {
+    const teamId = $(section).attr("id");
 
-    $(`#${teamId} a.team-form-card`).each((_: any, el: any) => {
-      const teamScores: any[] = [];
-
-      $(el)
-        .find(".form-team-detail")
-        .each((_: any, t: any) => {
-          teamScores.push({
-            team: $(t).find(".team-name").text().trim(),
+    const matches = $(section)
+      .find(".team-form-card")
+      .map((_: any, card: any) => {
+        const teams = $(card)
+          .find(".form-team-detail")
+          .map((_: any, t: any) => ({
+            name: $(t).find(".team-name").text().trim(),
             score: $(t).find(".team-score").text().trim(),
             overs: $(t).find(".team-over").text().trim(),
             flag: $(t).find("img").attr("src") || null,
-          });
-        });
+          }))
+          .get();
 
-      matches.push({
-        matchName: $(el).find(".match-name").text().trim(),
+        return {
+          matchName: $(card).find(".match-name").text().trim(),
+          series: $(card).find(".series-name").text().trim(),
+          result: $(card)
+            .find(".win.match span, .loss.match span")
+            .text()
+            .trim(),
+          teams,
+          matchUrl: "https://crex.com" + ($(card).attr("href") || ""),
+        };
+      })
+      .get();
+
+    const team = teamForm.find((t) => t.teamId === teamId);
+    if (team) team.matches = matches;
+  });
+
+  /* ===============================
+     🆚 HEAD TO HEAD (MATCH STRUCTURE)
+  =============================== */
+
+  const h2h = {
+    team1: {
+      name: $(".team1 .team-name").text().trim(),
+      logo: $(".team1 img").attr("src") || "",
+      wins: Number($(".team1-wins").text().trim() || 0),
+    },
+    team2: {
+      name: $(".team2 .team-name").text().trim(),
+      logo: $(".team2 img").attr("src") || "",
+      wins: Number($(".team2-wins").text().trim() || 0),
+    },
+    matches: $(".global-match-card")
+      .map((_: any, el: any) => ({
+        matchUrl: "https://crex.com" + ($(el).attr("href") || ""),
+        team1: $(el).find(".team-name").eq(0).text().trim(),
+        team1Score: $(el).find(".team-score").eq(0).text().trim(),
+        team1Overs: $(el).find(".team-over").eq(0).text().trim(),
+        team2: $(el).find(".team-name").eq(1).text().trim(),
+        team2Score: $(el).find(".team-score").eq(1).text().trim(),
+        team2Overs: $(el).find(".team-over").eq(1).text().trim(),
+        result: $(el).find(".match-dec-text").text().trim(),
         series: $(el).find(".series-name").text().trim(),
-        result: $(el).find(".win.match span, .loss.match span").text().trim(),
-        teams: teamScores,
+      }))
+      .get(),
+  };
+
+  /* ===============================
+     📊 POINTS TABLE
+  =============================== */
+
+  const pointsTable = $("#table tbody tr")
+    .map((_: any, row: any) => {
+      const td = $(row).find("td");
+
+      return {
+        team: td.eq(0).text().trim(),
+        logo: td.eq(0).find("img").attr("src") || null,
+        played: Number(td.eq(1).text().trim() || 0),
+        wins: Number(td.eq(2).text().trim() || 0),
+        losses: Number(td.eq(3).text().trim() || 0),
+        nrr: td.eq(4).text().trim(),
+        points: Number(td.eq(5).text().trim() || 0),
+      };
+    })
+    .get();
+
+  /* ===============================
+     📊 TEAM COMPARISON
+  =============================== */
+
+  const overall = $(".table.colHeader tbody tr")
+    .map((_: any, row: any) => {
+      const td = $(row).find("td");
+
+      return {
+        team1: td.eq(0).text().trim(),
+        metric: td.eq(1).text().trim(),
+        team2: td.eq(2).text().trim(),
+      };
+    })
+    .get();
+
+  // ❗ Cheerio cannot click → venue same as overall (fallback)
+  const venue = overall;
+
+  const teams = {
+    team1: {
+      name: $(".team1 .team-name").text().trim(),
+      logo: $(".team1 img").attr("src") || null,
+    },
+    team2: {
+      name: $(".team2 .team-name").text().trim(),
+      logo: $(".team2 img").attr("src") || null,
+    },
+  };
+
+  /* ===============================
+     🏟 VENUE DETAILS
+  =============================== */
+
+  const venueDetails = {
+    name: $("#venue-details .title-text").text().trim(),
+    weather: {
+      temperature: $(".weather-temp").text().trim(),
+      condition: $(".weather-cloudy-text").text().trim(),
+      humidity: $(".humidity-text div").last().text().trim(),
+      rainChance: $(".weather-place-hum-text").last().text().trim(),
+    },
+    stats: {
+      matches: $(".match-count").text().trim(),
+      winBatFirst: $(".win-bat-first .match-win-per").text().trim(),
+      winBowlFirst: $(".venue-per .match-win-per").last().text().trim(),
+      avg1stInns: $(".venue-avg-val").eq(0).text().trim(),
+      avg2ndInns: $(".venue-avg-val").eq(1).text().trim(),
+    },
+    paceVsSpin: {
+      paceWickets: $(".pace-text").next().text().trim(),
+      spinWickets: $(".red-color").text().trim(),
+      pacePercent: $(".s-format").eq(0).text().trim(),
+      spinPercent: $(".s-format").eq(1).text().trim(),
+    },
+    recentMatches: $(".global-match-card")
+      .map((_: any, el: any) => ({
+        team1: $(el).find(".team-name").eq(0).text().trim(),
+        team2: $(el).find(".team-name").eq(1).text().trim(),
+        result: $(el).find(".match-dec-text").text().trim(),
+        series: $(el).find(".series-name").text().trim(),
         url: "https://crex.com" + ($(el).attr("href") || ""),
-      });
-    });
-
-    return matches.slice(0, 5);
+      }))
+      .get(),
   };
 
-  Object.keys(teamsMap).forEach((teamId) => {
-    teamsMap[teamId].recent5 = getTeamRecentMatches(teamId);
-  });
-
-  // 🔥 CONVERT OBJECT → ARRAY (THIS IS WHAT YOU NEED)
-  const teams = Object.values(teamsMap);
-
-  /* =====================================================
-     2️⃣ HEAD TO HEAD (LAST MATCHES)
-  ====================================================== */
-
-  const h2h: any[] = [];
-
-  $(".global-match-card.gmc-without-logo").each((_: any, el: any) => {
-    h2h.push({
-      team1: {
-        name: $(el).find(".global-match-team .team-name").first().text().trim(),
-        score: $(el)
-          .find(".global-match-team .team-score")
-          .first()
-          .text()
-          .trim(),
-        overs: $(el)
-          .find(".global-match-team .team-over")
-          .first()
-          .text()
-          .trim(),
-      },
-      team2: {
-        name: $(el).find(".global-match-end .team-name").text().trim(),
-        score: $(el).find(".global-match-end .team-score").text().trim(),
-        overs: $(el).find(".global-match-end .team-over").text().trim(),
-      },
-      result: $(el).find(".match-dec-text").text().trim(),
-      series: $(el).find(".series-name").text().trim(),
-      url: "https://crex.com" + ($(el).attr("href") || ""),
-    });
-  });
-
-  /* =====================================================
-     3️⃣ POINTS TABLE
-  ====================================================== */
-
-  const pointsTable: any[] = [];
-
-  $("#table tbody tr").each((_: any, row: any) => {
-    const td = $(row).find("td");
-    if (td.length < 6) return;
-
-    pointsTable.push({
-      team: $(td[0]).text().trim(),
-      flag: $(td[0]).find("img").attr("src") || null,
-      played: $(td[1]).text().trim(),
-      won: $(td[2]).text().trim(),
-      lost: $(td[3]).text().trim(),
-      nrr: $(td[4]).text().trim(),
-      points: $(td[5]).text().trim(),
-    });
-  });
-
-  /* =====================================================
-     4️⃣ TEAM COMPARISON (LAST 10 – OVERALL)
-  ====================================================== */
-
-  const teamComparison: any[] = [];
-
-  $(".table.colHeader tbody tr").each((_: any, row: any) => {
-    const td = $(row).find("td");
-    if (td.length !== 3) return;
-
-    teamComparison.push({
-      team1: td.eq(0).text().trim(),
-      metric: td.eq(1).text().trim(),
-      team2: td.eq(2).text().trim(),
-    });
-  });
-
-  /* =====================================================
-     5️⃣ WEATHER DETAILS
-  ====================================================== */
-
-  const weather = {
-    venue: $(".weather-place-hum-text").first().text().trim(),
-    temperature: $(".weather-temp").text().trim(),
-    condition: $(".weather-cloudy-text").first().text().trim(),
-    humidity: $(".humidity-text").text().trim(),
-    rainChance: $(".weather-place-hum-text").last().text().trim(),
-  };
-
-  /* =====================================================
-     6️⃣ VENUE STATS
-  ====================================================== */
-
-  const venueStats = {
-    matches: $(".match-count").text().trim(),
-    winBatFirst: $(".win-bat-first .match-win-per").text().trim(),
-    winBowlFirst: $(".venue-per .match-win-per").last().text().trim(),
-    avg1stInns: $(".venue-avg-val").first().text().trim(),
-    avg2ndInns: $(".venue-avg-val").last().text().trim(),
-  };
-
-  /* =====================================================
-     7️⃣ PACE vs SPIN
-  ====================================================== */
-
-  const paceVsSpin = {
-    paceWickets: $(".pace-text").first().next(".wicket-count").text().trim(),
-    spinWickets: $(".red-color").text().trim(),
-    pacePercent: $(".s-format").first().text().trim(),
-    spinPercent: $(".s-format").last().text().trim(),
-  };
-
-  /* =====================================================
-     8️⃣ RECENT MATCHES ON VENUE
-  ====================================================== */
-
-  const venueRecentMatches: any[] = [];
-
-  $(".global-match-card:not(.gmc-without-logo)").each((_: any, el: any) => {
-    venueRecentMatches.push({
-      team1: $(el).find(".global-match-team .team-name").text().trim(),
-      team1Score: $(el).find(".global-match-team .team-score").text().trim(),
-      team2: $(el).find(".global-match-end .team-name").text().trim(),
-      team2Score: $(el).find(".global-match-end .team-score").text().trim(),
-      result: $(el).find(".match-dec-text").text().trim(),
-      series: $(el).find(".series-name").text().trim(),
-      url: "https://crex.com" + ($(el).attr("href") || ""),
-    });
-  });
-
-  /* =====================================================
-     ✅ FINAL RESPONSE
-  ====================================================== */
+  /* ===============================
+     ✅ FINAL MATCH (IMPORTANT)
+  =============================== */
 
   return {
-    teams, // ✅ ARRAY
+    teamForm,
     h2h,
     pointsTable,
-    teamComparison,
-    weather,
-    venueStats,
-    paceVsSpin,
-    venueRecentMatches,
+    comparision: {
+      teams,
+      comparison: {
+        overall,
+        venue,
+      },
+    },
+    venueDetails,
   };
 };

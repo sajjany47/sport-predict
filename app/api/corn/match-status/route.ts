@@ -8,6 +8,7 @@ import { SquadList } from "../../match-details/SquadList";
 import mongoose from "mongoose";
 import { CrexMatchScorecard } from "../../schedule/CrexScore";
 import { CrexV2Details } from "../../match-details/CrexV2Details";
+import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
 
 export const GET = async (_req: NextRequest) => {
   await dbConnect();
@@ -36,7 +37,9 @@ export const GET = async (_req: NextRequest) => {
         /* ================= MATCH DETAILS ================= */
 
         if (!match.isDetailsFetched) {
-          const details = await CrexV2Details(match.url);
+          const details = await ExtractMatchDetails(
+            `${match.url}/match-details`,
+          );
 
           if (details) {
             await MatchDetails.updateOne(
@@ -70,7 +73,10 @@ export const GET = async (_req: NextRequest) => {
           });
 
           if (matchDetails) {
-            const latestSquad = await SquadList(match.url, matchDetails.squads);
+            const latestSquad = await SquadList(
+              `${match.url}/match-details`,
+              matchDetails.squads,
+            );
 
             await MatchDetails.updateOne(
               { matchId: match._id },

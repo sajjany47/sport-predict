@@ -2,21 +2,11 @@ import { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import dbConnect from "../db";
 import { FormatErrorMessage } from "@/lib/utils";
-import { CrexV2Details } from "./CrexV2Details";
 import { SquadList } from "./SquadList";
 import MatchDetails from "./MatchDetailsModel";
 import { TeamRank } from "./TeamRank";
 import Match from "../schedule/MatchModel";
-
-const cleanPlayer = (player: any) => ({
-  ...player,
-  careerStats: {
-    ...player?.careerStats,
-    bowling: (player?.careerStats?.bowling ?? []).filter(
-      (item: any) => !item?.format?.toLowerCase()?.includes("debut"),
-    ),
-  },
-});
+import { ExtractMatchDetails } from "./ExtractMatchDetails";
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -88,20 +78,11 @@ export async function POST(request: NextRequest) {
      */
 
     if (!findMatch) {
-      const crexOverallStats: any = await CrexV2Details(body.url);
-
-      const cleanedSquads = (crexOverallStats?.squads ?? []).map(
-        (team: any) => ({
-          ...team,
-          playingPlayers: (team?.playingPlayers ?? []).map(cleanPlayer),
-          benchPlayers: (team?.benchPlayers ?? []).map(cleanPlayer),
-        }),
-      );
+      const crexOverallStats: any = await ExtractMatchDetails(body.url);
 
       const insertMatchDetails = await MatchDetails.insertOne({
         matchId: matchId,
         ...crexOverallStats,
-        squads: cleanedSquads,
         updatedAt: new Date(),
       });
 
@@ -121,7 +102,6 @@ export async function POST(request: NextRequest) {
         {
           data: {
             ...crexOverallStats,
-            squads: cleanedSquads,
             matchInfo,
           },
         },
@@ -149,7 +129,7 @@ export async function POST(request: NextRequest) {
 
     // 🔄 Fetch Latest Squad
     const latestSquad = await SquadList(
-      findMatch?.match?.url,
+      `${body.url}/match-details`,
       findMatch?.squads,
     );
 
