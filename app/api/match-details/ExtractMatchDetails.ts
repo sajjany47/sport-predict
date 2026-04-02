@@ -23,6 +23,6 @@ export const ExtractMatchDetails = async (url: string) => {
 
     return { squads: cleanedSquads, ...overviewData };
   } catch (error) {
-    console.log(error);
+    return null;
   }
 };

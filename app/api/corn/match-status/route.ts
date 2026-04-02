@@ -5,9 +5,7 @@ import moment from "moment";
 import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
 import { SquadList } from "../../match-details/SquadList";
-import mongoose from "mongoose";
 import { CrexMatchScorecard } from "../../schedule/CrexScore";
-import { CrexV2Details } from "../../match-details/CrexV2Details";
 import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
 
 export const GET = async (_req: NextRequest) => {
@@ -93,7 +91,8 @@ export const GET = async (_req: NextRequest) => {
 
         /* ================= SCORECARD ================= */
 
-        const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
+        // const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
+        const scoreCardUrl = `${match.url}/match-scorecard`;
 
         const scoreCard = await CrexMatchScorecard(scoreCardUrl);
 

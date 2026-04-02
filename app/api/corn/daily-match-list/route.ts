@@ -60,7 +60,8 @@ export const GET = async (req: NextRequest) => {
 
     for (let index = 0; index < filteredFixtureMatches.length; index++) {
       const match = filteredFixtureMatches[index];
-      const url = NormalizeCrexUrl(match.url);
+      // const url = NormalizeCrexUrl(match.url);
+      const url = match.url;
       const findMatch = await Match.findOne({ url });
       if (findMatch) {
         console.log("Match already exists, skipping:", url);
@@ -111,7 +112,7 @@ export const GET = async (req: NextRequest) => {
           `${match.url}/match-details`,
         );
 
-        if (!crexOverallStats) continue;
+        if (crexOverallStats === null) continue;
 
         const insertMatchDetails = await MatchDetails.insertOne({
           matchId: match._id,
