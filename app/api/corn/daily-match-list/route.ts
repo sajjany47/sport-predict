@@ -108,9 +108,7 @@ export const GET = async (req: NextRequest) => {
     for (let index = 0; index < dbMatches.length; index++) {
       const match = dbMatches[index];
       try {
-        const crexOverallStats = await ExtractMatchDetails(
-          `${match.url}/match-details`,
-        );
+        const crexOverallStats = await ExtractMatchDetails(`${match.url}`);
 
         if (crexOverallStats === null) continue;
 

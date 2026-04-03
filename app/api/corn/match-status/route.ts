@@ -35,9 +35,7 @@ export const GET = async (_req: NextRequest) => {
         /* ================= MATCH DETAILS ================= */
 
         if (!match.isDetailsFetched) {
-          const details = await ExtractMatchDetails(
-            `${match.url}/match-details`,
-          );
+          const details = await ExtractMatchDetails(`${match.url}`);
 
           if (details) {
             await MatchDetails.updateOne(
