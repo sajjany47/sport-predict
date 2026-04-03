@@ -52,7 +52,8 @@ export const GET = async (req: NextRequest) => {
       if (!match?.teams?.length) return false;
       return (
         match.teams[0]?.teamName !== "Team 1 (TBC)" &&
-        match.teams[1]?.teamShortName !== "Team"
+        match.teams[1]?.teamShortName !== "Team" &&
+        !match?.matchDescription?.toLowerCase().includes("test")
       );
     });
 
@@ -123,6 +124,11 @@ export const GET = async (req: NextRequest) => {
             { _id: new mongoose.Types.ObjectId(match._id) },
             {
               $set: {
+                isPlayingPlayerFetched:
+                  crexOverallStats.squads[0]?.playingPlayers?.length > 0 &&
+                  crexOverallStats.squads[1]?.playingPlayers?.length > 0
+                    ? true
+                    : false,
                 isDetailsFetched: true,
                 detailsFetchedAt: new Date(),
               },
