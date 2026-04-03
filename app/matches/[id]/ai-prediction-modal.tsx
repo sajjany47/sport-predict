@@ -178,9 +178,7 @@ const AIPredictionModal: React.FC<{
 
       await new Promise((r) => setTimeout(r, 300));
 
-      // const data: any = await GetNewAnalysis(match);
       const data: any = await Prediction(match);
-
 
       setPredictionData(data);
       toast.success("AI Prediction generated successfully!");
@@ -507,7 +505,7 @@ const AIPredictionModal: React.FC<{
                       >
                         {getConfidenceIcon(
                           predictionData.team1?.winnerPrediction?.confidence ||
-                          "",
+                            "",
                         )}
                         <span>
                           {predictionData.team1?.winnerPrediction?.confidence ||
@@ -569,7 +567,7 @@ const AIPredictionModal: React.FC<{
                       >
                         {getConfidenceIcon(
                           predictionData.team2?.winnerPrediction?.confidence ||
-                          "",
+                            "",
                         )}
                         <span>
                           {predictionData.team2?.winnerPrediction?.confidence ||
@@ -988,10 +986,11 @@ const AIPredictionModal: React.FC<{
                       {predictionData.dream11Team.map((player, index) => (
                         <div
                           key={index}
-                          className={`relative p-3 rounded-lg border ${player.team === "SL"
+                          className={`relative p-3 rounded-lg border ${
+                            player.team === "SL"
                               ? "border-blue-200 bg-blue-50/50"
                               : "border-purple-200 bg-purple-50/50"
-                            } hover:shadow-md transition-shadow`}
+                          } hover:shadow-md transition-shadow`}
                         >
                           {player.isCaptain && (
                             <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">
