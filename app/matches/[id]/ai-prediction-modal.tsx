@@ -178,10 +178,8 @@ const AIPredictionModal: React.FC<{
 
       await new Promise((r) => setTimeout(r, 300));
 
-      // const data: any = await GetNewAnalysis(match);
       const data: any = await Prediction(match);
 
-      console.log("Prediction Data:", data);
       setPredictionData(data);
       toast.success("AI Prediction generated successfully!");
     } catch (err) {

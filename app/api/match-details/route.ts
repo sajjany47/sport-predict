@@ -4,7 +4,7 @@ import dbConnect from "../db";
 import { FormatErrorMessage } from "@/lib/utils";
 import { SquadList } from "./SquadList";
 import MatchDetails from "./MatchDetailsModel";
-import { TeamRank } from "./TeamRank";
+// import { TeamRank } from "./TeamRank";
 import Match from "../schedule/MatchModel";
 import { ExtractMatchDetails } from "./ExtractMatchDetails";
 
@@ -49,26 +49,26 @@ export async function POST(request: NextRequest) {
      * ===============================
      */
 
-    const matchFormat = body?.format;
+    // const matchFormat = body?.format;
 
-    const prepareTeam = await Promise.all(
-      (body?.teams ?? []).map(async (team: any) => {
-        const teamRank = await TeamRank(
-          team.teamName,
-          team.teamName?.includes("Women") ? "WOMEN" : "MEN",
-          matchFormat,
-        );
+    // const prepareTeam = await Promise.all(
+    //   (body?.teams ?? []).map(async (team: any) => {
+    //     const teamRank = await TeamRank(
+    //       team.teamName,
+    //       team.teamName?.includes("Women") ? "WOMEN" : "MEN",
+    //       matchFormat,
+    //     );
 
-        return {
-          ...team,
-          teamRank,
-        };
-      }),
-    );
+    //     return {
+    //       ...team,
+    //       teamRank,
+    //     };
+    //   }),
+    // );
 
     const matchInfo = {
       ...body,
-      teams: prepareTeam,
+      // teams: prepareTeam,
     };
 
     /**
@@ -91,6 +91,11 @@ export async function POST(request: NextRequest) {
           { _id: matchId },
           {
             $set: {
+              isPlayingPlayerFetched:
+                crexOverallStats.squads[0]?.playingPlayers?.length > 0 &&
+                crexOverallStats.squads[1]?.playingPlayers?.length > 0
+                  ? true
+                  : false,
               isDetailsFetched: true,
               detailsFetchedAt: new Date(),
             },
@@ -131,6 +136,21 @@ export async function POST(request: NextRequest) {
     const latestSquad = await SquadList(
       `${body.url}/match-details`,
       findMatch?.squads,
+    );
+
+    await Match.updateOne(
+      { _id: matchId },
+      {
+        $set: {
+          isPlayingPlayerFetched:
+            latestSquad[0]?.playingPlayers?.length > 0 &&
+            latestSquad[1]?.playingPlayers?.length > 0
+              ? true
+              : false,
+          isDetailsFetched: true,
+          detailsFetchedAt: new Date(),
+        },
+      },
     );
 
     return Response.json(
