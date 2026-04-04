@@ -4,7 +4,6 @@ import dbConnect from "../db";
 import { FormatErrorMessage } from "@/lib/utils";
 import { SquadList } from "./SquadList";
 import MatchDetails from "./MatchDetailsModel";
-// import { TeamRank } from "./TeamRank";
 import Match from "../schedule/MatchModel";
 import { ExtractMatchDetails } from "./ExtractMatchDetails";
 import { Prediction } from "../order/Prediction";
@@ -15,7 +14,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // ✅ Validate Match ID
     if (!body?._id) {
       return Response.json(
         { success: false, error: "Match id required" },
@@ -25,89 +23,63 @@ export async function POST(request: NextRequest) {
 
     const matchId = new mongoose.Types.ObjectId(body._id);
 
-    // ✅ Find Match
-    const [findMatch] = await MatchDetails.aggregate([
-      { $match: { matchId: matchId } },
-      {
-        $lookup: {
-          from: "matches",
-          localField: "matchId",
-          foreignField: "_id",
-          as: "match",
-        },
-      },
-      {
-        $unwind: {
-          path: "$match",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
+    //  faster than aggregate
+    const [match, matchDetails] = await Promise.all([
+      Match.findById(matchId),
+      MatchDetails.findOne({ matchId }),
     ]);
 
-    /**
-     * ===============================
-     * PREPARE TEAM WITH RANK
-     * ===============================
-     */
-
-    // const matchFormat = body?.format;
-
-    // const prepareTeam = await Promise.all(
-    //   (body?.teams ?? []).map(async (team: any) => {
-    //     const teamRank = await TeamRank(
-    //       team.teamName,
-    //       team.teamName?.includes("Women") ? "WOMEN" : "MEN",
-    //       matchFormat,
-    //     );
-
-    //     return {
-    //       ...team,
-    //       teamRank,
-    //     };
-    //   }),
-    // );
-
-    const matchInfo = {
-      ...body,
-      // teams: prepareTeam,
-    };
+    const matchInfo = { ...body };
 
     /**
      * ===============================
      * IF MATCH NOT FOUND → SCRAPE
      * ===============================
      */
-
-    if (!findMatch) {
+    if (!matchDetails) {
       const crexOverallStats: any = await ExtractMatchDetails(body.url);
 
-      const insertMatchDetails = await MatchDetails.insertOne({
-        matchId: matchId,
-        ...crexOverallStats,
-        updatedAt: new Date(),
-      });
-
-      if (insertMatchDetails) {
-        const analysis = await Prediction({
-          ...crexOverallStats,
-          matchInfo: matchInfo,
-        });
-        await Match.updateOne(
-          { _id: matchId },
-          {
-            $set: {
-              prediction: analysis,
-              isPlayingPlayerFetched:
-                crexOverallStats.squads[0]?.playingPlayers?.length > 0 &&
-                crexOverallStats.squads[1]?.playingPlayers?.length > 0
-                  ? true
-                  : false,
-              isDetailsFetched: true,
-              detailsFetchedAt: new Date(),
-            },
-          },
+      if (!crexOverallStats) {
+        return Response.json(
+          { success: false, error: "Failed to fetch match details" },
+          { status: 500 },
         );
       }
+
+      //  upsert safe
+      await MatchDetails.updateOne(
+        { matchId },
+        {
+          $set: {
+            matchId,
+            ...crexOverallStats,
+            updatedAt: new Date(),
+          },
+        },
+        { upsert: true },
+      );
+
+      const hasPlaying11 =
+        crexOverallStats?.squads?.[0]?.playingPlayers?.length > 0 &&
+        crexOverallStats?.squads?.[1]?.playingPlayers?.length > 0;
+
+      const analysis = await Prediction({
+        ...crexOverallStats,
+        matchInfo,
+      });
+
+      await Match.updateOne(
+        { _id: matchId },
+        {
+          $set: {
+            prediction: analysis,
+            isPlayingPlayerFetched: hasPlaying11,
+            isDetailsFetched: true,
+            detailsFetchedAt: new Date(),
+            updatedAt: new Date(),
+          },
+        },
+      );
 
       return Response.json(
         {
@@ -126,11 +98,11 @@ export async function POST(request: NextRequest) {
      * ===============================
      */
 
-    if (findMatch?.match?.isPlayingPlayerFetched) {
+    if (match?.isPlayingPlayerFetched) {
       return Response.json(
         {
           data: {
-            ...findMatch,
+            ...matchDetails.toObject(),
             matchInfo,
           },
         },
@@ -138,30 +110,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 🔄 Fetch Latest Squad
+    //  Fetch Latest Squad
     const latestSquad = await SquadList(
       `${body.url}/match-details`,
-      findMatch?.squads,
+      matchDetails?.squads,
     );
 
-    const analysis = await Prediction({
-      ...findMatch,
-      squads: latestSquad,
-      matchInfo,
-    });
+    const hasPlaying11 =
+      latestSquad?.[0]?.playingPlayers?.length > 0 &&
+      latestSquad?.[1]?.playingPlayers?.length > 0;
+
+    //  update + prediction parallel
+    const [analysis] = await Promise.all([
+      Prediction({
+        ...matchDetails.toObject(), // ✅ FIXED
+        squads: latestSquad,
+        matchInfo,
+      }),
+
+      MatchDetails.updateOne(
+        { matchId },
+        {
+          $set: {
+            squads: latestSquad,
+            updatedAt: new Date(),
+          },
+        },
+      ),
+    ]);
 
     await Match.updateOne(
       { _id: matchId },
       {
         $set: {
           prediction: analysis,
-          isPlayingPlayerFetched:
-            latestSquad[0]?.playingPlayers?.length > 0 &&
-            latestSquad[1]?.playingPlayers?.length > 0
-              ? true
-              : false,
+          isPlayingPlayerFetched: hasPlaying11,
           isDetailsFetched: true,
           detailsFetchedAt: new Date(),
+          updatedAt: new Date(),
         },
       },
     );
@@ -169,7 +155,7 @@ export async function POST(request: NextRequest) {
     return Response.json(
       {
         data: {
-          ...findMatch,
+          ...matchDetails.toObject(),
           squads: latestSquad,
           matchInfo,
         },
@@ -177,6 +163,8 @@ export async function POST(request: NextRequest) {
       { status: 200 },
     );
   } catch (error: any) {
+    console.error("MATCH DETAILS ERROR:", error);
+
     return Response.json(
       { success: false, error: FormatErrorMessage(error) },
       { status: 500 },
