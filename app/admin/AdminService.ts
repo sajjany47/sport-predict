@@ -110,3 +110,14 @@ export const UserSendCredit = async (payload: any) => {
     throw new Error(error.response?.data?.message);
   }
 };
+
+export const fetchDashboardStats = async () => {
+  try {
+    const response = await privateApi.get("/api/admin/dashboard", {
+      headers: getHeadersWithToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message);
+  }
+};
