@@ -21,14 +21,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setSelectedMatch } from "@/store/slices/matchSlice";
 import { useQuery } from "@tanstack/react-query";
-import { FetchMatchList } from "../matches/MatchService";
 import MatchCard from "../matches/MatchCard";
+import { FetchMatchList } from "../MainService";
 
 const HomePage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   const { data = [] } = useQuery({
@@ -266,7 +266,7 @@ const HomePage = () => {
             {data
               .filter(
                 (item: any) =>
-                  item.status === "LIVE" || item.status === "NOT_STARTED"
+                  item.status === "LIVE" || item.status === "NOT_STARTED",
               )
               .slice(0, 6)
               .map((match: any) => (
