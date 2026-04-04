@@ -13,7 +13,7 @@ import CustomLoader from "@/components/ui/CustomLoader";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useQuery } from "@tanstack/react-query";
 import MatchCard from "./MatchCard";
-import { FetchMatchList } from "../MainService";
+import { FetchMatchList, FetchPlatformPerformance } from "../MainService";
 
 // Enhanced Tab configuration
 const TAB_CONFIG = [
@@ -89,6 +89,14 @@ const MatchesPage = () => {
       return response.data;
     },
     enabled: !!selectedDate,
+  });
+
+  const { data: performanceStats } = useQuery({
+    queryKey: ["platform-performance"],
+    queryFn: async () => {
+      const response = await FetchPlatformPerformance();
+      return response?.data || { pass: 0, fail: 0, total: 0 };
+    },
   });
 
   // Calculate match counts
@@ -180,6 +188,36 @@ const MatchesPage = () => {
             Get AI-powered predictions & live match insights
           </p>
         </div>
+
+        {/* Platform Performance Banner */}
+        {performanceStats && performanceStats.total > 0 && (
+          <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-xl shadow-lg border border-indigo-200 mb-6 md:mb-10 p-1 overflow-hidden relative group transition-transform hover:-translate-y-1">
+             <div className="absolute top-0 right-0 p-4 opacity-10 transform group-hover:scale-110 transition-transform">
+               <Trophy className="w-24 h-24 text-white" />
+             </div>
+             <div className="bg-white/95 rounded-lg p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between relative z-10">
+                <div className="flex items-center gap-3 mb-4 sm:mb-0">
+                   <div className="bg-gradient-to-br from-indigo-100 to-purple-100 p-2.5 rounded-full shadow-inner border border-indigo-50">
+                     <Flame className="w-6 h-6 text-indigo-600" />
+                   </div>
+                   <div className="text-center sm:text-left">
+                     <h3 className="font-bold text-gray-900 text-sm sm:text-base bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">Platform Accuracy</h3>
+                     <p className="text-xs sm:text-sm text-gray-500 font-medium">Over the last {performanceStats.total} matches</p>
+                   </div>
+                </div>
+                <div className="flex gap-3 sm:gap-4">
+                  <div className="flex flex-col items-center px-5 py-2.5 bg-gradient-to-b from-green-50 to-white rounded-lg border border-green-200 shadow-sm">
+                    <span className="text-2xl sm:text-3xl font-black text-green-600">{performanceStats.pass}</span>
+                    <span className="text-[10px] sm:text-xs font-bold uppercase text-green-700 tracking-wider">Pass</span>
+                  </div>
+                  <div className="flex flex-col items-center px-5 py-2.5 bg-gradient-to-b from-red-50 to-white rounded-lg border border-red-200 shadow-sm">
+                    <span className="text-2xl sm:text-3xl font-black text-red-600">{performanceStats.fail}</span>
+                    <span className="text-[10px] sm:text-xs font-bold uppercase text-red-700 tracking-wider">Fail</span>
+                  </div>
+                </div>
+             </div>
+          </div>
+        )}
 
         {/* Search + Date Filter */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 mb-6 md:mb-10">

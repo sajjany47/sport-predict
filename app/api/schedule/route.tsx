@@ -174,8 +174,8 @@ export async function POST(request: Request) {
 
           const status =
             result.includes("won") ||
-            result.includes("match drawn") ||
-            result.includes("no result")
+              result.includes("match drawn") ||
+              result.includes("no result")
               ? "COMPLETED"
               : result.includes("abandoned")
                 ? "ABANDONED"
@@ -189,12 +189,12 @@ export async function POST(request: Request) {
 
             score: scoreCard
               ? {
-                  score: (scoreCard.teams ?? []).map((t: any) => ({
-                    team: t.name,
-                    run: `${t.score} (${t.overs})`,
-                  })),
-                  result: scoreCard?.result ?? "",
-                }
+                score: (scoreCard.teams ?? []).map((t: any) => ({
+                  team: t.name,
+                  run: `${t.score} (${t.overs})`,
+                })),
+                result: scoreCard?.result ?? "",
+              }
               : null,
           };
         } catch (err) {
@@ -238,6 +238,7 @@ export async function POST(request: Request) {
           .tz(timezone);
         let data = {
           ...item,
+
           matchDate: matchDateTime.format("ddd, DD MMM YYYY"),
           startTime: matchDateTime.format("hh:mm A"),
           matchDateTimeUser: matchDateTime.format("DD MMM YYYY, hh:mm A"),

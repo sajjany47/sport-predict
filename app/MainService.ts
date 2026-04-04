@@ -264,3 +264,14 @@ export const FetchMatchList = async (date: any) => {
     throw new Error(error.message);
   }
 };
+
+export const FetchPlatformPerformance = async () => {
+  try {
+    const response = await publicApi.get("/api/stats/performance", {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+};

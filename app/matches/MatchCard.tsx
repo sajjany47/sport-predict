@@ -39,6 +39,7 @@ interface PredictionTeam {
   name: string;
   shortName: string;
   flag: string;
+
   firstInnings: {
     min: number;
     max: number;
@@ -59,6 +60,7 @@ interface PredictionTeam {
 interface Prediction {
   team1: PredictionTeam;
   team2: PredictionTeam;
+  matchRisk?: { risk: string; message: string };
   predictedWinner?: string;
   actualWinner?: string;
   predictionCorrect?: boolean;
@@ -827,6 +829,47 @@ const MatchCard = ({
 
         {/* Teams and Scores */}
         <div className="space-y-4 mb-4">{renderTeams()}</div>
+
+        {/* Risk Meter Section */}
+        {match.prediction?.matchRisk && (
+          <div
+            className={`mb-4 p-3 rounded-lg border ${
+              match.prediction.matchRisk.risk === "High"
+                ? "bg-red-50 border-red-100"
+                : match.prediction.matchRisk.risk === "Medium"
+                  ? "bg-amber-50 border-amber-100"
+                  : "bg-green-50 border-green-100"
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-bold uppercase text-gray-500 tracking-wider flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> Risk Level
+              </span>
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  match.prediction.matchRisk.risk === "High"
+                    ? "bg-red-100 text-red-700 border border-red-200"
+                    : match.prediction.matchRisk.risk === "Medium"
+                      ? "bg-amber-100 text-amber-700 border border-amber-200"
+                      : "bg-green-100 text-green-700 border border-green-200"
+                }`}
+              >
+                {match.prediction.matchRisk.risk}
+              </span>
+            </div>
+            <p
+              className={`text-xs font-semibold ${
+                match.prediction.matchRisk.risk === "High"
+                  ? "text-red-800"
+                  : match.prediction.matchRisk.risk === "Medium"
+                    ? "text-amber-800"
+                    : "text-green-800"
+              }`}
+            >
+              {match.prediction.matchRisk.message}
+            </p>
+          </div>
+        )}
 
         {/* Enhanced Match Status Section */}
         {renderMatchStatusSection()}

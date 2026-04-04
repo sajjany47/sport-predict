@@ -405,6 +405,7 @@ export const Prediction = async (data: any): Promise<any> => {
     if (findTeamAForm && findTeamBForm) {
       const teamAFormStats = CalculateTeamFormStats(findTeamAForm);
       const teamBFormStats = CalculateTeamFormStats(findTeamBForm);
+
       const winPercentage = CalculateTeamWinningPercentage(
         teamAFormStats.winPercentage ?? 50,
         teamBFormStats.winPercentage ?? 50,
@@ -535,6 +536,21 @@ export const Prediction = async (data: any): Promise<any> => {
     teamChance.teamB + teamBWinPercentage,
   );
 
+  const maxProbability = Math.max(
+    avgWinningChance.teamA,
+    avgWinningChance.teamB,
+  );
+  let risk = "High";
+  let riskMessage = "Both side match";
+
+  if (maxProbability > 57) {
+    risk = "Low";
+    riskMessage = "One side match";
+  } else if (maxProbability > 52) {
+    risk = "Medium";
+    riskMessage = "Slight rate come oppent";
+  }
+
   const hintData = GetHint(avgWinningChance.teamA, avgWinningChance.teamB);
 
   const teamATopPerformers = getTopPerformers(
@@ -551,10 +567,15 @@ export const Prediction = async (data: any): Promise<any> => {
   const dream11Team = generateDream11Team(mergedTeamA, mergedTeamB);
 
   return {
+    matchRisk: {
+      risk,
+      message: riskMessage,
+    },
     team1: {
       name: data?.matchInfo?.teams?.[0]?.teamName ?? teamA.teamName,
       shortName: teamA.teamName,
       flag: data?.matchInfo?.teams?.[0]?.teamFlagUrl || "",
+
       firstInnings: {
         min: Math.round(teamAPredicted * 0.9),
         max: Math.round(teamAPredicted * 1.1),
@@ -579,6 +600,7 @@ export const Prediction = async (data: any): Promise<any> => {
       name: data?.matchInfo?.teams?.[1]?.teamName ?? teamB.teamName,
       shortName: teamB.teamName,
       flag: data?.matchInfo?.teams?.[1]?.teamFlagUrl || "",
+
       firstInnings: {
         min: Math.round(teamBPredicted * 0.9),
         max: Math.round(teamBPredicted * 1.1),
