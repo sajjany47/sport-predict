@@ -82,87 +82,125 @@ export async function POST(request: Request) {
         let result = "";
 
         try {
-          // const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
-          const scoreCardUrl = `${match.url}/match-scorecard`;
+          const matchId = match._id;
 
-          scoreCard = await CrexMatchScorecard(scoreCardUrl);
+          // 🔥 parallel fetch (faster)
+          const [scoreCardRes, details] = await Promise.all([
+            CrexMatchScorecard(`${match.url}/match-scorecard`),
+            MatchDetails.findOne({ matchId }),
+          ]);
+
+          scoreCard = scoreCardRes;
           result = scoreCard?.result?.toLowerCase() ?? "";
 
-          if (!match.isPlayingPlayerFetched) {
-            const details = await MatchDetails.findOne({
-              matchId: new mongoose.Types.ObjectId(match._id),
-            });
+          let updatedSquads = details?.squads;
+          let prediction = match.prediction;
+
+          /* ================= PLAYING XI ================= */
+
+          if (!match.isPlayingPlayerFetched && details?.squads) {
             const latestSquad = await SquadList(
               `${match.url}/match-details`,
               details.squads,
             );
 
-            await MatchDetails.updateOne(
-              { matchId: match._id },
-              {
-                $set: {
-                  squads: latestSquad,
-                  updatedAt: new Date(),
-                },
-              },
-            );
+            const hasPlaying11 =
+              latestSquad?.[0]?.playingPlayers?.length > 0 &&
+              latestSquad?.[1]?.playingPlayers?.length > 0;
+
+            if (hasPlaying11) {
+              updatedSquads = latestSquad;
+
+              //  DB updates parallel
+              await Promise.all([
+                MatchDetails.updateOne(
+                  { matchId },
+                  {
+                    $set: {
+                      squads: latestSquad,
+                      updatedAt: new Date(),
+                    },
+                  },
+                ),
+                Match.updateOne(
+                  { _id: matchId },
+                  {
+                    $set: {
+                      isPlayingPlayerFetched: true,
+                      updatedAt: new Date(),
+                    },
+                  },
+                ),
+              ]);
+            }
+          }
+
+          /* ================= PREDICTION ================= */
+
+          if (!prediction && details) {
             const analysis = await Prediction({
-              ...MatchDetails,
-              squads: latestSquad,
+              ...details,
+              squads: updatedSquads,
               matchInfo: match,
             });
 
+            prediction = analysis;
+
+            // 🔥 save async (non-blocking feel)
             await Match.updateOne(
-              { _id: match._id },
+              { _id: matchId },
               {
                 $set: {
                   prediction: analysis,
-                  isPlayingPlayerFetched: true,
                   updatedAt: new Date(),
                 },
               },
             );
           }
-        } catch {
-          scoreCard = null;
-        }
 
-        const updatedTeams = (match.teams ?? []).map((dbTeam: any) => {
-          const scTeam = scoreCard?.teams?.find(
-            (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
-          );
+          /* ================= TEAM UPDATE ================= */
+
+          const updatedTeams = (match.teams ?? []).map((dbTeam: any) => {
+            const scTeam = scoreCard?.teams?.find(
+              (t: any) => t?.flagUrl === dbTeam?.teamFlagUrl,
+            );
+
+            return {
+              ...dbTeam,
+              teamShortName: scTeam?.name ?? GetTeamShortName(dbTeam.teamName),
+              cricketScore: scTeam ? `${scTeam.score} (${scTeam.overs})` : null,
+            };
+          });
+
+          const status =
+            result.includes("won") ||
+            result.includes("match drawn") ||
+            result.includes("no result")
+              ? "COMPLETED"
+              : result.includes("abandoned")
+                ? "ABANDONED"
+                : "LIVE";
 
           return {
-            ...dbTeam,
-            teamShortName: scTeam?.name ?? GetTeamShortName(dbTeam.teamName),
-            cricketScore: scTeam ? `${scTeam.score} (${scTeam.overs})` : null,
+            ...match,
+            teams: updatedTeams,
+            status,
+            prediction, // ✅ include
+
+            score: scoreCard
+              ? {
+                  score: (scoreCard.teams ?? []).map((t: any) => ({
+                    team: t.name,
+                    run: `${t.score} (${t.overs})`,
+                  })),
+                  result: scoreCard?.result ?? "",
+                }
+              : null,
           };
-        });
-
-        const status =
-          result.includes("won") ||
-          result.includes("match drawn") ||
-          result.includes("no result")
-            ? "COMPLETED"
-            : result.includes("abandoned")
-              ? "ABANDONED"
-              : "LIVE";
-
-        return {
-          ...match,
-          teams: updatedTeams,
-          status,
-
-          score: scoreCard
-            ? {
-                score: (scoreCard.teams ?? []).map((t: any) => ({
-                  team: t.name,
-                  run: `${t.score} (${t.overs})`,
-                })),
-                result: scoreCard?.result ?? "",
-              }
-            : null,
-        };
+        } catch (err) {
+          console.error("Match error:", match._id, err);
+          return match;
+        }
       }),
     );
 
