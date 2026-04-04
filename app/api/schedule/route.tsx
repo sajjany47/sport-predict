@@ -126,6 +126,7 @@ export async function POST(request: Request) {
                   { _id: matchId },
                   {
                     $set: {
+                      matchResult: result,
                       isPlayingPlayerFetched: true,
                       updatedAt: new Date(),
                     },
@@ -140,6 +141,7 @@ export async function POST(request: Request) {
           if (!prediction && details) {
             const analysis = await Prediction({
               ...details,
+
               squads: updatedSquads,
               matchInfo: match,
             });
@@ -151,6 +153,7 @@ export async function POST(request: Request) {
               { _id: matchId },
               {
                 $set: {
+                  matchResult: result,
                   prediction: analysis,
                   updatedAt: new Date(),
                 },
@@ -174,8 +177,8 @@ export async function POST(request: Request) {
 
           const status =
             result.includes("won") ||
-              result.includes("match drawn") ||
-              result.includes("no result")
+            result.includes("match drawn") ||
+            result.includes("no result")
               ? "COMPLETED"
               : result.includes("abandoned")
                 ? "ABANDONED"
@@ -186,15 +189,15 @@ export async function POST(request: Request) {
             teams: updatedTeams,
             status,
             prediction, // ✅ include
-
+            matchResult: result,
             score: scoreCard
               ? {
-                score: (scoreCard.teams ?? []).map((t: any) => ({
-                  team: t.name,
-                  run: `${t.score} (${t.overs})`,
-                })),
-                result: scoreCard?.result ?? "",
-              }
+                  score: (scoreCard.teams ?? []).map((t: any) => ({
+                    team: t.name,
+                    run: `${t.score} (${t.overs})`,
+                  })),
+                  result: scoreCard?.result ?? "",
+                }
               : null,
           };
         } catch (err) {

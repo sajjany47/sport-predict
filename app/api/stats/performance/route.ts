@@ -1,63 +1,87 @@
 import { NextResponse } from "next/server";
 import dbConnect from "../../db";
 import Match from "../../schedule/MatchModel";
+import moment from "moment";
 import { FormatErrorMessage } from "@/lib/utils";
 
 export const GET = async () => {
   await dbConnect();
+
   try {
-    // get last 15 completed matches that have a prediction, sort by most recent
+    // ✅ last 7 days filter
+    const last7Days = moment().subtract(7, "days").toDate();
+
     const recentMatches = await Match.find({
       status: "COMPLETED",
-      prediction: { $ne: null }
-    }).sort({ formatDate: -1 }).limit(15).lean();
+      isCompleted: true,
+      prediction: { $ne: null },
+      formatDate: { $gte: last7Days }, // 🔥 main fix
+    }).lean();
 
     let pass = 0;
     let fail = 0;
-    let evaluated = 0;
 
     for (const match of recentMatches) {
-        if (evaluated >= 7) break;
-        
-        let actualWinner = null;
-        let predictedWinner = null;
-        
-        // determine actual winner
-        if (match.score?.result && match.teams?.length) {
-            const result = match.score.result.toLowerCase();
-            const winningTeam = match.teams.find((team: any) =>
-                result.includes((team.teamName || "").toLowerCase()) ||
-                result.includes((team.teamShortName || "").toLowerCase())
-            );
-            actualWinner = winningTeam?.teamShortName || null;
-        }
+      let actualWinner = null;
+      let predictedWinner = null;
 
-        // determine predicted winner
-        if (match.prediction?.team1 && match.prediction?.team2) {
-            const t1 = match.prediction.team1;
-            const t2 = match.prediction.team2;
-            predictedWinner = t1.winnerPrediction.probability > t2.winnerPrediction.probability ? t1.shortName : t2.shortName;
-        }
+      /* ================= ACTUAL WINNER ================= */
 
-        if (actualWinner && predictedWinner) {
-            if (actualWinner === predictedWinner) {
-                pass++;
-            } else {
-                fail++;
-            }
-            evaluated++;
+      const resultText =
+        match.matchResult?.toLowerCase() ||
+        match.score?.result?.toLowerCase() ||
+        "";
+
+      if (resultText && match.teams?.length) {
+        const winningTeam = match.teams.find(
+          (team: any) =>
+            resultText.includes(team.teamName?.toLowerCase()) ||
+            resultText.includes(team.teamShortName?.toLowerCase())
+        );
+
+        actualWinner = winningTeam?.teamShortName || null;
+      }
+
+      /* ================= PREDICTED WINNER ================= */
+
+      if (match.prediction?.team1 && match.prediction?.team2) {
+        const t1 = match.prediction.team1;
+        const t2 = match.prediction.team2;
+
+        predictedWinner =
+          t1.winnerPrediction.probability >
+            t2.winnerPrediction.probability
+            ? t1.shortName
+            : t2.shortName;
+      }
+
+      /* ================= RESULT ================= */
+
+      if (actualWinner && predictedWinner) {
+        if (actualWinner === predictedWinner) {
+          pass++;
+        } else {
+          fail++;
         }
+      }
     }
 
     return NextResponse.json({
-        success: true,
-        data: {
-            pass,
-            fail,
-            total: evaluated
-        }
+      success: true,
+      data: {
+        pass,
+        fail,
+        total: pass + fail,
+        accuracy:
+          pass + fail > 0
+            ? ((pass / (pass + fail)) * 100).toFixed(2) + "%"
+            : "0%",
+      },
     });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: FormatErrorMessage(error) }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: FormatErrorMessage(error) },
+      { status: 500 }
+    );
   }
 };

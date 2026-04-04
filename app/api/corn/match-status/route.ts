@@ -189,6 +189,7 @@ export const GET = async (_req: NextRequest) => {
                 result.includes("no result"),
               teams: updatedTeams,
               status,
+              matchResult: result,
             },
           },
         );
