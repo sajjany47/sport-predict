@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
-import {
-  FormatErrorMessage,
-  GetTeamShortName,
-  NormalizeCrexUrl,
-} from "@/lib/utils";
+import { FormatErrorMessage } from "@/lib/utils";
 import { CrexNext3DaysFixturesArray } from "../CrexNext3DayList";
 import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
-// import moment from "moment-timezone";
 import moment from "moment";
 import { TeamRank } from "../../match-details/TeamRank";
 import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
+import { Prediction } from "../../order/Prediction";
 
 export const GET = async (req: NextRequest) => {
   await dbConnect();
@@ -120,6 +116,10 @@ export const GET = async (req: NextRequest) => {
         });
 
         if (insertMatchDetails) {
+          const analysis = await Prediction({
+            ...crexOverallStats,
+            matchInfo: match,
+          });
           await Match.updateOne(
             { _id: new mongoose.Types.ObjectId(match._id) },
             {
@@ -129,6 +129,7 @@ export const GET = async (req: NextRequest) => {
                   crexOverallStats.squads[1]?.playingPlayers?.length > 0
                     ? true
                     : false,
+                prediction: analysis,
                 isDetailsFetched: true,
                 detailsFetchedAt: new Date(),
               },

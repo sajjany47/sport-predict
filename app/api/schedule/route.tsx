@@ -106,10 +106,21 @@ export async function POST(request: Request) {
                 },
               },
             );
+            const analysis = await Prediction({
+              ...MatchDetails,
+              squads: latestSquad,
+              matchInfo: match,
+            });
 
             await Match.updateOne(
               { _id: match._id },
-              { $set: { isPlayingPlayerFetched: true, updatedAt: new Date() } },
+              {
+                $set: {
+                  prediction: analysis,
+                  isPlayingPlayerFetched: true,
+                  updatedAt: new Date(),
+                },
+              },
             );
           }
         } catch {
@@ -189,27 +200,26 @@ export async function POST(request: Request) {
           .tz(timezone);
         let data = {
           ...item,
-          prediction: null,
           matchDate: matchDateTime.format("ddd, DD MMM YYYY"),
           startTime: matchDateTime.format("hh:mm A"),
           matchDateTimeUser: matchDateTime.format("DD MMM YYYY, hh:mm A"),
         };
 
-        if (item.status === "COMPLETED") {
-          const details = await MatchDetails.findOne({
-            matchId: new mongoose.Types.ObjectId(item._id),
-          });
+        // if (item.status === "COMPLETED") {
+        //   const details = await MatchDetails.findOne({
+        //     matchId: new mongoose.Types.ObjectId(item._id),
+        //   });
 
-          if (details) {
-            const analysis = await Prediction({
-              ...details,
-              squads: details.squads,
-              matchInfo: item,
-            });
+        //   if (details) {
+        //     const analysis = await Prediction({
+        //       ...details,
+        //       squads: details.squads,
+        //       matchInfo: item,
+        //     });
 
-            data.prediction = analysis;
-          }
-        }
+        //     data.prediction = analysis;
+        //   }
+        // }
 
         return data;
       }),

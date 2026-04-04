@@ -7,6 +7,7 @@ import MatchDetails from "./MatchDetailsModel";
 // import { TeamRank } from "./TeamRank";
 import Match from "../schedule/MatchModel";
 import { ExtractMatchDetails } from "./ExtractMatchDetails";
+import { Prediction } from "../order/Prediction";
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -87,10 +88,15 @@ export async function POST(request: NextRequest) {
       });
 
       if (insertMatchDetails) {
+        const analysis = await Prediction({
+          ...crexOverallStats,
+          matchInfo: matchInfo,
+        });
         await Match.updateOne(
           { _id: matchId },
           {
             $set: {
+              prediction: analysis,
               isPlayingPlayerFetched:
                 crexOverallStats.squads[0]?.playingPlayers?.length > 0 &&
                 crexOverallStats.squads[1]?.playingPlayers?.length > 0
@@ -138,10 +144,17 @@ export async function POST(request: NextRequest) {
       findMatch?.squads,
     );
 
+    const analysis = await Prediction({
+      ...findMatch,
+      squads: latestSquad,
+      matchInfo,
+    });
+
     await Match.updateOne(
       { _id: matchId },
       {
         $set: {
+          prediction: analysis,
           isPlayingPlayerFetched:
             latestSquad[0]?.playingPlayers?.length > 0 &&
             latestSquad[1]?.playingPlayers?.length > 0

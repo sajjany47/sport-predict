@@ -7,6 +7,7 @@ import MatchDetails from "../../match-details/MatchDetailsModel";
 import { SquadList } from "../../match-details/SquadList";
 import { CrexMatchScorecard } from "../../schedule/CrexScore";
 import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
+import { Prediction } from "../../order/Prediction";
 
 export const GET = async (_req: NextRequest) => {
   await dbConnect();
@@ -17,7 +18,7 @@ export const GET = async (_req: NextRequest) => {
     const now = moment();
 
     const fixtures = await Match.find({
-      isCompleted: false,
+      isCompleted: true,
       formatDate: { $lte: now },
     }).lean();
 
@@ -38,6 +39,10 @@ export const GET = async (_req: NextRequest) => {
           const details = await ExtractMatchDetails(`${match.url}`);
 
           if (details) {
+            const analysis = await Prediction({
+              ...details,
+              matchInfo: match,
+            });
             await MatchDetails.updateOne(
               { matchId: match._id },
               {
@@ -58,6 +63,7 @@ export const GET = async (_req: NextRequest) => {
                     details?.squads[1]?.playingPlayers?.length > 0
                       ? true
                       : false,
+                  prediction: analysis,
                   isDetailsFetched: true,
                   detailsFetchedAt: new Date(),
                 },
@@ -79,6 +85,12 @@ export const GET = async (_req: NextRequest) => {
               matchDetails.squads,
             );
 
+            const analysis = await Prediction({
+              ...matchDetails,
+              squads: latestSquad,
+              matchInfo: match,
+            });
+
             await MatchDetails.updateOne(
               { matchId: match._id },
               {
@@ -90,7 +102,13 @@ export const GET = async (_req: NextRequest) => {
 
             await Match.updateOne(
               { _id: match._id },
-              { $set: { isPlayingPlayerFetched: true, updatedAt: new Date() } },
+              {
+                $set: {
+                  prediction: analysis,
+                  isPlayingPlayerFetched: true,
+                  updatedAt: new Date(),
+                },
+              },
             );
           }
         }

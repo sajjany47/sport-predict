@@ -38,6 +38,7 @@ const MatchSchema = new Schema(
     sport: { type: String, default: "cricket" },
     teams: { type: [TeamSchema], default: [] },
     isPlayingPlayerFetched: { type: Boolean, default: false },
+    prediction: { type: Object, default: null },
     isCompleted: { type: Boolean, default: false },
     isDetailsFetched: { type: Boolean, default: false },
     matchResult: { type: String, default: null },
