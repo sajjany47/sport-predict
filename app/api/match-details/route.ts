@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       return Response.json(
         {
           data: {
-            ...matchDetails.toObject(),
+            ...matchDetails,
             matchInfo,
           },
         },
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     //  update + prediction parallel
     const [analysis] = await Promise.all([
       Prediction({
-        ...matchDetails.toObject(), // ✅ FIXED
+        ...matchDetails,
         squads: latestSquad,
         matchInfo,
       }),

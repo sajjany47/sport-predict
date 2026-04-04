@@ -9,6 +9,26 @@ import { CrexMatchScorecard } from "../../schedule/CrexScore";
 import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
 import { Prediction } from "../../order/Prediction";
 
+// 🔥 concurrency limiter
+const asyncPool = async (limit: number, array: any[], iteratorFn: any) => {
+  const ret: any[] = [];
+  const executing: any[] = [];
+
+  for (const item of array) {
+    const p = Promise.resolve().then(() => iteratorFn(item));
+    ret.push(p);
+
+    if (limit <= array.length) {
+      const e: any = p.then(() => executing.splice(executing.indexOf(e), 1));
+      executing.push(e);
+      if (executing.length >= limit) {
+        await Promise.race(executing);
+      }
+    }
+  }
+  return Promise.all(ret);
+};
+
 export const GET = async (_req: NextRequest) => {
   await dbConnect();
 
@@ -29,96 +49,108 @@ export const GET = async (_req: NextRequest) => {
       });
     }
 
-    for (const match of fixtures) {
+    await asyncPool(3, fixtures, async (match: any) => {
       try {
         console.log("Processing match:", match._id);
+
+        let matchDetails = null;
 
         /* ================= MATCH DETAILS ================= */
 
         if (!match.isDetailsFetched) {
-          const details = await ExtractMatchDetails(`${match.url}`);
+          const details = await ExtractMatchDetails(match.url);
 
           if (details) {
+            const hasPlaying11 =
+              details?.squads?.[0]?.playingPlayers?.length > 0 &&
+              details?.squads?.[1]?.playingPlayers?.length > 0;
+
             const analysis = await Prediction({
               ...details,
               matchInfo: match,
             });
-            await MatchDetails.updateOne(
-              { matchId: match._id },
-              {
-                $set: {
-                  ...details,
-                  updatedAt: new Date(),
-                },
-              },
-              { upsert: true },
-            );
 
-            await Match.updateOne(
-              { _id: match._id },
-              {
-                $set: {
-                  isPlayingPlayerFetched:
-                    details?.squads[0]?.playingPlayers?.length > 0 &&
-                    details?.squads[1]?.playingPlayers?.length > 0
-                      ? true
-                      : false,
-                  prediction: analysis,
-                  isDetailsFetched: true,
-                  detailsFetchedAt: new Date(),
+            await Promise.all([
+              MatchDetails.updateOne(
+                { matchId: match._id },
+                {
+                  $set: {
+                    ...details,
+                    updatedAt: new Date(),
+                  },
                 },
-              },
-            );
+                { upsert: true },
+              ),
+              Match.updateOne(
+                { _id: match._id },
+                {
+                  $set: {
+                    isPlayingPlayerFetched: hasPlaying11,
+                    prediction: analysis,
+                    isDetailsFetched: true,
+                    detailsFetchedAt: new Date(),
+                  },
+                },
+              ),
+            ]);
+
+            matchDetails = details;
           }
         }
 
         /* ================= PLAYING XI ================= */
 
         if (!match.isPlayingPlayerFetched) {
-          const matchDetails = await MatchDetails.findOne({
-            matchId: match._id,
-          });
+          if (!matchDetails) {
+            matchDetails = await MatchDetails.findOne({
+              matchId: match._id,
+            });
+          }
 
-          if (matchDetails) {
+          if (matchDetails?.squads) {
             const latestSquad = await SquadList(
               `${match.url}/match-details`,
               matchDetails.squads,
             );
 
+            const hasPlaying11 =
+              latestSquad?.[0]?.playingPlayers?.length > 0 &&
+              latestSquad?.[1]?.playingPlayers?.length > 0;
+
             const analysis = await Prediction({
-              ...matchDetails,
+              ...(matchDetails.toObject?.() || matchDetails), // ✅ fix
               squads: latestSquad,
               matchInfo: match,
             });
 
-            await MatchDetails.updateOne(
-              { matchId: match._id },
-              {
-                $set: {
-                  squads: latestSquad,
+            await Promise.all([
+              MatchDetails.updateOne(
+                { matchId: match._id },
+                {
+                  $set: {
+                    squads: latestSquad,
+                  },
                 },
-              },
-            );
-
-            await Match.updateOne(
-              { _id: match._id },
-              {
-                $set: {
-                  prediction: analysis,
-                  isPlayingPlayerFetched: true,
-                  updatedAt: new Date(),
+              ),
+              Match.updateOne(
+                { _id: match._id },
+                {
+                  $set: {
+                    prediction: analysis,
+                    isPlayingPlayerFetched: hasPlaying11,
+                    updatedAt: new Date(),
+                  },
                 },
-              },
-            );
+              ),
+            ]);
           }
         }
 
         /* ================= SCORECARD ================= */
 
-        // const scoreCardUrl = match.url.replace(/\/info(\/)?$/i, "/scorecard");
-        const scoreCardUrl = `${match.url}/match-scorecard`;
-
-        const scoreCard = await CrexMatchScorecard(scoreCardUrl);
+        const scoreCard = await CrexMatchScorecard(
+          `${match.url}/match-scorecard`,
+        );
 
         const result = scoreCard?.result?.toLowerCase() ?? "";
 
@@ -162,22 +194,17 @@ export const GET = async (_req: NextRequest) => {
         );
 
         console.log("Match updated:", match._id);
-
-        /* optional delay to avoid scraping block */
-
-        await new Promise((r) => setTimeout(r, 500));
       } catch (err) {
         console.error("Match error:", match._id, err);
-        continue;
       }
-    }
+    });
 
     return NextResponse.json({
       success: true,
       message: "Matches processed",
     });
   } catch (error) {
-    console.error("CRON ERROR ❌", error);
+    console.error("CRON ERROR ", error);
 
     return NextResponse.json(
       {
