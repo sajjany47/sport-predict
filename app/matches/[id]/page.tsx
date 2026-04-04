@@ -376,7 +376,7 @@ const MatchDetailsPage = () => {
                     <div>
                       <p className="text-sm text-gray-500">Venue</p>
                       <p className="font-medium text-gray-900 text-sm md:text-base">
-                        {matchData.venueDetails.name}
+                        {matchData?.venueDetails?.name}
                       </p>
                     </div>
                   </CardContent>
@@ -491,7 +491,7 @@ const MatchDetailsPage = () => {
 
                               <TabsContent value="playing" className="mt-4">
                                 {squad.playingPlayers &&
-                                squad.playingPlayers.length > 0 ? (
+                                  squad.playingPlayers.length > 0 ? (
                                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 md:gap-4">
                                     {squad.playingPlayers.map(
                                       (player: any, index: number) => (
@@ -514,7 +514,7 @@ const MatchDetailsPage = () => {
 
                               <TabsContent value="bench" className="mt-4">
                                 {squad.benchPlayers &&
-                                squad.benchPlayers.length > 0 ? (
+                                  squad.benchPlayers.length > 0 ? (
                                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
                                     {squad.benchPlayers.map(
                                       (player: any, index: any) => (
@@ -559,7 +559,7 @@ const MatchDetailsPage = () => {
                           <span className="text-lg md:text-xl">
                             Stadium Analysis:{" "}
                             <span className="text-blue-600">
-                              {matchData.venueDetails.name}
+                              {matchData?.venueDetails?.name}
                             </span>
                           </span>
                         </CardTitle>

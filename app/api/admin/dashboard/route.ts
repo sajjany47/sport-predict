@@ -7,7 +7,9 @@ import User from "../../users/UserModel";
 export const GET = async (request: NextRequest) => {
   await dbConnect();
   try {
-    const currentYear = new Date().getFullYear();
+    const url = new URL(request.url);
+    const yearParam = url.searchParams.get("year");
+    const currentYear = yearParam ? parseInt(yearParam) : new Date().getFullYear();
 
     // 1. Total Users
     const totalUsers = await User.countDocuments();

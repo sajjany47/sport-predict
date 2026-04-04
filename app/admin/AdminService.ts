@@ -111,9 +111,10 @@ export const UserSendCredit = async (payload: any) => {
   }
 };
 
-export const fetchDashboardStats = async () => {
+export const fetchDashboardStats = async (year?: number) => {
   try {
-    const response = await privateApi.get("/api/admin/dashboard", {
+    const url = year ? `/api/admin/dashboard?year=${year}` : "/api/admin/dashboard";
+    const response = await privateApi.get(url, {
       headers: getHeadersWithToken(),
     });
     return response.data;

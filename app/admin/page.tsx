@@ -30,6 +30,7 @@ import {
 
 const AdminDashboard = () => {
   const [dbStats, setDbStats] = React.useState<any>(null);
+  const [selectedYear, setSelectedYear] = React.useState<number>(new Date().getFullYear());
 
   const { users, tickets, financeStats } = useSelector(
     (state: RootState) => state.admin
@@ -40,7 +41,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const res = await fetchDashboardStats();
+        const res = await fetchDashboardStats(selectedYear);
         if (res.success) {
           setDbStats(res.data);
         }
@@ -49,7 +50,7 @@ const AdminDashboard = () => {
       }
     };
     loadStats();
-  }, [dispatch]);
+  }, [dispatch, selectedYear]);
 
   const openTickets = tickets.filter((t) => t.status === "open").length;
 
@@ -100,13 +101,30 @@ const AdminDashboard = () => {
     <AdminLayout>
       <div className="space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Admin Dashboard
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Overview of your SportPredict platform
-          </p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Overview of your SportPredict platform
+            </p>
+          </div>
+          <div className="mt-4 sm:mt-0 flex items-center shadow-sm">
+            <span className="mr-3 text-sm font-medium text-gray-700">Filter Year :</span>
+            <select
+              id="year-select"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="border border-gray-300 rounded-md px-4 py-2 text-sm font-semibold text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            >
+              {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((yr) => (
+                <option key={yr} value={yr}>
+                  {yr}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Stats Cards */}

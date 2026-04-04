@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
     const matchId = new mongoose.Types.ObjectId(body._id);
 
     //  faster than aggregate
-    const [match, matchDetails] = await Promise.all([
-      Match.findById(matchId),
-      MatchDetails.findOne({ matchId }),
+    const [match, matchDetails]: any = await Promise.all([
+      Match.findById(matchId).lean(),
+      MatchDetails.findOne({ matchId }).lean(),
     ]);
 
     const matchInfo = { ...body };
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
     return Response.json(
       {
         data: {
-          ...matchDetails.toObject(),
+          ...matchDetails,
           squads: latestSquad,
           matchInfo,
         },
