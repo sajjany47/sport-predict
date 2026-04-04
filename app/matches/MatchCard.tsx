@@ -202,6 +202,7 @@ const MatchCard = ({
 
   // Get card background style based on prediction result
   const getCardBackgroundStyle = () => {
+    if (match.status === "ABANDONED") return "bg-gray-100 opacity-90 border-gray-200";
     if (match.status !== "COMPLETED" || !match.prediction) return "";
 
     const correct = isPredictionCorrect();
@@ -215,6 +216,7 @@ const MatchCard = ({
 
   // Get card border style
   const getCardBorderStyle = () => {
+    if (match.status === "ABANDONED") return "border-l-4 border-gray-400";
     if (match.status !== "COMPLETED" || !match.prediction) return "";
 
     const correct = isPredictionCorrect();
@@ -269,109 +271,25 @@ const MatchCard = ({
     if (correct === null) return null;
 
     return (
-      <div
-        className={`relative mb-4 p-4 rounded-lg overflow-hidden ${correct ? "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-200" : "bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-200"}`}
-      >
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-5">
-          {correct ? (
-            <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20"></div>
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-r from-red-400/20 to-rose-400/20"></div>
-          )}
+      <div className={`mb-4 rounded-xl border overflow-hidden shadow-sm transition-transform ${correct ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+        <div className={`flex items-center justify-center py-2 ${correct ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
+          {correct ? <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" /> : <XCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />}
+          <span className="font-bold text-xs sm:text-sm tracking-widest uppercase">{correct ? "Prediction Pass" : "Prediction Fail"}</span>
         </div>
-
-        <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div
-                className={`p-2 rounded-full ${correct ? "bg-green-100" : "bg-red-100"}`}
-              >
-                {correct ? (
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
-                ) : (
-                  <XCircle className="h-5 w-5 text-red-600" />
-                )}
-              </div>
-              <div>
-                <h3
-                  className={`font-bold ${correct ? "text-green-700" : "text-red-700"}`}
-                >
-                  {correct ? "PREDICTION PASSED!" : "PREDICTION FAILED"}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {correct
-                    ? `We correctly predicted ${predictedWinner} would win!`
-                    : `We predicted ${predictedWinner}, but ${actualWinner} won.`}
-                </p>
-              </div>
+        <div className="p-3">
+          <div className="flex justify-between items-center bg-white rounded-lg p-2 mb-2 border shadow-sm">
+            <div className="w-1/2 flex flex-col items-center border-r px-1 text-center">
+              <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-semibold mb-1"><TrendingUp className="inline w-3 h-3 mr-1 text-blue-500" />Our Pick</span>
+              <span className={`font-bold text-xs sm:text-sm leading-tight ${correct ? "text-green-700" : "text-red-700"}`}>{predictedWinner}</span>
             </div>
-
-            <div
-              className={`px-3 py-1 rounded-full font-bold ${correct ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}
-            >
-              {correct ? "PASS" : "FAIL"}
+            <div className="w-1/2 flex flex-col items-center px-1 text-center">
+              <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-semibold mb-1"><Crown className="inline w-3 h-3 mr-1 text-yellow-500" />Winner</span>
+              <span className="font-bold text-xs sm:text-sm leading-tight text-gray-900">{actualWinner}</span>
             </div>
           </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <div
-              className={`p-2 rounded-lg ${correct ? "bg-green-50 border border-green-100" : "bg-red-50 border border-red-100"}`}
-            >
-              <div className="flex items-center space-x-2 mb-1">
-                <TrendingUp
-                  className={`h-4 w-4 ${correct ? "text-green-600" : "text-red-600"}`}
-                />
-                <span className="text-xs font-medium text-gray-600">
-                  Our Prediction
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <img
-                  src={
-                    match.prediction[
-                      predictedWinner === match.prediction.team1.shortName
-                        ? "team1"
-                        : "team2"
-                    ].flag
-                  }
-                  alt="Predicted"
-                  className="w-6 h-6 rounded-full border"
-                />
-                <span className="font-bold">{predictedWinner}</span>
-                <span
-                  className={`text-xs px-2 py-1 rounded ${correct ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                >
-                  {Math.max(
-                    match.prediction.team1.winnerPrediction.probability,
-                    match.prediction.team2.winnerPrediction.probability,
-                  ).toFixed(1)}
-                  %
-                </span>
-              </div>
-            </div>
-
-            <div className="p-2 rounded-lg bg-white border border-gray-200">
-              <div className="flex items-center space-x-2 mb-1">
-                <Crown className="h-4 w-4 text-yellow-600" />
-                <span className="text-xs font-medium text-gray-600">
-                  Actual Winner
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <img
-                  src={
-                    match.teams.find((t) => t.teamShortName === actualWinner)
-                      ?.teamFlagUrl || ""
-                  }
-                  alt="Actual"
-                  className="w-6 h-6 rounded-full border"
-                />
-                <span className="font-bold">{actualWinner}</span>
-                <Trophy className="h-4 w-4 text-yellow-500" />
-              </div>
-            </div>
-          </div>
+          <p className="text-[10px] sm:text-xs text-center text-gray-600 font-medium leading-tight">
+            {correct ? `We correctly predicted ${predictedWinner} to win.` : `Predicted ${predictedWinner}, but ${actualWinner} won.`}
+          </p>
         </div>
       </div>
     );
@@ -522,11 +440,10 @@ const MatchCard = ({
                   <div
                     className="bg-gradient-to-r from-blue-500 to-indigo-600 h-1.5 rounded-full transition-all duration-1000"
                     style={{
-                      width: `${
-                        countdown.hours > 0
+                      width: `${countdown.hours > 0
                           ? ((24 - countdown.hours) / 24) * 100
                           : ((60 - countdown.minutes) / 60) * 100
-                      }%`,
+                        }%`,
                     }}
                   ></div>
                 </div>
@@ -579,23 +496,26 @@ const MatchCard = ({
 
       return (
         <div
-          className={`text-center py-3 px-4 rounded-lg mb-4 ${
-            match.status === "LIVE"
+          className={`text-center py-3 px-4 rounded-lg mb-4 shadow-sm ${match.status === "LIVE"
               ? "bg-gradient-to-r from-red-50 to-pink-50 border border-red-100"
               : match.status === "COMPLETED"
                 ? "bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100"
-                : "bg-gray-50"
-          }`}
+                : match.status === "ABANDONED"
+                  ? "bg-slate-100 border border-slate-300 opacity-90"
+                  : "bg-gray-50"
+            }`}
         >
           <p
-            className={`text-sm font-medium ${
-              match.status === "LIVE"
+            className={`text-sm font-bold flex flex-wrap items-center justify-center gap-1.5 ${match.status === "LIVE"
                 ? "text-red-700"
                 : match.status === "COMPLETED"
                   ? "text-green-700"
-                  : "text-gray-700"
-            }`}
+                  : match.status === "ABANDONED"
+                    ? "text-slate-600 uppercase tracking-widest text-xs"
+                    : "text-gray-700"
+              }`}
           >
+            {match.status === "ABANDONED" && <XCircle className="w-4 h-4 text-slate-500" />}
             {getMatchStatusText()}
           </p>
         </div>
@@ -621,15 +541,14 @@ const MatchCard = ({
       return (
         <React.Fragment key={index}>
           <div
-            className={`flex items-center justify-between p-3 rounded-lg ${
-              match.status === "UPCOMING"
+            className={`flex items-center justify-between p-3 rounded-lg ${match.status === "UPCOMING"
                 ? "bg-gradient-to-r from-blue-50/30 to-transparent hover:from-blue-50/50 hover:to-transparent"
                 : isActualWinner && correct !== null
                   ? correct
                     ? "bg-gradient-to-r from-green-50/30 to-emerald-50/10 border border-green-100"
                     : "bg-gradient-to-r from-red-50/30 to-rose-50/10 border border-red-100"
                   : "bg-white/50"
-            }`}
+              }`}
           >
             <div className="flex items-center space-x-3">
               <div className="relative">
@@ -639,13 +558,12 @@ const MatchCard = ({
                 <img
                   src={team.teamFlagUrl}
                   alt={team.teamName}
-                  className={`relative w-10 h-10 rounded-full object-cover border-2 ${
-                    isActualWinner
+                  className={`relative w-10 h-10 rounded-full object-cover border-2 ${isActualWinner
                       ? correct
                         ? "border-green-300 shadow-green-100"
                         : "border-red-300 shadow-red-100"
                       : "border-white shadow-sm"
-                  }`}
+                    }`}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = "none";
@@ -757,11 +675,12 @@ const MatchCard = ({
 
   return (
     <Card
-      className={`group hover:shadow-xl transition-all duration-300 border-0 ${
-        match.status === "COMPLETED" && match.prediction
+      className={`group hover:shadow-xl transition-all duration-300 border-0 ${match.status === "COMPLETED" && match.prediction
           ? `${getCardBackgroundStyle()} ${getCardBorderStyle()} shadow-lg`
-          : "bg-white"
-      } cursor-pointer relative overflow-hidden`}
+          : match.status === "ABANDONED"
+            ? `${getCardBackgroundStyle()} ${getCardBorderStyle()} shadow-sm`
+            : "bg-white"
+        } cursor-pointer relative overflow-hidden`}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -771,19 +690,18 @@ const MatchCard = ({
         <>
           {getPredictionResultIcon()}
           <div
-            className={`absolute top-0 right-0 w-32 h-32 opacity-5 -translate-y-16 translate-x-16 ${
-              isPredictionCorrect() ? "bg-green-500" : "bg-red-500"
-            } rounded-full`}
+            className={`absolute top-0 right-0 w-32 h-32 opacity-5 -translate-y-16 translate-x-16 ${isPredictionCorrect() ? "bg-green-500" : "bg-red-500"
+              } rounded-full`}
           ></div>
         </>
       )}
 
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-5">
         {/* Match Header */}
         <div className="flex items-center justify-between mb-3 text-sm text-gray-500">
           <div className="flex items-center space-x-2 w-full">
             <CalendarCog className="h-4 w-4 shrink-0" />
-            <span className="whitespace-normal break-words flex-1">
+            <span className="whitespace-normal break-words flex-1 text-xs sm:text-sm">
               {match.matchDescription}
             </span>
           </div>
@@ -799,14 +717,18 @@ const MatchCard = ({
                     ? match.prediction
                       ? "outline"
                       : "default"
-                    : "secondary"
+                    : match.status === "ABANDONED"
+                      ? "secondary"
+                      : "secondary"
               }
               className={
                 match.status === "UPCOMING"
                   ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0"
-                  : match.status === "COMPLETED" && match.prediction
-                    ? getHeaderBadgeStyle()
-                    : ""
+                  : match.status === "ABANDONED"
+                    ? "bg-slate-600 text-white hover:bg-slate-700 border-0 shadow-sm"
+                    : match.status === "COMPLETED" && match.prediction
+                      ? getHeaderBadgeStyle()
+                      : ""
               }
             >
               {match.status === "LIVE"
@@ -833,38 +755,35 @@ const MatchCard = ({
         {/* Risk Meter Section */}
         {match.prediction?.matchRisk && (
           <div
-            className={`mb-4 p-3 rounded-lg border ${
-              match.prediction.matchRisk.risk === "High"
+            className={`mb-4 p-3 rounded-lg border ${match.prediction.matchRisk.risk === "High"
                 ? "bg-red-50 border-red-100"
                 : match.prediction.matchRisk.risk === "Medium"
                   ? "bg-amber-50 border-amber-100"
                   : "bg-green-50 border-green-100"
-            }`}
+              }`}
           >
             <div className="flex items-center justify-between mb-1">
               <span className="text-[11px] font-bold uppercase text-gray-500 tracking-wider flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" /> Risk Level
               </span>
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  match.prediction.matchRisk.risk === "High"
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${match.prediction.matchRisk.risk === "High"
                     ? "bg-red-100 text-red-700 border border-red-200"
                     : match.prediction.matchRisk.risk === "Medium"
                       ? "bg-amber-100 text-amber-700 border border-amber-200"
                       : "bg-green-100 text-green-700 border border-green-200"
-                }`}
+                  }`}
               >
                 {match.prediction.matchRisk.risk}
               </span>
             </div>
             <p
-              className={`text-xs font-semibold ${
-                match.prediction.matchRisk.risk === "High"
+              className={`text-xs font-semibold ${match.prediction.matchRisk.risk === "High"
                   ? "text-red-800"
                   : match.prediction.matchRisk.risk === "Medium"
                     ? "text-amber-800"
                     : "text-green-800"
-              }`}
+                }`}
             >
               {match.prediction.matchRisk.message}
             </p>
@@ -887,15 +806,14 @@ const MatchCard = ({
         {/* Action Button */}
         {showPredictButton && match.status !== "ABANDONED" && (
           <Button
-            className={`w-full ${
-              match.status === "UPCOMING"
+            className={`w-full ${match.status === "UPCOMING"
                 ? "bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800"
                 : match.status === "COMPLETED" && match.prediction
                   ? isPredictionCorrect()
                     ? "bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800"
                     : "bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800"
                   : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            } text-white transition-all duration-300 shadow-md hover:shadow-lg`}
+              } text-white transition-all duration-300 shadow-md hover:shadow-lg`}
             onClick={(e) => {
               e.stopPropagation();
               onClick?.();
