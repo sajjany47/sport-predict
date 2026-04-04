@@ -4,48 +4,67 @@ import { FormatErrorMessage } from "@/lib/utils";
 import { CrexNext3DaysFixturesArray } from "../CrexNext3DayList";
 import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
-import mongoose from "mongoose";
 import moment from "moment";
 import { TeamRank } from "../../match-details/TeamRank";
 import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
 import { Prediction } from "../../order/Prediction";
 
-export const GET = async (req: NextRequest) => {
+// 🔥 concurrency limiter
+const asyncPool = async (limit: number, array: any[], iteratorFn: any) => {
+  const ret: any[] = [];
+  const executing: any[] = [];
+
+  for (const item of array) {
+    const p = Promise.resolve().then(() => iteratorFn(item));
+    ret.push(p);
+
+    if (limit <= array.length) {
+      const e: any = p.then(() => executing.splice(executing.indexOf(e), 1));
+      executing.push(e);
+      if (executing.length >= limit) {
+        await Promise.race(executing);
+      }
+    }
+  }
+  return Promise.all(ret);
+};
+
+export const GET = async () => {
   await dbConnect();
 
   try {
     console.log("CRON HIT ✅", new Date());
 
     // ---------------- DELETE OLD MATCHES ----------------
-    const cutoffDate = moment().subtract(7, "days").format("YYYY-MM-DD");
-    const fixtures = await CrexNext3DaysFixturesArray();
+    const cutoffDate = moment().subtract(7, "days").toDate();
 
-    // 1️⃣ Old matches list
-    const oldMatchList = await Match.find(
+    const oldMatches = await Match.find(
       { formatDate: { $lte: cutoffDate } },
       { _id: 1 },
     );
 
-    const matchIds = oldMatchList.map((m) => m._id);
-    // 2️⃣ MatchDetails delete
-    if (matchIds.length > 0) {
-      await MatchDetails.deleteMany({
-        matchId: { $in: matchIds },
+    const matchIds = oldMatches.map((m) => m._id);
+
+    if (matchIds.length) {
+      await MatchDetails.deleteMany({ matchId: { $in: matchIds } });
+    }
+
+    await Match.deleteMany({ formatDate: { $lte: cutoffDate } });
+
+    // ---------------- FETCH FIXTURES ----------------
+    const fixtures = await CrexNext3DaysFixturesArray();
+
+    if (!fixtures?.length) {
+      return NextResponse.json({
+        success: true,
+        message: "No fixtures found",
       });
     }
 
-    await Match.deleteMany({
-      formatDate: { $lte: cutoffDate },
-    });
-
-    // ---------------- FETCH FIXTURES ----------------
-
-    if (!fixtures?.length) {
-      return NextResponse.json({ success: true, message: "No fixtures found" });
-    }
-
-    const filteredFixtureMatches = fixtures.filter((match: any) => {
+    // ---------------- FILTER ----------------
+    const filteredMatches = fixtures.filter((match: any) => {
       if (!match?.teams?.length) return false;
+
       return (
         match.teams[0]?.teamName !== "Team 1 (TBC)" &&
         match.teams[1]?.teamShortName !== "Team" &&
@@ -53,95 +72,111 @@ export const GET = async (req: NextRequest) => {
       );
     });
 
-    // ---------------- UPSERT MATCHES ----------------
+    // ---------------- EXISTING MATCHES ----------------
+    const existingMatches = await Match.find(
+      { url: { $in: filteredMatches.map((m: any) => m.url) } },
+      { url: 1 },
+    );
 
-    for (let index = 0; index < filteredFixtureMatches.length; index++) {
-      const match = filteredFixtureMatches[index];
-      // const url = NormalizeCrexUrl(match.url);
-      const url = match.url;
-      const findMatch = await Match.findOne({ url });
-      if (findMatch) {
-        console.log("Match already exists, skipping:", url);
-        continue;
+    const existingUrlSet = new Set(existingMatches.map((m) => m.url));
+
+    // ---------------- NEW MATCHES ONLY ----------------
+    const newMatches = filteredMatches.filter(
+      (match: any) => !existingUrlSet.has(match.url),
+    );
+
+    console.log("New matches:", newMatches.length);
+
+    // ---------------- INSERT NEW MATCHES ----------------
+    await asyncPool(5, newMatches, async (match: any) => {
+      try {
+        const matchStartUTC = moment.utc(
+          `${match.matchDate} ${match.startTime}`,
+          "ddd, DD MMM YYYY h:mm A",
+        );
+
+        const prepareTeam = await Promise.all(
+          (match?.teams ?? []).map(async (team: any) => {
+            const teamRank = await TeamRank(
+              team.teamName,
+              team.teamName?.includes("Women") ? "WOMEN" : "MEN",
+              match.format,
+            );
+
+            return { ...team, teamRank };
+          }),
+        );
+
+        await Match.insertOne({
+          ...match,
+          teams: prepareTeam,
+          isCompleted: false,
+          isPlayingPlayerFetched: false,
+          isDetailsFetched: false,
+          formatDate: matchStartUTC.toDate(),
+          url: match.url,
+          createdAt: new Date(),
+        });
+
+        console.log("✅ Inserted:", match.url);
+      } catch (err) {
+        console.error("Insert error:", match.url, err);
       }
-      const matchStartUTC = moment.utc(
-        `${match.matchDate} ${match.startTime}`,
-        "ddd, DD MMM YYYY h:mm A",
-      );
-
-      const prepareTeam = await Promise.all(
-        (match?.teams ?? []).map(async (team: any) => {
-          const teamRank = await TeamRank(
-            team.teamName,
-            team.teamName?.includes("Women") ? "WOMEN" : "MEN",
-            match.format,
-          );
-
-          return {
-            ...team,
-            teamRank,
-          };
-        }),
-      );
-
-      await Match.insertOne({
-        ...match,
-        teams: prepareTeam,
-        isCompleted: false,
-        isPlayingPlayerFetched: false,
-        isDetailsFetched: false,
-        // formatDate: moment(match.matchDate, "ddd, DD MMM YYYY").format(
-        //   "YYYY-MM-DD",
-        // ),
-        formatDate: matchStartUTC.toDate(),
-        url,
-        createdAt: new Date(),
-      });
-    }
+    });
 
     // ---------------- FETCH UNPROCESSED MATCHES ----------------
     const dbMatches = await Match.find({ isDetailsFetched: false });
 
-    for (let index = 0; index < dbMatches.length; index++) {
-      const match = dbMatches[index];
+    await asyncPool(3, dbMatches, async (match: any) => {
       try {
-        const crexOverallStats = await ExtractMatchDetails(`${match.url}`);
+        const stats = await ExtractMatchDetails(match.url);
 
-        if (crexOverallStats === null) continue;
+        if (!stats) return;
 
-        const insertMatchDetails = await MatchDetails.insertOne({
+        // if (!stats?.teams || stats.teams.length < 2) {
+        //   console.log("⚠️ Skipping bad data:", match.url);
+        //   return;
+        // }
+
+        const hasPlaying11 =
+          stats?.squads?.[0]?.playingPlayers?.length > 0 &&
+          stats?.squads?.[1]?.playingPlayers?.length > 0;
+
+        // 🔥 insert only if not exists (no overwrite)
+        const existingDetails = await MatchDetails.findOne({
           matchId: match._id,
-          ...crexOverallStats,
-          updatedAt: new Date(),
         });
 
-        if (insertMatchDetails) {
-          const analysis = await Prediction({
-            ...crexOverallStats,
-            matchInfo: match,
+        if (!existingDetails) {
+          await MatchDetails.insertOne({
+            matchId: match._id,
+            ...stats,
+            updatedAt: new Date(),
           });
-          await Match.updateOne(
-            { _id: new mongoose.Types.ObjectId(match._id) },
-            {
-              $set: {
-                isPlayingPlayerFetched:
-                  crexOverallStats.squads[0]?.playingPlayers?.length > 0 &&
-                  crexOverallStats.squads[1]?.playingPlayers?.length > 0
-                    ? true
-                    : false,
-                prediction: analysis,
-                isDetailsFetched: true,
-                detailsFetchedAt: new Date(),
-              },
-            },
-          );
         }
-      } catch (err) {
-        if (err) continue;
-      }
-    }
 
-    return Response.json(
+        const analysis = await Prediction({
+          ...stats,
+          matchInfo: match,
+        });
+
+        await Match.updateOne(
+          { _id: match._id },
+          {
+            $set: {
+              isPlayingPlayerFetched: hasPlaying11,
+              prediction: analysis,
+              isDetailsFetched: true,
+              detailsFetchedAt: new Date(),
+            },
+          },
+        );
+      } catch (err) {
+        console.error("Processing error:", match.url, err);
+      }
+    });
+
+    return NextResponse.json(
       {
         success: true,
         message: "Match list updated successfully",
