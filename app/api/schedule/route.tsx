@@ -6,6 +6,7 @@ import MatchDetails from "../match-details/MatchDetailsModel";
 import mongoose from "mongoose";
 import moment from "moment-timezone";
 import { Prediction } from "../order/Prediction";
+import { SquadList } from "../match-details/SquadList";
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -86,6 +87,31 @@ export async function POST(request: Request) {
 
           scoreCard = await CrexMatchScorecard(scoreCardUrl);
           result = scoreCard?.result?.toLowerCase() ?? "";
+
+          if (!match.isPlayingPlayerFetched) {
+            const details = await MatchDetails.findOne({
+              matchId: new mongoose.Types.ObjectId(match._id),
+            });
+            const latestSquad = await SquadList(
+              `${match.url}/match-details`,
+              details.squads,
+            );
+
+            await MatchDetails.updateOne(
+              { matchId: match._id },
+              {
+                $set: {
+                  squads: latestSquad,
+                  updatedAt: new Date(),
+                },
+              },
+            );
+
+            await Match.updateOne(
+              { _id: match._id },
+              { $set: { isPlayingPlayerFetched: true, updatedAt: new Date() } },
+            );
+          }
         } catch {
           scoreCard = null;
         }

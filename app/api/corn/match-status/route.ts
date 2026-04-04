@@ -84,10 +84,13 @@ export const GET = async (_req: NextRequest) => {
               {
                 $set: {
                   squads: latestSquad,
-                  isPlayingPlayerFetched: true,
-                  playingXiFetchedAt: new Date(),
                 },
               },
+            );
+
+            await Match.updateOne(
+              { _id: match._id },
+              { $set: { isPlayingPlayerFetched: true, updatedAt: new Date() } },
             );
           }
         }
