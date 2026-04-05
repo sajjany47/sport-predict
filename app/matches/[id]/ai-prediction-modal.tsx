@@ -265,7 +265,7 @@ const AIPredictionModal: React.FC<{
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ">
                   Live Neural Analysis
                 </span>
               </div>
@@ -307,7 +307,7 @@ const AIPredictionModal: React.FC<{
                 {isLoading ? (
                   <div className="flex items-center gap-4">
                     <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span className="italic">Synthesizing...</span>
+                    <span className="">Synthesizing...</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-4">
@@ -325,7 +325,7 @@ const AIPredictionModal: React.FC<{
                   <div className="p-2 bg-amber-50 rounded-xl border border-amber-100">
                     <Trophy className="h-5 w-5 text-amber-600" />
                   </div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">
+                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
                     Dominance Metrics
                   </h3>
                 </div>
@@ -368,19 +368,19 @@ const AIPredictionModal: React.FC<{
                               <h4 className="font-black text-gray-900 text-xl leading-none uppercase tracking-tighter mb-1">
                                 {team?.shortName}
                               </h4>
-                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 italic">
+                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 ">
                                 Contender Status
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
                             <div
-                              className={`text-4xl font-black italic tracking-tighter text-${color}-600 drop-shadow-sm group-hover:scale-110 transition-transform`}
+                              className={`text-4xl font-black  tracking-tighter text-${color}-600 drop-shadow-sm group-hover:scale-110 transition-transform`}
                             >
                               {team?.winnerPrediction?.probability?.toFixed(1)}%
                             </div>
                             <Badge
-                              className={`bg-${color}-100 text-${color}-700 border-${color}-200 text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 italic mt-1`}
+                              className={`bg-${color}-100 text-${color}-700 border-${color}-200 text-[10px] font-black uppercase tracking-tighter px-2 py-0.5  mt-1`}
                             >
                               Win Probability
                             </Badge>
@@ -413,7 +413,7 @@ const AIPredictionModal: React.FC<{
                             </div>
                           </div>
                           <div className="p-3 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/50 mt-4">
-                            <p className="text-[11px] text-gray-600 italic font-bold leading-relaxed">
+                            <p className="text-[11px] text-gray-600  font-bold leading-relaxed">
                               "{team?.winnerPrediction?.hint?.hintMessage}"
                             </p>
                           </div>
@@ -430,7 +430,7 @@ const AIPredictionModal: React.FC<{
                   <div className="p-2 bg-blue-50 rounded-xl border border-blue-100">
                     <BarChart3 className="h-5 w-5 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">
+                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
                     Score Forecasting
                   </h3>
                 </div>
@@ -472,7 +472,7 @@ const AIPredictionModal: React.FC<{
                               </div>
                             </div>
                             <div
-                              className={`text-3xl font-black italic tracking-tighter text-${color}-700 bg-${color}-50/50 px-6 py-3 rounded-[24px] border border-${color}-100 group-hover:scale-105 transition-transform shadow-inner`}
+                              className={`text-3xl font-black  tracking-tighter text-${color}-700 bg-${color}-50/50 px-6 py-3 rounded-[24px] border border-${color}-100 group-hover:scale-105 transition-transform shadow-inner`}
                             >
                               {team?.firstInnings?.predicted}
                             </div>
@@ -482,7 +482,7 @@ const AIPredictionModal: React.FC<{
                               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">
                                 Expected Range
                               </p>
-                              <p className="text-sm font-black text-gray-800 italic">
+                              <p className="text-sm font-black text-gray-800 ">
                                 {team?.firstInnings?.min} —{" "}
                                 {team?.firstInnings?.max}
                               </p>
@@ -491,7 +491,7 @@ const AIPredictionModal: React.FC<{
                               <p className="text-[9px] font-black text-red-400 uppercase tracking-widest mb-1">
                                 Risk Factor
                               </p>
-                              <p className="text-sm font-black text-red-600 italic">
+                              <p className="text-sm font-black text-red-600 ">
                                 ~{team?.firstInnings?.wickets} Wkts
                               </p>
                             </div>
@@ -509,7 +509,7 @@ const AIPredictionModal: React.FC<{
                   <div className="p-2 bg-purple-50 rounded-xl border border-purple-100">
                     <Star className="h-5 w-5 text-purple-600" />
                   </div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">
+                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
                     Impact Players
                   </h3>
                 </div>
@@ -520,7 +520,7 @@ const AIPredictionModal: React.FC<{
                     <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-[34px] blur opacity-10 group-hover:opacity-25 transition-opacity duration-500"></div>
                     <Card className="relative bg-white border-0 rounded-[32px] overflow-hidden shadow-xl hover:shadow-2xl transition-all">
                       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-5 py-3 flex justify-between items-center">
-                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1 italic rounded-full">
+                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1  rounded-full">
                           Primary Striker
                         </Badge>
                         <Target className="w-5 h-5 text-blue-100 opacity-80" />
@@ -560,7 +560,7 @@ const AIPredictionModal: React.FC<{
                                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">
                                   Exp. Damage
                                 </p>
-                                <p className="text-lg font-black text-blue-600 italic">
+                                <p className="text-lg font-black text-blue-600 ">
                                   +{predictionData.team1?.topBatsman?.impactRun}{" "}
                                   Runs
                                 </p>
@@ -576,7 +576,7 @@ const AIPredictionModal: React.FC<{
                     <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-[34px] blur opacity-10 group-hover:opacity-25 transition-opacity duration-500"></div>
                     <Card className="relative bg-white border-0 rounded-[32px] overflow-hidden shadow-xl hover:shadow-2xl transition-all">
                       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-5 py-3 flex justify-between items-center">
-                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1 italic rounded-full">
+                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1  rounded-full">
                           Primary Striker
                         </Badge>
                         <Target className="w-5 h-5 text-blue-100 opacity-80" />
@@ -616,7 +616,7 @@ const AIPredictionModal: React.FC<{
                                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">
                                   Exp. Damage
                                 </p>
-                                <p className="text-lg font-black text-blue-600 italic">
+                                <p className="text-lg font-black text-blue-600 ">
                                   +{predictionData.team2?.topBatsman?.impactRun}{" "}
                                   Runs
                                 </p>
@@ -635,7 +635,7 @@ const AIPredictionModal: React.FC<{
                     <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-[34px] blur opacity-10 group-hover:opacity-25 transition-opacity duration-500"></div>
                     <Card className="relative bg-white border-0 rounded-[32px] overflow-hidden shadow-xl hover:shadow-2xl transition-all">
                       <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-5 py-3 flex justify-between items-center">
-                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1 italic rounded-full">
+                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1  rounded-full">
                           Death Specialist
                         </Badge>
                         <Zap className="w-5 h-5 text-emerald-100 opacity-80" />
@@ -675,7 +675,7 @@ const AIPredictionModal: React.FC<{
                                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">
                                   Wicket Prob.
                                 </p>
-                                <p className="text-lg font-black text-emerald-600 italic">
+                                <p className="text-lg font-black text-emerald-600 ">
                                   {
                                     predictionData.team1?.topBowler
                                       ?.impactWicket
@@ -694,7 +694,7 @@ const AIPredictionModal: React.FC<{
                     <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-[34px] blur opacity-10 group-hover:opacity-25 transition-opacity duration-500"></div>
                     <Card className="relative bg-white border-0 rounded-[32px] overflow-hidden shadow-xl hover:shadow-2xl transition-all">
                       <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-5 py-3 flex justify-between items-center">
-                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1 italic rounded-full">
+                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1  rounded-full">
                           Death Specialist
                         </Badge>
                         <Zap className="w-5 h-5 text-emerald-100 opacity-80" />
@@ -734,7 +734,7 @@ const AIPredictionModal: React.FC<{
                                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">
                                   Wicket Prob.
                                 </p>
-                                <p className="text-lg font-black text-emerald-600 italic">
+                                <p className="text-lg font-black text-emerald-600 ">
                                   {
                                     predictionData.team2?.topBowler
                                       ?.impactWicket
@@ -757,7 +757,7 @@ const AIPredictionModal: React.FC<{
                   <div className="p-2 bg-yellow-50 rounded-xl border border-yellow-100">
                     <Users className="h-5 w-5 text-yellow-600" />
                   </div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">
+                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
                     Key Players Analysis
                   </h3>
                 </div>
@@ -939,14 +939,14 @@ const AIPredictionModal: React.FC<{
                       </div>
                       <div className="flex items-center justify-between w-full">
                         <div>
-                          <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">
+                          <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
                             AI Elite Selection
                           </h3>
                           <p className="text-[10px] text-gray-500 font-medium mt-1">
                             Algorithm-based optimal XI based on impact metrics
                           </p>
                         </div>
-                        <Badge className="bg-emerald-600 text-white border-0 font-black italic tracking-tighter text-[10px] px-3 py-1.5">
+                        <Badge className="bg-emerald-600 text-white border-0 font-black  tracking-tighter text-[10px] px-3 py-1.5">
                           Recommended XI
                         </Badge>
                       </div>
@@ -1216,7 +1216,7 @@ const AIPredictionModal: React.FC<{
                               <p className="text-[8px] font-black text-gray-400 uppercase tracking-wider">
                                 Total Projected Points
                               </p>
-                              <p className="text-xl font-black text-indigo-600 italic">
+                              <p className="text-xl font-black text-indigo-600 ">
                                 {predictionData.dream11Team
                                   .reduce(
                                     (sum, p) => sum + (p.impactScore || 0),
@@ -1239,7 +1239,7 @@ const AIPredictionModal: React.FC<{
                     <div className="p-2 bg-slate-100 rounded-xl border border-slate-200">
                       <BarChart4 className="h-5 w-5 text-slate-600" />
                     </div>
-                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">
+                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
                       Ground Forensics
                     </h3>
                   </div>
@@ -1252,7 +1252,7 @@ const AIPredictionModal: React.FC<{
                             Status: Live Ground Node
                           </p>
                         </div>
-                        <h4 className="text-2xl font-black tracking-tighter leading-tight italic truncate">
+                        <h4 className="text-2xl font-black tracking-tighter leading-tight  truncate">
                           {predictionData.venueStats?.venueName ||
                             "Tactical Arena"}
                         </h4>
@@ -1264,7 +1264,7 @@ const AIPredictionModal: React.FC<{
                           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
                             Total Matches
                           </p>
-                          <p className="text-2xl font-black italic text-blue-400">
+                          <p className="text-2xl font-black  text-blue-400">
                             {predictionData.venueStats?.matches || "N/A"}
                           </p>
                         </div>
@@ -1272,7 +1272,7 @@ const AIPredictionModal: React.FC<{
                           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
                             Avg 1st Inns
                           </p>
-                          <p className="text-2xl font-black italic text-emerald-400">
+                          <p className="text-2xl font-black  text-emerald-400">
                             {predictionData.venueStats?.avg1stInns || "N/A"}
                           </p>
                         </div>
@@ -1317,7 +1317,7 @@ const AIPredictionModal: React.FC<{
                           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">
                             Avg 2nd Innings
                           </p>
-                          <p className="text-xl font-black italic text-amber-400">
+                          <p className="text-xl font-black  text-amber-400">
                             {predictionData.venueStats?.avg2ndInns || "N/A"}{" "}
                             runs
                           </p>
@@ -1333,7 +1333,7 @@ const AIPredictionModal: React.FC<{
                               Pace Propensity
                             </p>
                             <div className="flex items-end gap-3 mb-4">
-                              <span className="text-3xl font-black italic tracking-tighter group-hover/item:text-emerald-400 transition-colors">
+                              <span className="text-3xl font-black  tracking-tighter group-hover/item:text-emerald-400 transition-colors">
                                 {predictionData.venueStats.paceVsSpin
                                   .paceWickets || "—"}
                               </span>
@@ -1352,7 +1352,7 @@ const AIPredictionModal: React.FC<{
                               Spin Efficiency
                             </p>
                             <div className="flex items-end gap-3 mb-4">
-                              <span className="text-3xl font-black italic tracking-tighter group-hover/item:text-amber-400 transition-colors">
+                              <span className="text-3xl font-black  tracking-tighter group-hover/item:text-amber-400 transition-colors">
                                 {predictionData.venueStats.paceVsSpin
                                   .spinWickets || "—"}
                               </span>
@@ -1377,7 +1377,7 @@ const AIPredictionModal: React.FC<{
                     <div className="p-2 bg-orange-50 rounded-xl border border-orange-100">
                       <Sun className="h-5 w-5 text-orange-600" />
                     </div>
-                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter italic">
+                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
                       Atmospheric Matrix
                     </h3>
                   </div>
@@ -1393,7 +1393,7 @@ const AIPredictionModal: React.FC<{
                                 "Clear"}
                             </span>
                           </div>
-                          <div className="text-6xl font-black italic tracking-tighter mt-4 drop-shadow-2xl">
+                          <div className="text-6xl font-black  tracking-tighter mt-4 drop-shadow-2xl">
                             {predictionData.venueWeather?.temperature || "28°C"}
                           </div>
                         </div>
@@ -1405,7 +1405,7 @@ const AIPredictionModal: React.FC<{
                             <CloudRain className="w-3.5 h-3.5" />
                             Precipitation
                           </p>
-                          <div className="text-2xl font-black italic tracking-tighter">
+                          <div className="text-2xl font-black  tracking-tighter">
                             {predictionData.venueWeather?.rainChance || "0%"}
                           </div>
                         </div>
@@ -1414,7 +1414,7 @@ const AIPredictionModal: React.FC<{
                             <Droplets className="w-3.5 h-3.5" />
                             Humidity
                           </p>
-                          <div className="text-2xl font-black italic tracking-tighter">
+                          <div className="text-2xl font-black  tracking-tighter">
                             {predictionData.venueWeather?.humidity || "65%"}
                           </div>
                         </div>
@@ -1460,7 +1460,7 @@ const AIPredictionModal: React.FC<{
                         outcomes. Use this data purely for informational
                         purposes.
                       </p>
-                      <p className="text-[10px] text-gray-400 italic">
+                      <p className="text-[10px] text-gray-400 ">
                         Data refresh interval: Real-time | Confidence threshold:
                         {predictionData.team1?.winnerPrediction?.confidence ===
                         "High"
