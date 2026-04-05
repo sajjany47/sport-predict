@@ -264,208 +264,6 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
   return (
     <div className="space-y-6">
       {/* Header with Teams and Basic Info */}
-      <Card>
-        <CardContent className="p-4 md:p-6">
-          {/* Desktop View (3 columns) */}
-          <div className="hidden md:flex flex-col md:flex-row justify-between items-center gap-6">
-            {/* Team 1 */}
-            <div className="flex flex-col items-center text-center space-y-3 flex-1">
-              <div className="relative">
-                <img
-                  src={team1Data.teamFlag || ""}
-                  alt={team1Data.teamName || "Team"}
-                  className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white shadow-lg"
-                  onError={(e) => {
-                    e.currentTarget.src = "";
-                  }}
-                />
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-blue-600 text-xs px-2 py-1">
-                    {team1Data.teamId || "T1"}
-                  </Badge>
-                </div>
-              </div>
-              <h2 className="text-lg md:text-xl font-bold">
-                {team1Data.teamName || "Team 1"}
-              </h2>
-              {team1Points && (
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-yellow-500" />
-                    <span className="font-semibold text-sm md:text-base">
-                      {team1Points.points ?? 0} Points
-                    </span>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    NRR: {team1Points.nrr ?? "0.00"}
-                  </Badge>
-                </div>
-              )}
-            </div>
-
-            {/* VS Badge */}
-            <div className="flex flex-col items-center space-y-2">
-              <Badge className="px-4 py-2 text-base md:text-lg font-bold bg-gradient-to-r from-red-500 to-orange-500">
-                VS
-              </Badge>
-              <p className="text-sm text-gray-500">Head to Head</p>
-              <div className="flex gap-3 md:gap-4">
-                <span className="text-xl md:text-2xl font-bold text-blue-600">
-                  {h2hStats.team1Wins}
-                </span>
-                <span className="text-xl md:text-2xl font-bold text-gray-400">
-                  -
-                </span>
-                <span className="text-xl md:text-2xl font-bold text-red-600">
-                  {h2hStats.team2Wins}
-                </span>
-              </div>
-              <p className="text-xs text-gray-400">
-                Last {h2hMatches.length} meetings
-              </p>
-            </div>
-
-            {/* Team 2 */}
-            <div className="flex flex-col items-center text-center space-y-3 flex-1">
-              <div className="relative">
-                <img
-                  src={team2Data?.teamFlag || ""}
-                  alt={team2Data?.teamName || "Team"}
-                  className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white shadow-lg"
-                  onError={(e) => {
-                    e.currentTarget.src = "";
-                  }}
-                />
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-red-600 text-xs px-2 py-1">
-                    {team2Data?.teamId || "T2"}
-                  </Badge>
-                </div>
-              </div>
-              <h2 className="text-lg md:text-xl font-bold">
-                {team2Data?.teamName || "Team 2"}
-              </h2>
-              {team2Points && (
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-yellow-500" />
-                    <span className="font-semibold text-sm md:text-base">
-                      {team2Points?.points ?? 0} Points
-                    </span>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    NRR: {team2Points?.nrr ?? "0.00"}
-                  </Badge>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Mobile View (Single line) */}
-          <div className="md:hidden">
-            <div className="flex items-center justify-between">
-              {/* Team 1 */}
-              <div className="flex flex-col items-center text-center flex-1">
-                <div className="relative mb-2">
-                  <img
-                    src={team1Data.teamFlag || ""}
-                    alt={team1Data.teamName || "Team"}
-                    className="w-12 h-12 rounded-full border-2 border-white shadow-md"
-                    onError={(e) => {
-                      e.currentTarget.src = "";
-                    }}
-                  />
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-blue-600 text-[10px] px-1 py-0.5">
-                      {team1Data.teamId || "T1"}
-                    </Badge>
-                  </div>
-                </div>
-                <h3 className="text-xs font-bold text-gray-900 truncate max-w-[80px]">
-                  {team1Data.teamName || "Team 1"}
-                </h3>
-                {team1Points && (
-                  <div className="mt-1">
-                    <div className="flex items-center justify-center gap-1">
-                      <Trophy className="w-3 h-3 text-yellow-500" />
-                      <span className="text-xs font-semibold">
-                        {team1Points.points ?? 0}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* VS and H2H */}
-              <div className="flex flex-col items-center mx-2">
-                <Badge className="px-3 py-1 text-sm font-bold bg-gradient-to-r from-red-500 to-orange-500 mb-1">
-                  VS
-                </Badge>
-                <div className="flex items-center gap-1">
-                  <span className="text-sm font-bold text-blue-600">
-                    {h2hStats.team1Wins}
-                  </span>
-                  <span className="text-sm font-bold text-gray-400">-</span>
-                  <span className="text-sm font-bold text-red-600">
-                    {h2hStats.team2Wins}
-                  </span>
-                </div>
-                <p className="text-[10px] text-gray-500 mt-1">H2H</p>
-              </div>
-
-              {/* Team 2 */}
-              <div className="flex flex-col items-center text-center flex-1">
-                <div className="relative mb-2">
-                  <img
-                    src={team2Data?.teamFlag || ""}
-                    alt={team2Data?.teamName || "Team"}
-                    className="w-12 h-12 rounded-full border-2 border-white shadow-md"
-                    onError={(e) => {
-                      e.currentTarget.src = "";
-                    }}
-                  />
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-red-600 text-[10px] px-1 py-0.5">
-                      {team2Data?.teamId || "T2"}
-                    </Badge>
-                  </div>
-                </div>
-                <h3 className="text-xs font-bold text-gray-900 truncate max-w-[80px]">
-                  {team2Data?.teamName || "Team 2"}
-                </h3>
-                {team2Points && (
-                  <div className="mt-1">
-                    <div className="flex items-center justify-center gap-1">
-                      <Trophy className="w-3 h-3 text-yellow-500" />
-                      <span className="text-xs font-semibold">
-                        {team2Points?.points ?? 0}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Additional info for mobile */}
-            {team1Points && team2Points && (
-              <div className="grid grid-cols-2 gap-3 mt-4">
-                <div className="text-center p-2 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-gray-500">NRR</p>
-                  <p className="text-sm font-bold text-blue-600">
-                    {team1Points.nrr ?? "0.00"}
-                  </p>
-                </div>
-                <div className="text-center p-2 bg-red-50 rounded-lg">
-                  <p className="text-xs text-gray-500">NRR</p>
-                  <p className="text-sm font-bold text-red-600">
-                    {team2Points.nrr ?? "0.00"}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Current Form */}
       <Card>
@@ -484,39 +282,40 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                   <img
                     src={team1Data.teamFlag || ""}
                     alt={team1Data.teamName || "Team"}
-                    className="w-8 h-8 rounded-full"
+                    className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
                     onError={(e) => {
                       e.currentTarget.src = "";
                     }}
                   />
                   <div>
-                    <span className="font-semibold text-base">
+                    <span className="font-extrabold text-gray-900 text-sm uppercase tracking-tight">
                       {team1Data.teamName || "Team 1"}
                     </span>
-                    <p className="text-sm text-gray-500">
-                      {team1Data.teamId || "T1"}
+                    <p className="text-[10px] font-black text-blue-500 uppercase">
+                      {team1Data.teamId || "T1"} •{" "}
+                      <span className="text-gray-400">Squad List</span>
                     </p>
                   </div>
                 </div>
                 <Badge
                   variant="outline"
-                  className="bg-green-50 text-green-700 border-green-200"
+                  className="bg-blue-50 text-blue-700 border-blue-200 font-black text-[10px] tracking-widest italic"
                 >
-                  Win Rate: {calculateWinPercentage(team1Data)}%
+                  WR: {calculateWinPercentage(team1Data)}%
                 </Badge>
               </div>
 
-              {/* Form indicators - Medium size */}
-              <div className="flex gap-2 mb-3">
+              {/* Form indicators - Premium Grid */}
+              <div className="flex gap-1.5 mb-4">
                 {team1Form.map((form, index) => (
                   <div
                     key={index}
-                    className={`flex-1 h-10 rounded-lg flex items-center justify-center text-base font-bold ${
+                    className={`flex-1 h-12 rounded-xl flex items-center justify-center text-sm font-black shadow-inner transition-transform active:scale-95 ${
                       form === "win"
-                        ? "bg-green-500 text-white"
+                        ? "bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-blue-200 border-b-2 border-blue-700"
                         : form === "loss"
-                          ? "bg-red-500 text-white"
-                          : "bg-gray-400 text-white"
+                          ? "bg-gradient-to-b from-red-500 to-red-600 text-white shadow-red-200 border-b-2 border-red-700"
+                          : "bg-gradient-to-b from-gray-400 to-gray-500 text-white border-b-2 border-gray-600"
                     }`}
                   >
                     {form === "win" ? "W" : form === "loss" ? "L" : "D"}
@@ -524,23 +323,40 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                 ))}
               </div>
 
-              {/* Wins in last 5 - Highlighted */}
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-blue-600" />
-                    <span className="font-medium text-gray-700">
-                      Last 5 Matches Performance
+              {/* Wins in last 5 - Highlighted Premium */}
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50/10 rounded-xl border border-blue-200 shadow-sm relative overflow-hidden group">
+                <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-blue-500/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg ring-1 ring-blue-200 shadow-sm">
+                      <TrendingUp className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="font-black text-xs uppercase tracking-widest text-gray-500 block">
+                        Performance
+                      </span>
+                      <span className="font-bold text-gray-800 text-sm">
+                        Last 5 Matches
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-black text-2xl text-blue-600 drop-shadow-sm italic">
+                      {calculateWinsInLast5(team1Data)}{" "}
+                      <span className="text-xs uppercase tracking-tighter not-italic text-gray-400">
+                        Wins
+                      </span>
                     </span>
                   </div>
-                  <span className="font-bold text-lg text-blue-700">
-                    {calculateWinsInLast5(team1Data)} Wins
-                  </span>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">
-                  {calculateWinsInLast5(team1Data)} wins,{" "}
-                  {5 - calculateWinsInLast5(team1Data)} losses in last 5 matches
-                </p>
+                <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden flex">
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-1000"
+                    style={{
+                      width: `${(calculateWinsInLast5(team1Data) / 5) * 100}%`,
+                    }}
+                  ></div>
+                </div>
               </div>
             </div>
 
@@ -551,39 +367,40 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                   <img
                     src={team2Data?.teamFlag || ""}
                     alt={team2Data?.teamName || "Team"}
-                    className="w-8 h-8 rounded-full"
+                    className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
                     onError={(e) => {
                       e.currentTarget.src = "";
                     }}
                   />
                   <div>
-                    <span className="font-semibold text-base">
+                    <span className="font-extrabold text-gray-900 text-sm uppercase tracking-tight">
                       {team2Data?.teamName || "Team 2"}
                     </span>
-                    <p className="text-sm text-gray-500">
-                      {team2Data?.teamId || "T2"}
+                    <p className="text-[10px] font-black text-red-500 uppercase">
+                      {team2Data?.teamId || "T2"} •{" "}
+                      <span className="text-gray-400">Squad List</span>
                     </p>
                   </div>
                 </div>
                 <Badge
                   variant="outline"
-                  className="bg-green-50 text-green-700 border-green-200"
+                  className="bg-red-50 text-red-700 border-red-200 font-black text-[10px] tracking-widest italic"
                 >
-                  Win Rate: {calculateWinPercentage(team2Data)}%
+                  WR: {calculateWinPercentage(team2Data)}%
                 </Badge>
               </div>
 
-              {/* Form indicators - Medium size */}
-              <div className="flex gap-2 mb-3">
+              {/* Form indicators - Premium Grid */}
+              <div className="flex gap-1.5 mb-4">
                 {team2Form.map((form, index) => (
                   <div
                     key={index}
-                    className={`flex-1 h-10 rounded-lg flex items-center justify-center text-base font-bold ${
+                    className={`flex-1 h-12 rounded-xl flex items-center justify-center text-sm font-black shadow-inner transition-transform active:scale-95 ${
                       form === "win"
-                        ? "bg-green-500 text-white"
+                        ? "bg-gradient-to-b from-green-500 to-green-600 text-white shadow-green-200 border-b-2 border-green-700"
                         : form === "loss"
-                          ? "bg-red-500 text-white"
-                          : "bg-gray-400 text-white"
+                          ? "bg-gradient-to-b from-red-500 to-red-600 text-white shadow-red-200 border-b-2 border-red-700"
+                          : "bg-gradient-to-b from-gray-400 to-gray-500 text-white border-b-2 border-gray-600"
                     }`}
                   >
                     {form === "win" ? "W" : form === "loss" ? "L" : "D"}
@@ -591,136 +408,266 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
                 ))}
               </div>
 
-              {/* Wins in last 5 - Highlighted */}
-              <div className="p-3 bg-red-50 rounded-lg border border-red-100">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-red-600" />
-                    <span className="font-medium text-gray-700">
-                      Last 5 Matches Performance
+              {/* Wins in last 5 - Highlighted Premium */}
+              <div className="p-4 bg-gradient-to-br from-red-50 to-rose-50/10 rounded-xl border border-red-200 shadow-sm relative overflow-hidden group">
+                <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-red-500/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-100 rounded-lg ring-1 ring-red-200 shadow-sm">
+                      <TrendingUp className="w-4 h-4 text-red-600" />
+                    </div>
+                    <div>
+                      <span className="font-black text-xs uppercase tracking-widest text-gray-500 block">
+                        Performance
+                      </span>
+                      <span className="font-bold text-gray-800 text-sm">
+                        Last 5 Matches
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-black text-2xl text-red-600 drop-shadow-sm italic">
+                      {calculateWinsInLast5(team2Data)}{" "}
+                      <span className="text-xs uppercase tracking-tighter not-italic text-gray-400">
+                        Wins
+                      </span>
                     </span>
                   </div>
-                  <span className="font-bold text-lg text-red-700">
-                    {calculateWinsInLast5(team2Data)} Wins
-                  </span>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">
-                  {calculateWinsInLast5(team2Data)} wins,{" "}
-                  {5 - calculateWinsInLast5(team2Data)} losses in last 5 matches
-                </p>
+                <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden flex">
+                  <div
+                    className="h-full bg-gradient-to-r from-red-500 to-rose-600 transition-all duration-1000"
+                    style={{
+                      width: `${(calculateWinsInLast5(team2Data) / 5) * 100}%`,
+                    }}
+                  ></div>
+                </div>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
+      {/* Team Comparison - Premium Card */}
+      <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50">
+        <div className="bg-gradient-to-r from-blue-700 via-indigo-800 to-purple-900 p-4 sm:p-6 text-white relative overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-32 h-full bg-white/5 skew-x-12 transform translate-x-16"></div>
+          <div className="absolute -top-20 -left-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl"></div>
 
-      {/* Team Comparison - Perfect Layout */}
-      <Card>
-        <CardContent className="p-6">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex flex-col items-center gap-1">
-              <img
-                src={team1Data.teamFlag || ""}
-                alt={team1Data.teamName || "Team"}
-                className="w-10 h-10 rounded-full"
-                onError={(e) => {
-                  e.currentTarget.src = "";
-                }}
-              />
-              <div className="font-bold text-lg text-blue-600">
-                {team1Data.teamId || "T1"}
+          <div className="relative z-10">
+            {/* Mobile Layout (Stacked) */}
+            <div className="md:hidden">
+              {/* Top row with both teams */}
+              <div className="flex justify-between items-center gap-4 mb-6">
+                {/* Team 1 */}
+                <div className="flex flex-col items-center gap-2 flex-1">
+                  <div className="w-16 h-16 rounded-2xl bg-white p-1 shadow-lg transform -rotate-3">
+                    <img
+                      src={team1Data.teamFlag || ""}
+                      alt={team1Data.teamName || "Team"}
+                      className="w-full h-full rounded-xl object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "";
+                      }}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <div className="font-black text-lg tracking-tighter text-blue-200">
+                      {team1Data.teamId || "T1"}
+                    </div>
+                    <p className="text-blue-300/80 text-[10px] font-bold uppercase mt-0.5 truncate max-w-[100px]">
+                      {team1Data.teamName}
+                    </p>
+                  </div>
+                </div>
+
+                {/* VS Badge Mobile */}
+                <div className="flex flex-col items-center">
+                  <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                    <span className="text-xs font-black text-white/80">VS</span>
+                  </div>
+                </div>
+
+                {/* Team 2 */}
+                <div className="flex flex-col items-center gap-2 flex-1">
+                  <div className="w-16 h-16 rounded-2xl bg-white p-1 shadow-lg transform rotate-3">
+                    <img
+                      src={team2Data.teamFlag || ""}
+                      alt={team2Data.teamName || "Team"}
+                      className="w-full h-full rounded-xl object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "";
+                      }}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <div className="font-black text-lg tracking-tighter text-red-300">
+                      {team2Data.teamId || "T2"}
+                    </div>
+                    <p className="text-red-300/80 text-[10px] font-bold uppercase mt-0.5 truncate max-w-[100px]">
+                      {team2Data.teamName}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="text-xs text-gray-500">vs all teams</div>
+
+              {/* Center Title Mobile */}
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full border border-white/20 backdrop-blur-md mb-2">
+                  <BarChart3 className="w-3 h-3 text-amber-400" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em]">
+                    Live Analytics
+                  </span>
+                </div>
+                <h2 className="text-lg font-black italic tracking-tight drop-shadow-md">
+                  TEAM COMPARISON
+                </h2>
+                <p className="text-blue-200/60 text-[8px] font-bold uppercase tracking-widest mt-1">
+                  Overall Statistical Dominance
+                </p>
+              </div>
             </div>
 
-            <div className="text-center">
-              <div className="text-lg font-bold text-gray-600">
-                Team Comparison
+            {/* Desktop Layout (3 columns) */}
+            <div className="hidden md:flex flex-row justify-between items-center gap-4">
+              {/* Team 1 - Left */}
+              <div className="flex flex-col items-center gap-2 md:w-1/4">
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition-opacity"></div>
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white p-1 shadow-lg transform -rotate-3 group-hover:rotate-0 transition-transform duration-300">
+                    <img
+                      src={team1Data.teamFlag || ""}
+                      alt={team1Data.teamName || "Team"}
+                      className="w-full h-full rounded-xl object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "";
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="font-black text-xl tracking-tighter text-blue-200">
+                    {team1Data.teamId || "T1"}
+                  </div>
+                  <p className="text-blue-300/70 text-[10px] font-bold uppercase mt-0.5">
+                    {team1Data.teamName}
+                  </p>
+                </div>
               </div>
-              <div className="text-sm text-gray-400">Overall Stats</div>
-            </div>
 
-            <div className="flex flex-col items-center gap-1">
-              <img
-                src={team2Data.teamFlag || ""}
-                alt={team2Data.teamName || "Team"}
-                className="w-10 h-10 rounded-full"
-                onError={(e) => {
-                  e.currentTarget.src = "";
-                }}
-              />
-              <div className="font-bold text-lg text-red-600">
-                {team2Data.teamId || "T2"}
+              {/* Center Title Desktop */}
+              <div className="text-center md:flex-1">
+                <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-1 rounded-full border border-white/20 backdrop-blur-md mb-2">
+                  <BarChart3 className="w-4 h-4 text-amber-400" />
+                  <span className="text-xs font-black uppercase tracking-[0.2em]">
+                    Live Analytics
+                  </span>
+                </div>
+                <h2 className="text-2xl font-black italic tracking-tight drop-shadow-md">
+                  TEAM COMPARISON
+                </h2>
+                <p className="text-blue-200/60 text-[10px] font-bold uppercase tracking-widest mt-1">
+                  Overall Statistical Dominance
+                </p>
               </div>
-              <div className="text-xs text-gray-500">vs all teams</div>
+
+              {/* Team 2 - Right */}
+              <div className="flex flex-col items-center gap-2 md:w-1/4">
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-rose-500 to-red-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition-opacity"></div>
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white p-1 shadow-lg transform rotate-3 group-hover:rotate-0 transition-transform duration-300">
+                    <img
+                      src={team2Data.teamFlag || ""}
+                      alt={team2Data.teamName || "Team"}
+                      className="w-full h-full rounded-xl object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "";
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="font-black text-xl tracking-tighter text-red-300">
+                    {team2Data.teamId || "T2"}
+                  </div>
+                  <p className="text-red-300/70 text-[10px] font-bold uppercase mt-0.5">
+                    {team2Data.teamName}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Comparison Metrics - Simple Table */}
-          <div className="space-y-6">
+        <CardContent className="p-0">
+          <div className="divide-y divide-gray-100">
             {comparisonOverall.map((item, index) => {
               const metric = metrics.find((m) => m.key === item?.metric);
               if (!metric || !item) return null;
 
               const Icon = metric.icon;
               const isWinMetric = item.metric === "Win";
+              const val1 = parseFloat(item.team1 || "0");
+              const val2 = parseFloat(item.team2 || "0");
+              const isVal1Higher = val1 > val2;
 
               return (
-                <div key={index} className="flex items-center justify-between">
-                  {/* Team 1 Value */}
-                  <div className="w-1/3 text-right pr-4">
-                    <div
-                      className={`text-2xl font-bold ${
-                        isWinMetric ? "text-blue-600" : "text-blue-700"
-                      }`}
-                    >
-                      {item.team1 ?? "0"}
+                <div
+                  key={index}
+                  className="group hover:bg-blue-50/30 transition-colors duration-300 p-4 sm:p-6"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    {/* Team 1 Value */}
+                    <div className="flex-1 text-left">
+                      <div
+                        className={`text-2xl font-black tracking-tighter italic ${isVal1Higher ? "text-blue-600 scale-110" : "text-gray-400"} transition-all`}
+                      >
+                        {item.team1 ?? "0"}
+                        {isWinMetric && "%"}
+                      </div>
+                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                        {team1Data.teamId}
+                      </div>
                     </div>
-                    {isWinMetric && (
-                      <div className="text-xs text-gray-500">Win %</div>
-                    )}
-                  </div>
 
-                  {/* Metric with Icon */}
-                  <div className="w-1/3 flex flex-col items-center">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Icon className={`w-5 h-5 ${metric.color}`} />
-                      <span className="font-medium text-gray-700">
+                    {/* Metric Label Center */}
+                    <div className="flex flex-col items-center mx-4">
+                      <div
+                        className={`p-2 rounded-xl scale-90 sm:scale-100 mb-1 ${metric.bgColor} shadow-sm group-hover:rotate-12 transition-transform`}
+                      >
+                        <Icon className={`w-5 h-5 ${metric.color}`} />
+                      </div>
+                      <span className="font-black text-[10px] sm:text-xs text-gray-500 uppercase tracking-widest text-center">
                         {item.metric}
                       </span>
                     </div>
-                    {isWinMetric && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-1 bg-blue-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-blue-500"
-                            style={{ width: `${parseInt(item.team1 ?? "0")}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-400">vs</span>
-                        <div className="w-16 h-1 bg-red-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-red-500"
-                            style={{ width: `${parseInt(item.team2 ?? "0")}%` }}
-                          />
-                        </div>
+
+                    {/* Team 2 Value */}
+                    <div className="flex-1 text-right">
+                      <div
+                        className={`text-2xl font-black tracking-tighter italic ${!isVal1Higher ? "text-red-600 scale-110" : "text-gray-400"} transition-all`}
+                      >
+                        {item.team2 ?? "0"}
+                        {isWinMetric && "%"}
                       </div>
-                    )}
+                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                        {team2Data.teamId}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Team 2 Value */}
-                  <div className="w-1/3 text-left pl-4">
+                  {/* Progressive Comparison Bar */}
+                  <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden flex shadow-inner">
                     <div
-                      className={`text-2xl font-bold ${
-                        isWinMetric ? "text-red-600" : "text-red-700"
-                      }`}
-                    >
-                      {item.team2 ?? "0"}
-                    </div>
-                    {isWinMetric && (
-                      <div className="text-xs text-gray-500">Win %</div>
-                    )}
+                      className={`h-full transition-all duration-1000 ease-out ${isVal1Higher ? "bg-gradient-to-r from-blue-500 to-indigo-600 shadow-[0_0_10px_rgba(59,130,246,0.3)]" : "bg-blue-300"}`}
+                      style={{ width: `${(val1 / (val1 + val2 || 1)) * 100}%` }}
+                    ></div>
+                    <div className="w-px h-full bg-white/20 z-10"></div>
+                    <div
+                      className={`h-full transition-all duration-1000 ease-out ${!isVal1Higher ? "bg-gradient-to-r from-red-500 to-orange-600 shadow-[0_0_10px_rgba(239,68,68,0.3)]" : "bg-red-300"}`}
+                      style={{ width: `${(val2 / (val1 + val2 || 1)) * 100}%` }}
+                    ></div>
                   </div>
                 </div>
               );
@@ -728,7 +675,6 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
           </div>
         </CardContent>
       </Card>
-
       {/* Points Table & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Points Table */}
@@ -925,7 +871,6 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
           </CardContent>
         </Card>
       </div>
-
       {/* Recent Matches */}
       <Card>
         <CardHeader>
@@ -1032,7 +977,7 @@ const CrexOverviewTab = ({ matchData }: OverviewTabProps) => {
 
             {/* Team 2 Recent Matches */}
             <div>
-              <div className="flex items-center gap-3 mb-4 p-3 bg-gradient-to-r from-red-50 to-white rounded-lg">
+              <div className="flex items-center gap-3 mb-4 p-3 bg-gradient-to-r from-yellow-50 to-white rounded-lg">
                 <img
                   src={team2Data?.teamFlag || ""}
                   alt={team2Data?.teamName || "Team"}

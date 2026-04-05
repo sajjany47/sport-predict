@@ -11,6 +11,7 @@ import {
   Clock,
   Trophy,
   Target,
+  Activity,
   CalendarCog,
   Sparkles,
   AlertCircle,
@@ -753,42 +754,67 @@ const MatchCard = ({
         <div className="space-y-4 mb-4">{renderTeams()}</div>
 
         {/* Risk Meter Section */}
-        {match.prediction?.matchRisk && (
-          <div
-            className={`mb-4 p-3 rounded-lg border ${match.prediction.matchRisk.risk === "High"
-                ? "bg-red-50 border-red-100"
-                : match.prediction.matchRisk.risk === "Medium"
-                  ? "bg-amber-50 border-amber-100"
-                  : "bg-green-50 border-green-100"
-              }`}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-bold uppercase text-gray-500 tracking-wider flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" /> Risk Level
-              </span>
-              <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${match.prediction.matchRisk.risk === "High"
-                    ? "bg-red-100 text-red-700 border border-red-200"
-                    : match.prediction.matchRisk.risk === "Medium"
-                      ? "bg-amber-100 text-amber-700 border border-amber-200"
-                      : "bg-green-100 text-green-700 border border-green-200"
-                  }`}
-              >
-                {match.prediction.matchRisk.risk}
-              </span>
-            </div>
-            <p
-              className={`text-xs font-semibold ${match.prediction.matchRisk.risk === "High"
-                  ? "text-red-800"
-                  : match.prediction.matchRisk.risk === "Medium"
-                    ? "text-amber-800"
-                    : "text-green-800"
+        {(() => {
+          let risk = match.prediction?.matchRisk?.risk;
+          let message = match.prediction?.matchRisk?.message;
+
+          // Local calculation logic if API doesn't provide it
+          if (!risk && match.prediction) {
+            const p1 = match.prediction.team1.winnerPrediction.probability;
+            const p2 = match.prediction.team2.winnerPrediction.probability;
+            const maxP = Math.max(p1, p2);
+
+            if (maxP > 57) {
+              risk = "Low";
+              message = "One side match - High probability of success.";
+            } else if (maxP >= 52) {
+              risk = "Medium";
+              message = "Slight rate come opposite - Competitive match.";
+            } else {
+              risk = "High";
+              message = "Both side match - High volatility expected.";
+            }
+          }
+
+          if (!risk) return null;
+
+          return (
+            <div
+              className={`mb-4 p-3 rounded-xl border-2 ${risk === "High"
+                  ? "bg-red-50 border-red-100 shadow-sm"
+                  : risk === "Medium"
+                    ? "bg-amber-50 border-amber-100 shadow-sm"
+                    : "bg-emerald-50 border-emerald-100 shadow-sm"
                 }`}
             >
-              {match.prediction.matchRisk.message}
-            </p>
-          </div>
-        )}
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-1.5">
+                  <Activity className="w-3 h-3 text-indigo-500" /> Tactical Risk
+                </span>
+                <span
+                  className={`text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-tighter ${risk === "High"
+                      ? "bg-red-500 text-white"
+                      : risk === "Medium"
+                        ? "bg-amber-500 text-white"
+                        : "bg-emerald-500 text-white"
+                    }`}
+                >
+                  {risk}
+                </span>
+              </div>
+              <p
+                className={`text-[11px] font-bold leading-tight ${risk === "High"
+                    ? "text-red-700"
+                    : risk === "Medium"
+                      ? "text-amber-700"
+                      : "text-emerald-700"
+                  }`}
+              >
+                {message}
+              </p>
+            </div>
+          );
+        })()}
 
         {/* Enhanced Match Status Section */}
         {renderMatchStatusSection()}
