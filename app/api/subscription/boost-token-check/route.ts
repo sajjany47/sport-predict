@@ -3,7 +3,6 @@ import dbConnect from "../../db";
 import { FormatErrorMessage } from "@/lib/utils";
 import User from "../../users/UserModel";
 import mongoose from "mongoose";
-import moment from "moment";
 
 export async function POST(req: NextRequest) {
   await dbConnect();
@@ -11,43 +10,45 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
 
-    const findUser = await User.findOne({
-      _id: new mongoose.Types.ObjectId(data._id),
-    });
+    const findUser = await User.findById(data._id);
 
     if (!findUser) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "User not found",
-        },
+        { success: false, message: "User not found" },
         { status: 404 },
       );
     }
 
-    // 👉 Today date (YYYY-MM-DD)
-    const today = moment().format("YYYY-MM-DD");
+    // 👉 Get today start (IST safe)
+    const now = new Date();
 
-    // 👉 Last purchase date
-    const lastPurchaseDate = findUser.dailyBoostTokenPurchaseDate
-      ? moment(findUser.dailyBoostTokenPurchaseDate).format("YYYY-MM-DD")
-      : null;
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+
+    const tomorrowStart = new Date(todayStart);
+    tomorrowStart.setDate(todayStart.getDate() + 1);
+
+    const lastPurchase = findUser.dailyBoostTokenPurchaseDate;
 
     //  Already purchased today
-    if (lastPurchaseDate === today) {
+    if (
+      lastPurchase &&
+      lastPurchase >= todayStart &&
+      lastPurchase < tomorrowStart
+    ) {
       return NextResponse.json(
         {
           success: true,
           data: { isBuyAble: false },
-          message: "Token purchased successfully",
+          message: "You have already purchased today",
         },
         { status: 200 },
       );
     }
 
-    // ✅ Allow purchase → update date
-    findUser.dailyBoostTokenPurchaseDate = new Date();
-    await findUser.save();
+    // ✅ Allow purchase
+    // findUser.dailyBoostTokenPurchaseDate = new Date();
+    // await findUser.save();
 
     return NextResponse.json(
       {

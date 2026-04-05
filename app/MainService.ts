@@ -265,11 +265,15 @@ export const FetchMatchList = async (date: any) => {
   }
 };
 
-export const FetchPlatformPerformance = async () => {
+export const FetchPlatformPerformance = async (date: any) => {
   try {
-    const response = await publicApi.get("/api/stats/performance", {
-      headers: getHeaders(),
-    });
+    const response = await publicApi.post(
+      "/api/stats/performance",
+      { date: date },
+      {
+        headers: getHeaders(),
+      },
+    );
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || error.message);

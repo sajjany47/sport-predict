@@ -1,27 +1,42 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
 import Match from "../../schedule/MatchModel";
-import moment from "moment";
 import { FormatErrorMessage } from "@/lib/utils";
 
-export const GET = async () => {
+export const POST = async (req: NextRequest) => {
   await dbConnect();
 
   try {
-    // ✅ last 7 days filter
-    const last7Days = moment().subtract(7, "days").toDate();
+    const { date } = await req.json();
 
-    const recentMatches = await Match.find({
+    if (!date) {
+      return NextResponse.json(
+        { success: false, message: "Date is required" },
+        { status: 400 },
+      );
+    }
+
+    // ✅ Create start & end of selected day
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const matches = await Match.find({
       status: "COMPLETED",
       isCompleted: true,
       prediction: { $ne: null },
-      formatDate: { $gte: last7Days }, // 🔥 main fix
+      formatDate: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
     }).lean();
 
     let pass = 0;
     let fail = 0;
 
-    for (const match of recentMatches) {
+    for (const match of matches) {
       let actualWinner = null;
       let predictedWinner = null;
 
@@ -36,7 +51,7 @@ export const GET = async () => {
         const winningTeam = match.teams.find(
           (team: any) =>
             resultText.includes(team.teamName?.toLowerCase()) ||
-            resultText.includes(team.teamShortName?.toLowerCase())
+            resultText.includes(team.teamShortName?.toLowerCase()),
         );
 
         actualWinner = winningTeam?.teamShortName || null;
@@ -49,8 +64,7 @@ export const GET = async () => {
         const t2 = match.prediction.team2;
 
         predictedWinner =
-          t1.winnerPrediction.probability >
-            t2.winnerPrediction.probability
+          t1.winnerPrediction.probability > t2.winnerPrediction.probability
             ? t1.shortName
             : t2.shortName;
       }
@@ -81,7 +95,7 @@ export const GET = async () => {
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: FormatErrorMessage(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };
