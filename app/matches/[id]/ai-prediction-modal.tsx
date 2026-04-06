@@ -26,8 +26,6 @@ import {
   Thermometer,
   Users2,
   TargetIcon,
-  Activity,
-  Home,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -104,6 +102,11 @@ interface RecentMatch {
   url: string;
 }
 
+interface VenueRecord {
+  vs: string;
+  score: string;
+}
+
 interface PredictionData {
   team1: TeamPrediction;
   team2: TeamPrediction;
@@ -114,11 +117,6 @@ interface PredictionData {
     winBowlFirst: string;
     avg1stInns: string;
     avg2ndInns: string;
-    venueName?: string;
-    paceVsSpin?: {
-      paceWickets: string;
-      spinWickets: string;
-    };
   };
   venueWeather: {
     temperature: string;
@@ -156,7 +154,6 @@ const AIPredictionModal: React.FC<{
 
       if (!user || user.credits < 1) {
         toast.error("Insufficient credits. Please purchase more credits.");
-        router.push("/subscription");
         return;
       }
 
@@ -179,9 +176,12 @@ const AIPredictionModal: React.FC<{
       const res = await UserOrderCredit(payload);
       dispatch(updateCredits(user.credits - (res?.credits ?? 1)));
 
-      await new Promise((r) => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 300));
 
+      // const data: any = await GetNewAnalysis(match);
       const data: any = await Prediction(match);
+
+      console.log("Prediction Data:", data);
       setPredictionData(data);
       toast.success("AI Prediction generated successfully!");
     } catch (err) {
@@ -192,44 +192,94 @@ const AIPredictionModal: React.FC<{
     }
   };
 
-  const getRoleColor = (role: string = "") => {
-    const r = role.toLowerCase();
-    if (r.includes("batsman") || r.includes("batter"))
-      return "bg-blue-100 text-blue-700 border-blue-200";
-    if (r.includes("bowler"))
-      return "bg-emerald-100 text-emerald-700 border-emerald-200";
-    if (r.includes("all-rounder"))
-      return "bg-purple-100 text-purple-700 border-purple-200";
-    if (r.includes("keeper"))
-      return "bg-amber-100 text-amber-700 border-amber-200";
-    return "bg-gray-100 text-gray-700 border-gray-200";
+  const getRoleIcon = (role: string) => {
+    if (!role) return <Users className="h-4 w-4" />;
+    if (role.includes("Batter") || role.includes("Batsman")) {
+      return <TargetIcon className="h-4 w-4" />;
+    } else if (role.includes("Bowler")) {
+      return <Zap className="h-4 w-4" />;
+    } else if (role.includes("All Rounder")) {
+      return <Star className="h-4 w-4" />;
+    } else {
+      return <Users className="h-4 w-4" />;
+    }
   };
 
-  const getRoleIcon = (role: string) => {
-    if (!role) return <Users className="h-3 w-3" />;
+  const getRoleColor = (role: string) => {
+    if (!role) return "bg-gray-100 text-gray-800 border-gray-300";
     if (role.includes("Batter") || role.includes("Batsman")) {
-      return <TargetIcon className="h-3 w-3" />;
+      return "bg-blue-100 text-blue-800";
     } else if (role.includes("Bowler")) {
-      return <Zap className="h-3 w-3" />;
+      return "bg-red-100 text-red-800";
     } else if (role.includes("All Rounder")) {
-      return <Star className="h-3 w-3" />;
+      return "bg-purple-100 text-purple-800";
     } else {
-      return <Users className="h-3 w-3" />;
+      return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getConfidenceClass = (confidence: string) => {
+    if (!confidence) return "bg-gray-100 text-gray-800 border-gray-300";
+    switch (confidence) {
+      case "High":
+        return "bg-green-100 text-green-800 border-green-300";
+      case "Medium":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "Low":
+        return "bg-red-100 text-red-800 border-red-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
     }
   };
 
   const getConfidenceIcon = (confidence: string) => {
-    if (!confidence) return <Wifi className="h-3 w-3 text-gray-600" />;
+    if (!confidence) return <Wifi className="h-4 w-4 text-gray-600" />;
     switch (confidence) {
       case "High":
-        return <CheckCircle className="h-3 w-3 text-green-600" />;
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
       case "Medium":
-        return <TrendingUp className="h-3 w-3 text-yellow-600" />;
+        return <TrendingUp className="h-4 w-4 text-yellow-600" />;
       case "Low":
-        return <AlertTriangle className="h-3 w-3 text-red-600" />;
+        return <AlertTriangle className="h-4 w-4 text-red-600" />;
       default:
-        return <Wifi className="h-3 w-3 text-gray-600" />;
+        return <Wifi className="h-4 w-4 text-gray-600" />;
     }
+  };
+
+  const getTeamColor = (teamNumber: number) => {
+    return teamNumber === 1
+      ? "from-blue-600 to-indigo-600"
+      : "from-purple-600 to-pink-600";
+  };
+
+  const getTeamBgColor = (teamNumber: number) => {
+    return teamNumber === 1
+      ? "from-blue-50 to-indigo-50"
+      : "from-purple-50 to-pink-50";
+  };
+
+  const getTeamBorderColor = (teamNumber: number) => {
+    return teamNumber === 1 ? "border-blue-200" : "border-purple-200";
+  };
+
+  const getTeamTextColor = (teamNumber: number) => {
+    return teamNumber === 1 ? "text-blue-600" : "text-purple-600";
+  };
+
+  const getWeatherIcon = (condition: string) => {
+    if (!condition) return <Cloud className="h-5 w-5 text-blue-500" />;
+    const lowerCondition = condition.toLowerCase();
+    if (lowerCondition.includes("rain") || lowerCondition.includes("thunder"))
+      return <CloudRain className="h-5 w-5 text-blue-500" />;
+    if (
+      lowerCondition.includes("sun") ||
+      lowerCondition.includes("clear") ||
+      lowerCondition.includes("sunny")
+    )
+      return <Sun className="h-5 w-5 text-yellow-500" />;
+    if (lowerCondition.includes("cloud"))
+      return <Cloud className="h-5 w-5 text-gray-500" />;
+    return <Cloud className="h-5 w-5 text-blue-500" />;
   };
 
   const formatNumber = (num: number | undefined, decimals: number = 0) => {
@@ -243,1239 +293,1126 @@ const AIPredictionModal: React.FC<{
     match?.squadList?.[1]?.benchPlayer?.length === 0 &&
     match?.squadList?.[1]?.playingPlayer?.length === 0;
 
+  if (!predictionData) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent
+          className="w-full h-full p-4 md:mx-auto md:my-6 md:w-[95%] md:max-w-2xl md:h-auto bg-white md:rounded-2xl md:shadow-xl overflow-hidden flex flex-col"
+          aria-label="AI Match Prediction Modal"
+        >
+          <DialogHeader className="sticky top-0 z-20 bg-white border-b px-2 py-3 md:px-6 md:py-4">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center space-x-2 text-base md:text-xl">
+                <div className="p-1.5 md:p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+                  <Brain className="h-4 w-4 md:h-6 md:w-6 text-white" />
+                </div>
+                <span>AI Match Prediction</span>
+              </DialogTitle>
+              <DialogClose className="ml-3 inline-flex items-center justify-center rounded-md p-1 hover:bg-gray-100">
+                <span className="sr-only">Close</span>
+                <X className="h-5 w-5 text-gray-600" />
+              </DialogClose>
+            </div>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto -mx-4 md:mx-0 px-4 md:px-6 py-4 md:py-6">
+            <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0" />
+                <div>
+                  <h3 className="text-sm font-bold text-red-800 mb-2">
+                    ⚖️ LEGAL DISCLAIMER
+                  </h3>
+                  <p className="text-xs text-red-700">
+                    <strong>Betting is illegal in India.</strong> This website
+                    provides AI-powered cricket analysis and predictions for
+                    informational and entertainment purposes only. We do NOT
+                    promote, encourage, or facilitate any form of gambling,
+                    betting, or illegal activities.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {checkSquad ? (
+              <div className="text-center py-6 md:py-12">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <Brain className="h-8 w-8 md:h-10 md:w-10 text-white" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
+                  Team Squads Not Available Yet
+                </h3>
+                <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8 max-w-md mx-auto px-4">
+                  ⏳ Both team squads haven't been announced yet. Please check
+                  back later when the teams are finalized to get accurate AI
+                  predictions.
+                </p>
+              </div>
+            ) : (
+              <div className="text-center py-6 md:py-12">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <Brain className="h-8 w-8 md:h-10 md:w-10 text-white" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
+                  Get AI-Powered Match Prediction
+                </h3>
+                <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8 max-w-md mx-auto px-4">
+                  Our advanced AI analyzes 50+ factors including player form,
+                  pitch conditions, weather, and historical data to provide
+                  accurate predictions.
+                </p>
+                <Button
+                  onClick={handleGetPrediction}
+                  disabled={isLoading}
+                  className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-4 py-2 text-white rounded-md"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Analyzing Match...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Get AI Prediction (1 Credit)
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl p-0 overflow-hidden bg-gray-50 border-0 shadow-2xl rounded-3xl h-[90vh] md:h-auto flex flex-col">
-        <DialogHeader className="sr-only">
-          <DialogTitle>AI Match Oracle Alpha</DialogTitle>
+      <DialogContent
+        className="w-full h-full p-0 md:mx-auto md:my-6 md:w-[95%] md:max-w-7xl md:h-auto bg-white md:rounded-2xl md:shadow-xl overflow-hidden flex flex-col"
+        aria-label="AI Match Prediction Modal"
+      >
+        <DialogHeader className="sticky top-0 z-20 bg-white border-b px-4 py-3 md:px-6 md:py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-1.5 md:p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center">
+                <Brain className="h-4 w-4 md:h-6 md:w-6 text-white" />
+              </div>
+              <div>
+                <DialogTitle className="text-base md:text-xl lg:text-2xl font-semibold">
+                  AI Match Prediction
+                </DialogTitle>
+                <div className="flex items-center gap-3 text-xs md:text-sm text-gray-600 mt-1">
+                  <div className="flex items-center gap-2 truncate">
+                    <img
+                      src={predictionData.team1?.flag}
+                      alt={predictionData.team1?.shortName || "Team 1"}
+                      className="w-5 h-5 md:w-6 md:h-6 rounded object-cover"
+                    />
+                    <span className="font-medium truncate max-w-[90px] md:max-w-[140px]">
+                      {predictionData.team1?.shortName || "Team 1"}
+                    </span>
+                  </div>
+                  <span className="text-gray-300">vs</span>
+                  <div className="flex items-center gap-2 truncate">
+                    <img
+                      src={predictionData.team2?.flag}
+                      alt={predictionData.team2?.shortName || "Team 2"}
+                      className="w-5 h-5 md:w-6 md:h-6 rounded object-cover"
+                    />
+                    <span className="font-medium truncate max-w-[90px] md:max-w-[140px]">
+                      {predictionData.team2?.shortName || "Team 2"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogClose className="ml-3 inline-flex items-center justify-center rounded-md p-1 hover:bg-gray-100">
+              <span className="sr-only">Close</span>
+              <X className="h-5 w-5 text-gray-600" />
+            </DialogClose>
+          </div>
         </DialogHeader>
 
-        {/* Premium Header */}
-        <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-100 px-5 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl shadow-lg shadow-indigo-200 ring-4 ring-indigo-50">
-              <Brain className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-base font-black text-gray-900 uppercase tracking-tighter leading-none mb-1">
-                AI Prediction Oracle
-              </h2>
-              <div className="flex items-center gap-2">
-                <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ">
-                  Live Neural Analysis
-                </span>
+        <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6">
+          <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Shield className="h-6 w-6 text-red-600 flex-shrink-0" />
+              <div>
+                <h3 className="text-sm font-bold text-red-800 mb-2">
+                  ⚖️ IMPORTANT LEGAL NOTICE
+                </h3>
+                <p className="text-xs text-red-700">
+                  <strong>WARNING:</strong> Betting and gambling are strictly
+                  illegal in India. This analysis is for informational purposes
+                  only.
+                </p>
               </div>
             </div>
           </div>
-          <DialogClose asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </DialogClose>
-        </div>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-10 pb-12 scroll-smooth">
-          {!predictionData ? (
-            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[40px] border border-gray-100 shadow-inner relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(79,70,229,0.05),transparent_70%)] animate-pulse"></div>
-              <div className="relative mb-8 transform group-hover:scale-110 transition-transform duration-500">
-                <div className="absolute inset-0 bg-indigo-500 blur-[80px] opacity-20"></div>
-                <div className="bg-gradient-to-br from-indigo-500 to-blue-600 p-6 rounded-[32px] shadow-2xl relative z-10 ring-8 ring-indigo-50">
-                  <Zap className="h-12 w-12 text-white fill-white animate-pulse" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-3 uppercase tracking-tighter">
-                Initialize Prediction
-              </h3>
-              <p className="text-sm text-gray-500 mb-10 max-w-xs text-center font-bold leading-relaxed px-4">
-                Unlock high-density probability metrics and player impact scores
-                for 1 Credit.
-              </p>
-              <Button
-                onClick={handleGetPrediction}
-                disabled={isLoading}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-12 py-8 rounded-3xl shadow-2xl shadow-indigo-200 transition-all hover:scale-105 active:scale-95 group font-black uppercase tracking-widest text-sm relative overflow-hidden"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-4">
-                    <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span className="">Synthesizing...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-4">
-                    <Sparkles className="w-5 h-5 text-amber-300 fill-amber-300 group-hover:rotate-12 transition-transform" />
-                    <span>Generate AI Insight</span>
-                  </div>
-                )}
-              </Button>
-            </div>
-          ) : (
-            <>
-              {/* Winner Probability Matrix */}
-              <section>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-amber-50 rounded-xl border border-amber-100">
-                    <Trophy className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
-                    Dominance Metrics
-                  </h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    {
-                      team: predictionData.team1,
-                      color: "blue",
-                      secondary: "indigo",
-                    },
-                    {
-                      team: predictionData.team2,
-                      color: "rose",
-                      secondary: "red",
-                    },
-                  ].map(({ team, color, secondary }, idx) => (
-                    <Card
-                      key={idx}
-                      className={`relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-${color}-50 group hover:shadow-2xl transition-all duration-500 rounded-[32px]`}
+          <div className="space-y-4 md:space-y-6">
+            {/* Winner Prediction Card */}
+            <Card className="border-0 shadow-sm md:shadow-md">
+              <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                  <Trophy className="h-4 w-4 md:h-5 md:w-5 text-yellow-600" />
+                  <span>Winner Prediction</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                  {/* Team 1 */}
+                  <div
+                    className={`p-4 md:p-6 rounded-xl border ${getTeamBorderColor(1)} bg-gradient-to-br ${getTeamBgColor(1)} text-center`}
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-start md:space-x-4">
+                      <img
+                        src={predictionData.team1?.flag}
+                        alt={predictionData.team1?.shortName}
+                        className="w-9 h-9 md:w-12 md:h-12 rounded-lg shadow-sm mx-auto md:mx-0 object-cover"
+                      />
+                      <div className="mt-2 md:mt-0">
+                        <h3 className="text-lg md:text-xl font-bold text-gray-900 truncate">
+                          {predictionData.team1?.shortName}
+                        </h3>
+                        <p className="text-xs md:text-sm text-gray-600 truncate max-w-[180px]">
+                          {predictionData.team1?.name}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`mt-4 text-2xl md:text-3xl font-extrabold ${getTeamTextColor(1)}`}
                     >
+                      {predictionData.team1?.winnerPrediction?.probability?.toFixed(
+                        2,
+                      )}
+                      %
+                    </div>
+
+                    <div className="w-full bg-gray-200 rounded-full h-2 md:h-3 mt-3">
                       <div
-                        className={`absolute top-0 right-0 w-32 h-32 bg-${color}-500/5 rounded-full -translate-y-12 translate-x-12 blur-3xl group-hover:bg-${color}-500/10 transition-all duration-700`}
-                      ></div>
-                      <CardContent className="p-6 relative z-10">
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="flex items-center gap-4">
-                            <div className="relative">
-                              <div className="absolute inset-0 bg-white blur-xl opacity-50"></div>
-                              <div
-                                className={`relative p-1.5 rounded-[20px] bg-white shadow-xl ring-2 ring-${color}-100 transform group-hover:rotate-6 transition-transform`}
-                              >
-                                <img
-                                  src={team?.flag}
-                                  alt={team?.shortName}
-                                  className="w-14 h-14 rounded-xl object-cover"
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <h4 className="font-black text-gray-900 text-xl leading-none uppercase tracking-tighter mb-1">
-                                {team?.shortName}
-                              </h4>
-                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 ">
-                                Contender Status
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div
-                              className={`text-4xl font-black  tracking-tighter text-${color}-600 drop-shadow-sm group-hover:scale-110 transition-transform`}
-                            >
-                              {team?.winnerPrediction?.probability?.toFixed(1)}%
-                            </div>
-                            <Badge
-                              className={`bg-${color}-100 text-${color}-700 border-${color}-200 text-[10px] font-black uppercase tracking-tighter px-2 py-0.5  mt-1`}
-                            >
-                              Win Probability
-                            </Badge>
-                          </div>
-                        </div>
+                        className={`h-2 md:h-3 rounded-full bg-gradient-to-r ${getTeamColor(1)} transition-all duration-500`}
+                        style={{
+                          width: `${predictionData.team1?.winnerPrediction?.probability || 0}%`,
+                        }}
+                      />
+                    </div>
 
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
-                            <span className="text-gray-400">
-                              Confidence Rating
-                            </span>
-                            <span
-                              className={`text-${color}-600 bg-${color}-50 px-2 py-0.5 rounded-full border border-${color}-100 flex items-center gap-1`}
-                            >
-                              {getConfidenceIcon(
-                                team?.winnerPrediction?.confidence || "",
-                              )}
-                              {team?.winnerPrediction?.confidence || "Medium"}{" "}
-                              Level
-                            </span>
-                          </div>
-                          <div className="h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner p-1">
-                            <div
-                              className={`h-full rounded-full bg-gradient-to-r from-${color}-500 to-${secondary}-600 shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-1000 ease-out relative group-hover:scale-[1.02]`}
-                              style={{
-                                width: `${team?.winnerPrediction?.probability || 0}%`,
-                              }}
-                            >
-                              <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
-                            </div>
-                          </div>
-                          <div className="p-3 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/50 mt-4">
-                            <p className="text-[11px] text-gray-600  font-bold leading-relaxed">
-                              "{team?.winnerPrediction?.hint?.hintMessage}"
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </section>
+                    <div className="mt-3 flex items-center justify-center">
+                      <Badge
+                        variant="outline"
+                        className={`${getConfidenceClass(predictionData.team1?.winnerPrediction?.confidence || "")} text-xs md:text-sm px-2 py-0.5 md:px-3 md:py-1 flex items-center space-x-2`}
+                      >
+                        {getConfidenceIcon(
+                          predictionData.team1?.winnerPrediction?.confidence ||
+                            "",
+                        )}
+                        <span>
+                          {predictionData.team1?.winnerPrediction?.confidence ||
+                            "Unknown"}
+                        </span>
+                      </Badge>
+                    </div>
 
-              {/* Innings Projection Grid */}
-              <section>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-blue-50 rounded-xl border border-blue-100">
-                    <BarChart3 className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
-                    Score Forecasting
-                  </h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    { team: predictionData.team1, color: "blue" },
-                    { team: predictionData.team2, color: "rose" },
-                  ].map(({ team, color }, idx) => (
-                    <Card
-                      key={idx}
-                      className="border-0 shadow-xl hover:shadow-2xl transition-all group overflow-hidden bg-white rounded-[32px] ring-1 ring-gray-100"
+                    <div
+                      className={`mt-3 md:mt-4 text-xs md:text-sm p-2 md:p-3 rounded-lg border ${predictionData.team1?.winnerPrediction?.hint?.color || "border-gray-200"}`}
                     >
-                      <CardContent className="p-0">
-                        <div
-                          className={`h-2 bg-gradient-to-r from-${color}-500 to-transparent w-full`}
-                        ></div>
-                        <div className="p-6">
-                          <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-4">
-                              <div className="relative">
-                                <img
-                                  src={team?.flag}
-                                  alt={team?.shortName}
-                                  className="w-12 h-12 rounded-full object-cover border-4 border-gray-50 shadow-md group-hover:scale-110 transition-transform"
-                                />
-                                <div
-                                  className={`absolute -bottom-1 -right-1 w-5 h-5 bg-${color}-600 rounded-full border-2 border-white flex items-center justify-center shadow-lg`}
-                                >
-                                  <TrendingUp className="w-2.5 h-2.5 text-white" />
-                                </div>
-                              </div>
-                              <div>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">
-                                  Projected Target
-                                </p>
-                                <h4 className="font-black text-gray-900 uppercase text-lg tracking-tight">
-                                  {team?.shortName}
-                                </h4>
-                              </div>
-                            </div>
-                            <div
-                              className={`text-3xl font-black  tracking-tighter text-${color}-700 bg-${color}-50/50 px-6 py-3 rounded-[24px] border border-${color}-100 group-hover:scale-105 transition-transform shadow-inner`}
-                            >
-                              {team?.firstInnings?.predicted}
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-gray-50/80 rounded-2xl p-3 border border-gray-100 shadow-sm">
-                              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                                Expected Range
-                              </p>
-                              <p className="text-sm font-black text-gray-800 ">
-                                {team?.firstInnings?.min} —{" "}
-                                {team?.firstInnings?.max}
-                              </p>
-                            </div>
-                            <div className="bg-red-50/50 rounded-2xl p-3 border border-red-100 shadow-sm">
-                              <p className="text-[9px] font-black text-red-400 uppercase tracking-widest mb-1">
-                                Risk Factor
-                              </p>
-                              <p className="text-sm font-black text-red-600 ">
-                                ~{team?.firstInnings?.wickets} Wkts
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </section>
-
-              {/* Top Performers - Both Teams */}
-              <section>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-purple-50 rounded-xl border border-purple-100">
-                    <Star className="h-5 w-5 text-purple-600" />
+                      {predictionData.team1?.winnerPrediction?.hint
+                        ?.hintMessage || "No prediction hint available"}
+                    </div>
                   </div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
-                    Impact Players
-                  </h3>
-                </div>
 
-                {/* Top Batsmen */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                  <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-[34px] blur opacity-10 group-hover:opacity-25 transition-opacity duration-500"></div>
-                    <Card className="relative bg-white border-0 rounded-[32px] overflow-hidden shadow-xl hover:shadow-2xl transition-all">
-                      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-5 py-3 flex justify-between items-center">
-                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1  rounded-full">
-                          Primary Striker
-                        </Badge>
-                        <Target className="w-5 h-5 text-blue-100 opacity-80" />
+                  {/* Team 2 */}
+                  <div
+                    className={`p-4 md:p-6 rounded-xl border ${getTeamBorderColor(2)} bg-gradient-to-br ${getTeamBgColor(2)} text-center`}
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-start md:space-x-4">
+                      <img
+                        src={predictionData.team2?.flag}
+                        alt={predictionData.team2?.shortName}
+                        className="w-9 h-9 md:w-12 md:h-12 rounded-lg shadow-sm mx-auto md:mx-0 object-cover"
+                      />
+                      <div className="mt-2 md:mt-0">
+                        <h3 className="text-lg md:text-xl font-bold text-gray-900 truncate">
+                          {predictionData.team2?.shortName}
+                        </h3>
+                        <p className="text-xs md:text-sm text-gray-600 truncate max-w-[180px]">
+                          {predictionData.team2?.name}
+                        </p>
                       </div>
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-6">
-                          <div className="relative shrink-0">
-                            <div className="w-24 h-24 rounded-[28px] overflow-hidden shadow-2xl ring-4 ring-blue-50 bg-gray-100 transform group-hover:rotate-3 transition-transform duration-500">
-                              <img
-                                src={
-                                  predictionData.team1?.topBatsman?.image ||
-                                  "/placeholder-player.png"
-                                }
-                                alt={predictionData.team1?.topBatsman?.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-black text-gray-900 text-xl uppercase tracking-tighter leading-tight truncate group-hover:text-blue-600 transition-colors">
-                              {predictionData.team1?.topBatsman?.name}
-                            </h4>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1.5 flex items-center gap-2">
-                              <span className="flex items-center gap-1">
-                                {getRoleIcon(
-                                  predictionData.team1?.topBatsman?.role || "",
-                                )}
-                                {predictionData.team1?.topBatsman?.role}
-                              </span>
-                              <span className="w-1 h-1 bg-gray-200 rounded-full"></span>
-                              <span className="text-blue-500">
-                                {predictionData.team1?.shortName}
-                              </span>
-                            </p>
-                            <div className="mt-5 grid grid-cols-2 gap-6 pt-5 border-t border-gray-50">
-                              <div>
-                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">
-                                  Exp. Damage
-                                </p>
-                                <p className="text-lg font-black text-blue-600 ">
-                                  +{predictionData.team1?.topBatsman?.impactRun}{" "}
-                                  Runs
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                    </div>
 
-                  <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-[34px] blur opacity-10 group-hover:opacity-25 transition-opacity duration-500"></div>
-                    <Card className="relative bg-white border-0 rounded-[32px] overflow-hidden shadow-xl hover:shadow-2xl transition-all">
-                      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-5 py-3 flex justify-between items-center">
-                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1  rounded-full">
-                          Primary Striker
-                        </Badge>
-                        <Target className="w-5 h-5 text-blue-100 opacity-80" />
-                      </div>
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-6">
-                          <div className="relative shrink-0">
-                            <div className="w-24 h-24 rounded-[28px] overflow-hidden shadow-2xl ring-4 ring-blue-50 bg-gray-100 transform group-hover:rotate-3 transition-transform duration-500">
-                              <img
-                                src={
-                                  predictionData.team2?.topBatsman?.image ||
-                                  "/placeholder-player.png"
-                                }
-                                alt={predictionData.team2?.topBatsman?.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-black text-gray-900 text-xl uppercase tracking-tighter leading-tight truncate group-hover:text-blue-600 transition-colors">
-                              {predictionData.team2?.topBatsman?.name}
-                            </h4>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1.5 flex items-center gap-2">
-                              <span className="flex items-center gap-1">
-                                {getRoleIcon(
-                                  predictionData.team2?.topBatsman?.role || "",
-                                )}
-                                {predictionData.team2?.topBatsman?.role}
-                              </span>
-                              <span className="w-1 h-1 bg-gray-200 rounded-full"></span>
-                              <span className="text-rose-500">
-                                {predictionData.team2?.shortName}
-                              </span>
-                            </p>
-                            <div className="mt-5 grid grid-cols-2 gap-6 pt-5 border-t border-gray-50">
-                              <div>
-                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">
-                                  Exp. Damage
-                                </p>
-                                <p className="text-lg font-black text-blue-600 ">
-                                  +{predictionData.team2?.topBatsman?.impactRun}{" "}
-                                  Runs
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div
+                      className={`mt-4 text-2xl md:text-3xl font-extrabold ${getTeamTextColor(2)}`}
+                    >
+                      {predictionData.team2?.winnerPrediction?.probability?.toFixed(
+                        2,
+                      )}
+                      %
+                    </div>
+
+                    <div className="w-full bg-gray-200 rounded-full h-2 md:h-3 mt-3">
+                      <div
+                        className={`h-2 md:h-3 rounded-full bg-gradient-to-r ${getTeamColor(2)} transition-all duration-500`}
+                        style={{
+                          width: `${predictionData.team2?.winnerPrediction?.probability || 0}%`,
+                        }}
+                      />
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-center">
+                      <Badge
+                        variant="outline"
+                        className={`${getConfidenceClass(predictionData.team2?.winnerPrediction?.confidence || "")} text-xs md:text-sm px-2 py-0.5 md:px-3 md:py-1 flex items-center space-x-2`}
+                      >
+                        {getConfidenceIcon(
+                          predictionData.team2?.winnerPrediction?.confidence ||
+                            "",
+                        )}
+                        <span>
+                          {predictionData.team2?.winnerPrediction?.confidence ||
+                            "Unknown"}
+                        </span>
+                      </Badge>
+                    </div>
+
+                    <div
+                      className={`mt-3 md:mt-4 text-xs md:text-sm p-2 md:p-3 rounded-lg border ${predictionData.team2?.winnerPrediction?.hint?.color || "border-gray-200"}`}
+                    >
+                      {predictionData.team2?.winnerPrediction?.hint
+                        ?.hintMessage || "No prediction hint available"}
+                    </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Top Bowlers */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-[34px] blur opacity-10 group-hover:opacity-25 transition-opacity duration-500"></div>
-                    <Card className="relative bg-white border-0 rounded-[32px] overflow-hidden shadow-xl hover:shadow-2xl transition-all">
-                      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-5 py-3 flex justify-between items-center">
-                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1  rounded-full">
-                          Death Specialist
-                        </Badge>
-                        <Zap className="w-5 h-5 text-emerald-100 opacity-80" />
-                      </div>
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-6">
-                          <div className="relative shrink-0">
-                            <div className="w-24 h-24 rounded-[28px] overflow-hidden shadow-2xl ring-4 ring-emerald-50 bg-gray-100 transform group-hover:-rotate-3 transition-transform duration-500">
-                              <img
-                                src={
-                                  predictionData.team1?.topBowler?.image ||
-                                  "/placeholder-player.png"
-                                }
-                                alt={predictionData.team1?.topBowler?.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-black text-gray-900 text-xl uppercase tracking-tighter leading-tight truncate group-hover:text-emerald-600 transition-colors">
-                              {predictionData.team1?.topBowler?.name}
-                            </h4>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1.5 flex items-center gap-2">
-                              <span className="flex items-center gap-1">
-                                {getRoleIcon(
-                                  predictionData.team1?.topBowler?.role || "",
-                                )}
-                                {predictionData.team1?.topBowler?.role}
-                              </span>
-                              <span className="w-1 h-1 bg-gray-200 rounded-full"></span>
-                              <span className="text-emerald-500">
-                                {predictionData.team1?.shortName}
-                              </span>
-                            </p>
-                            <div className="mt-5 grid grid-cols-2 gap-6 pt-5 border-t border-gray-50">
-                              <div>
-                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">
-                                  Wicket Prob.
-                                </p>
-                                <p className="text-lg font-black text-emerald-600 ">
-                                  {
-                                    predictionData.team1?.topBowler
-                                      ?.impactWicket
-                                  }{" "}
-                                  Wkt
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-[34px] blur opacity-10 group-hover:opacity-25 transition-opacity duration-500"></div>
-                    <Card className="relative bg-white border-0 rounded-[32px] overflow-hidden shadow-xl hover:shadow-2xl transition-all">
-                      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-5 py-3 flex justify-between items-center">
-                        <Badge className="bg-white/20 text-white border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1  rounded-full">
-                          Death Specialist
-                        </Badge>
-                        <Zap className="w-5 h-5 text-emerald-100 opacity-80" />
-                      </div>
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-6">
-                          <div className="relative shrink-0">
-                            <div className="w-24 h-24 rounded-[28px] overflow-hidden shadow-2xl ring-4 ring-emerald-50 bg-gray-100 transform group-hover:-rotate-3 transition-transform duration-500">
-                              <img
-                                src={
-                                  predictionData.team2?.topBowler?.image ||
-                                  "/placeholder-player.png"
-                                }
-                                alt={predictionData.team2?.topBowler?.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-black text-gray-900 text-xl uppercase tracking-tighter leading-tight truncate group-hover:text-emerald-600 transition-colors">
-                              {predictionData.team2?.topBowler?.name}
-                            </h4>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1.5 flex items-center gap-2">
-                              <span className="flex items-center gap-1">
-                                {getRoleIcon(
-                                  predictionData.team2?.topBowler?.role || "",
-                                )}
-                                {predictionData.team2?.topBowler?.role}
-                              </span>
-                              <span className="w-1 h-1 bg-gray-200 rounded-full"></span>
-                              <span className="text-rose-500">
-                                {predictionData.team2?.shortName}
-                              </span>
-                            </p>
-                            <div className="mt-5 grid grid-cols-2 gap-6 pt-5 border-t border-gray-50">
-                              <div>
-                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">
-                                  Wicket Prob.
-                                </p>
-                                <p className="text-lg font-black text-emerald-600 ">
-                                  {
-                                    predictionData.team2?.topBowler
-                                      ?.impactWicket
-                                  }{" "}
-                                  Wkt
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              </section>
-
-              {/* Key Players Section */}
-              <section>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-yellow-50 rounded-xl border border-yellow-100">
-                    <Users className="h-5 w-5 text-yellow-600" />
-                  </div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
-                    Key Players Analysis
-                  </h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Team 1 Key Players */}
-                  <Card className="border-0 shadow-xl bg-white rounded-[32px] overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4">
-                      <div className="flex items-center gap-3">
+            {/* First Innings Score Prediction */}
+            <Card className="border-0 shadow-sm md:shadow-md">
+              <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                  <BarChart3 className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                  <span>First Innings Score Prediction</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                  {/* Team 1 */}
+                  <div
+                    className={`p-4 md:p-6 rounded-xl border ${getTeamBorderColor(1)} bg-gradient-to-br ${getTeamBgColor(1)} text-center`}
+                  >
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center space-x-2 mb-2">
                         <img
                           src={predictionData.team1?.flag}
-                          alt=""
-                          className="w-8 h-8 rounded-full border-2 border-white shadow-lg"
+                          alt={predictionData.team1?.shortName}
+                          className="w-8 h-8 md:w-10 md:h-10 rounded object-cover"
                         />
-                        <h4 className="font-black text-white text-lg uppercase tracking-tighter">
-                          {predictionData.team1?.shortName} - Core Assets
-                        </h4>
+                        <h3 className="text-base md:text-lg font-semibold text-gray-900">
+                          {predictionData.team1?.shortName}
+                        </h3>
+                      </div>
+
+                      <div
+                        className={`text-2xl md:text-3xl font-bold ${getTeamTextColor(1)} mb-3`}
+                      >
+                        {predictionData.team1?.firstInnings?.predicted || 0}
+                      </div>
+
+                      <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border mb-2 w-full">
+                        Range:{" "}
+                        <span className="font-semibold">
+                          {predictionData.team1?.firstInnings?.min || 0} -{" "}
+                          {predictionData.team1?.firstInnings?.max || 0}
+                        </span>
+                      </div>
+
+                      <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border w-full">
+                        Predicted Wickets:{" "}
+                        <span className="font-semibold text-red-600">
+                          {predictionData.team1?.firstInnings?.wickets || 0}
+                        </span>
                       </div>
                     </div>
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        {predictionData.team1?.keyPlayers?.map(
-                          (player, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50/50 to-white rounded-2xl border border-blue-100 hover:shadow-md transition-all group"
-                            >
-                              <div className="relative shrink-0">
-                                <img
-                                  src={
-                                    player.image || "/placeholder-player.png"
-                                  }
-                                  alt={player.name}
-                                  className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md group-hover:scale-105 transition-transform"
-                                />
-                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white">
-                                  <Star className="w-2.5 h-2.5 text-white" />
-                                </div>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-2 mb-1">
-                                  <h5 className="font-black text-gray-900 text-sm uppercase tracking-tighter truncate">
-                                    {player.shortName}
-                                  </h5>
-                                  <Badge
-                                    className={`${getRoleColor(player.role)} text-[9px] px-2 py-0.5`}
-                                  >
-                                    {player.role}
-                                  </Badge>
-                                </div>
-                                <p className="text-[9px] text-gray-500 font-mono mb-3">
-                                  {player.style}
-                                </p>
-                                <div className="grid grid-cols-3 gap-2">
-                                  <div className="text-center p-1.5 bg-white rounded-xl border border-gray-100">
-                                    <p className="text-[7px] font-black text-gray-400 uppercase">
-                                      Runs
-                                    </p>
-                                    <p className="text-xs font-black text-blue-600">
-                                      {formatNumber(player.impactRun)}
-                                    </p>
-                                  </div>
-                                  <div className="text-center p-1.5 bg-white rounded-xl border border-gray-100">
-                                    <p className="text-[7px] font-black text-gray-400 uppercase">
-                                      Wkts
-                                    </p>
-                                    <p className="text-xs font-black text-emerald-600">
-                                      {formatNumber(player.impactWicket)}
-                                    </p>
-                                  </div>
-                                  <div className="text-center p-1.5 bg-white rounded-xl border border-gray-100">
-                                    <p className="text-[7px] font-black text-gray-400 uppercase">
-                                      Pts
-                                    </p>
-                                    <p className="text-xs font-black text-purple-600">
-                                      {formatNumber(player.impactScore)}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  </div>
 
-                  {/* Team 2 Key Players */}
-                  <Card className="border-0 shadow-xl bg-white rounded-[32px] overflow-hidden">
-                    <div className="bg-gradient-to-r from-rose-600 to-red-700 px-6 py-4">
-                      <div className="flex items-center gap-3">
+                  {/* Team 2 */}
+                  <div
+                    className={`p-4 md:p-6 rounded-xl border ${getTeamBorderColor(2)} bg-gradient-to-br ${getTeamBgColor(2)} text-center`}
+                  >
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center space-x-2 mb-2">
                         <img
                           src={predictionData.team2?.flag}
-                          alt=""
-                          className="w-8 h-8 rounded-full border-2 border-white shadow-lg"
+                          alt={predictionData.team2?.shortName}
+                          className="w-8 h-8 md:w-10 md:h-10 rounded object-cover"
                         />
-                        <h4 className="font-black text-white text-lg uppercase tracking-tighter">
-                          {predictionData.team2?.shortName} - Core Assets
-                        </h4>
+                        <h3 className="text-base md:text-lg font-semibold text-gray-900">
+                          {predictionData.team2?.shortName}
+                        </h3>
+                      </div>
+
+                      <div
+                        className={`text-2xl md:text-3xl font-bold ${getTeamTextColor(2)} mb-3`}
+                      >
+                        {predictionData.team2?.firstInnings?.predicted || 0}
+                      </div>
+
+                      <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border mb-2 w-full">
+                        Range:{" "}
+                        <span className="font-semibold">
+                          {predictionData.team2?.firstInnings?.min || 0} -{" "}
+                          {predictionData.team2?.firstInnings?.max || 0}
+                        </span>
+                      </div>
+
+                      <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border w-full">
+                        Predicted Wickets:{" "}
+                        <span className="font-semibold text-red-600">
+                          {predictionData.team2?.firstInnings?.wickets || 0}
+                        </span>
                       </div>
                     </div>
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        {predictionData.team2?.keyPlayers?.map(
-                          (player, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center gap-4 p-4 bg-gradient-to-r from-rose-50/50 to-white rounded-2xl border border-rose-100 hover:shadow-md transition-all group"
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Top Performers Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+              {/* Top Batsmen */}
+              <Card className="border-0 shadow-sm md:shadow-md">
+                <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                  <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                    <Target className="h-4 w-4 md:h-5 md:w-5 text-red-600" />
+                    <span>Top Batsmen Prediction</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                  <div className="space-y-4 md:space-y-6">
+                    {/* Team 1 Batsman */}
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg border ${getTeamBorderColor(1)} bg-gradient-to-r ${getTeamBgColor(1)}`}
+                    >
+                      <img
+                        src={
+                          predictionData.team1?.topBatsman?.image ||
+                          "/placeholder-player.png"
+                        }
+                        alt={predictionData.team1?.topBatsman?.name}
+                        className="w-14 h-14 md:w-16 md:h-16 rounded-lg shadow-sm object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                          <div>
+                            <h3 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                              {predictionData.team1?.topBatsman?.name ||
+                                "Unknown"}
+                            </h3>
+                          </div>
+                          <Badge
+                            className={`${getRoleColor(predictionData.team1?.topBatsman?.role || "")} text-xs md:text-sm whitespace-nowrap`}
+                          >
+                            {getRoleIcon(
+                              predictionData.team1?.topBatsman?.role || "",
+                            )}
+                            <span className="ml-1 truncate">
+                              {predictionData.team1?.topBatsman?.role ||
+                                "Player"}
+                            </span>
+                          </Badge>
+                        </div>
+
+                        <div className="text-xs md:text-sm text-gray-600 mb-3">
+                          {predictionData.team1?.name}
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-white rounded-lg border">
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Impact Runs
+                            </div>
+                            <div className="text-sm font-bold text-green-600">
+                              {formatNumber(
+                                predictionData.team1?.topBatsman?.impactRun,
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Impact Score
+                            </div>
+                            <div className="text-sm font-bold text-blue-600">
+                              {formatNumber(
+                                predictionData.team1?.topBatsman?.impactScore,
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">Style</div>
+                            <div className="text-xs font-bold text-purple-600 truncate">
+                              {predictionData.team1?.topBatsman?.style?.split(
+                                " ",
+                              )[0] || "RHB"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Team 2 Batsman */}
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg border ${getTeamBorderColor(2)} bg-gradient-to-r ${getTeamBgColor(2)}`}
+                    >
+                      <img
+                        src={
+                          predictionData.team2?.topBatsman?.image ||
+                          "/placeholder-player.png"
+                        }
+                        alt={predictionData.team2?.topBatsman?.name}
+                        className="w-14 h-14 md:w-16 md:h-16 rounded-lg shadow-sm object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                          <div>
+                            <h3 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                              {predictionData.team2?.topBatsman?.name ||
+                                "Unknown"}
+                            </h3>
+                          </div>
+                          <Badge
+                            className={`${getRoleColor(predictionData.team2?.topBatsman?.role || "")} text-xs md:text-sm whitespace-nowrap`}
+                          >
+                            {getRoleIcon(
+                              predictionData.team2?.topBatsman?.role || "",
+                            )}
+                            <span className="ml-1 truncate">
+                              {predictionData.team2?.topBatsman?.role ||
+                                "Player"}
+                            </span>
+                          </Badge>
+                        </div>
+
+                        <div className="text-xs md:text-sm text-gray-600 mb-3">
+                          {predictionData.team2?.name}
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-white rounded-lg border">
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Impact Runs
+                            </div>
+                            <div className="text-sm font-bold text-green-600">
+                              {formatNumber(
+                                predictionData.team2?.topBatsman?.impactRun,
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Impact Score
+                            </div>
+                            <div className="text-sm font-bold text-blue-600">
+                              {formatNumber(
+                                predictionData.team2?.topBatsman?.impactScore,
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">Style</div>
+                            <div className="text-xs font-bold text-purple-600 truncate">
+                              {predictionData.team2?.topBatsman?.style?.split(
+                                " ",
+                              )[0] || "RHB"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Top Bowlers */}
+              <Card className="border-0 shadow-sm md:shadow-md">
+                <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                  <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                    <Zap className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                    <span>Top Bowlers Prediction</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                  <div className="space-y-4 md:space-y-6">
+                    {/* Team 1 Bowler */}
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg border ${getTeamBorderColor(1)} bg-gradient-to-r ${getTeamBgColor(1)}`}
+                    >
+                      <img
+                        src={
+                          predictionData.team1?.topBowler?.image ||
+                          "/placeholder-player.png"
+                        }
+                        alt={predictionData.team1?.topBowler?.name}
+                        className="w-14 h-14 md:w-16 md:h-16 rounded-lg shadow-sm object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                          <div>
+                            <h3 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                              {predictionData.team1?.topBowler?.name ||
+                                "Unknown"}
+                            </h3>
+                          </div>
+                          <Badge
+                            className={`${getRoleColor(predictionData.team1?.topBowler?.role || "")} text-xs md:text-sm whitespace-nowrap`}
+                          >
+                            {getRoleIcon(
+                              predictionData.team1?.topBowler?.role || "",
+                            )}
+                            <span className="ml-1 truncate">
+                              {predictionData.team1?.topBowler?.role ||
+                                "Player"}
+                            </span>
+                          </Badge>
+                        </div>
+
+                        <div className="text-xs md:text-sm text-gray-600 mb-3">
+                          {predictionData.team1?.name}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 mb-3 p-2 bg-white rounded-lg border">
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Impact Wickets
+                            </div>
+                            <div className="text-sm font-bold text-purple-600">
+                              {formatNumber(
+                                predictionData.team1?.topBowler?.impactWicket,
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Impact Score
+                            </div>
+                            <div className="text-sm font-bold text-blue-600">
+                              {formatNumber(
+                                predictionData.team1?.topBowler?.impactScore,
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Team 2 Bowler */}
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg border ${getTeamBorderColor(2)} bg-gradient-to-r ${getTeamBgColor(2)}`}
+                    >
+                      <img
+                        src={
+                          predictionData.team2?.topBowler?.image ||
+                          "/placeholder-player.png"
+                        }
+                        alt={predictionData.team2?.topBowler?.name}
+                        className="w-14 h-14 md:w-16 md:h-16 rounded-lg shadow-sm object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                          <div>
+                            <h3 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                              {predictionData.team2?.topBowler?.name ||
+                                "Unknown"}
+                            </h3>
+                          </div>
+                          <Badge
+                            className={`${getRoleColor(predictionData.team2?.topBowler?.role || "")} text-xs md:text-sm whitespace-nowrap`}
+                          >
+                            {getRoleIcon(
+                              predictionData.team2?.topBowler?.role || "",
+                            )}
+                            <span className="ml-1 truncate">
+                              {predictionData.team2?.topBowler?.role ||
+                                "Player"}
+                            </span>
+                          </Badge>
+                        </div>
+
+                        <div className="text-xs md:text-sm text-gray-600 mb-3">
+                          {predictionData.team2?.name}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 mb-3 p-2 bg-white rounded-lg border">
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Impact Wickets
+                            </div>
+                            <div className="text-sm font-bold text-purple-600">
+                              {formatNumber(
+                                predictionData.team2?.topBowler?.impactWicket,
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xs text-gray-500">
+                              Impact Score
+                            </div>
+                            <div className="text-sm font-bold text-blue-600">
+                              {formatNumber(
+                                predictionData.team2?.topBowler?.impactScore,
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Dream11 Team Section */}
+            {predictionData.dream11Team &&
+              predictionData.dream11Team.length > 0 && (
+                <Card className="border-0 shadow-sm md:shadow-md">
+                  <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                    <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                      <Users2 className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
+                      <span>Dream11 Team Prediction</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                      {predictionData.dream11Team.map((player, index) => (
+                        <div
+                          key={index}
+                          className={`relative p-3 rounded-lg border ${
+                            player.team === "SL"
+                              ? "border-blue-200 bg-blue-50/50"
+                              : "border-purple-200 bg-purple-50/50"
+                          } hover:shadow-md transition-shadow`}
+                        >
+                          {player.isCaptain && (
+                            <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">
+                              C
+                            </div>
+                          )}
+                          {player.isViceCaptain && !player.isCaptain && (
+                            <div className="absolute -top-2 -right-2 w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">
+                              VC
+                            </div>
+                          )}
+
+                          <div className="flex flex-col items-center">
+                            <img
+                              src={player.image || "/placeholder-player.png"}
+                              alt={player.name}
+                              className="w-16 h-16 rounded-full object-cover mb-2 border-2 border-white shadow-sm"
+                            />
+
+                            <h4 className="text-sm font-semibold text-center truncate w-full">
+                              {player.shortName}
+                            </h4>
+
+                            <Badge
+                              className={`${getRoleColor(player.role)} text-[10px] px-2 py-0.5 mt-1`}
                             >
-                              <div className="relative shrink-0">
-                                <img
-                                  src={
-                                    player.image || "/placeholder-player.png"
-                                  }
-                                  alt={player.name}
-                                  className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md group-hover:scale-105 transition-transform"
-                                />
-                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-rose-500 rounded-full flex items-center justify-center border-2 border-white">
-                                  <Star className="w-2.5 h-2.5 text-white" />
+                              {player.role}
+                            </Badge>
+
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] mt-1 bg-white"
+                            >
+                              {player.team}
+                            </Badge>
+                          </div>
+
+                          {/* Impact Stats */}
+                          <div className="mt-3 pt-2 border-t border-gray-200">
+                            <div className="grid grid-cols-3 gap-1 text-center">
+                              <div>
+                                <div className="text-[8px] text-gray-500">
+                                  Runs
+                                </div>
+                                <div className="text-xs font-semibold text-green-600">
+                                  {formatNumber(player.impactRun)}
                                 </div>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-2 mb-1">
-                                  <h5 className="font-black text-gray-900 text-sm uppercase tracking-tighter truncate">
-                                    {player.shortName}
-                                  </h5>
-                                  <Badge
-                                    className={`${getRoleColor(player.role)} text-[9px] px-2 py-0.5`}
-                                  >
-                                    {player.role}
-                                  </Badge>
+                              <div>
+                                <div className="text-[8px] text-gray-500">
+                                  Wkts
                                 </div>
-                                <p className="text-[9px] text-gray-500 font-mono mb-3">
+                                <div className="text-xs font-semibold text-blue-600">
+                                  {formatNumber(player.impactWicket)}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-[8px] text-gray-500">
+                                  Pts
+                                </div>
+                                <div className="text-xs font-semibold text-purple-600">
+                                  {formatNumber(player.impactScore)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+            {/* Key Players Section */}
+            <Card className="border-0 shadow-sm md:shadow-md">
+              <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                  <Star className="h-4 w-4 md:h-5 md:w-5 text-yellow-600" />
+                  <span>Key Players</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Team 1 Key Players */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-blue-600 mb-3 flex items-center gap-2 pb-2 border-b border-blue-200">
+                      <img
+                        src={predictionData.team1?.flag}
+                        alt=""
+                        className="w-5 h-5 rounded"
+                      />
+                      {predictionData.team1?.name} - Key Players
+                    </h3>
+                    <div className="space-y-2">
+                      {predictionData.team1?.keyPlayers?.map((player, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-3 p-2 bg-gradient-to-r from-blue-50 to-white rounded-lg border border-blue-100 hover:shadow-sm transition-shadow"
+                        >
+                          <img
+                            src={player.image || "/placeholder-player.png"}
+                            alt={player.name}
+                            className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="truncate">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {player.shortName}
+                                </span>
+                                <p className="text-xs text-gray-500 truncate">
                                   {player.style}
                                 </p>
-                                <div className="grid grid-cols-3 gap-2">
-                                  <div className="text-center p-1.5 bg-white rounded-xl border border-gray-100">
-                                    <p className="text-[7px] font-black text-gray-400 uppercase">
-                                      Runs
-                                    </p>
-                                    <p className="text-xs font-black text-blue-600">
-                                      {formatNumber(player.impactRun)}
-                                    </p>
-                                  </div>
-                                  <div className="text-center p-1.5 bg-white rounded-xl border border-gray-100">
-                                    <p className="text-[7px] font-black text-gray-400 uppercase">
-                                      Wkts
-                                    </p>
-                                    <p className="text-xs font-black text-emerald-600">
-                                      {formatNumber(player.impactWicket)}
-                                    </p>
-                                  </div>
-                                  <div className="text-center p-1.5 bg-white rounded-xl border border-gray-100">
-                                    <p className="text-[7px] font-black text-gray-400 uppercase">
-                                      Pts
-                                    </p>
-                                    <p className="text-xs font-black text-purple-600">
-                                      {formatNumber(player.impactScore)}
-                                    </p>
-                                  </div>
-                                </div>
                               </div>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </section>
-
-              {/* Elite XI Selection */}
-              {/* Elite XI Selection with Detailed Impact Metrics */}
-              {predictionData.dream11Team &&
-                predictionData.dream11Team.length > 0 && (
-                  <section>
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-emerald-50 rounded-xl border border-emerald-100">
-                        <Users2 className="h-5 w-5 text-emerald-600" />
-                      </div>
-                      <div className="flex items-center justify-between w-full">
-                        <div>
-                          <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
-                            AI Elite Selection
-                          </h3>
-                          <p className="text-[10px] text-gray-500 font-medium mt-1">
-                            Algorithm-based optimal XI based on impact metrics
-                          </p>
-                        </div>
-                        <Badge className="bg-emerald-600 text-white border-0 font-black  tracking-tighter text-[10px] px-3 py-1.5">
-                          Recommended XI
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <Card className="border-0 shadow-2xl overflow-hidden bg-white rounded-[40px] ring-1 ring-gray-100">
-                      <CardContent className="p-6 md:p-8">
-                        {/* Stats Legend */}
-                        <div className="mb-6 pb-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex items-center gap-4 text-[9px] font-black text-gray-500 uppercase tracking-wider">
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
-                              <span>Impact Runs</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-                              <span>Impact Wickets</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
-                              <span>Impact Points</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge
-                              variant="outline"
-                              className="text-[8px] font-black bg-amber-50 border-amber-200 text-amber-700"
-                            >
-                              C = Captain (2x Points)
-                            </Badge>
-                            <Badge
-                              variant="outline"
-                              className="text-[8px] font-black bg-indigo-50 border-indigo-200 text-indigo-700"
-                            >
-                              VC = Vice Captain (1.5x Points)
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                          {predictionData.dream11Team.map((player, index) => {
-                            // Calculate selection reason based on highest impact
-                            const isBatsman =
-                              player.role?.toLowerCase().includes("batsman") ||
-                              player.role?.toLowerCase().includes("batter");
-                            const isBowler = player.role
-                              ?.toLowerCase()
-                              .includes("bowler");
-                            const isAllRounder = player.role
-                              ?.toLowerCase()
-                              .includes("all-rounder");
-
-                            let primaryStrength = "";
-                            let strengthValue = "";
-                            let strengthColor = "";
-
-                            if (
-                              isBatsman ||
-                              (!isBowler &&
-                                player.impactRun > player.impactWicket)
-                            ) {
-                              primaryStrength = "Batting Anchor";
-                              strengthValue = `${formatNumber(player.impactRun)} runs`;
-                              strengthColor = "text-blue-600 bg-blue-50";
-                            } else if (isBowler) {
-                              primaryStrength = "Bowling Attack";
-                              strengthValue = `${formatNumber(player.impactWicket)} wickets`;
-                              strengthColor = "text-emerald-600 bg-emerald-50";
-                            } else if (isAllRounder) {
-                              primaryStrength = "Dual Threat";
-                              strengthValue = `${formatNumber(player.impactRun)} runs & ${formatNumber(player.impactWicket)} wkts`;
-                              strengthColor = "text-purple-600 bg-purple-50";
-                            } else {
-                              primaryStrength = "Impact Player";
-                              strengthValue = `${formatNumber(player.impactScore)} pts`;
-                              strengthColor = "text-amber-600 bg-amber-50";
-                            }
-
-                            return (
-                              <div
-                                key={index}
-                                className={`relative p-5 rounded-2xl transition-all duration-300 group hover:shadow-xl border-2 ${
-                                  player.isCaptain
-                                    ? "border-amber-400 bg-gradient-to-br from-amber-50/30 to-white"
-                                    : player.isViceCaptain
-                                      ? "border-indigo-400 bg-gradient-to-br from-indigo-50/30 to-white"
-                                      : "border-gray-100 bg-white hover:border-gray-200"
-                                }`}
+                              <Badge
+                                className={`${getRoleColor(player.role)} text-[10px] whitespace-nowrap`}
                               >
-                                {/* Captain/VC Badge */}
-                                {(player.isCaptain || player.isViceCaptain) && (
-                                  <div className="absolute -top-3 -right-3 z-10">
-                                    <div
-                                      className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${
-                                        player.isCaptain
-                                          ? "bg-gradient-to-r from-amber-500 to-orange-500"
-                                          : "bg-gradient-to-r from-indigo-500 to-purple-500"
-                                      }`}
-                                    >
-                                      <span className="text-white text-xs font-black">
-                                        {player.isCaptain ? "C" : "VC"}
-                                      </span>
-                                    </div>
-                                  </div>
-                                )}
+                                {player.role}
+                              </Badge>
+                            </div>
 
-                                <div className="flex items-start gap-4">
-                                  {/* Player Image */}
-                                  <div className="relative shrink-0">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full blur opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                                    <img
-                                      src={
-                                        player.image ||
-                                        "/placeholder-player.png"
-                                      }
-                                      alt={player.name}
-                                      className="w-16 h-16 rounded-full object-cover border-3 border-white shadow-lg group-hover:scale-105 transition-transform duration-300"
-                                    />
-                                    {/* Team Indicator */}
-                                    <div
-                                      className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black border-2 border-white shadow-md ${
-                                        player.team ===
-                                        predictionData.team1?.shortName
-                                          ? "bg-blue-500 text-white"
-                                          : "bg-rose-500 text-white"
-                                      }`}
-                                    >
-                                      {player.team ===
-                                      predictionData.team1?.shortName
-                                        ? "A"
-                                        : "B"}
-                                    </div>
-                                  </div>
-
-                                  {/* Player Info */}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                                      <h5 className="font-black text-gray-900 text-base uppercase tracking-tighter truncate group-hover:text-indigo-600 transition-colors">
-                                        {player.shortName}
-                                      </h5>
-                                      <Badge
-                                        className={`${getRoleColor(player.role)} text-[9px] px-2 py-0.5 font-black`}
-                                      >
-                                        {player.role}
-                                      </Badge>
-                                    </div>
-
-                                    <p className="text-[9px] text-gray-500 font-mono mb-2">
-                                      {player.style ||
-                                        (isBatsman
-                                          ? "Right-handed batter"
-                                          : isBowler
-                                            ? "Right-arm fast"
-                                            : "All-rounder")}
-                                    </p>
-
-                                    {/* Selection Reason */}
-                                    <div
-                                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg ${strengthColor} mb-3`}
-                                    >
-                                      <Star className="w-2.5 h-2.5" />
-                                      <span className="text-[8px] font-black uppercase tracking-tighter">
-                                        {primaryStrength}: {strengthValue}
-                                      </span>
-                                    </div>
-
-                                    {/* Impact Stats Grid */}
-                                    <div className="grid grid-cols-3 gap-2 mt-3">
-                                      <div className="text-center p-2 bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-100">
-                                        <p className="text-[7px] font-black text-gray-400 uppercase tracking-wider">
-                                          Runs
-                                        </p>
-                                        <p className="text-sm font-black text-blue-600">
-                                          {formatNumber(player.impactRun)}
-                                        </p>
-                                        <div className="w-full bg-blue-100 rounded-full h-1 mt-1">
-                                          <div
-                                            className="bg-blue-500 h-1 rounded-full transition-all duration-500"
-                                            style={{
-                                              width: `${Math.min((player.impactRun / 100) * 100, 100)}%`,
-                                            }}
-                                          ></div>
-                                        </div>
-                                      </div>
-                                      <div className="text-center p-2 bg-gradient-to-br from-emerald-50 to-white rounded-xl border border-emerald-100">
-                                        <p className="text-[7px] font-black text-gray-400 uppercase tracking-wider">
-                                          Wkts
-                                        </p>
-                                        <p className="text-sm font-black text-emerald-600">
-                                          {formatNumber(player.impactWicket)}
-                                        </p>
-                                        <div className="w-full bg-emerald-100 rounded-full h-1 mt-1">
-                                          <div
-                                            className="bg-emerald-500 h-1 rounded-full transition-all duration-500"
-                                            style={{
-                                              width: `${Math.min((player.impactWicket / 5) * 100, 100)}%`,
-                                            }}
-                                          ></div>
-                                        </div>
-                                      </div>
-                                      <div className="text-center p-2 bg-gradient-to-br from-purple-50 to-white rounded-xl border border-purple-100">
-                                        <p className="text-[7px] font-black text-gray-400 uppercase tracking-wider">
-                                          Points
-                                        </p>
-                                        <p className="text-sm font-black text-purple-600">
-                                          {formatNumber(player.impactScore)}
-                                        </p>
-                                        <div className="w-full bg-purple-100 rounded-full h-1 mt-1">
-                                          <div
-                                            className="bg-purple-500 h-1 rounded-full transition-all duration-500"
-                                            style={{
-                                              width: `${Math.min((player.impactScore / 150) * 100, 100)}%`,
-                                            }}
-                                          ></div>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    {/* Multiplier Info for Captain/VC */}
-                                    {(player.isCaptain ||
-                                      player.isViceCaptain) && (
-                                      <div className="mt-3 pt-2 border-t border-dashed border-gray-200">
-                                        <p className="text-[7px] font-black text-gray-400 uppercase tracking-wider flex items-center justify-between">
-                                          <span>Fantasy Impact</span>
-                                          <span className="text-amber-600">
-                                            {player.isCaptain
-                                              ? "2x Points Multiplier"
-                                              : "1.5x Points Multiplier"}
-                                          </span>
-                                        </p>
-                                        <p className="text-[8px] font-bold text-gray-700 mt-1">
-                                          Projected:{" "}
-                                          {(
-                                            player.impactScore *
-                                            (player.isCaptain
-                                              ? 2
-                                              : player.isViceCaptain
-                                                ? 1.5
-                                                : 1)
-                                          ).toFixed(0)}{" "}
-                                          pts
-                                        </p>
-                                      </div>
-                                    )}
-                                  </div>
+                            {/* Impact Stats Grid */}
+                            <div className="mt-2 grid grid-cols-3 gap-2">
+                              <div className="bg-white/80 rounded px-2 py-1 text-center">
+                                <div className="text-[8px] text-gray-500">
+                                  Impact Runs
                                 </div>
-
-                                {/* Selection Badge */}
-                                <div className="absolute bottom-3 right-3">
-                                  <div className="flex items-center gap-1">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                    <span className="text-[6px] font-black text-gray-400 uppercase tracking-wider">
-                                      AI Selected
-                                    </span>
-                                  </div>
+                                <div className="text-xs font-bold text-green-600">
+                                  {formatNumber(player.impactRun)}
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
-
-                        {/* Team Composition Summary */}
-                        <div className="mt-8 pt-6 border-t border-gray-100">
-                          <div className="flex flex-wrap items-center justify-between gap-4">
-                            <div className="flex items-center gap-6"></div>
-                            <div className="text-right">
-                              <p className="text-[8px] font-black text-gray-400 uppercase tracking-wider">
-                                Total Projected Points
-                              </p>
-                              <p className="text-xl font-black text-indigo-600 ">
-                                {predictionData.dream11Team
-                                  .reduce(
-                                    (sum, p) => sum + (p.impactScore || 0),
-                                    0,
-                                  )
-                                  .toFixed(2)}
-                              </p>
+                              <div className="bg-white/80 rounded px-2 py-1 text-center">
+                                <div className="text-[8px] text-gray-500">
+                                  Impact Wkts
+                                </div>
+                                <div className="text-xs font-bold text-blue-600">
+                                  {formatNumber(player.impactWicket)}
+                                </div>
+                              </div>
+                              <div className="bg-white/80 rounded px-2 py-1 text-center">
+                                <div className="text-[8px] text-gray-500">
+                                  Impact Pts
+                                </div>
+                                <div className="text-xs font-bold text-purple-600">
+                                  {formatNumber(player.impactScore)}
+                                </div>
+                              </div>
                             </div>
+
+                            {/* Bowling Concession (if applicable) */}
+                            {player.impactRunConced > 0 && (
+                              <div className="mt-1 text-[8px] text-gray-400 text-right">
+                                Runs conceded:{" "}
+                                {formatNumber(player.impactRunConced)}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </section>
-                )}
-              {/* Ground & Weather Metrics */}
-              <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Venue Statistics */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-100 rounded-xl border border-slate-200">
-                      <BarChart4 className="h-5 w-5 text-slate-600" />
+                      ))}
                     </div>
-                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
-                      Ground Forensics
+                  </div>
+
+                  {/* Team 2 Key Players */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-purple-600 mb-3 flex items-center gap-2 pb-2 border-b border-purple-200">
+                      <img
+                        src={predictionData.team2?.flag}
+                        alt=""
+                        className="w-5 h-5 rounded"
+                      />
+                      {predictionData.team2?.name} - Key Players
                     </h3>
-                  </div>
-                  <Card className="border-0 shadow-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white overflow-hidden group rounded-[40px]">
-                    <CardContent className="p-0">
-                      <div className="p-8 border-b border-white/5 bg-white/5 backdrop-blur-md">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-ping"></div>
-                          <p className="text-[10px] font-black text-blue-300 uppercase tracking-widest leading-none">
-                            Status: Live Ground Node
-                          </p>
-                        </div>
-                        <h4 className="text-2xl font-black tracking-tighter leading-tight  truncate">
-                          {predictionData.venueStats?.venueName ||
-                            "Tactical Arena"}
-                        </h4>
-                      </div>
-
-                      {/* Venue Stats Grid */}
-                      <div className="grid grid-cols-2 divide-x divide-white/5">
-                        <div className="p-6 hover:bg-white/5 transition-all">
-                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
-                            Total Matches
-                          </p>
-                          <p className="text-2xl font-black  text-blue-400">
-                            {predictionData.venueStats?.matches || "N/A"}
-                          </p>
-                        </div>
-                        <div className="p-6 hover:bg-white/5 transition-all">
-                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
-                            Avg 1st Inns
-                          </p>
-                          <p className="text-2xl font-black  text-emerald-400">
-                            {predictionData.venueStats?.avg1stInns || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="p-6 border-t border-white/5">
-                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">
-                          Toss Impact
-                        </p>
-                        <div className="space-y-3">
-                          <div>
-                            <div className="flex justify-between text-[10px] mb-1">
-                              <span>Bat First Win</span>
-                              <span>
-                                {predictionData.venueStats?.winBatFirst || "0%"}
-                              </span>
+                    <div className="space-y-2">
+                      {predictionData.team2?.keyPlayers?.map((player, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-3 p-2 bg-gradient-to-r from-purple-50 to-white rounded-lg border border-purple-100 hover:shadow-sm transition-shadow"
+                        >
+                          <img
+                            src={player.image || "/placeholder-player.png"}
+                            alt={player.name}
+                            className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="truncate">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {player.shortName}
+                                </span>
+                                <p className="text-xs text-gray-500 truncate">
+                                  {player.style}
+                                </p>
+                              </div>
+                              <Badge
+                                className={`${getRoleColor(player.role)} text-[10px] whitespace-nowrap`}
+                              >
+                                {player.role}
+                              </Badge>
                             </div>
-                            <Progress
-                              value={parseInt(
-                                predictionData.venueStats?.winBatFirst || "0",
-                              )}
-                              className="h-1.5 bg-white/10"
-                            />
-                          </div>
-                          <div>
-                            <div className="flex justify-between text-[10px] mb-1">
-                              <span>Bowl First Win</span>
-                              <span>
-                                {predictionData.venueStats?.winBowlFirst ||
-                                  "0%"}
-                              </span>
+
+                            {/* Impact Stats Grid */}
+                            <div className="mt-2 grid grid-cols-3 gap-2">
+                              <div className="bg-white/80 rounded px-2 py-1 text-center">
+                                <div className="text-[8px] text-gray-500">
+                                  Impact Runs
+                                </div>
+                                <div className="text-xs font-bold text-green-600">
+                                  {formatNumber(player.impactRun)}
+                                </div>
+                              </div>
+                              <div className="bg-white/80 rounded px-2 py-1 text-center">
+                                <div className="text-[8px] text-gray-500">
+                                  Impact Wkts
+                                </div>
+                                <div className="text-xs font-bold text-blue-600">
+                                  {formatNumber(player.impactWicket)}
+                                </div>
+                              </div>
+                              <div className="bg-white/80 rounded px-2 py-1 text-center">
+                                <div className="text-[8px] text-gray-500">
+                                  Impact Pts
+                                </div>
+                                <div className="text-xs font-bold text-purple-600">
+                                  {formatNumber(player.impactScore)}
+                                </div>
+                              </div>
                             </div>
-                            <Progress
-                              value={parseInt(
-                                predictionData.venueStats?.winBowlFirst || "0",
-                              )}
-                              className="h-1.5 bg-white/10"
-                            />
+
+                            {/* Bowling Concession (if applicable) */}
+                            {player.impactRunConced > 0 && (
+                              <div className="mt-1 text-[8px] text-gray-400 text-right">
+                                Runs conceded:{" "}
+                                {formatNumber(player.impactRunConced)}
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div className="mt-4 pt-4 border-t border-white/10">
-                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">
-                            Avg 2nd Innings
-                          </p>
-                          <p className="text-xl font-black  text-amber-400">
-                            {predictionData.venueStats?.avg2ndInns || "N/A"}{" "}
-                            runs
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Pace vs Spin if available */}
-                      {predictionData.venueStats?.paceVsSpin && (
-                        <div className="grid grid-cols-2 divide-x divide-white/5 border-t border-white/5">
-                          <div className="p-6 hover:bg-white/5 transition-all group/item">
-                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                              <Zap className="w-3 h-3 text-emerald-400" />
-                              Pace Propensity
-                            </p>
-                            <div className="flex items-end gap-3 mb-4">
-                              <span className="text-3xl font-black  tracking-tighter group-hover/item:text-emerald-400 transition-colors">
-                                {predictionData.venueStats.paceVsSpin
-                                  .paceWickets || "—"}
-                              </span>
-                              <span className="text-[8px] font-bold text-gray-500 pb-1 uppercase">
-                                Wickets
-                              </span>
-                            </div>
-                            <Progress
-                              value={65}
-                              className="h-1.5 bg-white/10"
-                            />
-                          </div>
-                          <div className="p-6 hover:bg-white/5 transition-all group/item">
-                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                              <Star className="w-3 h-3 text-amber-400" />
-                              Spin Efficiency
-                            </p>
-                            <div className="flex items-end gap-3 mb-4">
-                              <span className="text-3xl font-black  tracking-tighter group-hover/item:text-amber-400 transition-colors">
-                                {predictionData.venueStats.paceVsSpin
-                                  .spinWickets || "—"}
-                              </span>
-                              <span className="text-[8px] font-bold text-gray-500 pb-1 uppercase">
-                                Wickets
-                              </span>
-                            </div>
-                            <Progress
-                              value={35}
-                              className="h-1.5 bg-white/10"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Weather Conditions */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-orange-50 rounded-xl border border-orange-100">
-                      <Sun className="h-5 w-5 text-orange-600" />
+                      ))}
                     </div>
-                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter ">
-                      Atmospheric Matrix
-                    </h3>
                   </div>
-                  <Card className="border-0 shadow-2xl bg-gradient-to-br from-orange-500 to-rose-600 text-white overflow-hidden rounded-[40px] group">
-                    <CardContent className="p-8 relative">
-                      <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -translate-y-12 translate-x-12 blur-3xl group-hover:scale-125 transition-transform duration-1000"></div>
-                      <div className="flex items-center justify-between mb-10 relative z-10">
-                        <div className="flex flex-col gap-2">
-                          <div className="flex items-center gap-2 bg-white/20 backdrop-blur-xl px-4 py-1.5 rounded-full w-fit ring-1 ring-white/30 shadow-lg">
-                            <Cloud className="w-4 h-4 text-white" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">
-                              {predictionData.venueWeather?.condition ||
-                                "Clear"}
-                            </span>
-                          </div>
-                          <div className="text-6xl font-black  tracking-tighter mt-4 drop-shadow-2xl">
-                            {predictionData.venueWeather?.temperature || "28°C"}
-                          </div>
-                        </div>
-                        <Sun className="w-24 h-24 text-white/50 animate-[spin_10s_linear_infinite] drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 relative z-10">
-                        <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-5 border border-white/20 shadow-xl group-hover:bg-white/15 transition-all">
-                          <p className="text-[10px] font-black text-white/70 uppercase tracking-widest mb-2 flex items-center gap-2">
-                            <CloudRain className="w-3.5 h-3.5" />
-                            Precipitation
-                          </p>
-                          <div className="text-2xl font-black  tracking-tighter">
-                            {predictionData.venueWeather?.rainChance || "0%"}
-                          </div>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-5 border border-white/20 shadow-xl group-hover:bg-white/15 transition-all">
-                          <p className="text-[10px] font-black text-white/70 uppercase tracking-widest mb-2 flex items-center gap-2">
-                            <Droplets className="w-3.5 h-3.5" />
-                            Humidity
-                          </p>
-                          <div className="text-2xl font-black  tracking-tighter">
-                            {predictionData.venueWeather?.humidity || "65%"}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
                 </div>
-              </section>
+              </CardContent>
+            </Card>
 
-              {/* Bottom Disclaimer */}
-              <div className="mt-12 p-8 rounded-[40px] bg-white border border-gray-100 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-3xl"></div>
-                <div className="flex items-start gap-6 relative z-10">
-                  <div className="p-4 bg-red-50 rounded-[28px] ring-1 ring-red-100 shadow-inner">
-                    <Shield className="h-8 w-8 text-red-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-base font-black text-gray-900 uppercase tracking-tighter mb-4 flex items-center gap-3">
-                      ⚖️ Security & Regulatory Compliance
-                      <span className="px-2 py-0.5 bg-red-600 text-white text-[8px] rounded-full animate-pulse">
-                        Critical
-                      </span>
-                    </h4>
-                    <div className="text-[12px] font-medium leading-relaxed text-gray-500 space-y-4">
-                      <p>
-                        <strong className="text-red-700 uppercase tracking-tighter">
-                          Prohibited Activity:
-                        </strong>{" "}
-                        Betting and gambling are strictly illegal under the
-                        Public Gambling Act (1867). This interface is an
-                        analytical engine provided for{" "}
-                        <span className="text-black font-black underline decoration-indigo-500/30 underline-offset-4">
-                          Technical Research
-                        </span>{" "}
-                        and match-logic evaluation only.
-                      </p>
-                      <p>
-                        <strong className="text-gray-900">
-                          Alpha Disclosure:
-                        </strong>{" "}
-                        These insights are generated via advanced AI modeling.
-                        Historical performance is not a guarantee of future
-                        outcomes. Use this data purely for informational
-                        purposes.
-                      </p>
-                      <p className="text-[10px] text-gray-400 ">
-                        Data refresh interval: Real-time | Confidence threshold:
-                        {predictionData.team1?.winnerPrediction?.confidence ===
-                        "High"
-                          ? " >85%"
-                          : predictionData.team1?.winnerPrediction
-                                ?.confidence === "Medium"
-                            ? " 65-85%"
-                            : " <65%"}
-                      </p>
+            {/* Match Conditions Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+              {/* Venue Statistics */}
+              <Card className="border-0 shadow-sm md:shadow-md">
+                <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                  <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                    <BarChart4 className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
+                    <span>Venue Statistics</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg text-center">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {predictionData.venueStats?.matches || "N/A"}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          Total Matches
+                        </div>
+                      </div>
+                      <div className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg text-center">
+                        <div className="text-2xl font-bold text-green-600">
+                          {predictionData.venueStats?.avg1stInns || "N/A"}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          Avg 1st Inns
+                        </div>
+                      </div>
                     </div>
+
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            Batting First Wins
+                          </span>
+                          <span className="font-medium">
+                            {predictionData.venueStats?.winBatFirst}
+                          </span>
+                        </div>
+                        <Progress
+                          value={parseInt(
+                            predictionData.venueStats?.winBatFirst || "0",
+                          )}
+                          className="h-2"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            Bowling First Wins
+                          </span>
+                          <span className="font-medium">
+                            {predictionData.venueStats?.winBowlFirst}
+                          </span>
+                        </div>
+                        <Progress
+                          value={parseInt(
+                            predictionData.venueStats?.winBowlFirst || "0",
+                          )}
+                          className="h-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xs text-gray-500 mb-1">
+                        Average 2nd Innings Score
+                      </div>
+                      <div className="text-lg font-bold text-purple-600">
+                        {predictionData.venueStats?.avg2ndInns} runs
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Weather Conditions */}
+              <Card className="border-0 shadow-sm md:shadow-md">
+                <CardHeader className="px-3 md:px-6 py-3 md:py-4">
+                  <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
+                    <Cloud className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                    <span>Weather Conditions</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Thermometer className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          Temperature
+                        </span>
+                      </div>
+                      <div className="text-lg font-bold">
+                        {predictionData.venueWeather?.temperature}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-blue-50 rounded-lg text-center">
+                        <div className="flex justify-center mb-2">
+                          {getWeatherIcon(
+                            predictionData.venueWeather?.condition,
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">Condition</div>
+                        <div className="text-sm font-medium">
+                          {predictionData.venueWeather?.condition}
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-green-50 rounded-lg text-center">
+                        <Droplets className="h-5 w-5 text-green-500 mx-auto mb-2" />
+                        <div className="text-xs text-gray-500">Humidity</div>
+                        <div className="text-sm font-medium">
+                          {predictionData.venueWeather?.humidity}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CloudRain className="h-4 w-4 text-yellow-600" />
+                        <span className="text-sm font-medium">Rain Chance</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Progress
+                          value={parseInt(
+                            predictionData.venueWeather?.rainChance?.split(
+                              " ",
+                            )[0] || "0",
+                          )}
+                          className="flex-1 h-2"
+                        />
+                        <span className="text-sm font-bold">
+                          {predictionData.venueWeather?.rainChance}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Final Disclaimer */}
+            <div className="mt-4 p-4 rounded-lg border border-red-300 bg-gradient-to-r from-red-50 to-orange-50">
+              <div className="flex items-start gap-3">
+                <Shield className="h-6 w-6 text-red-600 flex-shrink-0" />
+                <div>
+                  <h4 className="text-sm font-bold text-red-800 mb-2">
+                    ⚖️ LEGAL DISCLAIMER & IMPORTANT NOTICE
+                  </h4>
+                  <div className="text-xs text-red-700 space-y-2">
+                    <p>
+                      <strong>WARNING:</strong> Gambling and betting are
+                      strictly prohibited by law in India. The Public Gambling
+                      Act of 1867 makes operating or visiting a gambling house
+                      illegal.
+                    </p>
+                    <p>
+                      <strong>PURPOSE:</strong> This website provides AI-powered
+                      cricket analysis and predictions{" "}
+                      <strong>
+                        FOR INFORMATIONAL AND ENTERTAINMENT PURPOSES ONLY
+                      </strong>
+                      . We do NOT promote, encourage, or facilitate any form of
+                      gambling, betting, or illegal activities.
+                    </p>
                   </div>
                 </div>
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
