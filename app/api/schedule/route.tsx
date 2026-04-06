@@ -2,11 +2,7 @@ import { FormatErrorMessage, GetTeamShortName } from "@/lib/utils";
 import dbConnect from "../db";
 import { CrexMatchScorecard } from "./CrexScore";
 import Match from "./MatchModel";
-import MatchDetails from "../match-details/MatchDetailsModel";
-import mongoose from "mongoose";
 import moment from "moment-timezone";
-import { Prediction } from "../order/Prediction";
-import { SquadList } from "../match-details/SquadList";
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -50,13 +46,6 @@ export async function POST(request: Request) {
     const completedMatch = filteredMatches.filter(
       (item: any) => item.status === "COMPLETED",
     );
-    // .map((item: any) => ({
-    //   ...item,
-    //   teams: item.teams.map((team: any) => ({
-    //     ...team,
-    //     teamShortName: GetTeamShortName(team.teamName),
-    //   })),
-    // }));
 
     const upcomingMatch = filteredMatches
       .filter((item: any) =>
@@ -77,89 +66,19 @@ export async function POST(request: Request) {
     });
 
     const processedLiveMatches = await Promise.all(
-      [...liveMatches, ...completedMatch].map(async (match: any) => {
-        let scoreCard: any = null;
+      [...liveMatches].map(async (match: any) => {
         let result = "";
 
         try {
           const matchId = match._id;
 
-          // 🔥 parallel fetch (faster)
-          const [scoreCardRes, details] = await Promise.all([
-            CrexMatchScorecard(`${match.url}/match-scorecard`),
-            MatchDetails.findOne({ matchId }),
-          ]);
-
-          scoreCard = scoreCardRes;
+          const scoreCardRes = await CrexMatchScorecard(
+              `${match.url}/match-scorecard`,
+            ),
+            scoreCard = scoreCardRes;
           result = scoreCard?.result?.toLowerCase() ?? "";
 
-          let updatedSquads = details?.squads;
           let prediction = match.prediction;
-
-          /* ================= PLAYING XI ================= */
-
-          if (!match.isPlayingPlayerFetched && details?.squads) {
-            const latestSquad = await SquadList(
-              `${match.url}/match-details`,
-              details.squads,
-            );
-
-            const hasPlaying11 =
-              latestSquad?.[0]?.playingPlayers?.length > 0 &&
-              latestSquad?.[1]?.playingPlayers?.length > 0;
-
-            if (hasPlaying11) {
-              updatedSquads = latestSquad;
-
-              //  DB updates parallel
-              await Promise.all([
-                MatchDetails.updateOne(
-                  { matchId },
-                  {
-                    $set: {
-                      squads: latestSquad,
-                      updatedAt: new Date(),
-                    },
-                  },
-                ),
-                Match.updateOne(
-                  { _id: matchId },
-                  {
-                    $set: {
-                      matchResult: result,
-                      isPlayingPlayerFetched: true,
-                      updatedAt: new Date(),
-                    },
-                  },
-                ),
-              ]);
-            }
-          }
-
-          /* ================= PREDICTION ================= */
-
-          if (!prediction && details) {
-            const analysis = await Prediction({
-              ...details,
-
-              squads: updatedSquads,
-              matchInfo: match,
-            });
-
-            prediction = analysis;
-
-            // 🔥 save async (non-blocking feel)
-            await Match.updateOne(
-              { _id: matchId },
-              {
-                $set: {
-                  matchResult: result,
-                  prediction: analysis,
-                  updatedAt: new Date(),
-                },
-              },
-            );
-          }
 
           /* ================= TEAM UPDATE ================= */
 
@@ -188,7 +107,7 @@ export async function POST(request: Request) {
             ...match,
             teams: updatedTeams,
             status,
-            prediction, // ✅ include
+            prediction,
             matchResult: result,
             score: scoreCard
               ? {
@@ -208,7 +127,7 @@ export async function POST(request: Request) {
     );
 
     const sortedData = [
-      // ...completedMatch,
+      ...completedMatch,
       ...upcomingMatch,
       ...processedLiveMatches,
     ]
@@ -234,38 +153,20 @@ export async function POST(request: Request) {
         return false;
       });
 
-    const finalPrepareData = await Promise.all(
-      sortedData.map(async (item: any) => {
-        const matchDateTime = moment
-          .utc(`${item.matchDate} ${item.startTime}`, "ddd, DD MMM YYYY h:mm A")
-          .tz(timezone);
-        let data = {
-          ...item,
+    const finalPrepareData = sortedData.map((item: any) => {
+      const matchDateTime = moment
+        .utc(`${item.matchDate} ${item.startTime}`, "ddd, DD MMM YYYY h:mm A")
+        .tz(timezone);
+      let data = {
+        ...item,
 
-          matchDate: matchDateTime.format("ddd, DD MMM YYYY"),
-          startTime: matchDateTime.format("hh:mm A"),
-          matchDateTimeUser: matchDateTime.format("DD MMM YYYY, hh:mm A"),
-        };
+        matchDate: matchDateTime.format("ddd, DD MMM YYYY"),
+        startTime: matchDateTime.format("hh:mm A"),
+        matchDateTimeUser: matchDateTime.format("DD MMM YYYY, hh:mm A"),
+      };
 
-        // if (item.status === "COMPLETED") {
-        //   const details = await MatchDetails.findOne({
-        //     matchId: new mongoose.Types.ObjectId(item._id),
-        //   });
-
-        //   if (details) {
-        //     const analysis = await Prediction({
-        //       ...details,
-        //       squads: details.squads,
-        //       matchInfo: item,
-        //     });
-
-        //     data.prediction = analysis;
-        //   }
-        // }
-
-        return data;
-      }),
-    );
+      return data;
+    });
 
     return Response.json(
       {

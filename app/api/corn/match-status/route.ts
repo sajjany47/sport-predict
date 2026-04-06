@@ -38,7 +38,8 @@ export const GET = async (_req: NextRequest) => {
     const now = moment();
 
     const fixtures = await Match.find({
-      isCompleted: true,
+      status: { $ne: "UPCOMING" },
+      isCompleted: false,
       formatDate: { $lte: now },
     }).lean();
 
@@ -79,7 +80,6 @@ export const GET = async (_req: NextRequest) => {
                     updatedAt: new Date(),
                   },
                 },
-                { upsert: true },
               ),
               Match.updateOne(
                 { _id: match._id },
@@ -190,6 +190,15 @@ export const GET = async (_req: NextRequest) => {
               teams: updatedTeams,
               status,
               matchResult: result,
+              score: scoreCard
+                ? {
+                    score: (scoreCard.teams ?? []).map((t: any) => ({
+                      team: t.name,
+                      run: `${t.score} (${t.overs})`,
+                    })),
+                    result: scoreCard?.result ?? "",
+                  }
+                : null,
             },
           },
         );

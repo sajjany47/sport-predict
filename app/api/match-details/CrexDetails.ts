@@ -168,26 +168,28 @@ export const CrexDetails = async (url: string) => {
       pacePercent: $(".s-format").eq(0).text().trim(),
       spinPercent: $(".s-format").eq(1).text().trim(),
     },
-    recentMatches: $(".global-match-card").map((_: any, el: any) => {
-      const teams = $(el).find(".team-name");
-      const scores = $(el).find(".team-score");
-      const overs = $(el).find(".team-over");
+    recentMatches: $(".global-match-card")
+      .map((_: any, el: any) => {
+        const teams = $(el).find(".team-name");
+        const scores = $(el).find(".team-score");
+        const overs = $(el).find(".team-over");
 
-      return {
-        team1: teams.eq(0).text().trim(),
-        team1Score: scores.eq(0).text().trim(),
-        team1Overs: overs.eq(0).text().trim(),
+        return {
+          team1: teams.eq(0).text().trim(),
+          team1Score: scores.eq(0).text().trim(),
+          team1Overs: overs.eq(0).text().trim(),
 
-        team2: teams.eq(1).text().trim(),
-        team2Score: scores.eq(1).text().trim(),
-        team2Overs: overs.eq(1).text().trim(),
+          team2: teams.eq(1).text().trim(),
+          team2Score: scores.eq(1).text().trim(),
+          team2Overs: overs.eq(1).text().trim(),
 
-        result: $(el).find(".match-dec-text").text().trim(),
-        series: $(el).find(".series-name").text().trim(),
+          result: $(el).find(".match-dec-text").text().trim(),
+          series: $(el).find(".series-name").text().trim(),
 
-        url: "https://crex.com" + ($(el).attr("href") || ""),
-      };
-    }),
+          url: "https://crex.com" + ($(el).attr("href") || ""),
+        };
+      })
+      .get(), // ✅ IMPORTANT
   };
 
   /* ===============================
