@@ -42,6 +42,7 @@ const MatchSchema = new Schema(
     isCompleted: { type: Boolean, default: false },
     isDetailsFetched: { type: Boolean, default: false },
     matchResult: { type: String, default: null },
+    score: { type: Object, default: null },
   },
   { timestamps: true },
 );

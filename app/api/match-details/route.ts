@@ -47,17 +47,11 @@ export async function POST(request: NextRequest) {
       }
 
       //  upsert safe
-      await MatchDetails.updateOne(
-        { matchId },
-        {
-          $set: {
-            matchId,
-            ...crexOverallStats,
-            updatedAt: new Date(),
-          },
-        },
-        { upsert: true },
-      );
+      await MatchDetails.insertOne({
+        matchId,
+        ...crexOverallStats,
+        updatedAt: new Date(),
+      });
 
       const hasPlaying11 =
         crexOverallStats?.squads?.[0]?.playingPlayers?.length > 0 &&
