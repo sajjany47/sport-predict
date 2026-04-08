@@ -40,7 +40,7 @@ export const GET = async (_req: NextRequest) => {
     const fixtures = await Match.find({
       // status: { $ne: "UPCOMING" },
       isCompleted: false,
-      // formatDate: { $lte: now },
+      formatDate: { $lte: now },
     }).lean();
 
     if (!fixtures.length) {

@@ -1369,6 +1369,55 @@ export const NormalizeCrexUrl = (url: string) => {
     .replace(/\/info(\/)?$/i, "/info"); // ensure ending clean
 };
 
+// export const GetTeamShortName = (teamName: string): string => {
+//   if (!teamName || typeof teamName !== "string") return "";
+
+//   let name = teamName.toUpperCase().trim();
+
+//   /* ---------- detect women ---------- */
+//   const isWomen = /\bWOMEN\b|\bW\b/.test(name);
+
+//   name = name
+//     .replace(/\bWOMEN\b|\bW\b/g, "")
+//     .replace(/[^A-Z\s]/g, " ")
+//     .replace(/\s+/g, " ")
+//     .trim();
+
+//   const words = name.split(" ").filter(Boolean);
+
+//   let code = "";
+
+//   /* ---------- multi word countries ---------- */
+//   if (words.length >= 2) {
+//     // take first letter of each word
+//     code = words.map((w) => w[0]).join("");
+
+//     // if more than 2 letters keep 2 (SL, NZ, SA, WI, HK)
+//     if (code.length > 2) code = code.slice(0, 2);
+//   } else if (words.length === 1) {
+//     /* ---------- single word countries ---------- */
+//     const w = words[0];
+
+//     // remove vowels except first
+//     // const consonants = w[0] + w.slice(1).replace(/[AEIOU]/g, "");
+
+//     code = w.slice(0, 3);
+
+//     // if still small, pad from name
+//     if (code.length < 3) code = w.slice(0, 3);
+//   }
+
+//   /* ---------- franchise fallback ---------- */
+//   if (!code) {
+//     code = words
+//       .map((w) => w[0])
+//       .join("")
+//       .slice(0, 3);
+//   }
+
+//   return isWomen ? `${code}-W` : code;
+// };
+
 export const GetTeamShortName = (teamName: string): string => {
   if (!teamName || typeof teamName !== "string") return "";
 
@@ -1387,27 +1436,30 @@ export const GetTeamShortName = (teamName: string): string => {
 
   let code = "";
 
-  /* ---------- multi word countries ---------- */
+  /* ---------- RULE 1: Multi-word ---------- */
   if (words.length >= 2) {
-    // take first letter of each word
     code = words.map((w) => w[0]).join("");
 
-    // if more than 2 letters keep 2 (SL, NZ, SA, WI, HK)
-    if (code.length > 2) code = code.slice(0, 2);
+    // 👉 If 2 words → keep 2 letters (MI, CSK, SL, NZ)
+    if (words.length === 2) {
+      code = code.slice(0, 2);
+    }
+
+    // 👉 If 3+ words → keep 3 letters (KKR, RCB)
+    else if (words.length >= 3) {
+      code = code.slice(0, 3);
+    }
   } else if (words.length === 1) {
-    /* ---------- single word countries ---------- */
+    /* ---------- RULE 2: Single word ---------- */
     const w = words[0];
 
-    // remove vowels except first
-    // const consonants = w[0] + w.slice(1).replace(/[AEIOU]/g, "");
+    // remove vowels after first letter → better abbreviation
+    const consonants = w[0] + w.slice(1).replace(/[AEIOU]/g, "");
 
-    code = w.slice(0, 3);
-
-    // if still small, pad from name
-    if (code.length < 3) code = w.slice(0, 3);
+    code = consonants.slice(0, 3);
   }
 
-  /* ---------- franchise fallback ---------- */
+  /* ---------- fallback ---------- */
   if (!code) {
     code = words
       .map((w) => w[0])
