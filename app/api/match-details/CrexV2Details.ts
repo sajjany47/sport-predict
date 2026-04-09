@@ -648,7 +648,8 @@ export const CrexV2Details = async (url: string) => {
     }
 
     return {
-      squads: FilterSquad(prepareData),
+      // squads: FilterSquad(prepareData),
+      squads: prepareData,
       teamForm: teamFormFinal,
       h2h,
       pointsTable,
