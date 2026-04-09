@@ -64,7 +64,9 @@ export const GET = async (_req: NextRequest) => {
           if (details) {
             const hasPlaying11 =
               details?.squads?.[0]?.playingPlayers?.length > 0 &&
-              details?.squads?.[1]?.playingPlayers?.length > 0;
+              details?.squads?.[0]?.playingPlayers?.length <= 12 &&
+              details?.squads?.[1]?.playingPlayers?.length > 0 &&
+              details?.squads?.[1]?.playingPlayers?.length <= 12;
 
             const analysis = await Prediction({
               ...details,
@@ -115,7 +117,9 @@ export const GET = async (_req: NextRequest) => {
 
             const hasPlaying11 =
               latestSquad?.[0]?.playingPlayers?.length > 0 &&
-              latestSquad?.[1]?.playingPlayers?.length > 0;
+              latestSquad?.[0]?.playingPlayers?.length <= 12 &&
+              latestSquad?.[1]?.playingPlayers?.length > 0 &&
+              latestSquad?.[1]?.playingPlayers?.length <= 12;
 
             const analysis = await Prediction({
               ...(matchDetails.toObject?.() || matchDetails), // ✅ fix

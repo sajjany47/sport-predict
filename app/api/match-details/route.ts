@@ -5,8 +5,9 @@ import { FormatErrorMessage } from "@/lib/utils";
 import { SquadList } from "./SquadList";
 import MatchDetails from "./MatchDetailsModel";
 import Match from "../schedule/MatchModel";
-import { ExtractMatchDetails } from "./ExtractMatchDetails";
+
 import { Prediction } from "../order/Prediction";
+import { CrexV2Details } from "./CrexV2Details";
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -37,7 +38,9 @@ export async function POST(request: NextRequest) {
      * ===============================
      */
     if (!matchDetails) {
-      const crexOverallStats: any = await ExtractMatchDetails(body.url);
+      const crexOverallStats: any = await CrexV2Details(
+        `body.url/match-details`,
+      );
 
       if (!crexOverallStats) {
         return Response.json(
@@ -55,7 +58,9 @@ export async function POST(request: NextRequest) {
 
       const hasPlaying11 =
         crexOverallStats?.squads?.[0]?.playingPlayers?.length > 0 &&
-        crexOverallStats?.squads?.[1]?.playingPlayers?.length > 0;
+        crexOverallStats?.squads?.[0]?.playingPlayers?.length <= 12 &&
+        crexOverallStats?.squads?.[1]?.playingPlayers?.length > 0 &&
+        crexOverallStats?.squads?.[1]?.playingPlayers?.length <= 12;
 
       const analysis = await Prediction({
         ...crexOverallStats,
@@ -112,7 +117,9 @@ export async function POST(request: NextRequest) {
 
     const hasPlaying11 =
       latestSquad?.[0]?.playingPlayers?.length > 0 &&
-      latestSquad?.[1]?.playingPlayers?.length > 0;
+      latestSquad?.[0]?.playingPlayers?.length <= 12 &&
+      latestSquad?.[1]?.playingPlayers?.length > 0 &&
+      latestSquad?.[1]?.playingPlayers?.length <= 12;
 
     //  update + prediction parallel
     const [analysis] = await Promise.all([

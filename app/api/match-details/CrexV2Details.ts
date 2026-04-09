@@ -1,6 +1,7 @@
 // import puppeteer from "puppeteer";
 import { getBrowser } from "@/lib/browser";
 import { CrexPlayerDetails } from "./CrexPlayerDetails";
+import { FilterSquad } from "@/lib/utils";
 
 // Rate limiting helper
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -585,7 +586,9 @@ export const CrexV2Details = async (url: string) => {
     // Process player details with rate limiting
     const prepareData: any[] = [];
 
-    for (const team of squads) {
+    const filtersquad = FilterSquad(squads);
+
+    for (const team of filtersquad) {
       /* ================= ENRICH PLAYER ================= */
 
       const enrichPlayer = async (player: any) => {
