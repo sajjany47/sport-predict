@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import dbConnect from "../db";
-import { FormatErrorMessage } from "@/lib/utils";
+import { FilterSquad, FormatErrorMessage } from "@/lib/utils";
 import { SquadList } from "./SquadList";
 import MatchDetails from "./MatchDetailsModel";
 import Match from "../schedule/MatchModel";
@@ -38,16 +38,18 @@ export async function POST(request: NextRequest) {
      * ===============================
      */
     if (!matchDetails) {
-      const crexOverallStats: any = await CrexV2Details(
-        `body.url/match-details`,
-      );
+      const matchDetails: any = await CrexV2Details(`body.url/match-details`);
 
-      if (!crexOverallStats) {
+      if (!matchDetails) {
         return Response.json(
           { success: false, error: "Failed to fetch match details" },
           { status: 500 },
         );
       }
+      const crexOverallStats = {
+        ...matchDetails,
+        squads: FilterSquad(matchDetails.squads),
+      };
 
       //  upsert safe
       await MatchDetails.insertOne({

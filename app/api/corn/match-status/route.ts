@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
-import { FormatErrorMessage, GetTeamShortName } from "@/lib/utils";
+import { FilterSquad, FormatErrorMessage, GetTeamShortName } from "@/lib/utils";
 import moment from "moment";
 import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
@@ -8,6 +8,7 @@ import { SquadList } from "../../match-details/SquadList";
 import { CrexMatchScorecard } from "../../schedule/CrexScore";
 import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
 import { Prediction } from "../../order/Prediction";
+import { CrexV2Details } from "../../match-details/CrexV2Details";
 
 // 🔥 concurrency limiter
 const asyncPool = async (limit: number, array: any[], iteratorFn: any) => {
@@ -59,7 +60,8 @@ export const GET = async (_req: NextRequest) => {
         /* ================= MATCH DETAILS ================= */
 
         if (!match.isDetailsFetched) {
-          const details = await ExtractMatchDetails(match.url);
+          const stats = await CrexV2Details(`match.url/match-details`);
+          const details = { ...stats, squads: FilterSquad(stats.squads) };
 
           if (details) {
             const hasPlaying11 =

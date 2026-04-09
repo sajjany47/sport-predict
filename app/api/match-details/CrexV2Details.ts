@@ -586,9 +586,7 @@ export const CrexV2Details = async (url: string) => {
     // Process player details with rate limiting
     const prepareData: any[] = [];
 
-    const filtersquad = FilterSquad(squads);
-
-    for (const team of filtersquad) {
+    for (const team of squads) {
       /* ================= ENRICH PLAYER ================= */
 
       const enrichPlayer = async (player: any) => {

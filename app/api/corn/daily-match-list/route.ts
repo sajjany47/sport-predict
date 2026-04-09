@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
-import { FormatErrorMessage } from "@/lib/utils";
+import { FilterSquad, FormatErrorMessage } from "@/lib/utils";
 import { CrexNext3DaysFixturesArray } from "../CrexNext3DayList";
 import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
@@ -134,6 +134,8 @@ export const GET = async () => {
 
         if (!stats) return;
 
+        const filterSquad = FilterSquad(stats.squads);
+
         // if (!stats?.teams || stats.teams.length < 2) {
         //   console.log("⚠️ Skipping bad data:", match.url);
         //   return;
@@ -154,6 +156,7 @@ export const GET = async () => {
           await MatchDetails.insertOne({
             matchId: match._id,
             ...stats,
+            squads: filterSquad,
             updatedAt: new Date(),
           });
         }
