@@ -159,7 +159,6 @@ export async function POST(request: Request) {
         .tz(timezone);
       let data = {
         ...item,
-
         matchDate: matchDateTime.format("ddd, DD MMM YYYY"),
         startTime: matchDateTime.format("hh:mm A"),
         matchDateTimeUser: matchDateTime.format("DD MMM YYYY, hh:mm A"),

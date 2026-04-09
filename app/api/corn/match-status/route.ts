@@ -6,7 +6,6 @@ import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
 import { SquadList } from "../../match-details/SquadList";
 import { CrexMatchScorecard } from "../../schedule/CrexScore";
-import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
 import { Prediction } from "../../order/Prediction";
 import { CrexV2Details } from "../../match-details/CrexV2Details";
 
@@ -60,8 +59,7 @@ export const GET = async (_req: NextRequest) => {
         /* ================= MATCH DETAILS ================= */
 
         if (!match.isDetailsFetched) {
-          const stats = await CrexV2Details(`match.url/match-details`);
-          const details = { ...stats, squads: FilterSquad(stats.squads) };
+          const details = await CrexV2Details(`${match.url}/match-details`);
 
           if (details) {
             const hasPlaying11 =

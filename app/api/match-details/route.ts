@@ -38,18 +38,16 @@ export async function POST(request: NextRequest) {
      * ===============================
      */
     if (!matchDetails) {
-      const matchDetails: any = await CrexV2Details(`body.url/match-details`);
+      const crexOverallStats: any = await CrexV2Details(
+        `${body.url}/match-details`,
+      );
 
-      if (!matchDetails) {
+      if (!crexOverallStats) {
         return Response.json(
           { success: false, error: "Failed to fetch match details" },
           { status: 500 },
         );
       }
-      const crexOverallStats = {
-        ...matchDetails,
-        squads: FilterSquad(matchDetails.squads),
-      };
 
       //  upsert safe
       await MatchDetails.insertOne({
