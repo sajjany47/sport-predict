@@ -75,13 +75,13 @@ export const SquadList = async (url: string, squad: any[]) => {
       const fullPlayerList = [...team.playingPlayers, ...team.benchPlayers];
       const updatedPlayingPlayers = fullPlayerList.filter((lp: any) =>
         liveTeam.players.some(
-          (fp: any) => fp.playerUrl === lp.playerUrl || fp.name === lp.name,
+          (fp: any) => fp.playerUrl === lp.playerUrl && fp.name === lp.name,
         ),
       );
       const updatedBenchPlayers = fullPlayerList.filter(
         (lp: any) =>
           !liveTeam.players.some(
-            (fp: any) => fp.playerUrl === lp.playerUrl || fp.name === lp.name,
+            (fp: any) => fp.playerUrl === lp.playerUrl && fp.name === lp.name,
           ),
       );
       return {
