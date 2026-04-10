@@ -155,8 +155,11 @@ export const SquadList = async (url: string, squad: any[]) => {
         liveTeam.playingPlayers.some((lp) => lp.playerUrl === player.playerUrl),
       );
 
-      const updatedBenchPlayers = fullPlayerList.filter((player) =>
-        liveTeam.benchPlayers.some((lp) => lp.playerUrl === player.playerUrl),
+      const updatedBenchPlayers = fullPlayerList.filter(
+        (player) =>
+          !liveTeam.playingPlayers.some(
+            (lp) => lp.playerUrl === player.playerUrl,
+          ),
       );
 
       return {
