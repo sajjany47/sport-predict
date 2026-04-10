@@ -13,7 +13,7 @@ export const CrexV2Details = async (url: string) => {
     //   headless: true,
     //   args: ["--no-sandbox", "--disable-setuid-sandbox"],
     // });
-    const browser = await getBrowser();
+    browser = await getBrowser();
 
     const page = await browser.newPage();
     page.setDefaultTimeout(60000);

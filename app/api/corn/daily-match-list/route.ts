@@ -8,6 +8,7 @@ import moment from "moment";
 import { TeamRank } from "../../match-details/TeamRank";
 import { Prediction } from "../../order/Prediction";
 import { CrexV2Details } from "../../match-details/CrexV2Details";
+import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
 
 // 🔥 concurrency limiter
 const asyncPool = async (limit: number, array: any[], iteratorFn: any) => {
@@ -129,7 +130,9 @@ export const GET = async () => {
 
     await asyncPool(3, dbMatches, async (match: any) => {
       try {
-        const stats = await CrexV2Details(`${match.url}/match-details`);
+        // const stats = await CrexV2Details(`${match.url}/match-details`);
+
+        const stats = await ExtractMatchDetails(`${match.url}`);
 
         if (!stats) return;
 
@@ -144,18 +147,34 @@ export const GET = async () => {
           stats?.squads?.[1]?.playingPlayers?.length > 0 &&
           stats?.squads?.[1]?.playingPlayers?.length <= 12;
 
+        await MatchDetails.updateOne(
+          { matchId: match._id },
+          {
+            $set: {
+              matchId: match._id,
+              ...stats,
+              updatedAt: new Date(),
+            },
+          },
+          { upsert: true },
+        );
         // 🔥 insert only if not exists (no overwrite)
-        const existingDetails = await MatchDetails.findOne({
-          matchId: match._id,
-        });
+        // const existingDetails = await MatchDetails.findOne({
+        //   matchId: match._id,
+        // });
 
-        if (!existingDetails) {
-          await MatchDetails.insertOne({
-            matchId: match._id,
-            ...stats,
-            updatedAt: new Date(),
-          });
-        }
+        // if (!existingDetails) {
+        //   await MatchDetails.insertOne({
+        //     matchId: match._id,
+        //     ...stats,
+        //     updatedAt: new Date(),
+        //   });
+        // } else {
+        //   await MatchDetails.updateOne(
+        //     { matchId: match._id },
+        //     { $set: { ...stats, updatedAt: new Date() } },
+        //   );
+        // }
 
         const analysis = await Prediction({
           ...stats,

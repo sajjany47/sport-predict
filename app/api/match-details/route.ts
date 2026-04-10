@@ -8,6 +8,7 @@ import Match from "../schedule/MatchModel";
 
 import { Prediction } from "../order/Prediction";
 import { CrexV2Details } from "./CrexV2Details";
+import { ExtractMatchDetails } from "./ExtractMatchDetails";
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -38,9 +39,7 @@ export async function POST(request: NextRequest) {
      * ===============================
      */
     if (!matchDetails) {
-      const crexOverallStats: any = await CrexV2Details(
-        `${body.url}/match-details`,
-      );
+      const crexOverallStats: any = await ExtractMatchDetails(`${body.url}`);
 
       if (!crexOverallStats) {
         return Response.json(

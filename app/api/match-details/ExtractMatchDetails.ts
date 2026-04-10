@@ -6,7 +6,8 @@ const cleanPlayer = (player: any) => ({
   careerStats: {
     ...player?.careerStats,
     bowling: (player?.careerStats?.bowling ?? []).filter(
-      (item: any) => !item?.format?.toLowerCase()?.includes("debut"),
+      (item: any) =>
+        !item?.format || !item.format.toLowerCase().includes("debut"),
     ),
   },
 });
