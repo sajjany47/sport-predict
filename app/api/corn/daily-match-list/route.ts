@@ -6,8 +6,8 @@ import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
 import moment from "moment";
 import { TeamRank } from "../../match-details/TeamRank";
-import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
 import { Prediction } from "../../order/Prediction";
+import { CrexV2Details } from "../../match-details/CrexV2Details";
 
 // 🔥 concurrency limiter
 const asyncPool = async (limit: number, array: any[], iteratorFn: any) => {
@@ -129,7 +129,7 @@ export const GET = async () => {
 
     await asyncPool(3, dbMatches, async (match: any) => {
       try {
-        const stats = await ExtractMatchDetails(match.url);
+        const stats = await CrexV2Details(`${match.url}/match-details`);
 
         if (!stats) return;
 
@@ -140,7 +140,9 @@ export const GET = async () => {
 
         const hasPlaying11 =
           stats?.squads?.[0]?.playingPlayers?.length > 0 &&
-          stats?.squads?.[1]?.playingPlayers?.length > 0;
+          stats?.squads?.[0]?.playingPlayers?.length <= 12 &&
+          stats?.squads?.[1]?.playingPlayers?.length > 0 &&
+          stats?.squads?.[1]?.playingPlayers?.length <= 12;
 
         // 🔥 insert only if not exists (no overwrite)
         const existingDetails = await MatchDetails.findOne({

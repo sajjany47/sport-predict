@@ -1470,6 +1470,26 @@ export const GetTeamShortName = (teamName: string): string => {
   return isWomen ? `${code}-W` : code;
 };
 
+export const FilterSquad = (squads: any[]) => {
+  const cleanPlayer = (player: any) => ({
+    ...player,
+    careerStats: {
+      ...player?.careerStats,
+      bowling: (player?.careerStats?.bowling ?? []).filter(
+        (item: any) => !item?.format?.toLowerCase()?.includes("debut"),
+      ),
+    },
+  });
+
+  const a = (squads ?? []).map((team: any) => ({
+    ...team,
+    playingPlayers: (team?.playingPlayers ?? []).map(cleanPlayer),
+    benchPlayers: (team?.benchPlayers ?? []).map(cleanPlayer),
+  }));
+
+  return a;
+};
+
 // {
 //   "crons": [
 //     {
