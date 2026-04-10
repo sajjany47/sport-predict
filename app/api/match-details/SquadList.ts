@@ -161,12 +161,12 @@ export const SquadList = async (url: string, squad: any[]) => {
 
       return {
         ...team,
+        toss: liveTeam.toss,
         playingPlayers: updatedPlayingPlayers,
         benchPlayers: updatedBenchPlayers,
       };
     });
 
-    console.log(prepareSquad);
     return prepareSquad;
   } catch (error) {
     return squad;
