@@ -2,88 +2,163 @@
 
 import { getBrowser } from "@/lib/browser";
 
+// Rate limiting helper
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const SquadList = async (url: string, squad: any[]) => {
-  // const browser = await puppeteer.launch({
-  //   headless: true,
-  //   args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  // });
-  const browser = await getBrowser();
-
-  const page = await browser.newPage();
-
+  let browser;
   try {
-    await page.setViewport({ width: 1920, height: 1080 });
-
-    await page.setUserAgent(
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
-    );
-
+    browser = await getBrowser();
+    const page = await browser.newPage();
     page.setDefaultTimeout(60000);
 
-    await page.goto(url, { waitUntil: "networkidle2" });
+    await page
+      .goto(url, { waitUntil: "networkidle2", timeout: 60000 })
+      .catch(() => null);
 
-    // wait squads wrapper (more reliable than button)
-    await page.waitForSelector(".playingxi", { timeout: 30000 });
+    // ✅ wait some safe selector
+    await page.waitForSelector("body", { timeout: 15000 }).catch(() => null);
 
-    const latestSquad = await page.evaluate(async () => {
-      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    /* ===============================
+ SQUADS (BEFORE + AFTER TOSS)
+ =============================== */
 
-      const output: any[] = [];
+    // Toss (null before toss)
+    const toss = await page
+      .$eval(".toss-wrap p", (el) => el.textContent?.trim())
+      .catch(() => null);
 
-      const buttons = Array.from(
-        document.querySelectorAll<HTMLButtonElement>(".playingxi-button"),
-      );
+    const isAfterToss = Boolean(toss);
 
-      for (let i = 0; i < buttons.length; i++) {
-        buttons[i].click();
-        await sleep(400);
+    // wait team buttons
+    await page.waitForSelector(".playingxi-button").catch(() => null);
+    const squads: {
+      teamName: string;
+      toss: any;
+      playingPlayers: any[];
+      benchPlayers: any[];
+    }[] = [];
 
-        const teamShortName = buttons[i].textContent?.trim() || "";
+    const teamCount = await page
+      .$$eval(".playingxi-button", (btns) => btns.length)
+      .catch(() => 0);
 
-        const players = Array.from(
-          document.querySelectorAll(".playingxi-card-row"),
-        ).map((row) => {
-          const a = row.querySelector("a");
-
-          return {
-            name: a?.getAttribute("title") || "",
-            role:
-              row.querySelector(".bat-ball-type div")?.textContent?.trim() ||
-              "",
-            playerUrl: a?.getAttribute("href")
-              ? "https://crex.com" + a.getAttribute("href")
-              : null,
-            playerImage:
-              row.querySelector(".img-card img")?.getAttribute("src") || null,
-          };
-        });
-
-        output.push({
-          teamName: teamShortName,
-          players,
-        });
+    // helper → extract currently visible players
+    const extractPlayers = async () => {
+      try {
+        await page
+          .waitForFunction(
+            () => document.querySelectorAll(".playingxi-card-row").length > 0,
+            { timeout: 15000 },
+          )
+          .catch(() => null);
+      } catch {
+        console.log("⚠️ Players not loaded, continuing...");
       }
 
-      return output;
-    });
+      return page
+        .$$eval(".playingxi-card-row", (rows) =>
+          rows.map((row) => {
+            const a = row.querySelector("a");
+
+            return {
+              name: a?.getAttribute("title") || "",
+              shortName:
+                row.querySelector(".p-name")?.textContent?.trim() || "",
+              role:
+                row.querySelector(".bat-ball-type div")?.textContent?.trim() ||
+                "",
+              isWK: row.textContent?.includes("(WK)") || false,
+              playerUrl: a?.getAttribute("href")
+                ? "https://crex.com" + a.getAttribute("href")
+                : null,
+              image:
+                row.querySelector(".img-card img")?.getAttribute("src") || null,
+            };
+          }),
+        )
+        .catch(() => []);
+    };
+
+    for (let i = 0; i < teamCount; i++) {
+      const teamName = await page
+        .$$eval(
+          ".playingxi-button",
+          (btns, idx) => btns[idx]?.textContent?.trim(),
+          i,
+        )
+        .catch(() => `Team ${i + 1}`);
+
+      // click team
+      await page
+        .evaluate((idx) => {
+          const btn = document.querySelectorAll(".playingxi-button")[
+            idx
+          ] as HTMLElement;
+          btn?.click();
+        }, i)
+        .catch(() => null);
+
+      await delay(400);
+
+      // expand bench AFTER toss (EVERY TEAM)
+      if (isAfterToss) {
+        await page
+          .evaluate(() => {
+            const arrow = document.querySelector("#bench-arrow") as HTMLElement;
+            arrow?.scrollIntoView({ block: "center" });
+            arrow?.click();
+          })
+          .catch(() => null);
+
+        // wait until bench rows appear (>11)
+        await page
+          .waitForFunction(
+            () => document.querySelectorAll(".playingxi-card-row").length > 0,
+            { timeout: 5000 },
+          )
+          .catch(() => null);
+
+        await delay(300);
+      }
+
+      const allPlayers = await extractPlayers();
+
+      let playingPlayers: any[] = [];
+      let benchPlayers: any[] = [];
+
+      if (!isAfterToss) {
+        // BEFORE toss → full squad
+        benchPlayers = allPlayers;
+      } else {
+        // AFTER toss → split
+        playingPlayers = allPlayers.slice(0, 11);
+        benchPlayers = allPlayers.slice(11);
+      }
+
+      squads.push({
+        teamName: teamName || "",
+        toss,
+        playingPlayers,
+        benchPlayers,
+      });
+    }
+
+    await page.close();
 
     const prepareSquad = squad.map((team: any) => {
-      const liveTeam = latestSquad.find(
-        (t: any) => t.teamName === team.teamName,
-      );
+      const liveTeam = squads.find((t: any) => t.teamName === team.teamName);
       if (!liveTeam) return team;
+
       const fullPlayerList = [...team.playingPlayers, ...team.benchPlayers];
-      const updatedPlayingPlayers = fullPlayerList.filter((lp: any) =>
-        liveTeam.players.some(
-          (fp: any) => fp.playerUrl === lp.playerUrl && fp.name === lp.name,
-        ),
+
+      const updatedPlayingPlayers = fullPlayerList.filter((player) =>
+        liveTeam.playingPlayers.some((lp) => lp.playerUrl === player.playerUrl),
       );
-      const updatedBenchPlayers = fullPlayerList.filter(
-        (lp: any) =>
-          !liveTeam.players.some(
-            (fp: any) => fp.playerUrl === lp.playerUrl && fp.name === lp.name,
-          ),
+
+      const updatedBenchPlayers = fullPlayerList.filter((player) =>
+        liveTeam.benchPlayers.some((lp) => lp.playerUrl === player.playerUrl),
       );
+
       return {
         ...team,
         playingPlayers: updatedPlayingPlayers,
@@ -91,8 +166,9 @@ export const SquadList = async (url: string, squad: any[]) => {
       };
     });
 
+    console.log(prepareSquad);
     return prepareSquad;
-  } finally {
-    await browser.close();
+  } catch (error) {
+    return squad;
   }
 };
