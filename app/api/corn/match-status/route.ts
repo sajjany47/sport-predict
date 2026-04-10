@@ -8,6 +8,7 @@ import { SquadList } from "../../match-details/SquadList";
 import { CrexMatchScorecard } from "../../schedule/CrexScore";
 import { Prediction } from "../../order/Prediction";
 import { CrexV2Details } from "../../match-details/CrexV2Details";
+import { ExtractMatchDetails } from "../../match-details/ExtractMatchDetails";
 
 // 🔥 concurrency limiter
 const asyncPool = async (limit: number, array: any[], iteratorFn: any) => {
@@ -59,7 +60,7 @@ export const GET = async (_req: NextRequest) => {
         /* ================= MATCH DETAILS ================= */
 
         if (!match.isDetailsFetched) {
-          const details = await CrexV2Details(`${match.url}/match-details`);
+          const details = await ExtractMatchDetails(`${match.url}`);
 
           if (details) {
             const hasPlaying11 =
