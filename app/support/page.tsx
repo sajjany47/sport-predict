@@ -9,7 +9,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 
 import { DummyData } from "@/lib/DummyData";
-import { GetNewAnalysis } from "../matches/[id]/GetNewAnanlysis";
 import { Prediction } from "../api/order/Prediction";
 
 const SupportPage = () => {
