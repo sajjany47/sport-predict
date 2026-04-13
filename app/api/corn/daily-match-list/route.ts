@@ -69,7 +69,9 @@ export const GET = async () => {
       return (
         match.teams[0]?.teamName !== "Team 1 (TBC)" &&
         match.teams[1]?.teamShortName !== "Team" &&
-        !match?.matchDescription?.toLowerCase().includes("test")
+        !match?.matchDescription?.toLowerCase().includes("test") &&
+        !match?.url?.toLowerCase().includes("test") &&
+        !match?.url?.toLowerCase().includes("match-county-championship")
       );
     });
 
