@@ -1,13 +1,12 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   CreditCard,
   Zap,
@@ -19,21 +18,13 @@ import {
   Crown,
   Sparkles,
   Star,
+  MessageCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { setOrderHistory, setPlans } from "@/store/slices/subscriptionSlice";
 import { DailyCreditAd } from "@/components/GetDailyCredit";
-import {
-  CheckBoostToken,
-  PaymentCreate,
-  SubscriptionList,
-  UserOrderCredit,
-} from "../MainService";
+import { UserOrderCredit } from "../MainService";
 import { loginSuccess } from "@/store/slices/authSlice";
-import { load } from "@cashfreepayments/cashfree-js";
-import CustomLoader from "@/components/ui/CustomLoader";
-import * as Icons from "lucide-react";
 
 const SubscriptionPage = () => {
   const { isAuthenticated, user } = useSelector(
@@ -41,153 +32,91 @@ const SubscriptionPage = () => {
   );
   const dispatch = useDispatch();
   const router = useRouter();
-  const [customTokens, setCustomTokens] = useState(1);
+  
   const [dailyCredit, setDailyCredit] = useState(false);
   const [dailyCreditRes, setDailyCreditRes] = useState<any>({
     message: "",
     isSuccess: null,
   });
-  const [dailyFreeCredit, setDailyFreeCredit] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [tokenPackages, setTokenPackages] = useState([]);
-  const [isPurchasable, setIsPurchasable] = useState(false);
 
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     router.push("/auth/login");
-  //     return;
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-  useEffect(() => {
-    if (user?.id) {
-      userBoostToken(user?.id);
+  const staticPlans = [
+    {
+      id: "starter",
+      name: "Starter Pack",
+      tokens: 1,
+      price: 49,
+      description: "Perfect for a single winning prediction",
+      features: ["1 AI Match Prediction", "Standard Support", "Instant Access"],
+      color: "from-blue-400 to-blue-600",
+      borderColor: "border-blue-100",
+      bgColor: "bg-white",
+      popular: false,
+    },
+    {
+      id: "standard",
+      name: "Standard Pack",
+      tokens: 5,
+      price: 199,
+      description: "Best for regular weekend matches",
+      features: ["5 AI Match Predictions", "Priority Support", "Lifetime Validity", "Save ₹46"],
+      color: "from-purple-500 to-purple-700",
+      borderColor: "border-purple-200",
+      bgColor: "bg-purple-50/30",
+      popular: true,
+      savings: "Save ₹46",
+    },
+    {
+      id: "premium",
+      name: "Premium Pack",
+      tokens: 15,
+      price: 599,
+      description: "For the ultimate fantasy player",
+      features: ["15 AI Match Predictions", "VIP Support", "Lifetime Validity", "Save ₹136"],
+      color: "from-amber-400 to-amber-600",
+      borderColor: "border-amber-200",
+      bgColor: "bg-amber-50/30",
+      popular: false,
+      savings: "Save ₹136",
     }
-    planList();
-  }, []);
+  ];
 
-  const userBoostToken = (id: any) => {
-    CheckBoostToken(id)
-      .then((res) => {
-        setIsPurchasable(res.data.isBuyAble);
-      })
-      .catch((error) => {
-        toast.error(error.message || "Failed to get list. Please try again.");
-      });
-  };
-
-  const planList = () => {
-    setLoading(true);
-    SubscriptionList()
-      .then((res) => {
-        const a = res.data.filter((item: any) => item.isActive);
-        setTokenPackages(a);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setLoading(false);
-        toast.error(error.message || "Failed to get list. Please try again.");
-      });
-  };
-
-  const handleTokenChange = (value: string) => {
-    const tokens = parseInt(value) || 1;
-    setCustomTokens(Math.min(Math.max(tokens, 1), 1000)); // Limit between 1-1000
-  };
-
-  const initiatePayment = async (data: any) => {
-    setLoading(true);
-    let cashfree;
-    cashfree = await load({
-      mode: process.env.NEXT_PUBLIC_CASH_MODE, // or "sandbox" for testing
-    });
-
-    PaymentCreate({
-      orderNumber:
-        Date.now().toString(36) + Math.random().toString(36).substring(2),
-      orderAmount: Number(data.price),
-    })
-      .then((response) => {
-        dispatch(setOrderHistory(response.data));
-        let checkoutOptions = {
-          paymentSessionId: response.data.payment_session_id, // Get this from your backend
-          redirectTarget: "_self", // or "_blank", "_top", "_modal", or a DOM element
-        };
-
-        cashfree.checkout(checkoutOptions).then(() => {});
-      })
-      .catch(() => {
-        setLoading(false);
-      });
-  };
-
-  const handlePurchase = async (
-    packageId: string,
-    tokens: number,
-    price: number,
-  ) => {
+  const handleWhatsAppPayment = (plan: any) => {
     if (!isAuthenticated) {
+      toast.error("Please login to continue");
       router.push("/auth/login");
       return;
     }
 
-    if (packageId === "free") {
-      setDailyFreeCredit(tokens);
-      setDailyCredit(true);
+    const whatsappNumber = "918981374643";
+    const message = `Hello! I would like to purchase the *${plan.name}* (${plan.tokens} Tokens) for *₹${plan.price}*.
 
-      return;
-    }
+*My Details:*
+- Name: ${user?.username || 'N/A'}
+- Email: ${user?.email || 'N/A'}
+- User ID: ${user?.id || 'N/A'}
 
-    if (packageId === "starter" && !isPurchasable) {
-      toast.error("Only 1 time per day per user");
-      return;
-    }
+I am sending this message to confirm my payment. Please add the tokens to my account.`;
 
-    if (packageId === "custom" && customTokens < 1) {
-      toast.error("Please select at least 1 token");
-      return;
-    }
-
-    const packageData: any = tokenPackages.find(
-      (pkg: any) => pkg.type === packageId,
-    );
-    if (!packageData) return;
-
-    const actualPrice = packageId === "custom" ? customTokens * price : price;
-
-    // Save chosen plan before redirect and call payment
-    const prepareData = {
-      ...packageData,
-      price: actualPrice,
-      credits: packageId === "custom" ? customTokens : packageData.credits,
-    };
-    const { icon, ...serializableData }: any = prepareData;
-
-    // dispatch(setPlans(serializableData));
-    initiatePayment({
-      _id: packageData._id,
-      type: packageData.type,
-      price: actualPrice,
-      credits: packageId === "custom" ? customTokens : packageData.credits,
-      name: packageData.name,
-    });
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, "_blank");
   };
 
-  const calculateSavings = (packageId: string) => {
-    if (packageId === "basic") {
-      return "Save ₹201";
-    } else if (packageId === "pro") {
-      return "Save ₹601";
+  const handleFreeToken = () => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
     }
-    return null;
+    setDailyCredit(true);
   };
 
   const handleCreditAdd = () => {
     let payload = {
       ordertype: "credit",
       userId: user!.id,
-      credits: Number(dailyFreeCredit ?? 1),
+      credits: 1,
       status: "completed",
       paymentMode: "PROMOTION",
       paymentDate: new Date(),
@@ -201,15 +130,16 @@ const SubscriptionPage = () => {
 
         setDailyCreditRes({ message: res.message, isSuccess: true });
         dispatch(loginSuccess({ ...prepareUser }));
+        toast.success("Token added successfully!");
       })
       .catch((error) => {
         setDailyCreditRes({ message: error.message, isSuccess: false });
+        toast.error(error.message || "Failed to add token");
       });
   };
 
   return (
     <>
-      {loading && <CustomLoader />}
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="container mx-auto px-4 py-12">
           {/* Header */}
@@ -222,318 +152,213 @@ const SubscriptionPage = () => {
                 Buy Prediction Tokens
               </span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Unlock AI Predictions
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 font-display">
+              Elevate Your Game
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-              1 Token = 1 Prediction. Choose your perfect token package and
-              start winning!
+              Choose your token package and get instant access to premium AI predictions. 
+              Payments are handled securely via WhatsApp.
             </p>
 
             {/* Current Token Balance */}
             {user && (
-              <div className="inline-flex items-center space-x-4 bg-white rounded-2xl px-6 py-4 shadow-lg border">
+              <div className="inline-flex items-center space-x-4 bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-xl border border-white">
                 <div className="flex items-center space-x-2">
-                  <Coins className="h-6 w-6 text-yellow-500" />
-                  <span className="text-lg font-semibold text-gray-900">
+                  <Coins className="h-6 w-6 text-yellow-500 animate-pulse" />
+                  <span className="text-lg font-bold text-gray-900">
                     {user.credits || 0} Tokens Available
                   </span>
                 </div>
-                <div className="w-px h-6 bg-gray-300"></div>
-                <div className="text-sm text-gray-600">
-                  Each prediction costs 1 token
+                <div className="w-px h-6 bg-gray-200"></div>
+                <div className="text-sm font-medium text-blue-600">
+                  1 token = 1 premium prediction
                 </div>
               </div>
             )}
           </div>
 
           {/* Token Packages */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto mb-16">
-            {tokenPackages.map((pkg: any, index) => {
-              const IconComponent =
-                pkg.icon && Icons[pkg.icon as keyof typeof Icons];
-              const savings = calculateSavings(pkg.type);
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-20">
+            {staticPlans.map((pkg) => (
+              <Card
+                key={pkg.id}
+                className={`relative group transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl ${
+                  pkg.bgColor
+                } border-2 ${pkg.borderColor} overflow-hidden ${
+                  pkg.popular ? "ring-2 ring-blue-500 shadow-2xl scale-105 z-10" : "shadow-lg"
+                }`}
+              >
+                {pkg.popular && (
+                  <div className="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600"></div>
+                )}
+                
+                {pkg.popular && (
+                  <div className="absolute top-4 right-4">
+                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 py-1.5 px-3 shadow-lg">
+                      <Star className="h-3 w-3 mr-1 fill-current" />
+                      Best Value
+                    </Badge>
+                  </div>
+                )}
 
-              return (
-                <Card
-                  key={pkg._id}
-                  className={`relative group transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
-                    pkg.bgColor
-                  } border-2 ${pkg.borderColor} ${
-                    pkg.popular ? "ring-2 ring-blue-500 shadow-xl" : "shadow-lg"
-                  }`}
-                >
-                  {pkg.popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1">
-                        <Star className="h-3 w-3 mr-1 fill-current" />
-                        Most Popular
-                      </Badge>
+                {pkg.savings && !pkg.popular && (
+                  <div className="absolute top-4 right-4">
+                    <Badge className="bg-green-500 text-white border-0 py-1 px-2.5">
+                      {pkg.savings}
+                    </Badge>
+                  </div>
+                )}
+
+                <CardContent className="p-8 text-center">
+                  {/* Icon */}
+                  <div
+                    className={`w-20 h-20 bg-gradient-to-br ${pkg.color} rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl group-hover:rotate-6 transition-transform duration-500`}
+                  >
+                    {pkg.tokens === 1 ? <Zap className="h-10 w-10 text-white" /> : 
+                     pkg.tokens <= 5 ? <Coins className="h-10 w-10 text-white" /> : 
+                     <Crown className="h-10 w-10 text-white" />}
+                  </div>
+
+                  {/* Package Name */}
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
+                    {pkg.name}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-gray-500 text-sm mb-6 min-h-[40px]">
+                    {pkg.description}
+                  </p>
+
+                  {/* Price */}
+                  <div className="mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100 group-hover:bg-white transition-colors duration-300">
+                    <div className="flex items-center justify-center baseline">
+                        <span className="text-4xl font-black text-gray-900">₹{pkg.price}</span>
                     </div>
-                  )}
-
-                  {savings && (
-                    <div className="absolute -top-3 right-4">
-                      <Badge className="bg-green-500 text-white">
-                        {savings}
-                      </Badge>
+                    <div className="text-sm font-semibold text-blue-600 mt-1 uppercase tracking-wider">
+                      {pkg.tokens} Predicted Match{pkg.tokens > 1 ? 'es' : ''}
                     </div>
-                  )}
+                  </div>
 
-                  <CardContent className="p-6 text-center">
-                    {/* Icon */}
-                    <div
-                      className={`w-16 h-16 bg-gradient-to-r ${pkg.color} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}
-                    >
-                      <IconComponent className="h-8 w-8 text-white" />
-                    </div>
-
-                    {/* Package Name */}
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {pkg.name}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-gray-600 text-sm mb-4">
-                      {pkg.description}
-                    </p>
-
-                    {/* Custom Token Input */}
-                    {pkg.type === "custom" && (
-                      <div className="mb-4">
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">
-                          Number of Tokens
-                        </label>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleTokenChange(String(customTokens - 1))
-                            }
-                            disabled={customTokens <= 1}
-                          >
-                            -
-                          </Button>
-                          <Input
-                            type="number"
-                            value={customTokens}
-                            onChange={(e) => handleTokenChange(e.target.value)}
-                            className="text-center w-20"
-                            min="1"
-                            max="1000"
-                          />
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleTokenChange(String(customTokens + 1))
-                            }
-                            disabled={customTokens >= 1000}
-                          >
-                            +
-                          </Button>
+                  {/* Features */}
+                  <ul className="space-y-4 mb-8 text-left max-w-[200px] mx-auto">
+                    {pkg.features.map((feature, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-start text-sm text-gray-600 group-hover:text-gray-900 transition-colors"
+                      >
+                        <div className="mt-1 mr-3 p-0.5 bg-green-100 rounded-full">
+                          <Zap className="h-3 w-3 text-green-600 fill-current" />
                         </div>
-                      </div>
-                    )}
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
 
-                    {/* Price */}
-                    <div className="mb-4">
-                      {pkg.price === 0 ? (
-                        <div className="text-3xl font-bold text-green-600">
-                          FREE
-                        </div>
-                      ) : (
-                        <>
-                          <div className="text-3xl font-bold text-gray-900">
-                            ₹
-                            {pkg.type === "custom"
-                              ? customTokens * pkg.price
-                              : pkg.price}
-                          </div>
-                          {pkg.type !== "custom" && (
-                            <div className="text-sm text-gray-600">
-                              ₹{Math.round(pkg.price / pkg.credits)} per token
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Tokens */}
-                    <div className="mb-6">
-                      <div className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
-                        {pkg.type === "custom" ? customTokens : pkg.credits}
-                      </div>
-                      <div className="text-gray-600 font-medium">
-                        PREDICTION TOKENS
-                      </div>
-                    </div>
-
-                    {/* Features */}
-                    <ul className="space-y-2 mb-6">
-                      {pkg.features.map((feature: any, featureIndex: any) => (
-                        <li
-                          key={featureIndex}
-                          className="flex items-center justify-center text-sm text-gray-600"
-                        >
-                          <Zap className="h-3 w-3 text-green-500 mr-2" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-
-                    {/* Action Button */}
-                    <Button
-                      className={`w-full ${
-                        pkg.price === 0
-                          ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-                          : pkg.popular
-                            ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                            : "bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600"
-                      } text-white font-semibold py-3`}
-                      onClick={() => {
-                        handlePurchase(pkg.type, pkg.credits, pkg.price);
-                        const { icon, ...serializableData }: any = pkg;
-
-                        dispatch(setPlans(serializableData));
-                      }}
-                    >
-                      {pkg.price === 0 ? (
-                        <>
-                          <Play className="h-4 w-4 mr-2" />
-                          Watch Ad & Get Token
-                        </>
-                      ) : (
-                        <>
-                          <CreditCard className="h-4 w-4 mr-2" />
-                          Buy Now
-                        </>
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  {/* Action Button */}
+                  <Button
+                    className={`w-full h-14 text-lg font-bold gap-2 shadow-xl hover:shadow-2xl transition-all duration-300 ${
+                      pkg.popular
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        : "bg-gray-900 hover:bg-black"
+                    } text-white`}
+                    onClick={() => handleWhatsAppPayment(pkg)}
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                    Pay via WhatsApp
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
-          {/* Features Section */}
-          <div className="max-w-6xl mx-auto mb-16">
-            <Card className="shadow-2xl border-0 bg-gradient-to-br from-white to-blue-50">
-              <CardHeader className="text-center pb-8">
-                <CardTitle className="text-3xl font-bold text-gray-900">
-                  Why Use Prediction Tokens?
-                </CardTitle>
-                <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                  Get AI-powered insights that give you the winning edge
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                  <div className="text-center group hover:scale-105 transition-transform">
-                    <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl">
-                      <Trophy className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="font-bold text-gray-900 mb-2 text-lg">
-                      95% Accuracy
-                    </h3>
-                    <p className="text-gray-600">
-                      Proven prediction success rate across thousands of matches
-                    </p>
-                  </div>
-                  <div className="text-center group hover:scale-105 transition-transform">
-                    <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl">
-                      <Zap className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="font-bold text-gray-900 mb-2 text-lg">
-                      Instant Access
-                    </h3>
-                    <p className="text-gray-600">
-                      Get predictions immediately after token purchase
-                    </p>
-                  </div>
-                  <div className="text-center group hover:scale-105 transition-transform">
-                    <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl">
-                      <Shield className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="font-bold text-gray-900 mb-2 text-lg">
-                      Lifetime Tokens
-                    </h3>
-                    <p className="text-gray-600">
-                      Purchased tokens never expire, use them anytime
-                    </p>
-                  </div>
-                  <div className="text-center group hover:scale-105 transition-transform">
-                    <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl">
-                      <Users className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="font-bold text-gray-900 mb-2 text-lg">
-                      50K+ Winners
-                    </h3>
-                    <p className="text-gray-600">
-                      Join our community of successful fantasy players
-                    </p>
-                  </div>
+          {/* Daily Free Credit Action Card */}
+          <div className="max-w-4xl mx-auto mb-20">
+             <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-200 border-2 overflow-hidden relative">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Sparkles className="h-24 w-24 text-green-600" />
                 </div>
-              </CardContent>
-            </Card>
+                <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="text-center md:text-left">
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Need a trial token?</h2>
+                        <p className="text-gray-600 text-lg">Watch a short advertisement and get 1 free prediction token every day!</p>
+                    </div>
+                    <Button 
+                        size="lg" 
+                        variant="default" 
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold h-14 px-8 min-w-[200px] shadow-xl hover:shadow-green-200 transition-all rounded-xl"
+                        onClick={handleFreeToken}
+                    >
+                        <Play className="h-5 w-5 mr-3 fill-current" />
+                        Get Free Token
+                    </Button>
+                </CardContent>
+             </Card>
           </div>
 
-          {/* FAQ Section */}
-          <div className="max-w-4xl mx-auto">
+          {/* Features Comparison */}
+          <div className="max-w-5xl mx-auto mb-20">
             <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-              Frequently Asked Questions
+              Why Choice Our AI Predictions?
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-gray-900 mb-3 text-lg">
-                    How do tokens work?
-                  </h3>
-                  <p className="text-gray-600">
-                    Each prediction costs 1 token. Buy tokens in packages and
-                    use them for AI-powered match predictions, winner forecasts,
-                    and Dream11 team suggestions.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-gray-900 mb-3 text-lg">
-                    Do tokens expire?
-                  </h3>
-                  <p className="text-gray-600">
-                    No! All purchased tokens are valid forever. Only free daily
-                    tokens expire after 24 hours if not used.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-gray-900 mb-3 text-lg">
-                    Can I get free tokens?
-                  </h3>
-                  <p className="text-gray-600">
-                    Yes! Watch one ad daily to get 1 free token. Perfect for
-                    trying out our predictions before purchasing.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-gray-900 mb-3 text-lg">
-                    What payment methods?
-                  </h3>
-                  <p className="text-gray-600">
-                    We accept UPI, credit/debit cards, net banking, and all
-                    major digital wallets. 100% secure payments.
-                  </p>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="text-center p-6 rounded-3xl bg-white shadow-lg border border-gray-100 hover:border-blue-200 transition-all">
+                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Trophy className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2">92% Win Rate</h3>
+                <p className="text-sm text-gray-500">Consistently high accuracy across all cricket formats.</p>
+              </div>
+              <div className="text-center p-6 rounded-3xl bg-white shadow-lg border border-gray-100 hover:border-green-200 transition-all">
+                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Zap className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2">Real-time Data</h3>
+                <p className="text-sm text-gray-500">Analysis based on latest player form and pitch status.</p>
+              </div>
+              <div className="text-center p-6 rounded-3xl bg-white shadow-lg border border-gray-100 hover:border-purple-200 transition-all">
+                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2">100% Secure</h3>
+                <p className="text-sm text-gray-500">Manual verification ensures your tokens are safe.</p>
+              </div>
+              <div className="text-center p-6 rounded-3xl bg-white shadow-lg border border-gray-100 hover:border-orange-200 transition-all">
+                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-8 w-8 text-orange-600" />
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2">Expert Team</h3>
+                <p className="text-sm text-gray-500">Backed by cricket analysts and AI developers.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Instructions */}
+          <div className="max-w-3xl mx-auto text-center p-12 rounded-[2.5rem] bg-gray-900 text-white shadow-2xl">
+            <h2 className="text-3xl font-bold mb-6">How to Buy?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+                <div>
+                    <div className="text-blue-400 font-black text-4xl mb-2">01.</div>
+                    <h4 className="font-bold mb-1">Select Plan</h4>
+                    <p className="text-gray-400 text-sm">Choose the token pack that fits your needs.</p>
+                </div>
+                <div>
+                    <div className="text-blue-400 font-black text-4xl mb-2">02.</div>
+                    <h4 className="font-bold mb-1">WhatsApp Us</h4>
+                    <p className="text-gray-400 text-sm">Follow the link to our official WhatsApp.</p>
+                </div>
+                <div>
+                    <div className="text-blue-400 font-black text-4xl mb-2">03.</div>
+                    <h4 className="font-bold mb-1">Send Proof</h4>
+                    <p className="text-gray-400 text-sm">Pay via UPI/QR and send the screenshot.</p>
+                </div>
+            </div>
+            <div className="mt-10 pt-10 border-t border-gray-800">
+                <p className="text-gray-400 italic">Tokens will be added to your account within 10-15 minutes of verification.</p>
             </div>
           </div>
         </div>
       </div>
+      
       {dailyCredit && (
         <DailyCreditAd
           isOpen={dailyCredit}
