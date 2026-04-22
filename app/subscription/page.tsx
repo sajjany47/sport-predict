@@ -19,6 +19,8 @@ import {
   Sparkles,
   Star,
   MessageCircle,
+  Copy,
+  Check,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -47,7 +49,7 @@ const SubscriptionPage = () => {
       tokens: 1,
       price: 49,
       description: "Perfect for a single winning prediction",
-      features: ["1 AI Match Prediction", "Standard Support", "Instant Access"],
+      features: ["1 Premium Token", "Standard Support", "Instant Access"],
       color: "from-blue-400 to-blue-600",
       borderColor: "border-blue-100",
       bgColor: "bg-white",
@@ -59,7 +61,7 @@ const SubscriptionPage = () => {
       tokens: 5,
       price: 199,
       description: "Best for regular weekend matches",
-      features: ["5 AI Match Predictions", "Priority Support", "Lifetime Validity", "Save ₹46"],
+      features: ["5 Premium Tokens", "Priority Support", "Lifetime Validity", "Save ₹46"],
       color: "from-purple-500 to-purple-700",
       borderColor: "border-purple-200",
       bgColor: "bg-purple-50/30",
@@ -72,7 +74,7 @@ const SubscriptionPage = () => {
       tokens: 15,
       price: 599,
       description: "For the ultimate fantasy player",
-      features: ["15 AI Match Predictions", "VIP Support", "Lifetime Validity", "Save ₹136"],
+      features: ["15 Premium Tokens", "VIP Support", "Lifetime Validity", "Save ₹136"],
       color: "from-amber-400 to-amber-600",
       borderColor: "border-amber-200",
       bgColor: "bg-amber-50/30",
@@ -138,6 +140,15 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
       });
   };
 
+  const [copiedText, setCopiedText] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(label);
+    toast.success(`${label} copied to clipboard!`);
+    setTimeout(() => setCopiedText(null), 2000);
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -156,25 +167,94 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
               Elevate Your Game
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-              Choose your token package and get instant access to premium AI predictions. 
-              Payments are handled securely via WhatsApp.
+              Get instant access to premium AI predictions. 
+              Choose a pack and <strong>pay directly via WhatsApp</strong> for quick activation.
             </p>
 
-            {/* Current Token Balance */}
-            {user && (
-              <div className="inline-flex items-center space-x-4 bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-xl border border-white">
-                <div className="flex items-center space-x-2">
-                  <Coins className="h-6 w-6 text-yellow-500 animate-pulse" />
-                  <span className="text-lg font-bold text-gray-900">
-                    {user.credits || 0} Tokens Available
-                  </span>
+            {/* Trust & Instant Contact Banner */}
+            <div className="max-w-4xl mx-auto mb-12">
+              <div className="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-xl border border-white/50 relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                  <Shield className="h-32 w-32 text-blue-600" />
                 </div>
-                <div className="w-px h-6 bg-gray-200"></div>
-                <div className="text-sm font-medium text-blue-600">
-                  1 token = 1 premium prediction
+                
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
+                  {/* Trust Part */}
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+                    <div className="flex items-center space-x-2 bg-green-50 px-4 py-2 rounded-2xl border border-green-100">
+                      <span className="text-green-600 font-bold">✅</span>
+                      <span className="text-sm font-bold text-gray-700">100+ Users served</span>
+                    </div>
+                    <div className="flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100">
+                      <span className="text-blue-600 font-bold">⚡</span>
+                      <span className="text-sm font-bold text-gray-700">Instant Support</span>
+                    </div>
+                    <div className="flex items-center space-x-2 bg-purple-50 px-4 py-2 rounded-2xl border border-purple-100">
+                      <span className="text-purple-600 font-bold">🔒</span>
+                      <span className="text-sm font-bold text-gray-700">Safe Verification</span>
+                    </div>
+                  </div>
+
+                  {/* Contact Part */}
+                  <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+                    <div className="w-full sm:w-auto bg-slate-50 hover:bg-white transition-colors p-4 rounded-2xl border border-slate-200 flex items-center justify-between gap-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-green-100 p-2 rounded-lg">
+                          <MessageCircle className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">WhatsApp Pay</p>
+                          <p className="text-base font-bold text-gray-900 leading-none">8981374643</p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-lg hover:bg-green-50 text-green-600"
+                        onClick={() => copyToClipboard("8981374643", "WhatsApp number")}
+                      >
+                        {copiedText === "WhatsApp number" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      </Button>
+                    </div>
+
+                    <div className="w-full sm:w-auto bg-slate-50 hover:bg-white transition-colors p-4 rounded-2xl border border-slate-200 flex items-center justify-between gap-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-blue-100 p-2 rounded-lg">
+                          <Shield className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">Email Support</p>
+                          <p className="text-base font-bold text-gray-900 leading-none truncate max-w-[120px]">sportpredict247@gmail.com</p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-lg hover:bg-blue-50 text-blue-600"
+                        onClick={() => copyToClipboard("sportpredict247@gmail.com", "Email support")}
+                      >
+                        {copiedText === "Email support" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Current Balance - now inside the banner as a badge */}
+                {user && (
+                    <div className="mt-6 pt-6 border-t border-gray-100 flex items-center justify-center lg:justify-start space-x-2">
+                        <div className="flex items-center space-x-2 bg-yellow-50 px-3 py-1.5 rounded-xl border border-yellow-100">
+                            <Coins className="h-4 w-4 text-yellow-500 animate-pulse" />
+                            <span className="text-xs font-black text-gray-900 uppercase tracking-tighter">
+                                {user.credits || 0} Tokens Available
+                            </span>
+                        </div>
+                        <span className="text-[10px] font-bold text-blue-600 uppercase italic">
+                            1 token = 1 premium prediction
+                        </span>
+                    </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Token Packages */}
@@ -235,7 +315,7 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                         <span className="text-4xl font-black text-gray-900">₹{pkg.price}</span>
                     </div>
                     <div className="text-sm font-semibold text-blue-600 mt-1 uppercase tracking-wider">
-                      {pkg.tokens} Predicted Match{pkg.tokens > 1 ? 'es' : ''}
+                      {pkg.tokens} Token{pkg.tokens > 1 ? 's' : ''}
                     </div>
                   </div>
 
@@ -333,29 +413,6 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
           </div>
 
           {/* Payment Instructions */}
-          <div className="max-w-3xl mx-auto text-center p-12 rounded-[2.5rem] bg-gray-900 text-white shadow-2xl">
-            <h2 className="text-3xl font-bold mb-6">How to Buy?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-                <div>
-                    <div className="text-blue-400 font-black text-4xl mb-2">01.</div>
-                    <h4 className="font-bold mb-1">Select Plan</h4>
-                    <p className="text-gray-400 text-sm">Choose the token pack that fits your needs.</p>
-                </div>
-                <div>
-                    <div className="text-blue-400 font-black text-4xl mb-2">02.</div>
-                    <h4 className="font-bold mb-1">WhatsApp Us</h4>
-                    <p className="text-gray-400 text-sm">Follow the link to our official WhatsApp.</p>
-                </div>
-                <div>
-                    <div className="text-blue-400 font-black text-4xl mb-2">03.</div>
-                    <h4 className="font-bold mb-1">Send Proof</h4>
-                    <p className="text-gray-400 text-sm">Pay via UPI/QR and send the screenshot.</p>
-                </div>
-            </div>
-            <div className="mt-10 pt-10 border-t border-gray-800">
-                <p className="text-gray-400 italic">Tokens will be added to your account within 10-15 minutes of verification.</p>
-            </div>
-          </div>
         </div>
       </div>
       
