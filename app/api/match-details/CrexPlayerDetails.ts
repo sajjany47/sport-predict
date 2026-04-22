@@ -1,4 +1,5 @@
 import { GetHtml } from "@/lib/utils";
+import { PlayerScore } from "./PlayerScore";
 
 export const CrexPlayerDetails = async (url: string) => {
   const $ = await GetHtml(url);
@@ -33,12 +34,39 @@ export const CrexPlayerDetails = async (url: string) => {
       .get();
   };
 
+  const battingRecent = readRecent("Batting");
+  const bowlingRecent = readRecent("Bowling");
+
+  // ✅ ENRICH WITH PlayerScore (Batting) - Sequential to avoid resource exhaustion
+  const enrichedBatting = [];
+  for (const match of battingRecent.slice(0, 5)) {
+    if (match.scorecardUrl) {
+      const stats = await PlayerScore(url, match.scorecardUrl).catch(() => null);
+      enrichedBatting.push({ ...match, ...stats });
+    } else {
+      enrichedBatting.push(match);
+    }
+  }
+
+  // ✅ ENRICH WITH PlayerScore (Bowling) - Sequential
+  const enrichedBowling = [];
+  for (const match of bowlingRecent.slice(0, 5)) {
+    if (match.scorecardUrl) {
+      const stats = await PlayerScore(url, match.scorecardUrl).catch(() => null);
+      enrichedBowling.push({ ...match, ...stats });
+    } else {
+      enrichedBowling.push(match);
+    }
+  }
+
   const recentForm = {
-    batting: readRecent("Batting"),
-    bowling: readRecent("Bowling"),
+    batting: enrichedBatting,
+    bowling: enrichedBowling,
   };
 
+
   /* ================= CAREER STATS ================= */
+
 
   const careerSections = $("section.careerSection");
 
