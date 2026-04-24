@@ -1490,6 +1490,54 @@ export const FilterSquad = (squads: any[]) => {
   return a;
 };
 
+export const SendPrediction = async (prediction: any) => {
+  try {
+    const BOT_TOKEN = "8779344951:AAGQ2HQLS786MfYhi4vvdipJMzDSsashxx0";
+    const CHAT_ID = "@sportbetting1998";
+
+    const {
+      team1,
+      team2,
+      team1Chance,
+      team2Chance,
+      finalWinner,
+      message = "According to the analysis",
+      stopLoss = "20 Paisa",
+      brandName = "BETTING SAJJAN ❤️",
+    } = prediction;
+
+    const text = `
+🕉 ${team1.toUpperCase()} VS ${team2.toUpperCase()} 🕉
+
+📊 Winning Chances:
+${team1.toUpperCase()} - ${team1Chance}
+${team2.toUpperCase()} - ${team2Chance}
+
+🏆 MATCH WINNER - ${finalWinner.toUpperCase()} 🏆
+
+${message}
+
+${finalWinner.toUpperCase()} WILL WIN THIS MATCH
+
+⚠️ Loss cut at ${stopLoss} compulsory
+
+${brandName}
+`;
+
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+    const response = await axios.post(url, {
+      chat_id: CHAT_ID,
+      text: text,
+    });
+
+    return response.data;
+  } catch (error: any) {
+    console.log("Telegram Send Error:", error?.response?.data || error.message);
+    return null;
+  }
+};
+
 // {
 //   "crons": [
 //     {
