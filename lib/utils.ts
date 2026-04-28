@@ -390,14 +390,14 @@ export const FindWinner = (team: any, selectedMatch: any, teamName: any) => {
     } else if (team1Score.runs > team2Score.runs) {
       winner =
         match.team1?.name.toLowerCase() ===
-        findTeamShortName?.toLocaleLowerCase()
+          findTeamShortName?.toLocaleLowerCase()
           ? "W"
           : "L";
       winnerType = "batting";
     } else if (team2Score.runs > team1Score.runs) {
       winner =
         match.team2?.name.toLowerCase() ===
-        findTeamShortName?.toLocaleLowerCase()
+          findTeamShortName?.toLocaleLowerCase()
           ? "W"
           : "L";
       winnerType = "bowling";
@@ -1032,8 +1032,8 @@ export const playerPredictionScoreCalculate = (
   // weighted combined batting metrics (50% recent, 30% career, 20% stadium)
   const totalRuns = CheckIntValue(
     recentRuns * W_RECENT +
-      battingCareerRuns * W_CAREER +
-      battingStadiumRuns * W_STADIUM,
+    battingCareerRuns * W_CAREER +
+    battingStadiumRuns * W_STADIUM,
     2,
   );
 
@@ -1046,8 +1046,8 @@ export const playerPredictionScoreCalculate = (
 
   const totalAvgBallFaced = CheckIntValue(
     recentBalls * W_RECENT +
-      battingCareerBalls * W_CAREER +
-      battingStadiumBalls * W_STADIUM,
+    battingCareerBalls * W_CAREER +
+    battingStadiumBalls * W_STADIUM,
     2,
   );
   const totalAvgStrikeRate = CheckIntValue(
@@ -1114,22 +1114,22 @@ export const playerPredictionScoreCalculate = (
   // weighted bowling aggregates (50% recent, 30% career, 20% stadium)
   const totalAvgOvers = CheckIntValue(
     recentOvers * W_RECENT +
-      bowlingCareerOvers * W_CAREER +
-      bowlingStadiumOvers * W_STADIUM,
+    bowlingCareerOvers * W_CAREER +
+    bowlingStadiumOvers * W_STADIUM,
     2,
   );
 
   const totalAvgWickets = CheckIntValue(
     recentWicket * W_RECENT +
-      bowlingCareerWickets * W_CAREER +
-      bowlingStadiumWickets * W_STADIUM,
+    bowlingCareerWickets * W_CAREER +
+    bowlingStadiumWickets * W_STADIUM,
     2,
   );
 
   const totalAvgRunsConceded = CheckIntValue(
     recentRunsConceded * W_RECENT +
-      bowlingCareerRuns * W_CAREER +
-      bowlingStadiumRuns * W_STADIUM,
+    bowlingCareerRuns * W_CAREER +
+    bowlingStadiumRuns * W_STADIUM,
     2,
   );
 
@@ -1503,7 +1503,7 @@ export const SendPrediction = async (prediction: any) => {
       finalWinner,
       message = "According to the analysis",
       stopLoss = "20 Paisa",
-      brandName = "BETTING SAJJAN ❤️",
+      brandName = "SportPredict -Powered by AI ❤️",
     } = prediction;
 
     const text = `
