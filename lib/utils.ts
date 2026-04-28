@@ -390,14 +390,14 @@ export const FindWinner = (team: any, selectedMatch: any, teamName: any) => {
     } else if (team1Score.runs > team2Score.runs) {
       winner =
         match.team1?.name.toLowerCase() ===
-          findTeamShortName?.toLocaleLowerCase()
+        findTeamShortName?.toLocaleLowerCase()
           ? "W"
           : "L";
       winnerType = "batting";
     } else if (team2Score.runs > team1Score.runs) {
       winner =
         match.team2?.name.toLowerCase() ===
-          findTeamShortName?.toLocaleLowerCase()
+        findTeamShortName?.toLocaleLowerCase()
           ? "W"
           : "L";
       winnerType = "bowling";
@@ -1032,8 +1032,8 @@ export const playerPredictionScoreCalculate = (
   // weighted combined batting metrics (50% recent, 30% career, 20% stadium)
   const totalRuns = CheckIntValue(
     recentRuns * W_RECENT +
-    battingCareerRuns * W_CAREER +
-    battingStadiumRuns * W_STADIUM,
+      battingCareerRuns * W_CAREER +
+      battingStadiumRuns * W_STADIUM,
     2,
   );
 
@@ -1046,8 +1046,8 @@ export const playerPredictionScoreCalculate = (
 
   const totalAvgBallFaced = CheckIntValue(
     recentBalls * W_RECENT +
-    battingCareerBalls * W_CAREER +
-    battingStadiumBalls * W_STADIUM,
+      battingCareerBalls * W_CAREER +
+      battingStadiumBalls * W_STADIUM,
     2,
   );
   const totalAvgStrikeRate = CheckIntValue(
@@ -1114,22 +1114,22 @@ export const playerPredictionScoreCalculate = (
   // weighted bowling aggregates (50% recent, 30% career, 20% stadium)
   const totalAvgOvers = CheckIntValue(
     recentOvers * W_RECENT +
-    bowlingCareerOvers * W_CAREER +
-    bowlingStadiumOvers * W_STADIUM,
+      bowlingCareerOvers * W_CAREER +
+      bowlingStadiumOvers * W_STADIUM,
     2,
   );
 
   const totalAvgWickets = CheckIntValue(
     recentWicket * W_RECENT +
-    bowlingCareerWickets * W_CAREER +
-    bowlingStadiumWickets * W_STADIUM,
+      bowlingCareerWickets * W_CAREER +
+      bowlingStadiumWickets * W_STADIUM,
     2,
   );
 
   const totalAvgRunsConceded = CheckIntValue(
     recentRunsConceded * W_RECENT +
-    bowlingCareerRuns * W_CAREER +
-    bowlingStadiumRuns * W_STADIUM,
+      bowlingCareerRuns * W_CAREER +
+      bowlingStadiumRuns * W_STADIUM,
     2,
   );
 
@@ -1494,17 +1494,35 @@ export const SendPrediction = async (prediction: any) => {
   try {
     const BOT_TOKEN = "8779344951:AAGQ2HQLS786MfYhi4vvdipJMzDSsashxx0";
     const CHAT_ID = "@sportbetting1998";
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+    // const {
+    //   team1,
+    //   team2,
+    //   team1Chance,
+    //   team2Chance,
+    //   finalWinner,
+    //   message = "According to the analysis",
+    //   stopLoss = "20 Paisa",
+    //   brandName = "SportPredict - 🎯 POWERED BY AI ❤️",
+    // } = prediction;
+    const team1 = prediction?.team1?.name;
+    const team2 = prediction?.team2?.name;
 
-    const {
-      team1,
-      team2,
-      team1Chance,
-      team2Chance,
-      finalWinner,
-      message = "According to the analysis",
-      stopLoss = "20 Paisa",
-      brandName = "SportPredict -Powered by AI ❤️",
-    } = prediction;
+    const team1Chance =
+      prediction?.team1?.winnerPrediction?.probability?.toFixed(2) + "%";
+
+    const team2Chance =
+      prediction?.team2?.winnerPrediction?.probability?.toFixed(2) + "%";
+
+    const finalWinner =
+      prediction?.team1?.winnerPrediction?.probability >
+      prediction?.team2?.winnerPrediction?.probability
+        ? team1
+        : team2;
+
+    const brandName = "SportPredict - 🎯 POWERED BY AI ❤️";
+    const message = "According to the analysis";
+    const stopLoss = "20 Paisa";
 
     const text = `
 🕉 ${team1.toUpperCase()} VS ${team2.toUpperCase()} 🕉
@@ -1524,7 +1542,7 @@ ${finalWinner.toUpperCase()} WILL WIN THIS MATCH
 ${brandName}
 `;
 
-    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+    // const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
     const response = await axios.post(url, {
       chat_id: CHAT_ID,
