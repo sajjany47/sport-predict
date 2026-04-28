@@ -186,26 +186,41 @@ export const GET = async (_req: NextRequest) => {
         });
 
         const matchDateTime = moment(match.formatDate);
+        const isOldMatch = now.diff(matchDateTime, "days") >= 2;
 
-        const status = matchDateTime.isAfter(moment())
-          ? "UPCOMING"
-          : result.includes("abandoned")
-            ? "ABANDONED"
-            : result.includes("won") ||
-                result.includes("match drawn") ||
-                result.includes("no result")
-              ? "COMPLETED"
-              : "LIVE";
+        // const status = matchDateTime.isAfter(moment())
+        //   ? "UPCOMING"
+        //   : result.includes("abandoned")
+        //     ? "ABANDONED"
+        //     : result.includes("won") ||
+        //         result.includes("match drawn") ||
+        //         result.includes("no result")
+        //       ? "COMPLETED"
+        //       : "LIVE";
+
+        const status = isOldMatch
+          ? "COMPLETED"
+          : matchDateTime.isAfter(now)
+            ? "UPCOMING"
+            : result.includes("abandoned")
+              ? "ABANDONED"
+              : result.includes("won") ||
+                  result.includes("match drawn") ||
+                  result.includes("no result")
+                ? "COMPLETED"
+                : "LIVE";
+        const isCompleted = isOldMatch || status === "COMPLETED";
 
         await Match.updateOne(
           { _id: match._id },
           {
             $set: {
-              isCompleted:
-                result.includes("abandoned") ||
-                result.includes("won") ||
-                result.includes("match drawn") ||
-                result.includes("no result"),
+              // isCompleted:
+              //   result.includes("abandoned") ||
+              //   result.includes("won") ||
+              //   result.includes("match drawn") ||
+              //   result.includes("no result"),
+              isCompleted,
               teams: updatedTeams,
               status,
               matchResult: result,
