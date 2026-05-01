@@ -43,6 +43,8 @@ const MatchSchema = new Schema(
     isDetailsFetched: { type: Boolean, default: false },
     matchResult: { type: String, default: null },
     score: { type: Object, default: null },
+    isPredictionMessageSent: { type: Boolean, default: false },
+    isResultMessageSent: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
