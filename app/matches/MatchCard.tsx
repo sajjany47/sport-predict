@@ -167,18 +167,38 @@ const MatchCard = ({
   }, [match._id, match.formatDate, match.startTime, match.status]);
 
   // Determine actual winner from result
+  // const getActualWinner = () => {
+  //   if (!match.score?.result || match.status !== "COMPLETED") return null;
+
+  //   const result = match.score.result;
+  //   const winningTeam = match.teams.find(
+  //     (team) =>
+  //       result.toLowerCase().includes(team.teamName.toLowerCase()) ||
+  //       result.toLowerCase().includes(team.teamShortName.toLowerCase()),
+  //   );
+
+  //   return winningTeam?.teamShortName || null;
+  // };
+
   const getActualWinner = () => {
-    if (!match.score?.result || match.status !== "COMPLETED") return null;
+  if (!match.score?.result || match.status !== "COMPLETED") return null;
 
-    const result = match.score.result;
-    const winningTeam = match.teams.find(
-      (team) =>
-        result.toLowerCase().includes(team.teamName.toLowerCase()) ||
-        result.toLowerCase().includes(team.teamShortName.toLowerCase()),
-    );
+  const result = match.score.result.toLowerCase();
 
-    return winningTeam?.teamShortName || null;
-  };
+  if (
+    result.includes(match.prediction?.team1?.name?.toLowerCase())
+  ) {
+    return match.prediction.team1.shortName; // PAK
+  }
+
+  if (
+    result.includes(match.prediction?.team2?.name?.toLowerCase())
+  ) {
+    return match.prediction.team2.shortName; // AUS
+  }
+
+  return null;
+};
 
   // Determine predicted winner based on higher probability
   const getPredictedWinner = () => {
