@@ -14,6 +14,10 @@ import {
   Shield,
   ChevronRight,
   Play,
+  Brain,
+  Rocket,
+  Globe,
+  Lightbulb,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -87,6 +91,40 @@ const HomePage = () => {
       title: "Secure & Reliable",
       description:
         "99.9% uptime with bank-grade security. Your data and payments are completely secure with us.",
+    },
+  ];
+
+  const team = [
+    {
+      name: "Rajesh Kumar",
+      role: "CEO & Founder",
+      description:
+        "Former cricket analyst with 15+ years experience in sports analytics and AI.",
+      avatar: "RK",
+      icon: Rocket,
+    },
+    {
+      name: "Priya Sharma",
+      role: "CTO & Co-Founder",
+      description:
+        "AI/ML expert with background in predictive modeling and data science.",
+      avatar: "PS",
+      icon: Brain,
+    },
+    {
+      name: "Amit Patel",
+      role: "Head of Cricket Analytics",
+      description: "Ex-professional cricket coach and statistical analyst.",
+      avatar: "AP",
+      icon: Globe,
+    },
+    {
+      name: "Sneha Gupta",
+      role: "Product Manager",
+      description:
+        "Product strategy expert focused on user experience and fantasy sports.",
+      avatar: "SG",
+      icon: Lightbulb,
     },
   ];
 
@@ -285,6 +323,47 @@ const HomePage = () => {
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Meet Our Leadership
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Passionate cricket enthusiasts and technology experts working
+              together to revolutionize fantasy sports
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            {team.map((member, index) => {
+              const Icon = member.icon;
+              return (
+                <Card
+                  key={index}
+                  className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 text-center"
+                >
+                  <CardContent className="p-6">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="h-7 w-7 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {member.name}
+                    </h3>
+                    <Badge className="mb-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0">
+                      {member.role}
+                    </Badge>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {member.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
