@@ -274,8 +274,8 @@ const TicketDetailsPage = () => {
   };
 
   // Function to determine if message is from user or admin
-  const isUserMessage = (message: any) => {
-    return message.replyBy._id === ticket.user._id;
+  const isCurrentUserMessage = (message: any) => {
+    return message.replyBy._id === user?.id;
   };
 
   const formatTime = (dateString: string) => {
@@ -541,7 +541,7 @@ const TicketDetailsPage = () => {
 
                       <div className="p-6 space-y-6 max-h-96 overflow-y-auto">
                         {ticket.message.map((msg: any, index: number) => {
-                          const isUser = isUserMessage(msg);
+                          const isMe = isCurrentUserMessage(msg);
                           return (
                             <div key={msg._id} className="space-y-2">
                               {/* Date separator if needed */}
@@ -559,26 +559,26 @@ const TicketDetailsPage = () => {
 
                               <div
                                 className={`flex ${
-                                  isUser ? "justify-start" : "justify-end"
+                                  isMe ? "justify-end" : "justify-start"
                                 }`}
                               >
                                 <div
                                   className={`flex ${
-                                    isUser ? "flex-row" : "flex-row-reverse"
+                                    isMe ? "flex-row-reverse" : "flex-row"
                                   } items-start space-x-3 max-w-xs lg:max-w-md`}
                                 >
                                   {/* Avatar */}
                                   <div
                                     className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                      isUser
-                                        ? "bg-gradient-to-r from-green-400 to-blue-500"
-                                        : "bg-gradient-to-r from-purple-500 to-pink-500"
+                                      isMe
+                                        ? "bg-gradient-to-r from-purple-500 to-pink-500"
+                                        : "bg-gradient-to-r from-green-400 to-blue-500"
                                     }`}
                                   >
-                                    {isUser ? (
-                                      <User className="h-4 w-4 text-white" />
-                                    ) : (
+                                    {isMe ? (
                                       <Shield className="h-4 w-4 text-white" />
+                                    ) : (
+                                      <User className="h-4 w-4 text-white" />
                                     )}
                                   </div>
 
@@ -586,9 +586,9 @@ const TicketDetailsPage = () => {
                                   <div className="space-y-1">
                                     <div
                                       className={`px-4 py-3 rounded-2xl ${
-                                        isUser
-                                          ? "bg-gray-100 text-gray-900 rounded-bl-sm"
-                                          : "bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-sm"
+                                        isMe
+                                          ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-sm"
+                                          : "bg-gray-100 text-gray-900 rounded-bl-sm"
                                       } shadow-sm`}
                                     >
                                       <p className="text-sm leading-relaxed">
@@ -599,18 +599,16 @@ const TicketDetailsPage = () => {
                                     {/* Message Info */}
                                     <div
                                       className={`flex items-center space-x-2 text-xs ${
-                                        isUser
-                                          ? "text-gray-500"
-                                          : "text-gray-400"
+                                        isMe ? "text-gray-400" : "text-gray-500"
                                       } ${
-                                        isUser ? "ml-0" : "mr-0 justify-end"
+                                        isMe ? "mr-0 justify-end" : "ml-0"
                                       }`}
                                     >
                                       <span className="flex items-center space-x-1">
-                                        {isUser ? (
-                                          <UserCheck className="h-3 w-3" />
-                                        ) : (
+                                        {isMe ? (
                                           <Shield className="h-3 w-3" />
+                                        ) : (
+                                          <UserCheck className="h-3 w-3" />
                                         )}
                                         <span>{msg.replyBy.name}</span>
                                       </span>
