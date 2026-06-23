@@ -165,19 +165,13 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-        {/* Breadcrumb */}
-        <div className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 text-sm text-muted-foreground">
-            <Home className="h-3.5 w-3.5" />
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-foreground font-medium">Subscription</span>
-          </div>
-        </div>
-
         <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
           {/* Header */}
           <div className="text-center mb-10 md:mb-14">
-            <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-xs font-semibold tracking-wide">
+            <Badge
+              variant="secondary"
+              className="mb-4 px-4 py-1.5 text-xs font-semibold tracking-wide"
+            >
               <Sparkles className="h-3 w-3 mr-1.5" />
               AI-Powered Predictions
             </Badge>
@@ -214,8 +208,8 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                   </div>
                 </div>
                 <div className="mt-3 pt-3 border-t border-white/20 flex items-center gap-2 text-blue-100 text-xs">
-                  <BarChart3 className="h-3.5 w-3.5" />
-                  1 token = 1 premium prediction
+                  <BarChart3 className="h-3.5 w-3.5" />1 token = 1 premium
+                  prediction
                 </div>
               </div>
             </div>
@@ -277,7 +271,10 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-blue-50 text-blue-600 shrink-0"
                     onClick={() =>
-                      copyToClipboard("sportpredict247@gmail.com", "Email support")
+                      copyToClipboard(
+                        "sportpredict247@gmail.com",
+                        "Email support",
+                      )
                     }
                   >
                     {copiedText === "Email support" ? (
@@ -317,13 +314,17 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                     </div>
                   )}
 
-                  <CardHeader className={`pb-0 text-center ${pkg.popular ? "pt-8" : "pt-6"}`}>
+                  <CardHeader
+                    className={`pb-0 text-center ${pkg.popular ? "pt-8" : "pt-6"}`}
+                  >
                     <div
                       className={`w-12 h-12 bg-gradient-to-br ${pkg.color} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md`}
                     >
                       <Icon className="h-6 w-6 text-white" />
                     </div>
-                    <CardTitle className="text-xl font-bold">{pkg.name}</CardTitle>
+                    <CardTitle className="text-xl font-bold">
+                      {pkg.name}
+                    </CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
                       {pkg.description}
                     </p>
@@ -351,7 +352,10 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                     {/* Features */}
                     <ul className="space-y-3 mb-8 flex-1">
                       {pkg.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-3 text-sm">
+                        <li
+                          key={idx}
+                          className="flex items-start gap-3 text-sm"
+                        >
                           <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                           <span className="text-gray-600">{feature}</span>
                         </li>
@@ -505,8 +509,6 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
               })}
             </div>
           </div>
-
-
         </div>
       </div>
 
