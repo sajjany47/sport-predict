@@ -21,6 +21,14 @@ import {
   MessageCircle,
   Copy,
   Check,
+  ChevronRight,
+  Home,
+  ArrowRight,
+  Wallet,
+  Smartphone,
+  Clock,
+  BarChart3,
+  CheckCircle2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -45,51 +53,46 @@ const SubscriptionPage = () => {
   const staticPlans = [
     {
       id: "starter",
-      name: "Starter Pack",
+      name: "Starter",
       tokens: 1,
       price: 49,
-      description: "Perfect for a single winning prediction",
+      description: "Perfect for a single prediction",
       features: ["1 Premium Token", "Standard Support", "Instant Access"],
-      color: "from-blue-400 to-blue-600",
-      borderColor: "border-blue-100",
-      bgColor: "bg-white",
+      color: "from-blue-500 to-blue-600",
+      icon: Zap,
       popular: false,
     },
     {
       id: "standard",
-      name: "Standard Pack",
+      name: "Standard",
       tokens: 5,
       price: 199,
-      description: "Best for regular weekend matches",
+      description: "Best for weekend matches",
       features: [
         "5 Premium Tokens",
         "Priority Support",
         "Lifetime Validity",
         "Save ₹46",
       ],
-      color: "from-purple-500 to-purple-700",
-      borderColor: "border-purple-200",
-      bgColor: "bg-purple-50/30",
+      color: "from-violet-500 to-violet-600",
+      icon: Coins,
       popular: true,
-      savings: "Save ₹46",
     },
     {
       id: "premium",
-      name: "Premium Pack",
+      name: "Premium",
       tokens: 15,
       price: 599,
-      description: "For the ultimate fantasy player",
+      description: "For the ultimate player",
       features: [
         "15 Premium Tokens",
         "VIP Support",
         "Lifetime Validity",
         "Save ₹136",
       ],
-      color: "from-amber-400 to-amber-600",
-      borderColor: "border-amber-200",
-      bgColor: "bg-amber-50/30",
+      color: "from-amber-500 to-amber-600",
+      icon: Crown,
       popular: false,
-      savings: "Save ₹136",
     },
   ];
 
@@ -161,313 +164,349 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="container mx-auto px-4 py-12">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+        {/* Breadcrumb */}
+        <div className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 text-sm text-muted-foreground">
+            <Home className="h-3.5 w-3.5" />
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-foreground font-medium">Subscription</span>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
           {/* Header */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-3 mb-6">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-2xl shadow-lg">
-                <Coins className="h-8 w-8 text-white" />
-              </div>
-              <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Buy Prediction Tokens
+          <div className="text-center mb-10 md:mb-14">
+            <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-xs font-semibold tracking-wide">
+              <Sparkles className="h-3 w-3 mr-1.5" />
+              AI-Powered Predictions
+            </Badge>
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+              Get Premium{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+                Prediction Tokens
               </span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 font-display">
-              Elevate Your Game
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-              Get instant access to premium AI predictions. Choose a pack and{" "}
-              <strong>pay directly via WhatsApp</strong> for quick activation.
+            <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto">
+              Unlock expert cricket predictions. Each token gives you one
+              premium AI-powered match analysis.
             </p>
-
-            {/* Trust & Instant Contact Banner */}
-            <div className="max-w-4xl mx-auto mb-12">
-              <div className="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-xl border border-white/50 relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
-                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                  <Shield className="h-32 w-32 text-blue-600" />
-                </div>
-
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
-                  {/* Trust Part */}
-                  <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-                    <div className="flex items-center space-x-2 bg-green-50 px-4 py-2 rounded-2xl border border-green-100">
-                      <span className="text-green-600 font-bold">✅</span>
-                      <span className="text-sm font-bold text-gray-700">
-                        100+ Users served
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100">
-                      <span className="text-blue-600 font-bold">⚡</span>
-                      <span className="text-sm font-bold text-gray-700">
-                        Instant Support
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2 bg-purple-50 px-4 py-2 rounded-2xl border border-purple-100">
-                      <span className="text-purple-600 font-bold">🔒</span>
-                      <span className="text-sm font-bold text-gray-700">
-                        Safe Verification
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Contact Part */}
-                  <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-                    <div className="w-full sm:w-auto bg-slate-50 hover:bg-white transition-colors p-4 rounded-2xl border border-slate-200 flex items-center justify-between gap-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="bg-green-100 p-2 rounded-lg">
-                          <MessageCircle className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">
-                            WhatsApp Pay
-                          </p>
-                          <p className="text-base font-bold text-gray-900 leading-none">
-                            8981374643
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 rounded-lg hover:bg-green-50 text-green-600"
-                        onClick={() =>
-                          copyToClipboard("8981374643", "WhatsApp number")
-                        }
-                      >
-                        {copiedText === "WhatsApp number" ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-
-                    <div className="w-full sm:w-auto bg-slate-50 hover:bg-white transition-colors p-4 rounded-2xl border border-slate-200 flex items-center justify-between gap-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="bg-blue-100 p-2 rounded-lg">
-                          <Shield className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">
-                            Email Support
-                          </p>
-                          <p className="text-base font-bold text-gray-900 leading-none truncate max-w-[120px]">
-                            sportpredict247@gmail.com
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 rounded-lg hover:bg-blue-50 text-blue-600"
-                        onClick={() =>
-                          copyToClipboard(
-                            "sportpredict247@gmail.com",
-                            "Email support",
-                          )
-                        }
-                      >
-                        {copiedText === "Email support" ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Current Balance - now inside the banner as a badge */}
-                {user && (
-                  <div className="mt-6 pt-6 border-t border-gray-100 flex items-center justify-center lg:justify-start space-x-2">
-                    <div className="flex items-center space-x-2 bg-yellow-50 px-3 py-1.5 rounded-xl border border-yellow-100">
-                      <Coins className="h-4 w-4 text-yellow-500 animate-pulse" />
-                      <span className="text-xs font-black text-gray-900 uppercase tracking-tighter">
-                        {user.credits || 0} Tokens Available
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-bold text-blue-600 uppercase italic">
-                      1 token = 1 premium prediction
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
 
-          {/* Token Packages */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-20">
-            {staticPlans.map((pkg) => (
-              <Card
-                key={pkg.id}
-                className={`relative group transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl ${
-                  pkg.bgColor
-                } border-2 ${pkg.borderColor} overflow-hidden ${
-                  pkg.popular
-                    ? "ring-2 ring-blue-500 shadow-2xl scale-105 z-10"
-                    : "shadow-lg"
-                }`}
-              >
-                {pkg.popular && (
-                  <div className="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600"></div>
-                )}
-
-                {pkg.popular && (
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 py-1.5 px-3 shadow-lg">
-                      <Star className="h-3 w-3 mr-1 fill-current" />
-                      Best Value
-                    </Badge>
-                  </div>
-                )}
-
-                {pkg.savings && !pkg.popular && (
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-green-500 text-white border-0 py-1 px-2.5">
-                      {pkg.savings}
-                    </Badge>
-                  </div>
-                )}
-
-                <CardContent className="p-8 text-center">
-                  {/* Icon */}
-                  <div
-                    className={`w-20 h-20 bg-gradient-to-br ${pkg.color} rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl group-hover:rotate-6 transition-transform duration-500`}
-                  >
-                    {pkg.tokens === 1 ? (
-                      <Zap className="h-10 w-10 text-white" />
-                    ) : pkg.tokens <= 5 ? (
-                      <Coins className="h-10 w-10 text-white" />
-                    ) : (
-                      <Crown className="h-10 w-10 text-white" />
-                    )}
-                  </div>
-
-                  {/* Package Name */}
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
-                    {pkg.name}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-gray-500 text-sm mb-6 min-h-[40px]">
-                    {pkg.description}
-                  </p>
-
-                  {/* Price */}
-                  <div className="mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100 group-hover:bg-white transition-colors duration-300">
-                    <div className="flex items-center justify-center baseline">
-                      <span className="text-4xl font-black text-gray-900">
-                        ₹{pkg.price}
+          {/* Balance Card */}
+          {user && (
+            <div className="max-w-lg mx-auto mb-6">
+              <div className="bg-gradient-to-r from-blue-600 to-violet-600 rounded-xl p-4 md:p-5 text-white shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-100 text-xs font-medium uppercase tracking-wide mb-1">
+                      Your Balance
+                    </p>
+                    <p className="text-2xl md:text-3xl font-bold">
+                      {user.credits || 0}{" "}
+                      <span className="text-lg font-normal text-blue-200">
+                        tokens
                       </span>
+                    </p>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3">
+                    <Wallet className="h-6 w-6" />
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-white/20 flex items-center gap-2 text-blue-100 text-xs">
+                  <BarChart3 className="h-3.5 w-3.5" />
+                  1 token = 1 premium prediction
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Contact / Trust Section */}
+          <div className="max-w-3xl mx-auto mb-10">
+            <div className="bg-white rounded-2xl border border-gray-200 p-5 md:p-6 shadow-sm">
+              <h2 className="text-lg font-bold text-gray-900 text-center mb-4">
+                Need Help?
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex items-center justify-between bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-green-100 p-2 rounded-lg">
+                      <MessageCircle className="h-5 w-5 text-green-600" />
                     </div>
-                    <div className="text-sm font-semibold text-blue-600 mt-1 uppercase tracking-wider">
-                      {pkg.tokens} Token{pkg.tokens > 1 ? "s" : ""}
+                    <div>
+                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                        WhatsApp
+                      </p>
+                      <p className="text-sm font-bold text-gray-900">
+                        8981374643
+                      </p>
                     </div>
                   </div>
-
-                  {/* Features */}
-                  <ul className="space-y-4 mb-8 text-left max-w-[200px] mx-auto">
-                    {pkg.features.map((feature, idx) => (
-                      <li
-                        key={idx}
-                        className="flex items-start text-sm text-gray-600 group-hover:text-gray-900 transition-colors"
-                      >
-                        <div className="mt-1 mr-3 p-0.5 bg-green-100 rounded-full">
-                          <Zap className="h-3 w-3 text-green-600 fill-current" />
-                        </div>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Action Button */}
                   <Button
-                    className={`w-full h-14 text-lg font-bold gap-2 shadow-xl hover:shadow-2xl transition-all duration-300 ${
-                      pkg.popular
-                        ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                        : "bg-gray-900 hover:bg-black"
-                    } text-white`}
-                    onClick={() => handleWhatsAppPayment(pkg)}
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg hover:bg-green-50 text-green-600 shrink-0"
+                    onClick={() =>
+                      copyToClipboard("8981374643", "WhatsApp number")
+                    }
                   >
-                    <MessageCircle className="h-5 w-5" />
-                    Pay via WhatsApp
+                    {copiedText === "WhatsApp number" ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
                   </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Daily Free Credit Action Card */}
-          {/* <div className="max-w-4xl mx-auto mb-20">
-             <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-200 border-2 overflow-hidden relative">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <Sparkles className="h-24 w-24 text-green-600" />
                 </div>
-                <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="text-center md:text-left">
-                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Need a trial token?</h2>
-                        <p className="text-gray-600 text-lg">Watch a short advertisement and get 1 free prediction token every day!</p>
+
+                <div className="flex items-center justify-between bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-100 p-2 rounded-lg">
+                      <Shield className="h-5 w-5 text-blue-600" />
                     </div>
-                    <Button 
-                        size="lg" 
-                        variant="default" 
-                        className="bg-green-600 hover:bg-green-700 text-white font-bold h-14 px-8 min-w-[200px] shadow-xl hover:shadow-green-200 transition-all rounded-xl"
-                        onClick={handleFreeToken}
-                    >
-                        <Play className="h-5 w-5 mr-3 fill-current" />
-                        Get Free Token
-                    </Button>
-                </CardContent>
-             </Card>
-          </div> */}
-
-          {/* Features Comparison */}
-          <div className="max-w-5xl mx-auto mb-20">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-              Why Choice Our AI Predictions?
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="text-center p-6 rounded-3xl bg-white shadow-lg border border-gray-100 hover:border-blue-200 transition-all">
-                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Trophy className="h-8 w-8 text-blue-600" />
+                    <div>
+                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                        Email
+                      </p>
+                      <p className="text-sm font-bold text-gray-900">
+                        sportpredict247@gmail.com
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg hover:bg-blue-50 text-blue-600 shrink-0"
+                    onClick={() =>
+                      copyToClipboard("sportpredict247@gmail.com", "Email support")
+                    }
+                  >
+                    {copiedText === "Email support" ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">92% Win Rate</h3>
-                <p className="text-sm text-gray-500">
-                  Consistently high accuracy across all cricket formats.
-                </p>
               </div>
-              <div className="text-center p-6 rounded-3xl bg-white shadow-lg border border-gray-100 hover:border-green-200 transition-all">
-                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Zap className="h-8 w-8 text-green-600" />
-                </div>
-                <h3 className="font-bold text-gray-900 mb-2">Real-time Data</h3>
-                <p className="text-sm text-gray-500">
-                  Analysis based on latest player form and pitch status.
-                </p>
-              </div>
-              <div className="text-center p-6 rounded-3xl bg-white shadow-lg border border-gray-100 hover:border-purple-200 transition-all">
-                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Shield className="h-8 w-8 text-purple-600" />
-                </div>
-                <h3 className="font-bold text-gray-900 mb-2">100% Secure</h3>
-                <p className="text-sm text-gray-500">
-                  Manual verification ensures your tokens are safe.
-                </p>
-              </div>
-              <div className="text-center p-6 rounded-3xl bg-white shadow-lg border border-gray-100 hover:border-orange-200 transition-all">
-                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-8 w-8 text-orange-600" />
-                </div>
-                <h3 className="font-bold text-gray-900 mb-2">Expert Team</h3>
-                <p className="text-sm text-gray-500">
-                  Backed by cricket analysts and AI developers.
-                </p>
-              </div>
+              <p className="text-xs text-center text-muted-foreground mt-3">
+                After payment, share the transaction screenshot on WhatsApp for
+                instant token activation.
+              </p>
             </div>
           </div>
 
-          {/* Payment Instructions */}
+          {/* Pricing Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto mb-16">
+            {staticPlans.map((pkg) => {
+              const Icon = pkg.icon;
+              return (
+                <Card
+                  key={pkg.id}
+                  className={`relative flex flex-col transition-all duration-300 hover:shadow-xl ${
+                    pkg.popular
+                      ? "border-blue-200 shadow-blue-100/50 shadow-lg scale-[1.02] md:scale-105 z-10"
+                      : "border-gray-200 shadow-sm hover:border-gray-300"
+                  }`}
+                >
+                  {pkg.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
+                      <Badge className="bg-gradient-to-r from-blue-600 to-violet-600 text-white border-0 shadow-lg px-4 py-1">
+                        <Star className="h-3 w-3 mr-1 fill-white" />
+                        Best Value
+                      </Badge>
+                    </div>
+                  )}
+
+                  <CardHeader className={`pb-0 text-center ${pkg.popular ? "pt-8" : "pt-6"}`}>
+                    <div
+                      className={`w-12 h-12 bg-gradient-to-br ${pkg.color} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md`}
+                    >
+                      <Icon className="h-6 w-6 text-white" />
+                    </div>
+                    <CardTitle className="text-xl font-bold">{pkg.name}</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {pkg.description}
+                    </p>
+                  </CardHeader>
+
+                  <CardContent className="flex flex-col flex-1 pt-6">
+                    {/* Price */}
+                    <div className="text-center mb-6">
+                      <div className="flex items-baseline justify-center gap-0.5">
+                        <span className="text-sm text-muted-foreground">₹</span>
+                        <span className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                          {pkg.price}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {pkg.tokens} token{pkg.tokens > 1 ? "s" : ""}
+                        {pkg.tokens > 1 && (
+                          <span className="text-blue-600 font-medium ml-1">
+                            · ₹{(pkg.price / pkg.tokens).toFixed(0)}/token
+                          </span>
+                        )}
+                      </p>
+                    </div>
+
+                    {/* Features */}
+                    <ul className="space-y-3 mb-8 flex-1">
+                      {pkg.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-3 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                          <span className="text-gray-600">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Button */}
+                    <Button
+                      className={`w-full h-12 text-base font-semibold gap-2 shadow-md hover:shadow-lg transition-all ${
+                        pkg.popular
+                          ? "bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white"
+                          : "bg-gray-900 hover:bg-gray-800 text-white"
+                      }`}
+                      onClick={() => handleWhatsAppPayment(pkg)}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      Buy via WhatsApp
+                      <ArrowRight className="h-4 w-4 ml-auto opacity-50" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* How It Works */}
+          <div className="max-w-4xl mx-auto mb-16">
+            <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-10 tracking-tight">
+              How It Works
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  step: "01",
+                  title: "Choose a Pack",
+                  desc: "Select the token pack that fits your needs.",
+                  icon: Coins,
+                },
+                {
+                  step: "02",
+                  title: "Pay via WhatsApp",
+                  desc: "Send payment and receive tokens within minutes.",
+                  icon: Smartphone,
+                },
+                {
+                  step: "03",
+                  title: "Start Predicting",
+                  desc: "Use tokens to unlock premium AI predictions.",
+                  icon: BarChart3,
+                },
+              ].map((item) => {
+                const ItemIcon = item.icon;
+                return (
+                  <div key={item.step} className="text-center">
+                    <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-100">
+                      <ItemIcon className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">
+                      Step {item.step}
+                    </p>
+                    <h3 className="font-bold text-gray-900 mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">{item.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Free Token Section */}
+          <div className="max-w-3xl mx-auto mb-16">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-200 p-6 md:p-8 text-center">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-6 w-6 text-green-600" />
+              </div>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                Want a Free Trial?
+              </h2>
+              <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+                Watch a short ad and get 1 free prediction token every day.
+              </p>
+              <Button
+                size="lg"
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold h-12 px-8 shadow-lg hover:shadow-green-200 transition-all rounded-xl"
+                onClick={handleFreeToken}
+              >
+                <Play className="h-4 w-4 mr-2 fill-current" />
+                Get Free Token
+              </Button>
+            </div>
+          </div>
+
+          {/* Features Grid */}
+          <div className="max-w-5xl mx-auto mb-16">
+            <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-10 tracking-tight">
+              Why Choose Our Predictions?
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                {
+                  icon: Trophy,
+                  title: "92% Win Rate",
+                  desc: "High accuracy across formats",
+                  color: "text-blue-600",
+                  bg: "bg-blue-50",
+                },
+                {
+                  icon: Zap,
+                  title: "Real-time Data",
+                  desc: "Live form & pitch analysis",
+                  color: "text-green-600",
+                  bg: "bg-green-50",
+                },
+                {
+                  icon: Shield,
+                  title: "100% Secure",
+                  desc: "Manual token verification",
+                  color: "text-violet-600",
+                  bg: "bg-violet-50",
+                },
+                {
+                  icon: Users,
+                  title: "Expert Team",
+                  desc: "Analysts + AI developers",
+                  color: "text-orange-600",
+                  bg: "bg-orange-50",
+                },
+              ].map((feat) => {
+                const FeatIcon = feat.icon;
+                return (
+                  <Card
+                    key={feat.title}
+                    className="border-gray-100 shadow-sm hover:shadow-md transition-all"
+                  >
+                    <CardContent className="p-5 text-center">
+                      <div
+                        className={`w-10 h-10 ${feat.bg} rounded-xl flex items-center justify-center mx-auto mb-3`}
+                      >
+                        <FeatIcon className={`h-5 w-5 ${feat.color}`} />
+                      </div>
+                      <h3 className="font-bold text-gray-900 text-sm mb-1">
+                        {feat.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {feat.desc}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+
         </div>
       </div>
 
