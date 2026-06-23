@@ -45,10 +45,6 @@ export async function POST(request: Request) {
 
     const now = moment().tz(timezone);
 
-    const completedMatch = filteredMatches.filter(
-      (item: any) => item.status === "COMPLETED",
-    );
-
     const upcomingMatch = filteredMatches
       .filter((item: any) =>
         moment.utc(item.formatDate).tz(timezone).isAfter(now),
@@ -64,7 +60,7 @@ export async function POST(request: Request) {
 
     const liveMatches = filteredMatches.filter((item: any) => {
       const matchDateTime = moment.utc(item.formatDate).tz(timezone);
-      return matchDateTime.isBefore(now) && item.status !== "COMPLETED";
+      return matchDateTime.isBefore(now);
     });
 
     const processedLiveMatches = await Promise.all(
@@ -129,7 +125,6 @@ export async function POST(request: Request) {
     );
 
     const sortedData = [
-      ...completedMatch,
       ...upcomingMatch,
       ...processedLiveMatches,
     ]

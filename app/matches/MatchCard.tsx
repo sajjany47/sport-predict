@@ -323,13 +323,13 @@ const MatchCard = ({
   };
 
   // Format score display
-  const getTeamScore = (teamShortName: string): string => {
+  const getTeamScore = (teamShortName: string, teamName?: string): string => {
     if (!match.score || !match.score.score.length) {
       return "Yet to bat";
     }
 
     const teamScore = match.score.score.find(
-      (score) => score.team === teamShortName,
+      (score) => score.team === teamShortName || score.team === teamName,
     );
 
     return teamScore ? teamScore.run : "Yet to bat";
@@ -645,7 +645,7 @@ const MatchCard = ({
             </div>
             <div className="text-right">
               <div className="font-bold text-gray-900 text-xl">
-                {getTeamScore(team.teamShortName)}
+                {getTeamScore(team.teamShortName, team.teamName)}
               </div>
               {match.status === "COMPLETED" &&
                 match.prediction &&
