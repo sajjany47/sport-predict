@@ -81,8 +81,9 @@ const SupportPage = () => {
 
   const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("open");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
   const [supportListData, setSupportListData] = useState<any>([]);
@@ -117,6 +118,8 @@ const SupportPage = () => {
         return <Clock className="h-4 w-4 text-amber-500" />;
       case "resolved":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "closed":
+        return <CheckCircle className="h-4 w-4 text-slate-500" />;
       default:
         return <MessageSquare className="h-4 w-4 text-gray-500" />;
     }
@@ -130,6 +133,8 @@ const SupportPage = () => {
         return "bg-amber-50 text-amber-700 border-amber-200";
       case "resolved":
         return "bg-green-50 text-green-700 border-green-200";
+      case "closed":
+        return "bg-slate-100 text-slate-700 border-slate-200";
       default:
         return "bg-gray-50 text-gray-700 border-gray-200";
     }
@@ -188,22 +193,24 @@ const SupportPage = () => {
     const matchesSearch =
       ticket.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.ticketNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = activeTab === "all" || ticket.status === activeTab;
+    const matchesStatus =
+      activeTab === "all" ||
+      (activeTab === "open" &&
+        (ticket.status === "open" || ticket.status === "in-progress")) ||
+      (activeTab === "close" &&
+        (ticket.status === "resolved" || ticket.status === "closed"));
     return matchesSearch && matchesStatus;
   });
 
   const openTickets = supportListData.filter(
-    (c: any) => c.status === "open",
+    (c: any) => c.status === "open" || c.status === "in-progress",
   ).length;
-  const inProgressTickets = supportListData.filter(
-    (c: any) => c.status === "in-progress",
-  ).length;
-  const resolvedTickets = supportListData.filter(
-    (c: any) => c.status === "resolved",
+  const closeTickets = supportListData.filter(
+    (c: any) => c.status === "resolved" || c.status === "closed",
   ).length;
 
   const handelFormSubmit = (values: any) => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     const payload = {
       subject: values.subject,
       description: values.description,
@@ -214,12 +221,12 @@ const SupportPage = () => {
     TicketCreate(payload)
       .then((res) => {
         toast.success(res.message);
-        setIsLoading(false);
+        setIsSubmitting(false);
         setIsCreateTicketOpen(false);
         fetchTicketList();
       })
       .catch((err) => {
-        setIsLoading(false);
+        setIsSubmitting(false);
         toast.error(err.message || "Failed to save details. Please try again.");
       });
   };
@@ -378,22 +385,22 @@ const SupportPage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
                 {
-                  label: "Open Tickets",
+                  label: "Total Tickets",
+                  value: supportListData.length,
+                  icon: Ticket,
+                  color: "text-blue-500",
+                  bg: "bg-blue-50",
+                },
+                {
+                  label: "Open",
                   value: openTickets,
                   icon: AlertCircle,
                   color: "text-red-500",
                   bg: "bg-red-50",
                 },
                 {
-                  label: "In Progress",
-                  value: inProgressTickets,
-                  icon: Clock,
-                  color: "text-amber-500",
-                  bg: "bg-amber-50",
-                },
-                {
-                  label: "Resolved",
-                  value: resolvedTickets,
+                  label: "Closed",
+                  value: closeTickets,
                   icon: CheckCircle,
                   color: "text-green-500",
                   bg: "bg-green-50",
@@ -516,10 +523,10 @@ const SupportPage = () => {
                                   </Button>
                                   <Button
                                     type="submit"
-                                    disabled={isLoading}
+                                    disabled={isSubmitting}
                                     className="bg-blue-600 hover:bg-blue-700"
                                   >
-                                    {isLoading
+                                    {isSubmitting
                                       ? "Creating..."
                                       : "Create Ticket"}
                                   </Button>
@@ -549,13 +556,7 @@ const SupportPage = () => {
                       onValueChange={setActiveTab}
                       className="w-full"
                     >
-                      <TabsList className="w-full sm:w-auto grid grid-cols-4 bg-gray-100 p-1 rounded-lg mb-5">
-                        <TabsTrigger
-                          value="all"
-                          className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
-                        >
-                          All ({supportListData.length})
-                        </TabsTrigger>
+                      <TabsList className="w-full sm:w-auto grid grid-cols-2 bg-gray-100 p-1 rounded-lg mb-5 max-w-[200px]">
                         <TabsTrigger
                           value="open"
                           className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
@@ -563,16 +564,10 @@ const SupportPage = () => {
                           Open ({openTickets})
                         </TabsTrigger>
                         <TabsTrigger
-                          value="in-progress"
+                          value="close"
                           className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
                         >
-                          Active ({inProgressTickets})
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="resolved"
-                          className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
-                        >
-                          Done ({resolvedTickets})
+                          Closed ({closeTickets})
                         </TabsTrigger>
                       </TabsList>
 

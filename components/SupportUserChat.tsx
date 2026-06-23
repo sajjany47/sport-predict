@@ -122,6 +122,8 @@ const SupportUserChat = ({ data }: any) => {
         return <Clock className="h-4 w-4 text-yellow-600" />;
       case "resolved":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case "closed":
+        return <CheckCircle className="h-4 w-4 text-slate-500" />;
       default:
         return <MessageSquare className="h-4 w-4 text-gray-600" />;
     }
@@ -135,6 +137,8 @@ const SupportUserChat = ({ data }: any) => {
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "resolved":
         return "bg-green-100 text-green-800 border-green-200";
+      case "closed":
+        return "bg-slate-100 text-slate-700 border-slate-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -230,12 +234,12 @@ const SupportUserChat = ({ data }: any) => {
       });
   };
 
-  const markAsResolved = () => {
+  const closeTicket = () => {
     setIsLoading(true);
     TicketUpdate({
       ticketId: ticket._id,
-      status: "resolved",
-      ticketStatus: "resolved",
+      status: "closed",
+      ticketStatus: "closed",
     })
       .then((res) => {
         setTicket({
@@ -243,7 +247,7 @@ const SupportUserChat = ({ data }: any) => {
           user: ticket.user, // Preserve user data
         });
         setMessages(res.data.message ?? []);
-        toast.success("Ticket marked as resolved");
+        toast.success("Ticket closed successfully");
         setIsLoading(false);
       })
       .catch((err) => {
@@ -414,13 +418,13 @@ const SupportUserChat = ({ data }: any) => {
                     </p>
                   </div>
 
-                  {ticket.status !== "resolved" && (
+                  {ticket.status !== "resolved" && ticket.status !== "closed" && (
                     <Button
-                      onClick={markAsResolved}
+                      onClick={closeTicket}
                       className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-md"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
-                      Mark as Resolved
+                      Close Ticket
                     </Button>
                   )}
                 </CardContent>
@@ -606,14 +610,14 @@ const SupportUserChat = ({ data }: any) => {
 
                 {/* Reply Form */}
                 <div className="p-3 md:p-4 border-t bg-white rounded-b-2xl">
-                  {ticket.status === "resolved" ? (
+                  {ticket.status === "resolved" || ticket.status === "closed" ? (
                     <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
                       <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
                       <h3 className="text-lg font-semibold text-green-800 mb-2">
-                        Ticket Resolved Successfully
+                        Ticket {ticket.status === "closed" ? "Closed" : "Resolved"} Successfully
                       </h3>
                       <p className="text-green-700 text-sm">
-                        This conversation has been marked as resolved. If you
+                        This conversation has been marked as {ticket.status}. If you
                         have further issues, please create a new support ticket.
                       </p>
                     </div>
@@ -678,8 +682,8 @@ const SupportUserChat = ({ data }: any) => {
               </div>
             </Card>
 
-            {/* Rating prompt for resolved tickets */}
-            {ticket.status === "resolved" && (
+            {/* Rating prompt for resolved/closed tickets */}
+            {(ticket.status === "resolved" || ticket.status === "closed") && (
               <Card className="border-0 shadow-lg bg-gradient-to-r from-green-50 to-emerald-50 mt-4 md:mt-6 rounded-2xl">
                 <CardContent className="p-4 md:p-6">
                   <div className="flex flex-col md:flex-row items-center justify-between">

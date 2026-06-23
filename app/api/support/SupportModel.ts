@@ -8,8 +8,8 @@ const SupportSchema = new Schema(
     ticketNumber: String,
     status: {
       type: String,
-      enum: ["in-progress", "resolved", "open"],
-      default: "in-progress",
+      enum: ["open", "in-progress", "resolved", "closed"],
+      default: "open",
     },
     priority: {
       type: String,
@@ -23,8 +23,8 @@ const SupportSchema = new Schema(
         replyBy: Schema.Types.ObjectId,
         ticketStatus: {
           type: String,
-          enum: ["in-progress", "resolved", "open"],
-          default: "in-progress",
+          enum: ["open", "in-progress", "resolved", "closed"],
+          default: "open",
         },
         isRead: { type: Boolean, default: false },
       },

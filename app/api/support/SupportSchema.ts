@@ -14,8 +14,8 @@ export const SupportTicketValidation = Yup.object().shape({
     .min(10, "Description must be at least 10 characters long"),
 
   status: Yup.string()
-    .oneOf(["in-progress", "resolved", "open"], "Invalid status")
-    .default("in-progress"),
+    .oneOf(["open", "in-progress", "resolved", "closed"], "Invalid status")
+    .default("open"),
 
   message: Yup.array().of(
     Yup.object().shape({
@@ -24,8 +24,8 @@ export const SupportTicketValidation = Yup.object().shape({
       replyAt: Yup.date().default(() => new Date()),
       replyBy: Yup.string().required("ReplyBy is required"),
       ticketStatus: Yup.string()
-        .oneOf(["in-progress", "resolved", "open"], "Invalid ticket status")
-        .default("in-progress"),
+        .oneOf(["open", "in-progress", "resolved", "closed"], "Invalid ticket status")
+        .default("open"),
     })
   ),
 });

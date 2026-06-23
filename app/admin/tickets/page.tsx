@@ -69,7 +69,7 @@ const validationSchema = Yup.object().shape({
 
 const AdminTicketsPage = () => {
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
   const dispatch = useDispatch();
   const router = useRouter();
@@ -93,7 +93,7 @@ const AdminTicketsPage = () => {
       .then((res) => {
         const prepareData = res.data.map((item: any) => {
           let ticketUnread = item.message.filter(
-            (elm: any) => elm.isRead === false && elm.replyBy._id !== user?.id
+            (elm: any) => elm.isRead === false && elm.replyBy._id !== user?.id,
           );
           return { ...item, ticketUnread: ticketUnread.length ?? 0 };
         });
@@ -110,10 +110,10 @@ const AdminTicketsPage = () => {
   const handleStatusChange = (
     ticketId: string,
     newStatus: string,
-    assignedTo?: string
+    assignedTo?: string,
   ) => {
     dispatch(
-      updateTicketStatus({ id: ticketId, status: newStatus, assignedTo })
+      updateTicketStatus({ id: ticketId, status: newStatus, assignedTo }),
     );
     toast.success(`Ticket status updated to ${newStatus}`);
   };
@@ -153,6 +153,8 @@ const AdminTicketsPage = () => {
         return <Clock className="h-4 w-4 text-yellow-600" />;
       case "resolved":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case "closed":
+        return <CheckCircle className="h-4 w-4 text-slate-500" />;
       default:
         return <MessageSquare className="h-4 w-4 text-gray-600" />;
     }
@@ -166,6 +168,8 @@ const AdminTicketsPage = () => {
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "resolved":
         return "bg-green-100 text-green-800 border-green-200";
+      case "closed":
+        return "bg-slate-100 text-slate-700 border-slate-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -204,8 +208,8 @@ const AdminTicketsPage = () => {
   const filteredTickets = tickets.filter((ticket: any) => {
     const matchesSearch =
       ticket.ticketNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket?.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket?.user?.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.subject.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = activeTab === "all" || ticket.status === activeTab;
@@ -215,10 +219,13 @@ const AdminTicketsPage = () => {
 
   const openTickets = tickets.filter((t: any) => t.status === "open").length;
   const inProgressTickets = tickets.filter(
-    (t: any) => t.status === "in-progress"
+    (t: any) => t.status === "in-progress",
   ).length;
   const resolvedTickets = tickets.filter(
-    (t: any) => t.status === "resolved"
+    (t: any) => t.status === "resolved",
+  ).length;
+  const closedTickets = tickets.filter(
+    (t: any) => t.status === "closed",
   ).length;
 
   const formatDate = (dateString: string) => {
@@ -365,7 +372,7 @@ const AdminTicketsPage = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -435,6 +442,24 @@ const AdminTicketsPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-slate-50 to-gray-50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">
+                    Closed
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {closedTickets}
+                  </p>
+                </div>
+                <div className="p-3 rounded-full bg-slate-100">
+                  <CheckCircle className="h-6 w-6 text-slate-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Search and Filters */}
@@ -473,7 +498,7 @@ const AdminTicketsPage = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="sm:grid sm:grid-cols-4 mb-6 bg-gray-100 p-1 rounded-lg">
+                <TabsList className="sm:grid sm:grid-cols-5 mb-6 bg-gray-100 p-1 rounded-lg">
                   <TabsTrigger
                     value="all"
                     className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
@@ -497,6 +522,12 @@ const AdminTicketsPage = () => {
                     className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
                   >
                     Resolved ({resolvedTickets})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="closed"
+                    className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  >
+                    Closed ({closedTickets})
                   </TabsTrigger>
                 </TabsList>
 
@@ -530,7 +561,7 @@ const AdminTicketsPage = () => {
                                   </Badge>
                                   <Badge
                                     className={getPriorityColor(
-                                      ticket.priority
+                                      ticket.priority,
                                     )}
                                   >
                                     <div className="flex items-center space-x-1">
@@ -542,7 +573,7 @@ const AdminTicketsPage = () => {
                                   </Badge>
                                   <Badge
                                     className={getCategoryColor(
-                                      ticket.category
+                                      ticket.category,
                                     )}
                                   >
                                     <div className="flex items-center space-x-1">
@@ -566,8 +597,8 @@ const AdminTicketsPage = () => {
                                   <div className="flex items-center space-x-2">
                                     <User className="h-4 w-4 text-blue-600" />
                                     <span>
-                                      {ticket.user.name} (@
-                                      {ticket.user.username})
+                                      {ticket?.user?.name} (@
+                                      {ticket?.user?.username})
                                     </span>
                                   </div>
                                   <div className="flex items-center space-x-2">
@@ -620,7 +651,7 @@ const AdminTicketsPage = () => {
                                         handleStatusChange(
                                           ticket._id,
                                           "in-progress",
-                                          "Admin Support"
+                                          "Admin Support",
                                         )
                                       }
                                       className="cursor-pointer"
@@ -634,7 +665,7 @@ const AdminTicketsPage = () => {
                                       onClick={() =>
                                         handleStatusChange(
                                           ticket._id,
-                                          "resolved"
+                                          "resolved",
                                         )
                                       }
                                       className="cursor-pointer"
@@ -644,6 +675,31 @@ const AdminTicketsPage = () => {
                                     </DropdownMenuItem>
                                   )}
                                   {ticket.status === "resolved" && (
+                                    <>
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          handleStatusChange(
+                                            ticket._id,
+                                            "closed",
+                                          )
+                                        }
+                                        className="cursor-pointer"
+                                      >
+                                        <CheckCircle className="h-4 w-4 mr-2" />
+                                        Close Ticket
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          handleStatusChange(ticket._id, "open")
+                                        }
+                                        className="cursor-pointer"
+                                      >
+                                        <AlertCircle className="h-4 w-4 mr-2" />
+                                        Reopen Ticket
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+                                  {ticket.status === "closed" && (
                                     <DropdownMenuItem
                                       onClick={() =>
                                         handleStatusChange(ticket._id, "open")

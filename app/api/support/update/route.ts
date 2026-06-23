@@ -34,9 +34,12 @@ export const POST = async (request: NextRequest) => {
     const isUser = checkTicket.userId.toString() === loggedInUser._id;
     let messageText = reqData.text || "";
 
-    if (reqData.status === "resolved" && reqData.ticketStatus === "resolved") {
+    if (
+      (reqData.status === "resolved" && reqData.ticketStatus === "resolved") ||
+      (reqData.status === "closed" && reqData.ticketStatus === "closed")
+    ) {
       messageText =
-        "Ticket resolved successfully. This chat will now be closed.";
+        "Ticket closed successfully. This chat will now be closed.";
     }
 
     const newMessage = {

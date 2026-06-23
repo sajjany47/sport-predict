@@ -104,7 +104,7 @@ const TicketDetailsPage = () => {
   const handleStatusChange = (newStatus: string) => {
     if (ticket) {
       let reqData: any = { ticketId: ticket._id, status: newStatus };
-      if (newStatus === "resolved") {
+      if (newStatus === "resolved" || newStatus === "closed") {
         reqData.ticketStatus = newStatus;
       }
       if (newStatus === "open") {
@@ -134,6 +134,8 @@ const TicketDetailsPage = () => {
         return <Clock className="h-5 w-5 text-yellow-600" />;
       case "resolved":
         return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case "closed":
+        return <CheckCircle className="h-5 w-5 text-slate-500" />;
       default:
         return <MessageSquare className="h-5 w-5 text-gray-600" />;
     }
@@ -147,6 +149,8 @@ const TicketDetailsPage = () => {
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "resolved":
         return "bg-green-100 text-green-800 border-green-200";
+      case "closed":
+        return "bg-slate-100 text-slate-700 border-slate-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -331,6 +335,24 @@ const TicketDetailsPage = () => {
                   </DropdownMenuItem>
                 )}
                 {ticket.status === "resolved" && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => handleStatusChange("closed")}
+                      className="cursor-pointer"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Close Ticket
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleStatusChange("open")}
+                      className="cursor-pointer"
+                    >
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      Reopen Ticket
+                    </DropdownMenuItem>
+                  </>
+                )}
+                {ticket.status === "closed" && (
                   <DropdownMenuItem
                     onClick={() => handleStatusChange("open")}
                     className="cursor-pointer"
@@ -605,14 +627,14 @@ const TicketDetailsPage = () => {
 
                       {/* Reply Section */}
                       <div className="p-6 border-t border-gray-200 bg-gray-50">
-                        {ticket.status === "resolved" ? (
+                        {ticket.status === "resolved" || ticket.status === "closed" ? (
                           <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
                             <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
                             <h3 className="text-lg font-semibold text-green-800 mb-2">
-                              Ticket Resolved Successfully
+                              Ticket {ticket.status === "closed" ? "Closed" : "Resolved"} Successfully
                             </h3>
                             <p className="text-green-700">
-                              This conversation has been marked as resolved.
+                              This conversation has been marked as {ticket.status}.
                             </p>
                           </div>
                         ) : (
