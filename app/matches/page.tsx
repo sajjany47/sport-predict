@@ -97,10 +97,10 @@ const MatchesPage = () => {
     enabled: !!selectedDate,
   });
 
-  useEffect(() => {
-    getPerformanceStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate]);
+  // useEffect(() => {
+  //   getPerformanceStats();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [selectedDate]);
 
   const getPerformanceStats = () => {
     FetchPlatformPerformance(selectedDate)
@@ -204,7 +204,7 @@ const MatchesPage = () => {
         </div>
 
         {/* Platform Performance Banner */}
-        {performanceStats && performanceStats.total > 0 && (
+        {/* {performanceStats && performanceStats.total > 0 && (
           <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-xl shadow-lg border border-indigo-200 mb-6 md:mb-10 p-1 overflow-hidden relative group transition-transform hover:-translate-y-1">
             <div className="absolute top-0 right-0 p-4 opacity-10 transform group-hover:scale-110 transition-transform">
               <Trophy className="w-24 h-24 text-white" />
@@ -243,7 +243,7 @@ const MatchesPage = () => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Search + Date Filter */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 mb-6 md:mb-10">

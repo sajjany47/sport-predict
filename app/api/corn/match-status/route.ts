@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
-import { FilterSquad, FormatErrorMessage, GetTeamShortName } from "@/lib/utils";
+import {
+  FilterSquad,
+  FormatErrorMessage,
+  GetTeamShortName,
+  SendPrediction,
+} from "@/lib/utils";
 import moment from "moment";
 import Match from "../../schedule/MatchModel";
 import MatchDetails from "../../match-details/MatchDetailsModel";
@@ -35,7 +40,16 @@ export const GET = async (_req: NextRequest) => {
 
   try {
     console.log("CRON HIT ✅", new Date());
-
+    // SendPrediction({
+    //   team1: "SL",
+    //   team2: "NZ",
+    //   team1Chance: "46%",
+    //   team2Chance: "54%",
+    //   finalWinner: "NZ",
+    //   message: "According to the analysis",
+    //   stopLoss: "20 Paisa",
+    //   brandName: "BETTING SAJJAN ❤️",
+    // })
     const now = moment();
 
     const fixtures = await Match.find({
@@ -172,26 +186,41 @@ export const GET = async (_req: NextRequest) => {
         });
 
         const matchDateTime = moment(match.formatDate);
+        const isOldMatch = now.diff(matchDateTime, "days") >= 2;
 
-        const status = matchDateTime.isAfter(moment())
-          ? "UPCOMING"
-          : result.includes("abandoned")
-            ? "ABANDONED"
-            : result.includes("won") ||
-                result.includes("match drawn") ||
-                result.includes("no result")
-              ? "COMPLETED"
-              : "LIVE";
+        // const status = matchDateTime.isAfter(moment())
+        //   ? "UPCOMING"
+        //   : result.includes("abandoned")
+        //     ? "ABANDONED"
+        //     : result.includes("won") ||
+        //         result.includes("match drawn") ||
+        //         result.includes("no result")
+        //       ? "COMPLETED"
+        //       : "LIVE";
+
+        const status = isOldMatch
+          ? "COMPLETED"
+          : matchDateTime.isAfter(now)
+            ? "UPCOMING"
+            : result.includes("abandoned")
+              ? "ABANDONED"
+              : result.includes("won") ||
+                  result.includes("match drawn") ||
+                  result.includes("no result")
+                ? "COMPLETED"
+                : "LIVE";
+        const isCompleted = isOldMatch || status === "COMPLETED";
 
         await Match.updateOne(
           { _id: match._id },
           {
             $set: {
-              isCompleted:
-                result.includes("abandoned") ||
-                result.includes("won") ||
-                result.includes("match drawn") ||
-                result.includes("no result"),
+              // isCompleted:
+              //   result.includes("abandoned") ||
+              //   result.includes("won") ||
+              //   result.includes("match drawn") ||
+              //   result.includes("no result"),
+              isCompleted,
               teams: updatedTeams,
               status,
               matchResult: result,

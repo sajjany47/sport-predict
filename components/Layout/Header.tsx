@@ -66,9 +66,9 @@ const Header = () => {
     isSuccess: null,
   });
 
-  useEffect(() => {
-    matchStatusUpdate();
-  }, []);
+  // useEffect(() => {
+  //   matchStatusUpdate();
+  // }, []);
 
   const matchStatusUpdate = () => {
     CornMatchStatus()
