@@ -2,9 +2,11 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 import {
   Calendar,
   MapPin,
@@ -22,7 +24,9 @@ import {
   Crown,
   ShieldCheck,
   ShieldX,
+  Copy,
 } from "lucide-react";
+import type { RootState } from "@/store";
 
 interface Team {
   teamName: string;
@@ -119,6 +123,8 @@ const MatchCard = ({
 
   const [isHovered, setIsHovered] = useState(false);
   const intervalRef = useRef<number | null>(null);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const isAdmin = user?.role === "admin";
 
   // Parse date and time from formatDate and startTime
   const getMatchDateTime = () => {
@@ -672,6 +678,32 @@ const MatchCard = ({
     },
   ];
 
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied to clipboard!`);
+  };
+
+  const getMatchTitleText = () => {
+    const t1 = match.teams[0]?.teamName ?? "";
+    const t2 = match.teams[1]?.teamName ?? "";
+    return `${t1} vs ${t2} ${match.matchDescription}`;
+  };
+
+  const getTeamCopyText = () => {
+    const title = getMatchTitleText();
+    const t1 = match.prediction?.team1;
+    const t2 = match.prediction?.team2;
+
+    if (!t1 || !t2) return title;
+
+    const winnerLine = `Match Winner :${t1.name} (${t1.winnerPrediction.probability.toFixed(1)}%)|${t2.name} (${t2.winnerPrediction.probability.toFixed(1)}%)`;
+    const fi1 = t1.firstInnings;
+    const fi2 = t2.firstInnings;
+    const fiLine = `FirstInningScore :${t1.name} ${fi1.predicted}(${fi1.min}-${fi1.max}) | ${t2.name} ${fi2.predicted}(${fi2.min}-${fi2.max})`;
+
+    return `${title}\n${winnerLine}\n${fiLine}`;
+  };
+
   const matchDateTime = getMatchDateTime();
 
   return (
@@ -852,6 +884,36 @@ const MatchCard = ({
                 : "View Match Details"
               : "Get Prediction"}
           </Button>
+        )}
+
+        {/* Admin Copy Buttons */}
+        {isAdmin && (
+          <div className="flex gap-2 mt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs h-8 gap-1.5"
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(getTeamCopyText(), "Team info");
+              }}
+            >
+              <Copy className="h-3 w-3" />
+              Copy Team Info
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs h-8 gap-1.5"
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(getMatchTitleText(), "Match title");
+              }}
+            >
+              <Copy className="h-3 w-3" />
+              Copy Match Title
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>
