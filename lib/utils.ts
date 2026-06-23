@@ -1451,12 +1451,7 @@ export const GetTeamShortName = (teamName: string): string => {
     }
   } else if (words.length === 1) {
     /* ---------- RULE 2: Single word ---------- */
-    const w = words[0];
-
-    // remove vowels after first letter → better abbreviation
-    const consonants = w[0] + w.slice(1).replace(/[AEIOU]/g, "");
-
-    code = consonants.slice(0, 3);
+    code = words[0].slice(0, 3);
   }
 
   /* ---------- fallback ---------- */
