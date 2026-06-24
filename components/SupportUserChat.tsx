@@ -36,6 +36,11 @@ import { FormikTextArea } from "@/components/CustomField";
 import * as Yup from "yup";
 import CustomLoader from "@/components/ui/CustomLoader";
 import { TicketList, TicketUpdate } from "@/app/MainService";
+import {
+  getSocket,
+  connectToTicket,
+  disconnectFromTicket,
+} from "@/lib/socketClient";
 
 const validationSchema = Yup.object().shape({
   message: Yup.string()
@@ -64,6 +69,33 @@ const SupportUserChat = ({ data }: any) => {
     fetchTicketDetails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    if (!data?.ticketId) return;
+    const socket = getSocket();
+    connectToTicket(data.ticketId);
+
+    const handleNewMessage = (data: any) => {
+      if (data.message?.replyBy?._id === user?.id) return;
+      setMessages((prev: any[]) => [...prev, data.message]);
+    };
+
+    const handleStatusUpdated = (statusData: any) => {
+      setTicket((prev: any) =>
+        prev ? { ...prev, status: statusData.status } : prev
+      );
+    };
+
+    socket.on("new:message", handleNewMessage);
+    socket.on("status:updated", handleStatusUpdated);
+
+    return () => {
+      disconnectFromTicket(data.ticketId);
+      socket.off("new:message", handleNewMessage);
+      socket.off("status:updated", handleStatusUpdated);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.ticketId]);
 
   const fetchTicketDetails = () => {
     setIsLoading(true);
@@ -204,6 +236,16 @@ const SupportUserChat = ({ data }: any) => {
     }
   };
 
+  const emitNewMessage = (ticketId: string, msg: any) => {
+    const socket = getSocket();
+    socket.emit("send:message", { ticketId, message: msg });
+  };
+
+  const emitStatusChange = (ticketId: string, status: string) => {
+    const socket = getSocket();
+    socket.emit("status:changed", { ticketId, status });
+  };
+
   const handleFormSubmit = (values: any, { resetForm }: any) => {
     if (!values.message.trim()) return;
 
@@ -217,15 +259,17 @@ const SupportUserChat = ({ data }: any) => {
       text: values.message.trim(),
     })
       .then((res) => {
+        const msgs = res.data.message ?? [];
         setTicket({
           ...res.data,
-          user: ticket.user, // Preserve user data
+          user: ticket.user,
         });
-        setMessages(res.data.message ?? []);
+        setMessages(msgs);
+        const newMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+        if (newMsg) emitNewMessage(ticket._id, newMsg);
         setIsSubmitting(false);
         setIsTyping(false);
         resetForm();
-        toast.success("Message sent successfully!");
       })
       .catch((err) => {
         setIsSubmitting(false);
@@ -244,9 +288,10 @@ const SupportUserChat = ({ data }: any) => {
       .then((res) => {
         setTicket({
           ...res.data,
-          user: ticket.user, // Preserve user data
+          user: ticket.user,
         });
         setMessages(res.data.message ?? []);
+        emitStatusChange(ticket._id, "closed");
         toast.success("Ticket closed successfully");
         setIsLoading(false);
       })

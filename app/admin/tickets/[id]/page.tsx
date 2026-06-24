@@ -42,6 +42,11 @@ import {
 import toast from "react-hot-toast";
 import { TicketList, TicketUpdate } from "@/app/MainService";
 import {
+  getSocket,
+  connectToTicket,
+  disconnectFromTicket,
+} from "@/lib/socketClient";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -88,6 +93,38 @@ const TicketDetailsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const ticketId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+    if (!ticketId) return;
+    const socket = getSocket();
+    connectToTicket(ticketId);
+
+    const handleNewMessage = (data: any) => {
+      if (data.message?.replyBy?._id === user?.id) return;
+      setTicket((prev: any) => {
+        if (!prev) return prev;
+        const msgs = prev.message ? [...prev.message, data.message] : [data.message];
+        return { ...prev, message: msgs };
+      });
+    };
+
+    const handleStatusUpdated = (data: any) => {
+      setTicket((prev: any) =>
+        prev ? { ...prev, status: data.status } : prev
+      );
+    };
+
+    socket.on("new:message", handleNewMessage);
+    socket.on("status:updated", handleStatusUpdated);
+
+    return () => {
+      disconnectFromTicket(ticketId);
+      socket.off("new:message", handleNewMessage);
+      socket.off("status:updated", handleStatusUpdated);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params?.id]);
+
   const fetchTicketDetails = () => {
     setIsLoading(true);
     TicketList({ ticketId: params.id })
@@ -99,6 +136,11 @@ const TicketDetailsPage = () => {
         setIsLoading(false);
         toast.error(err.message || "Failed to get details. Please try again.");
       });
+  };
+
+  const emitStatusChange = (ticketId: string, status: string) => {
+    const socket = getSocket();
+    socket.emit("status:changed", { ticketId, status });
   };
 
   const handleStatusChange = (newStatus: string) => {
@@ -116,6 +158,7 @@ const TicketDetailsPage = () => {
       TicketUpdate(reqData)
         .then((res) => {
           setTicket(res.data);
+          emitStatusChange(ticket._id, newStatus);
           toast.success(`Ticket status updated to ${newStatus}`);
           setIsLoading(false);
         })
@@ -195,10 +238,13 @@ const TicketDetailsPage = () => {
       text: newMessage,
     })
       .then((res) => {
-        // let a = res.data[0];
-        setTicket({
-          ...res.data,
-        });
+        setTicket({ ...res.data });
+        const msgs = res.data.message ?? [];
+        const newMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+        if (newMsg) {
+          const socket = getSocket();
+          socket.emit("send:message", { ticketId: res.data._id || ticket._id, message: newMsg });
+        }
         setNewMessage("");
         setIsSubmitting(false);
       })
