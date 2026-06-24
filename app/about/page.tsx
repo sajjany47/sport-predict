@@ -75,31 +75,11 @@ const AboutPage = () => {
 
   const team = [
     {
-      name: "Rajesh Kumar",
-      role: "CEO & Founder",
+      name: "Sajjan Kumar Yadav",
+      role: "Senior Software Engineer & Founder",
       description:
-        "Former cricket analyst with 15+ years experience in sports analytics and AI.",
-      avatar: "RK",
-    },
-    {
-      name: "Priya Sharma",
-      role: "CTO",
-      description:
-        "AI/ML expert with background in predictive modeling and data science.",
-      avatar: "PS",
-    },
-    {
-      name: "Amit Patel",
-      role: "Head of Cricket Analytics",
-      description: "Ex-professional cricket coach and statistical analyst.",
-      avatar: "AP",
-    },
-    {
-      name: "Sneha Gupta",
-      role: "Product Manager",
-      description:
-        "Product strategy expert focused on user experience and fantasy sports.",
-      avatar: "SG",
+        "Single-handedly building and managing the entire SportPredict platform — from AI models to frontend, backend, and infrastructure.",
+      avatar: "SK",
     },
   ];
 
@@ -298,14 +278,13 @@ const AboutPage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Meet Our Team
+              Built by a Solo Developer
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Passionate cricket enthusiasts and technology experts working
-              together
+              One person, one vision — delivering AI-powered cricket predictions
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 gap-8 max-w-sm mx-auto">
             {team.map((member, index) => (
               <Card key={index} className="border-0 shadow-lg text-center">
                 <CardContent className="p-6">
