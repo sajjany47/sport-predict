@@ -14,10 +14,7 @@ import {
   Shield,
   ChevronRight,
   Play,
-  Brain,
   Rocket,
-  Globe,
-  Lightbulb,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -96,35 +93,12 @@ const HomePage = () => {
 
   const team = [
     {
-      name: "Rajesh Kumar",
-      role: "CEO & Founder",
+      name: "Sajjan Kumar Yadav",
+      role: "Senior Software Engineer & Founder",
       description:
-        "Former cricket analyst with 15+ years experience in sports analytics and AI.",
-      avatar: "RK",
+        "Single-handedly building and managing the entire SportPredict platform — from AI models to frontend, backend, and infrastructure.",
+      avatar: "SK",
       icon: Rocket,
-    },
-    {
-      name: "Priya Sharma",
-      role: "CTO & Co-Founder",
-      description:
-        "AI/ML expert with background in predictive modeling and data science.",
-      avatar: "PS",
-      icon: Brain,
-    },
-    {
-      name: "Amit Patel",
-      role: "Head of Cricket Analytics",
-      description: "Ex-professional cricket coach and statistical analyst.",
-      avatar: "AP",
-      icon: Globe,
-    },
-    {
-      name: "Sneha Gupta",
-      role: "Product Manager",
-      description:
-        "Product strategy expert focused on user experience and fantasy sports.",
-      avatar: "SG",
-      icon: Lightbulb,
     },
   ];
 
@@ -133,7 +107,7 @@ const HomePage = () => {
       router.push("/auth/login");
       return;
     }
-    router.push(`/matches/${match.matchId}`);
+    router.push(`/matches/${match._id}`);
     dispatch(setSelectedMatch(match));
   };
 
@@ -309,7 +283,7 @@ const HomePage = () => {
               .slice(0, 6)
               .map((match: any) => (
                 <MatchCard
-                  key={match.matchId}
+                  key={match._id}
                   match={match}
                   showPredictButton
                   onClick={() => handleMatchClick(match)}
@@ -332,14 +306,13 @@ const HomePage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Meet Our Leadership
+              Built by a Solo Developer
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Passionate cricket enthusiasts and technology experts working
-              together to revolutionize fantasy sports
+              One person, one vision — delivering AI-powered cricket predictions
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 gap-8 max-w-sm mx-auto">
             {team.map((member, index) => {
               const Icon = member.icon;
               return (
