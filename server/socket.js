@@ -1,32 +1,45 @@
-// const { Server } = require("socket.io");
 import { Server } from "socket.io";
 
-const io = new Server(3005, {
+const PORT = process.env.PORT || 3005;
+
+const io = new Server(PORT, {
   cors: {
-    origin: "http://localhost:3004",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
 io.on("connection", (socket) => {
-  console.log("Client connected:", socket.id);
+  console.log("[Socket Server] Client connected:", socket.id);
 
   socket.on("join:ticket", (ticketId) => {
     socket.join(`ticket:${ticketId}`);
-    console.log(`Socket ${socket.id} joined room ticket:${ticketId}`);
+    console.log(
+      `[Socket Server] Socket ${socket.id} joined room ticket:${ticketId}`,
+    );
   });
 
   socket.on("leave:ticket", (ticketId) => {
     socket.leave(`ticket:${ticketId}`);
-    console.log(`Socket ${socket.id} left room ticket:${ticketId}`);
+    console.log(
+      `[Socket Server] Socket ${socket.id} left room ticket:${ticketId}`,
+    );
   });
 
   socket.on("send:message", (data) => {
-    io.to(`ticket:${data.ticketId}`).emit("new:message", data);
+    console.log(
+      `[Socket Server] Message from ${socket.id} to room ticket:${data.ticketId}:`,
+      data.message,
+    );
+    // Broadcast to everyone else in the room
+    socket.to(`ticket:${data.ticketId}`).emit("new:message", data);
   });
 
   socket.on("status:changed", (data) => {
-    io.to(`ticket:${data.ticketId}`).emit("status:updated", data);
+    console.log(
+      `[Socket Server] Status changed for ticket:${data.ticketId} to ${data.status}`,
+    );
+    socket.to(`ticket:${data.ticketId}`).emit("status:updated", data);
   });
 
   socket.on("typing", (data) => {
@@ -35,9 +48,14 @@ io.on("connection", (socket) => {
       .emit("user:typing", { userName: data.userName });
   });
 
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
+  socket.on("disconnect", (reason) => {
+    console.log(
+      "[Socket Server] Client disconnected:",
+      socket.id,
+      "reason:",
+      reason,
+    );
   });
 });
 
-console.log("Socket.IO server running on port 3005");
+console.log(`Socket.IO server running on port ${PORT}`);

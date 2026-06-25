@@ -54,6 +54,11 @@ const SupportUserChat = ({ data }: any) => {
   );
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // useRef so socket handlers always read the latest user.id without stale closure
+  const userRef = useRef(user);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,6 +66,8 @@ const SupportUserChat = ({ data }: any) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [showSidebar, setShowSidebar] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
+  const [socketStatus, setSocketStatus] = useState<"connected" | "disconnected" | "connecting">("connecting");
+  const [socketError, setSocketError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -75,9 +82,35 @@ const SupportUserChat = ({ data }: any) => {
     const socket = getSocket();
     connectToTicket(data.ticketId);
 
+    // Initial status check
+    setSocketStatus(socket.connected ? "connected" : "connecting");
+
+    const handleConnect = () => {
+      setSocketStatus("connected");
+      setSocketError(null);
+    };
+
+    const handleDisconnect = (reason: string) => {
+      setSocketStatus("disconnected");
+      setSocketError(`Disconnected: ${reason}`);
+    };
+
+    const handleConnectError = (err: any) => {
+      setSocketStatus("disconnected");
+      setSocketError(err.message || "Connection error");
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
+
     const handleNewMessage = (data: any) => {
-      if (data.message?.replyBy?._id === user?.id) return;
-      setMessages((prev: any[]) => [...prev, data.message]);
+      const newMsg = data?.message;
+      if (!newMsg) return;
+      setMessages((prev: any[]) => {
+        if (prev.some((m) => m._id === newMsg._id)) return prev;
+        return [...prev, newMsg];
+      });
     };
 
     const handleStatusUpdated = (statusData: any) => {
@@ -89,8 +122,16 @@ const SupportUserChat = ({ data }: any) => {
     socket.on("new:message", handleNewMessage);
     socket.on("status:updated", handleStatusUpdated);
 
+    // If socket is already connected, trigger connect callback manually
+    if (socket.connected) {
+      handleConnect();
+    }
+
     return () => {
       disconnectFromTicket(data.ticketId);
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
       socket.off("new:message", handleNewMessage);
       socket.off("status:updated", handleStatusUpdated);
     };
@@ -259,13 +300,19 @@ const SupportUserChat = ({ data }: any) => {
       text: values.message.trim(),
     })
       .then((res) => {
-        const msgs = res.data.message ?? [];
+        const serverMsgs = res.data.message ?? [];
         setTicket({
           ...res.data,
           user: ticket.user,
         });
-        setMessages(msgs);
-        const newMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+        setMessages((prev) => {
+          const merged = [...prev];
+          for (const m of serverMsgs) {
+            if (!merged.some((x) => x._id === m._id)) merged.push(m);
+          }
+          return merged;
+        });
+        const newMsg = serverMsgs.length > 0 ? serverMsgs[serverMsgs.length - 1] : null;
         if (newMsg) emitNewMessage(ticket._id, newMsg);
         setIsSubmitting(false);
         setIsTyping(false);
@@ -345,9 +392,21 @@ const SupportUserChat = ({ data }: any) => {
               <ArrowLeft className="h-4 w-4 md:mr-2" />
               <span className="hidden md:inline">Back to Tickets</span>
             </Button>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-              Support Ticket
-            </h1>
+            <div className="flex flex-col md:flex-row md:items-center md:space-x-3">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+                Support Ticket
+              </h1>
+              <div className="flex items-center space-x-1.5 mt-1 md:mt-0">
+                <span className={`w-2 h-2 rounded-full ${
+                  socketStatus === "connected" ? "bg-green-500 animate-pulse" :
+                  socketStatus === "connecting" ? "bg-yellow-500 animate-pulse" : "bg-red-500"
+                }`} />
+                <span className="text-xs text-gray-500 font-medium">
+                  {socketStatus === "connected" ? "Live Sync Active" :
+                   socketStatus === "connecting" ? "Connecting to Live Sync..." : `Live Sync Offline (${socketError || "Disconnect"})`}
+                </span>
+              </div>
+            </div>
           </div>
 
           <Button

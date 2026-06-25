@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
@@ -84,6 +84,14 @@ const TicketDetailsPage = () => {
   const [ticket, setTicket] = useState<any>(null);
   const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [socketStatus, setSocketStatus] = useState<"connected" | "disconnected" | "connecting">("connecting");
+  const [socketError, setSocketError] = useState<string | null>(null);
+
+  // useRef so socket handlers always read the latest user.id without stale closure
+  const userRef = useRef(user);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -99,12 +107,36 @@ const TicketDetailsPage = () => {
     const socket = getSocket();
     connectToTicket(ticketId);
 
+    // Initial status check
+    setSocketStatus(socket.connected ? "connected" : "connecting");
+
+    const handleConnect = () => {
+      setSocketStatus("connected");
+      setSocketError(null);
+    };
+
+    const handleDisconnect = (reason: string) => {
+      setSocketStatus("disconnected");
+      setSocketError(`Disconnected: ${reason}`);
+    };
+
+    const handleConnectError = (err: any) => {
+      setSocketStatus("disconnected");
+      setSocketError(err.message || "Connection error");
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
+
     const handleNewMessage = (data: any) => {
-      if (data.message?.replyBy?._id === user?.id) return;
+      const newMsg = data?.message;
+      if (!newMsg) return;
       setTicket((prev: any) => {
         if (!prev) return prev;
-        const msgs = prev.message ? [...prev.message, data.message] : [data.message];
-        return { ...prev, message: msgs };
+        const current = prev.message || [];
+        if (current.some((m: any) => m._id === newMsg._id)) return prev;
+        return { ...prev, message: [...current, newMsg] };
       });
     };
 
@@ -117,8 +149,16 @@ const TicketDetailsPage = () => {
     socket.on("new:message", handleNewMessage);
     socket.on("status:updated", handleStatusUpdated);
 
+    // If socket is already connected, trigger connect callback manually
+    if (socket.connected) {
+      handleConnect();
+    }
+
     return () => {
       disconnectFromTicket(ticketId);
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
       socket.off("new:message", handleNewMessage);
       socket.off("status:updated", handleStatusUpdated);
     };
@@ -344,14 +384,26 @@ const TicketDetailsPage = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Tickets
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Ticket Details
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Ticket #{ticket.ticketNumber}
-              </p>
-            </div>
+             <div>
+               <div className="flex items-center space-x-3">
+                 <h1 className="text-3xl font-bold text-gray-900">
+                   Ticket Details
+                 </h1>
+                 <div className="flex items-center space-x-1.5 bg-white px-2 py-1 rounded-lg border shadow-sm">
+                   <span className={`w-2 h-2 rounded-full ${
+                     socketStatus === "connected" ? "bg-green-500 animate-pulse" :
+                     socketStatus === "connecting" ? "bg-yellow-500 animate-pulse" : "bg-red-500"
+                   }`} />
+                   <span className="text-xs text-gray-500 font-medium">
+                     {socketStatus === "connected" ? "Live Sync Active" :
+                      socketStatus === "connecting" ? "Connecting to Live Sync..." : `Live Sync Offline (${socketError || "Disconnect"})`}
+                   </span>
+                 </div>
+               </div>
+               <p className="text-gray-600 mt-1">
+                 Ticket #{ticket.ticketNumber}
+               </p>
+             </div>
           </div>
           <div className="mt-4 md:mt-0 flex items-center space-x-2">
             <DropdownMenu>
