@@ -500,6 +500,171 @@ Best regards,<br>
 `;
 };
 
+export const AdminDepositCreditsEmail = (data: {
+  user: {
+    name?: string;
+    email: string;
+  };
+  credits: number;
+  totalCreditsAdded: number;
+  amount: number;
+  adminName?: string;
+  appUrl?: string;
+  supportEmail?: string;
+  supportPhone?: string;
+}) => {
+  const {
+    user,
+    credits,
+    totalCreditsAdded,
+    amount,
+    adminName = "SportPredict Team",
+    appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_API_URL,
+    supportEmail = process.env.NEXT_PUBLIC_EMAIL || "support@sportpredict.com",
+    supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (555) 123-4567",
+  } = data;
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deposit Confirmation - SportPredict</title>
+</head>
+
+<body style="margin:0;padding:20px;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center">
+
+<!-- MAIN WRAPPER -->
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;border:1px solid #e5e7eb;overflow:hidden;">
+
+<!-- HEADER -->
+<tr>
+<td align="center" style="background:#1a2a6c;padding:30px;color:white;">
+  <h1 style="margin:0;font-size:32px;">
+    <span style="color:#fdbb2d;">Sport</span>Predict
+  </h1>
+  <p style="margin-top:6px;font-size:14px;opacity:0.9;">
+    Deposit Confirmation
+  </p>
+</td>
+</tr>
+
+<!-- BODY -->
+<tr>
+<td style="padding:32px;color:#374151;">
+
+<h2 style="margin-top:0;font-size:22px;color:#1f2937;">
+  Hello ${user.name || "Valued User"},
+</h2>
+
+<p style="font-size:16px;line-height:1.6;">
+Your deposit has been successfully processed! Thank you for your payment.
+</p>
+
+<!-- DEPOSIT DETAILS -->
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+<tr>
+<td style="background:#f9fafb;padding:16px 24px;border-bottom:1px solid #e5e7eb;">
+  <strong style="font-size:15px;color:#1f2937;">Deposit Summary</strong>
+</td>
+</tr>
+<tr>
+<td style="padding:16px 24px;">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#6b7280;">Amount Paid</td>
+      <td align="right" style="padding:8px 0;font-size:16px;font-weight:bold;color:#1f2937;">₹${amount.toLocaleString("en-IN")}</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#6b7280;border-top:1px solid #f3f4f6;">Tokens Received</td>
+      <td align="right" style="padding:8px 0;font-size:16px;font-weight:bold;color:#f5576c;border-top:1px solid #f3f4f6;">+${totalCreditsAdded} Tokens</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#6b7280;border-top:1px solid #f3f4f6;">Total Wallet Balance</td>
+      <td align="right" style="padding:8px 0;font-size:16px;font-weight:bold;color:#10b981;border-top:1px solid #f3f4f6;">${credits} Tokens</td>
+    </tr>
+  </table>
+</td>
+</tr>
+</table>
+
+<!-- BALANCE HIGHLIGHT -->
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+<tr>
+<td align="center" style="background:#10b981;padding:30px;border-radius:10px;color:white;">
+  <p style="margin:0;font-size:14px;letter-spacing:1px;">
+    ✅ DEPOSIT SUCCESSFUL
+  </p>
+  <p style="margin:12px 0 0;font-size:32px;font-weight:bold;">
+    ${credits} TOKENS
+  </p>
+  <p style="margin-top:10px;font-size:13px;opacity:0.9;">
+    Current wallet balance
+  </p>
+</td>
+</tr>
+</table>
+
+<!-- CTA -->
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:30px 0;">
+<tr>
+<td align="center">
+  <a href="${appUrl}/dashboard"
+     style="background:#1a2a6c;color:white;text-decoration:none;padding:14px 28px;border-radius:6px;font-weight:bold;display:inline-block;margin-bottom:10px;">
+     🚀 Go to Dashboard
+  </a>
+  <br>
+  <a href="${appUrl}/matches"
+     style="background:#667eea;color:white;text-decoration:none;padding:14px 28px;border-radius:6px;font-weight:bold;display:inline-block;">
+     🏆 Start Predicting
+  </a>
+</td>
+</tr>
+</table>
+
+<!-- SUPPORT -->
+<p style="margin-top:24px;font-size:15px;text-align:center;">
+Need help? Contact us at <br>
+📧 <a href="mailto:${supportEmail}" style="color:#1a2a6c;">${supportEmail}</a><br>
+📞 ${supportPhone}
+</p>
+
+<p style="margin-top:30px;font-size:16px;">
+Happy predicting!<br>
+<strong>The SportPredict Team</strong>
+</p>
+
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td align="center" style="background:#1f2937;color:#d1db;padding:20px;">
+  <p style="margin:0;font-size:13px;">
+    © ${new Date().getFullYear()} SportPredict. All rights reserved.
+  </p>
+  <p style="margin-top:6px;font-size:12px;">
+    This is an automated email. Please do not reply.
+  </p>
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`;
+};
+
 export const AdminFreeCreditsEmail = (data: {
   user: {
     name?: string;

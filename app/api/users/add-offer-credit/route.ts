@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
-import moment from "moment";
 import dbConnect from "../../db";
 import User from "../UserModel";
 import { FormatErrorMessage } from "@/lib/utils";
 import { MailSend } from "@/lib/MailSend";
-import { AdminFreeCreditsEmail } from "@/components/template/UserTemp";
+import {
+  AdminFreeCreditsEmail,
+  AdminDepositCreditsEmail,
+} from "@/components/template/UserTemp";
 
 export const POST = async (request: NextRequest) => {
   await dbConnect();
@@ -38,6 +40,7 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
+    const creditType = body.type || "offer";
     const updatedCredits = (targetUser.credits || 0) + (body.credits || 0);
 
     const updateuserCredits = await User.updateOne(
@@ -46,27 +49,51 @@ export const POST = async (request: NextRequest) => {
     );
 
     if (updateuserCredits) {
-      const emailData = {
-        user: {
-          name: targetUser.name,
-          email: targetUser.email,
-        },
-        credits: updatedCredits,
-        totalCreditsAdded: body.credits,
-        reason:
-          "SportPredict added 5 bonus tokens to your account as a special gesture.",
-        adminName: "SportPredict Team",
-        appUrl: process.env.NEXT_PUBLIC_API_URL,
-        supportEmail: process.env.NEXT_PUBLIC_EMAIL,
-        supportPhone: process.env.NEXT_PUBLIC_MOBILE,
-      };
+      if (creditType === "deposit") {
+        const depositAmount = body.amount || 0;
+        const emailData = {
+          user: {
+            name: targetUser.name,
+            email: targetUser.email,
+          },
+          credits: updatedCredits,
+          totalCreditsAdded: body.credits,
+          amount: depositAmount,
+          adminName: "SportPredict Team",
+          appUrl: process.env.NEXT_PUBLIC_API_URL,
+          supportEmail: process.env.NEXT_PUBLIC_EMAIL,
+          supportPhone: process.env.NEXT_PUBLIC_MOBILE,
+        };
 
-      const emailHtml = AdminFreeCreditsEmail(emailData);
-      await MailSend({
-        to: [targetUser.email],
-        subject: `🎁 ${body.credits} Free Credits Added to Your SportPredict Account!`,
-        html: emailHtml,
-      });
+        const emailHtml = AdminDepositCreditsEmail(emailData);
+        await MailSend({
+          to: [targetUser.email],
+          subject: `✅ Deposit Confirmed - ₹${depositAmount} for ${body.credits} Tokens`,
+          html: emailHtml,
+        });
+      } else {
+        const emailData = {
+          user: {
+            name: targetUser.name,
+            email: targetUser.email,
+          },
+          credits: updatedCredits,
+          totalCreditsAdded: body.credits,
+          reason:
+            "SportPredict added bonus tokens to your account as a special gesture.",
+          adminName: "SportPredict Team",
+          appUrl: process.env.NEXT_PUBLIC_API_URL,
+          supportEmail: process.env.NEXT_PUBLIC_EMAIL,
+          supportPhone: process.env.NEXT_PUBLIC_MOBILE,
+        };
+
+        const emailHtml = AdminFreeCreditsEmail(emailData);
+        await MailSend({
+          to: [targetUser.email],
+          subject: `🎁 ${body.credits} Free Credits Added to Your SportPredict Account!`,
+          html: emailHtml,
+        });
+      }
     }
 
     return NextResponse.json(

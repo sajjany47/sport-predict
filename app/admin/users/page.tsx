@@ -140,8 +140,12 @@ const SendCreditsDialog = React.memo(
     open,
     onOpenChange,
     selectedUser,
+    creditType,
+    onCreditTypeChange,
     creditsAmount,
     onCreditsAmountChange,
+    depositAmount,
+    onDepositAmountChange,
     sendingCredits,
     onSendCredits,
     getStatusColor,
@@ -149,8 +153,12 @@ const SendCreditsDialog = React.memo(
     open: boolean;
     onOpenChange: (open: boolean) => void;
     selectedUser: any;
+    creditType: string;
+    onCreditTypeChange: (type: string) => void;
     creditsAmount: number;
     onCreditsAmountChange: (amount: number) => void;
+    depositAmount: number;
+    onDepositAmountChange: (amount: number) => void;
     sendingCredits: boolean;
     onSendCredits: () => void;
     getStatusColor: (status: string) => string;
@@ -163,10 +171,10 @@ const SendCreditsDialog = React.memo(
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Coins className="h-5 w-5 text-yellow-600" />
-            Send Free Credits
+            Add Credits
           </DialogTitle>
           <DialogDescription>
-            Add free credits to user's account. This action cannot be undone.
+            Add credits to user&apos;s account. Select type and enter details.
           </DialogDescription>
         </DialogHeader>
 
@@ -176,9 +184,61 @@ const SendCreditsDialog = React.memo(
             getStatusColor={getStatusColor}
           />
 
+          {/* Credit Type */}
+          <div className="space-y-2">
+            <Label>Credit Type</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="creditType"
+                  value="offer"
+                  checked={creditType === "offer"}
+                  onChange={(e) => onCreditTypeChange(e.target.value)}
+                  className="accent-green-600"
+                />
+                <span className="text-sm font-medium">Offer (Free)</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="creditType"
+                  value="deposit"
+                  checked={creditType === "deposit"}
+                  onChange={(e) => onCreditTypeChange(e.target.value)}
+                  className="accent-blue-600"
+                />
+                <span className="text-sm font-medium">Deposit</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Deposit Amount */}
+          {creditType === "deposit" && (
+            <div className="space-y-2">
+              <Label htmlFor="depositAmount">Amount (₹) *</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 font-medium">
+                  ₹
+                </span>
+                <Input
+                  id="depositAmount"
+                  type="number"
+                  min="1"
+                  value={depositAmount || ""}
+                  onChange={(e) =>
+                    onDepositAmountChange(Number(e.target.value))
+                  }
+                  className="pl-8"
+                  placeholder="Enter amount in rupees"
+                />
+              </div>
+            </div>
+          )}
+
           {/* Credits Amount */}
           <div className="space-y-2">
-            <Label htmlFor="credits">Credits Amount *</Label>
+            <Label htmlFor="credits">Credits *</Label>
             <div className="relative">
               <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -209,6 +269,15 @@ const SendCreditsDialog = React.memo(
               ))}
             </div>
           </div>
+
+          {/* Summary */}
+          {creditType === "deposit" && depositAmount > 0 && creditsAmount > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+              User will receive <strong>{creditsAmount} tokens</strong> for{" "}
+              <strong>₹{depositAmount.toLocaleString("en-IN")}</strong>. A
+              deposit confirmation email will be sent to the user.
+            </div>
+          )}
         </div>
 
         <DialogFooter>
@@ -217,13 +286,19 @@ const SendCreditsDialog = React.memo(
             onClick={() => {
               onOpenChange(false);
               onCreditsAmountChange(5);
+              onDepositAmountChange(0);
+              onCreditTypeChange("offer");
             }}
           >
             Cancel
           </Button>
           <Button
             onClick={onSendCredits}
-            disabled={sendingCredits || !creditsAmount}
+            disabled={
+              sendingCredits ||
+              !creditsAmount ||
+              (creditType === "deposit" && !depositAmount)
+            }
             className="bg-green-600 hover:bg-green-700"
           >
             {sendingCredits ? (
@@ -234,7 +309,7 @@ const SendCreditsDialog = React.memo(
             ) : (
               <>
                 <Send className="h-4 w-4 mr-2" />
-                Send Credits
+                {creditType === "deposit" ? "Confirm Deposit" : "Send Credits"}
               </>
             )}
           </Button>
@@ -611,8 +686,11 @@ const AdminUsersPage = () => {
   const [loading, setLoading] = useState(false);
   const [sendingCredits, setSendingCredits] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [creditsAmount, setCreditsAmount] = useState<number>(5);
+  const [creditType, setCreditType] = useState<string>("offer");
+  const [depositAmount, setDepositAmount] = useState<number>(0);
   const [suspendReason, setSuspendReason] = useState<string>("");
   const [banReason, setBanReason] = useState<string>("");
   const [sendCreditsOpen, setSendCreditsOpen] = useState(false);
@@ -694,24 +772,34 @@ const AdminUsersPage = () => {
         toast.error("Please enter a valid credit amount");
         return;
       }
+      if (creditType === "deposit" && !depositAmount) {
+        toast.error("Please enter the deposit amount");
+        return;
+      }
 
       setSendingCredits(true);
 
       try {
-        await UserSendCredit({ userId, credits: creditsAmount });
+        const payload: any = { userId, credits: creditsAmount, type: creditType };
+        if (creditType === "deposit") {
+          payload.amount = depositAmount;
+        }
+        await UserSendCredit(payload);
         toast.success(
           `Successfully added ${creditsAmount} credits to user account`
         );
         GetUserDetails();
         setSendCreditsOpen(false);
         setCreditsAmount(5);
+        setDepositAmount(0);
+        setCreditType("offer");
       } catch (error: any) {
         toast.error(error.message || "Failed to send credits");
       } finally {
         setSendingCredits(false);
       }
     },
-    [creditsAmount, GetUserDetails]
+    [creditsAmount, creditType, depositAmount, GetUserDetails]
   );
 
   const handleSuspendUser = useCallback(
@@ -1116,8 +1204,12 @@ const AdminUsersPage = () => {
           open={sendCreditsOpen}
           onOpenChange={setSendCreditsOpen}
           selectedUser={selectedUser}
+          creditType={creditType}
+          onCreditTypeChange={setCreditType}
           creditsAmount={creditsAmount}
           onCreditsAmountChange={setCreditsAmount}
+          depositAmount={depositAmount}
+          onDepositAmountChange={setDepositAmount}
           sendingCredits={sendingCredits}
           onSendCredits={() => handleSendCredits(selectedUser?._id)}
           getStatusColor={getStatusColor}
