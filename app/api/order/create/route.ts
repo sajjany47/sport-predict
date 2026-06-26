@@ -6,6 +6,7 @@ import { FormatErrorMessage } from "@/lib/utils";
 import Order from "../OrderModel";
 import mongoose from "mongoose";
 import User from "../../users/UserModel";
+import Notification from "../../notification/NotificationModel";
 import moment from "moment";
 import axios from "axios";
 
@@ -195,6 +196,13 @@ export const POST = async (req: NextRequest) => {
           { _id: userId },
           { $inc: { credits: createdOrder.credits } },
         );
+        await Notification.create({
+          userId: userId,
+          type: "credit",
+          title: "Daily tokens received",
+          message: `You received ${createdOrder.credits} free prediction tokens.`,
+          link: "/matches",
+        });
       }
 
       if (
@@ -211,6 +219,13 @@ export const POST = async (req: NextRequest) => {
             },
           },
         );
+        await Notification.create({
+          userId: userId,
+          type: "payment",
+          title: "Payment successful",
+          message: `Your payment was verified and ${createdOrder.credits} tokens have been added to your account.`,
+          link: "/matches",
+        });
       }
     }
 

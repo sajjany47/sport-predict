@@ -4,6 +4,7 @@ import matchSlice from "./slices/matchSlice";
 import subscriptionSlice from "./slices/subscriptionSlice";
 import helpdeskSlice from "./slices/helpdeskSlice";
 import adminSlice from "./slices/adminSlice";
+import notificationSlice from "./slices/notificationSlice";
 import storage from "redux-persist/lib/storage";
 // import storage from "redux-persist/lib/storage/session";
 import {
@@ -28,6 +29,7 @@ const rootReducer = combineReducers({
   subscription: subscriptionSlice,
   helpdesk: helpdeskSlice,
   admin: adminSlice,
+  notification: notificationSlice,
 });
 
 const persistReducers = persistReducer(persistConfig, rootReducer);

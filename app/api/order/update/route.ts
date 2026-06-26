@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import moment from "moment";
 import Subscription from "../../subscription/SubscriptionModel";
 import User from "../../users/UserModel";
+import Notification from "../../notification/NotificationModel";
 import { MailSend } from "@/lib/MailSend";
 import {
   PaymentFailedTem,
@@ -147,6 +148,13 @@ export const POST = async (req: NextRequest) => {
             { _id: new mongoose.Types.ObjectId(findOrder.userId) },
             { $set: { credits: Number(findUser.credits) + Number(credits) } }
           );
+          await Notification.create({
+            userId: findOrder.userId,
+            type: "payment",
+            title: "Tokens added via WhatsApp",
+            message: `${credits} tokens have been added to your account by admin.`,
+            link: "/matches",
+          });
         }
       }
       if (updateData.status === "failed") {

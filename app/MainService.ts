@@ -279,3 +279,29 @@ export const FetchPlatformPerformance = async (date: any) => {
     throw new Error(error.response?.data?.message || error.message);
   }
 };
+
+export const NotificationList = async (payload?: any) => {
+  try {
+    const response = await privateApi.post(
+      "/api/notification/list",
+      payload || {},
+      { headers: getHeadersWithToken() }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+};
+
+export const NotificationRead = async (payload?: any) => {
+  try {
+    const response = await privateApi.post(
+      "/api/notification/read",
+      payload || {},
+      { headers: getHeadersWithToken() }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+};

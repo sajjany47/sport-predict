@@ -36,6 +36,12 @@ import {
   Smartphone,
   ExternalLink,
   RefreshCcw,
+  Bell,
+  MessageSquare,
+  Gift,
+  CheckCircle2,
+  Clock,
+  Zap,
 } from "lucide-react";
 import MarqueeNotice from "../ui/marquee-notice";
 import { usePathname } from "next/navigation";
@@ -45,7 +51,14 @@ import {
   CornMatchList,
   CornMatchStatus,
   UserOrderCredit,
+  NotificationList,
+  NotificationRead,
 } from "@/app/MainService";
+import {
+  setNotifications,
+  markAsRead,
+  markAllAsRead,
+} from "@/store/slices/notificationSlice";
 import toast from "react-hot-toast";
 import { set } from "mongoose";
 import CustomLoader from "../ui/CustomLoader";
@@ -65,6 +78,34 @@ const Header = () => {
     message: "",
     isSuccess: null,
   });
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const { items: notifItems, unreadCount } = useSelector(
+    (state: RootState) => state.notification,
+  );
+
+  const isAuthPage = pathname.startsWith("/auth/");
+
+  const fetchNotifications = () => {
+    if (isAuthPage || !localStorage.getItem("token")) return;
+    NotificationList()
+      .then((res) => {
+        dispatch(
+          setNotifications({
+            data: res.data || [],
+            unreadCount: res.unreadCount || 0,
+          }),
+        );
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated || isAuthPage) return;
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, dispatch, isAuthPage]);
 
   // useEffect(() => {
   //   matchStatusUpdate();
@@ -275,6 +316,140 @@ const Header = () => {
                       {user.credits}
                     </Badge>
                   </div>
+
+                  {/* Notifications */}
+                  <DropdownMenu open={notifOpen} onOpenChange={setNotifOpen}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-lg hover:bg-gray-50"
+                      >
+                        <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
+                        {unreadCount > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-red-500 rounded-full text-[10px] text-white font-bold flex items-center justify-center px-1">
+                            {unreadCount > 9 ? "9+" : unreadCount}
+                          </span>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-80 sm:w-96 p-0 rounded-xl shadow-xl border max-h-[70vh] overflow-hidden"
+                    >
+                      <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-4 py-3 border-b">
+                        <div className="flex items-center space-x-2">
+                          <Bell className="h-4 w-4 text-blue-600" />
+                          <span className="font-semibold text-gray-900 text-sm">
+                            Notifications
+                          </span>
+                          {unreadCount > 0 && (
+                            <Badge
+                              variant="secondary"
+                              className="bg-blue-100 text-blue-700 text-xs"
+                            >
+                              {unreadCount} new
+                            </Badge>
+                          )}
+                        </div>
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              NotificationRead();
+                              dispatch(markAllAsRead());
+                            }}
+                            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+                      <div className="overflow-y-auto max-h-[50vh]">
+                        {notifItems.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <Bell className="h-8 w-8 text-gray-300 mb-3" />
+                            <p className="text-sm text-gray-500 font-medium">
+                              No notifications yet
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              Notifications will appear here
+                            </p>
+                          </div>
+                        ) : (
+                          notifItems.map((n: any) => (
+                            <button
+                              key={n._id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNotifOpen(false);
+                                if (!n.isRead) {
+                                  NotificationRead({ notificationId: n._id });
+                                  dispatch(markAsRead(n._id));
+                                }
+                                if (n.link) router.push(n.link);
+                              }}
+                              className={`w-full text-left px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors flex items-start space-x-3 ${
+                                !n.isRead ? "bg-blue-50/50" : ""
+                              }`}
+                            >
+                              <div
+                                className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                  n.type === "support"
+                                    ? "bg-green-100"
+                                    : n.type === "payment"
+                                      ? "bg-blue-100"
+                                      : n.type === "credit"
+                                        ? "bg-amber-100"
+                                        : "bg-gray-100"
+                                }`}
+                              >
+                                {n.type === "support" ? (
+                                  <MessageSquare className="h-4 w-4 text-green-600" />
+                                ) : n.type === "payment" ? (
+                                  <CreditCard className="h-4 w-4 text-blue-600" />
+                                ) : n.type === "credit" ? (
+                                  <Gift className="h-4 w-4 text-amber-600" />
+                                ) : (
+                                  <Zap className="h-4 w-4 text-gray-600" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between">
+                                  <p
+                                    className={`text-sm ${
+                                      !n.isRead
+                                        ? "font-semibold text-gray-900"
+                                        : "font-medium text-gray-700"
+                                    } truncate`}
+                                  >
+                                    {n.title}
+                                  </p>
+                                  {!n.isRead && (
+                                    <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                                  {n.message}
+                                </p>
+                                <p className="text-[10px] text-gray-400 mt-1">
+                                  {new Date(n.createdAt).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    },
+                                  )}
+                                </p>
+                              </div>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
                   {/* User Dropdown */}
                   <DropdownMenu>

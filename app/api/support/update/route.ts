@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../db";
 import { FormatErrorMessage } from "@/lib/utils";
 import SupportTicket from "../SupportModel";
+import Notification from "../../notification/NotificationModel";
 import mongoose from "mongoose";
 
 export const POST = async (request: NextRequest) => {
@@ -65,6 +66,17 @@ export const POST = async (request: NextRequest) => {
         },
       }
     );
+
+    // --- Notification: if admin replied, notify the user ---
+    if (!isUser && messageText) {
+      await Notification.create({
+        userId: checkTicket.userId,
+        type: "support",
+        title: "New reply on your ticket",
+        message: messageText.length > 100 ? messageText.slice(0, 100) + "..." : messageText,
+        link: `/support?ticketId=${reqData.ticketId}`,
+      });
+    }
 
     // --- Step 2: Mark opposite party messages as read ---
     await SupportTicket.updateOne(
