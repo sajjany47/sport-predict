@@ -50,7 +50,7 @@ const validationSchema = Yup.object().shape({
 
 const SupportUserChat = ({ data }: any) => {
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -66,7 +66,9 @@ const SupportUserChat = ({ data }: any) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [showSidebar, setShowSidebar] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
-  const [socketStatus, setSocketStatus] = useState<"connected" | "disconnected" | "connecting">("connecting");
+  const [socketStatus, setSocketStatus] = useState<
+    "connected" | "disconnected" | "connecting"
+  >("connecting");
   const [socketError, setSocketError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -105,9 +107,12 @@ const SupportUserChat = ({ data }: any) => {
     socket.on("connect_error", handleConnectError);
 
     const handleNewMessage = (data: any) => {
+      console.log("USER RECEIVED SOCKET MESSAGE:", data);
+
       const newMsg = data?.message;
       if (!newMsg) return;
-      setMessages((prev: any[]) => {
+
+      setMessages((prev) => {
         if (prev.some((m) => m._id === newMsg._id)) return prev;
         return [...prev, newMsg];
       });
@@ -115,7 +120,7 @@ const SupportUserChat = ({ data }: any) => {
 
     const handleStatusUpdated = (statusData: any) => {
       setTicket((prev: any) =>
-        prev ? { ...prev, status: statusData.status } : prev
+        prev ? { ...prev, status: statusData.status } : prev,
       );
     };
 
@@ -312,7 +317,8 @@ const SupportUserChat = ({ data }: any) => {
           }
           return merged;
         });
-        const newMsg = serverMsgs.length > 0 ? serverMsgs[serverMsgs.length - 1] : null;
+        const newMsg =
+          serverMsgs.length > 0 ? serverMsgs[serverMsgs.length - 1] : null;
         if (newMsg) emitNewMessage(ticket._id, newMsg);
         setIsSubmitting(false);
         setIsTyping(false);
@@ -345,7 +351,7 @@ const SupportUserChat = ({ data }: any) => {
       .catch((err) => {
         setIsLoading(false);
         toast.error(
-          err.message || "Failed to update ticket. Please try again."
+          err.message || "Failed to update ticket. Please try again.",
         );
       });
   };
@@ -397,13 +403,21 @@ const SupportUserChat = ({ data }: any) => {
                 Support Ticket
               </h1>
               <div className="flex items-center space-x-1.5 mt-1 md:mt-0">
-                <span className={`w-2 h-2 rounded-full ${
-                  socketStatus === "connected" ? "bg-green-500 animate-pulse" :
-                  socketStatus === "connecting" ? "bg-yellow-500 animate-pulse" : "bg-red-500"
-                }`} />
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    socketStatus === "connected"
+                      ? "bg-green-500 animate-pulse"
+                      : socketStatus === "connecting"
+                        ? "bg-yellow-500 animate-pulse"
+                        : "bg-red-500"
+                  }`}
+                />
                 <span className="text-xs text-gray-500 font-medium">
-                  {socketStatus === "connected" ? "Live Sync Active" :
-                   socketStatus === "connecting" ? "Connecting to Live Sync..." : `Live Sync Offline (${socketError || "Disconnect"})`}
+                  {socketStatus === "connected"
+                    ? "Live Sync Active"
+                    : socketStatus === "connecting"
+                      ? "Connecting to Live Sync..."
+                      : `Live Sync Offline (${socketError || "Disconnect"})`}
                 </span>
               </div>
             </div>
@@ -522,15 +536,16 @@ const SupportUserChat = ({ data }: any) => {
                     </p>
                   </div>
 
-                  {ticket.status !== "resolved" && ticket.status !== "closed" && (
-                    <Button
-                      onClick={closeTicket}
-                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-md"
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Close Ticket
-                    </Button>
-                  )}
+                  {ticket.status !== "resolved" &&
+                    ticket.status !== "closed" && (
+                      <Button
+                        onClick={closeTicket}
+                        className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-md"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Close Ticket
+                      </Button>
+                    )}
                 </CardContent>
               </Card>
 
@@ -714,15 +729,19 @@ const SupportUserChat = ({ data }: any) => {
 
                 {/* Reply Form */}
                 <div className="p-3 md:p-4 border-t bg-white rounded-b-2xl">
-                  {ticket.status === "resolved" || ticket.status === "closed" ? (
+                  {ticket.status === "resolved" ||
+                  ticket.status === "closed" ? (
                     <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
                       <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
                       <h3 className="text-lg font-semibold text-green-800 mb-2">
-                        Ticket {ticket.status === "closed" ? "Closed" : "Resolved"} Successfully
+                        Ticket{" "}
+                        {ticket.status === "closed" ? "Closed" : "Resolved"}{" "}
+                        Successfully
                       </h3>
                       <p className="text-green-700 text-sm">
-                        This conversation has been marked as {ticket.status}. If you
-                        have further issues, please create a new support ticket.
+                        This conversation has been marked as {ticket.status}. If
+                        you have further issues, please create a new support
+                        ticket.
                       </p>
                     </div>
                   ) : (

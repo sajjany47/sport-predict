@@ -25,53 +25,18 @@ interface TypingData {
   userName: string;
 }
 
-io.on("connection", (socket: Socket) => {
-  console.log("[Socket Server] Client connected:", socket.id);
+io.on("connection", (socket) => {
+  console.log("Connected:", socket.id);
 
-  socket.on("join:ticket", (ticketId: string) => {
+  socket.on("join:ticket", (ticketId) => {
+    console.log(`${socket.id} joined ticket:${ticketId}`);
     socket.join(`ticket:${ticketId}`);
-    console.log(
-      `[Socket Server] Socket ${socket.id} joined room ticket:${ticketId}`,
-    );
   });
 
-  socket.on("leave:ticket", (ticketId: string) => {
-    socket.leave(`ticket:${ticketId}`);
-    console.log(
-      `[Socket Server] Socket ${socket.id} left room ticket:${ticketId}`,
-    );
-  });
-
-  socket.on("send:message", (data: MessageData) => {
-    console.log(
-      `[Socket Server] Message from ${socket.id} to room ticket:${data.ticketId}:`,
-      data.message,
-    );
+  socket.on("send:message", (data) => {
+    console.log("Broadcasting:", data);
 
     socket.to(`ticket:${data.ticketId}`).emit("new:message", data);
-  });
-
-  socket.on("status:changed", (data: StatusData) => {
-    console.log(
-      `[Socket Server] Status changed for ticket:${data.ticketId} to ${data.status}`,
-    );
-
-    socket.to(`ticket:${data.ticketId}`).emit("status:updated", data);
-  });
-
-  socket.on("typing", (data: TypingData) => {
-    socket.to(`ticket:${data.ticketId}`).emit("user:typing", {
-      userName: data.userName,
-    });
-  });
-
-  socket.on("disconnect", (reason: string) => {
-    console.log(
-      "[Socket Server] Client disconnected:",
-      socket.id,
-      "reason:",
-      reason,
-    );
   });
 });
 

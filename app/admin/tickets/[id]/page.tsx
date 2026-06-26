@@ -72,7 +72,7 @@ const validationSchema = Yup.object().shape({
 });
 const TicketDetailsPage = () => {
   const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
   const params = useParams();
   const router = useRouter();
@@ -84,7 +84,9 @@ const TicketDetailsPage = () => {
   const [ticket, setTicket] = useState<any>(null);
   const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [socketStatus, setSocketStatus] = useState<"connected" | "disconnected" | "connecting">("connecting");
+  const [socketStatus, setSocketStatus] = useState<
+    "connected" | "disconnected" | "connecting"
+  >("connecting");
   const [socketError, setSocketError] = useState<string | null>(null);
 
   // useRef so socket handlers always read the latest user.id without stale closure
@@ -130,19 +132,30 @@ const TicketDetailsPage = () => {
     socket.on("connect_error", handleConnectError);
 
     const handleNewMessage = (data: any) => {
+      console.log("ADMIN RECEIVED SOCKET MESSAGE:", data);
+
       const newMsg = data?.message;
       if (!newMsg) return;
+
       setTicket((prev: any) => {
         if (!prev) return prev;
+
         const current = prev.message || [];
-        if (current.some((m: any) => m._id === newMsg._id)) return prev;
-        return { ...prev, message: [...current, newMsg] };
+
+        if (current.some((m: any) => m._id === newMsg._id)) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          message: [...current, newMsg],
+        };
       });
     };
 
     const handleStatusUpdated = (data: any) => {
       setTicket((prev: any) =>
-        prev ? { ...prev, status: data.status } : prev
+        prev ? { ...prev, status: data.status } : prev,
       );
     };
 
@@ -270,7 +283,10 @@ const TicketDetailsPage = () => {
   };
 
   const handleSendMessage = () => {
+    console.log("1. Admin clicked Send");
+
     setIsSubmitting(true);
+
     TicketUpdate({
       ticketId: ticket._id,
       status: ticket.status,
@@ -278,21 +294,37 @@ const TicketDetailsPage = () => {
       text: newMessage,
     })
       .then((res) => {
+        console.log("2. TicketUpdate Success", res.data);
+
         setTicket({ ...res.data });
+
         const msgs = res.data.message ?? [];
         const newMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+
+        console.log("3. New Message:", newMsg);
+
+        const socket = getSocket();
+        console.log("4. Socket Connected:", socket.connected);
+
         if (newMsg) {
-          const socket = getSocket();
-          socket.emit("send:message", { ticketId: res.data._id || ticket._id, message: newMsg });
+          console.log("5. Emitting Socket Event");
+
+          socket.emit("send:message", {
+            ticketId: res.data._id || ticket._id,
+            message: newMsg,
+          });
+
+          console.log("6. Emit Completed");
         }
+
         setNewMessage("");
         setIsSubmitting(false);
       })
       .catch((err) => {
+        console.log("ERROR:", err);
+
         setIsSubmitting(false);
-        toast.error(
-          err.message || "Failed to update ticket. Please try again."
-        );
+        toast.error(err.message || "Failed to update ticket.");
       });
   };
 
@@ -384,26 +416,34 @@ const TicketDetailsPage = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Tickets
             </Button>
-             <div>
-               <div className="flex items-center space-x-3">
-                 <h1 className="text-3xl font-bold text-gray-900">
-                   Ticket Details
-                 </h1>
-                 <div className="flex items-center space-x-1.5 bg-white px-2 py-1 rounded-lg border shadow-sm">
-                   <span className={`w-2 h-2 rounded-full ${
-                     socketStatus === "connected" ? "bg-green-500 animate-pulse" :
-                     socketStatus === "connecting" ? "bg-yellow-500 animate-pulse" : "bg-red-500"
-                   }`} />
-                   <span className="text-xs text-gray-500 font-medium">
-                     {socketStatus === "connected" ? "Live Sync Active" :
-                      socketStatus === "connecting" ? "Connecting to Live Sync..." : `Live Sync Offline (${socketError || "Disconnect"})`}
-                   </span>
-                 </div>
-               </div>
-               <p className="text-gray-600 mt-1">
-                 Ticket #{ticket.ticketNumber}
-               </p>
-             </div>
+            <div>
+              <div className="flex items-center space-x-3">
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Ticket Details
+                </h1>
+                <div className="flex items-center space-x-1.5 bg-white px-2 py-1 rounded-lg border shadow-sm">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      socketStatus === "connected"
+                        ? "bg-green-500 animate-pulse"
+                        : socketStatus === "connecting"
+                          ? "bg-yellow-500 animate-pulse"
+                          : "bg-red-500"
+                    }`}
+                  />
+                  <span className="text-xs text-gray-500 font-medium">
+                    {socketStatus === "connected"
+                      ? "Live Sync Active"
+                      : socketStatus === "connecting"
+                        ? "Connecting to Live Sync..."
+                        : `Live Sync Offline (${socketError || "Disconnect"})`}
+                  </span>
+                </div>
+              </div>
+              <p className="text-gray-600 mt-1">
+                Ticket #{ticket.ticketNumber}
+              </p>
+            </div>
           </div>
           <div className="mt-4 md:mt-0 flex items-center space-x-2">
             <DropdownMenu>
@@ -572,7 +612,7 @@ const TicketDetailsPage = () => {
                       <span className="text-gray-600">Priority:</span>
                       <Badge
                         className={getPriorityColor(
-                          ticket.priority || "medium"
+                          ticket.priority || "medium",
                         )}
                       >
                         {(ticket.priority || "medium").charAt(0).toUpperCase() +
@@ -646,7 +686,7 @@ const TicketDetailsPage = () => {
                               {index === 0 ||
                               formatDate(msg.replyAt) !==
                                 formatDate(
-                                  ticket.message[index - 1].replyAt
+                                  ticket.message[index - 1].replyAt,
                                 ) ? (
                                 <div className="flex justify-center">
                                   <span className="px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
@@ -698,9 +738,7 @@ const TicketDetailsPage = () => {
                                     <div
                                       className={`flex items-center space-x-2 text-xs ${
                                         isMe ? "text-gray-400" : "text-gray-500"
-                                      } ${
-                                        isMe ? "mr-0 justify-end" : "ml-0"
-                                      }`}
+                                      } ${isMe ? "mr-0 justify-end" : "ml-0"}`}
                                     >
                                       <span className="flex items-center space-x-1">
                                         {isMe ? (
@@ -723,14 +761,20 @@ const TicketDetailsPage = () => {
 
                       {/* Reply Section */}
                       <div className="p-6 border-t border-gray-200 bg-gray-50">
-                        {ticket.status === "resolved" || ticket.status === "closed" ? (
+                        {ticket.status === "resolved" ||
+                        ticket.status === "closed" ? (
                           <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
                             <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
                             <h3 className="text-lg font-semibold text-green-800 mb-2">
-                              Ticket {ticket.status === "closed" ? "Closed" : "Resolved"} Successfully
+                              Ticket{" "}
+                              {ticket.status === "closed"
+                                ? "Closed"
+                                : "Resolved"}{" "}
+                              Successfully
                             </h3>
                             <p className="text-green-700">
-                              This conversation has been marked as {ticket.status}.
+                              This conversation has been marked as{" "}
+                              {ticket.status}.
                             </p>
                           </div>
                         ) : (
