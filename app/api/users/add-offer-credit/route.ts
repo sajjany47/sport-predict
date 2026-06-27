@@ -19,14 +19,14 @@ export const POST = async (request: NextRequest) => {
     if (!loggedInUser?._id) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (loggedInUser.role !== "admin") {
       return NextResponse.json(
         { success: false, message: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -36,7 +36,7 @@ export const POST = async (request: NextRequest) => {
     if (!targetUser) {
       return NextResponse.json(
         { success: false, message: "User not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -45,10 +45,28 @@ export const POST = async (request: NextRequest) => {
 
     const updateuserCredits = await User.updateOne(
       { _id: new mongoose.Types.ObjectId(body.userId) },
-      { $set: { credits: updatedCredits } }
+      { $set: { credits: updatedCredits } },
     );
 
     if (updateuserCredits) {
+      console.log("Calling Socket Server...");
+
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_SOCKET_URL + "/credits-updated",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: body.userId,
+            credits: updatedCredits,
+          }),
+        },
+      );
+
+      console.log("Socket Response Status:", response.status);
+      console.log("Socket Response:", await response.text());
       if (creditType === "deposit") {
         const depositAmount = body.amount || 0;
         const emailData = {
@@ -101,12 +119,12 @@ export const POST = async (request: NextRequest) => {
         success: true,
         message: "Credits send successfully",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: FormatErrorMessage(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };

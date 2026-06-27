@@ -1,8 +1,8 @@
 import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
-// Track which ticket rooms we've joined so we can re-join on reconnect
 let activeTicketId: string | null = null;
+let activeUserId: string | null = null;
 
 const getSocketUrl = (): string => {
   if (typeof window !== "undefined") {
@@ -23,7 +23,10 @@ const getSocketUrl = (): string => {
 export const getSocket = (): Socket => {
   if (!socket) {
     const SOCKET_URL = getSocketUrl();
-    console.log("[Socket] Initializing socket client connecting to:", SOCKET_URL);
+    console.log(
+      "[Socket] Initializing socket client connecting to:",
+      SOCKET_URL,
+    );
 
     socket = io(SOCKET_URL, {
       autoConnect: false,
@@ -36,10 +39,15 @@ export const getSocket = (): Socket => {
 
     // Re-join ticket room on reconnect (server loses room membership on disconnect)
     socket.on("connect", () => {
-      console.log("[Socket] Connected successfully with ID:", socket?.id);
+      console.log("[Socket] Connected:", socket?.id);
+      console.log("[Socket] activeUserId:", activeUserId);
+      // console.log("[Socket] Connected successfully with ID:", socket?.id);
       if (activeTicketId) {
-        console.log("[Socket] Re-joining ticket room:", activeTicketId);
         socket?.emit("join:ticket", activeTicketId);
+      }
+
+      if (activeUserId) {
+        socket?.emit("join:user", activeUserId);
       }
     });
 
@@ -59,11 +67,34 @@ export const connectToTicket = (ticketId: string) => {
   activeTicketId = ticketId;
 
   if (s.connected) {
-    console.log("[Socket] Already connected, emitting join:ticket for room:", ticketId);
+    console.log(
+      "[Socket] Already connected, emitting join:ticket for room:",
+      ticketId,
+    );
     s.emit("join:ticket", ticketId);
   } else {
-    console.log("[Socket] Not connected, initiating connection and will join room:", ticketId);
+    console.log(
+      "[Socket] Not connected, initiating connection and will join room:",
+      ticketId,
+    );
     // connect() is safe to call multiple times — socket.io ignores if already connecting
+    s.connect();
+  }
+};
+
+export const connectUserSocket = (userId: string) => {
+  const s = getSocket();
+
+  activeUserId = userId;
+
+  console.log("[Socket] connectUserSocket:", userId);
+  console.log("[Socket] Connected:", s.connected);
+
+  if (s.connected) {
+    console.log("[Socket] Joining user immediately");
+    s.emit("join:user", userId);
+  } else {
+    console.log("[Socket] Connecting...");
     s.connect();
   }
 };
@@ -86,4 +117,8 @@ export const disconnectSocket = () => {
     socket.disconnect();
     socket = null;
   }
+};
+
+export const disconnectUserSocket = () => {
+  activeUserId = null;
 };

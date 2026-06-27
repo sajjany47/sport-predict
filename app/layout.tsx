@@ -10,6 +10,7 @@ import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 import { PersistGate } from "redux-persist/integration/react";
 import ReactQueryProvider from "@/lib/ReactQueryProvider";
+import SocketListener from "@/lib/SocketListener";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <ReactQueryProvider>
+              <SocketListener />
               <div className="min-h-screen flex flex-col">
                 <Header />
                 <main className="flex-1">{children}</main>

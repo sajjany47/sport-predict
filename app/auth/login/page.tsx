@@ -24,6 +24,7 @@ import { UserLogin } from "@/app/MainService";
 import CustomLoader from "@/components/ui/CustomLoader";
 import Image from "next/image";
 import SportLogo from "@/components/assests/new sport logo.png";
+import { connectUserSocket } from "@/lib/socketClient";
 
 // Validation Schema
 const loginValidationSchema = Yup.object({
@@ -60,6 +61,7 @@ const LoginPage = () => {
         };
         localStorage.setItem("token", res.data.token);
         dispatch(loginSuccess(userData));
+        connectUserSocket(userData.id);
         setIsLoading(false);
         toast.success("Login successful!");
 

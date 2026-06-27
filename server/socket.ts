@@ -1,43 +1,80 @@
-import { Server, Socket } from "socket.io";
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
 
 const PORT: number = Number(process.env.PORT) || 3005;
 
-const io = new Server(PORT, {
+const app = express();
+
+app.use(express.json());
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
-interface MessageData {
-  ticketId: string;
-  message: string;
-  userName?: string;
-}
+app.post("/credits-updated", (req, res) => {
+  const { userId, credits } = req.body;
 
-interface StatusData {
-  ticketId: string;
-  status: string;
-}
+  console.log(`Sending updated credits to user ${userId}: ${credits}`);
 
-interface TypingData {
-  ticketId: string;
-  userName: string;
-}
+  io.to(`user:${userId}`).emit("credits:updated", {
+    credits,
+  });
+
+  return res.json({
+    success: true,
+  });
+});
 
 io.on("connection", (socket) => {
   console.log("Connected:", socket.id);
 
-  socket.on("join:ticket", (ticketId) => {
+  // =========================
+  // Ticket Chat
+  // =========================
+
+  socket.on("join:ticket", (ticketId: string) => {
     console.log(`${socket.id} joined ticket:${ticketId}`);
     socket.join(`ticket:${ticketId}`);
   });
 
-  socket.on("send:message", (data) => {
-    console.log("Broadcasting:", data);
+  socket.on("leave:ticket", (ticketId: string) => {
+    socket.leave(`ticket:${ticketId}`);
+  });
 
+  socket.on("send:message", (data) => {
     socket.to(`ticket:${data.ticketId}`).emit("new:message", data);
+  });
+
+  // =========================
+  // User Room
+  // =========================
+
+  socket.on("join:user", (userId: string) => {
+    socket.join(`user:${userId}`);
+    console.log(`${socket.id} joined user:${userId}`);
+  });
+
+  socket.on("credits:updated", (data: { userId: string; credits: number }) => {
+    console.log(
+      `Credits Updated => User: ${data.userId} Credits: ${data.credits}`,
+    );
+
+    io.to(`user:${data.userId}`).emit("credits:updated", {
+      credits: data.credits,
+    });
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`${socket.id} disconnected`);
   });
 });
 
-console.log(`Socket.IO server running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Socket.IO Server running on ${PORT}`);
+});

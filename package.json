@@ -60,6 +60,7 @@
     "embla-carousel-react": "^8.3.0",
     "eslint": "8.49.0",
     "eslint-config-next": "13.5.1",
+    "express": "^5.2.1",
     "formik": "^2.4.6",
     "input-otp": "^1.2.4",
     "jose": "^6.0.12",
@@ -102,6 +103,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/moment-timezone": "^0.5.13",
     "@types/node": "^24.0.4",
