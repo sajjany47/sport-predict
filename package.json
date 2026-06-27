@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev -p 3004\" \"node server/socket.js\"",
+    "dev": "concurrently \"next dev -p 3004\" \"node server/socket.ts\"",
     "dev:next": "next dev -p 3004",
-    "dev:socket": "node server/socket.js",
+    "dev:socket": "node server/socket.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
