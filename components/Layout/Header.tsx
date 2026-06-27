@@ -103,7 +103,7 @@ const Header = () => {
   useEffect(() => {
     if (!isAuthenticated || isAuthPage) return;
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60000);
+    const interval = setInterval(fetchNotifications, 15000);
     return () => clearInterval(interval);
   }, [isAuthenticated, dispatch, isAuthPage]);
 

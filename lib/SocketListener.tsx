@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { getSocket, connectUserSocket } from "@/lib/socketClient";
 import { updateCredits } from "@/store/slices/authSlice";
+import { addNotification } from "@/store/slices/notificationSlice";
 
 export default function SocketListener() {
   const dispatch = useDispatch();
@@ -22,14 +23,21 @@ export default function SocketListener() {
 
     const handleCreditsUpdated = (data: { credits: number }) => {
       console.log("Credits Updated:", data);
-
       dispatch(updateCredits(data.credits));
     };
 
+    const handleNotificationNew = (data: { notification: any }) => {
+      if (data?.notification) {
+        dispatch(addNotification(data.notification));
+      }
+    };
+
     socket.on("credits:updated", handleCreditsUpdated);
+    socket.on("notification:new", handleNotificationNew);
 
     return () => {
       socket.off("credits:updated", handleCreditsUpdated);
+      socket.off("notification:new", handleNotificationNew);
     };
   }, [dispatch, isAuthenticated, user?.id]);
 

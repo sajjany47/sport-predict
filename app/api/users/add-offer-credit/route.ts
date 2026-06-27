@@ -2,12 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import dbConnect from "../../db";
 import User from "../UserModel";
+import Notification from "../../notification/NotificationModel";
 import { FormatErrorMessage } from "@/lib/utils";
 import { MailSend } from "@/lib/MailSend";
 import {
   AdminFreeCreditsEmail,
   AdminDepositCreditsEmail,
 } from "@/components/template/UserTemp";
+
+const SOCKET_URL =
+  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3005";
+
+const notifySocket = async (endpoint: string, payload: any) => {
+  try {
+    await fetch(`${SOCKET_URL}${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // Socket server not running — ignore
+  }
+};
 
 export const POST = async (request: NextRequest) => {
   await dbConnect();
@@ -49,24 +65,45 @@ export const POST = async (request: NextRequest) => {
     );
 
     if (updateuserCredits) {
-      console.log("Calling Socket Server...");
+      // Real-time balance update via socket
+      notifySocket("/credits-updated", {
+        userId: body.userId,
+        credits: updatedCredits,
+      });
 
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_SOCKET_URL + "/credits-updated",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: body.userId,
-            credits: updatedCredits,
-          }),
+      // Create in-app notification
+      const notifTitle =
+        creditType === "deposit"
+          ? `Deposit of ₹${body.amount || 0} successful`
+          : `${body.credits} free credits added`;
+      const notifMessage =
+        creditType === "deposit"
+          ? `Your deposit of ₹${body.amount || 0} for ${body.credits} tokens was successful. Current balance: ${updatedCredits} tokens.`
+          : `${body.credits} free tokens have been added to your account by admin. Current balance: ${updatedCredits} tokens.`;
+
+      const notification = await Notification.create({
+        userId: body.userId,
+        type: creditType === "deposit" ? "payment" : "credit",
+        title: notifTitle,
+        message: notifMessage,
+        link: "/subscription",
+      });
+
+      // Real-time notification via socket
+      notifySocket("/send-notification", {
+        userId: body.userId,
+        notification: {
+          _id: notification._id,
+          userId: notification.userId,
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          link: notification.link,
+          isRead: false,
+          createdAt: notification.createdAt,
         },
-      );
+      });
 
-      console.log("Socket Response Status:", response.status);
-      console.log("Socket Response:", await response.text());
       if (creditType === "deposit") {
         const depositAmount = body.amount || 0;
         const emailData = {

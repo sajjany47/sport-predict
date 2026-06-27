@@ -31,6 +31,20 @@ app.post("/credits-updated", (req, res) => {
   });
 });
 
+app.post("/send-notification", (req, res) => {
+  const { userId, notification } = req.body;
+
+  console.log(`Sending notification to user ${userId}`);
+
+  io.to(`user:${userId}`).emit("notification:new", {
+    notification,
+  });
+
+  return res.json({
+    success: true,
+  });
+});
+
 io.on("connection", (socket) => {
   console.log("Connected:", socket.id);
 
