@@ -42,6 +42,7 @@ import {
   CheckCircle2,
   Clock,
   Zap,
+  Trash2,
 } from "lucide-react";
 import MarqueeNotice from "../ui/marquee-notice";
 import { usePathname } from "next/navigation";
@@ -53,11 +54,14 @@ import {
   UserOrderCredit,
   NotificationList,
   NotificationRead,
+  NotificationDelete,
 } from "@/app/MainService";
 import {
   setNotifications,
   markAsRead,
   markAllAsRead,
+  removeNotification,
+  clearAllNotifications,
 } from "@/store/slices/notificationSlice";
 import toast from "react-hot-toast";
 import { set } from "mongoose";
@@ -352,16 +356,16 @@ const Header = () => {
                             </Badge>
                           )}
                         </div>
-                        {unreadCount > 0 && (
+                        {notifItems.length > 0 && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              NotificationRead();
-                              dispatch(markAllAsRead());
+                              NotificationDelete();
+                              dispatch(clearAllNotifications());
                             }}
-                            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                            className="text-xs text-red-600 hover:text-red-800 font-medium"
                           >
-                            Mark all read
+                            Clear all
                           </button>
                         )}
                       </div>
@@ -378,73 +382,90 @@ const Header = () => {
                           </div>
                         ) : (
                           notifItems.map((n: any) => (
-                            <button
+                            <div
                               key={n._id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setNotifOpen(false);
-                                if (!n.isRead) {
-                                  NotificationRead({ notificationId: n._id });
-                                  dispatch(markAsRead(n._id));
-                                }
-                                if (n.link) router.push(n.link);
-                              }}
-                              className={`w-full text-left px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors flex items-start space-x-3 ${
+                              className={`group relative w-full px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors flex items-start space-x-3 ${
                                 !n.isRead ? "bg-blue-50/50" : ""
                               }`}
                             >
-                              <div
-                                className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                  n.type === "support"
-                                    ? "bg-green-100"
-                                    : n.type === "payment"
-                                      ? "bg-blue-100"
-                                      : n.type === "credit"
-                                        ? "bg-amber-100"
-                                        : "bg-gray-100"
-                                }`}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setNotifOpen(false);
+                                  if (!n.isRead) {
+                                    NotificationRead({ notificationId: n._id });
+                                    dispatch(markAsRead(n._id));
+                                  }
+                                  if (n.link) router.push(n.link);
+                                }}
+                                className="flex items-start space-x-3 flex-1 min-w-0 text-left"
                               >
-                                {n.type === "support" ? (
-                                  <MessageSquare className="h-4 w-4 text-green-600" />
-                                ) : n.type === "payment" ? (
-                                  <CreditCard className="h-4 w-4 text-blue-600" />
-                                ) : n.type === "credit" ? (
-                                  <Gift className="h-4 w-4 text-amber-600" />
-                                ) : (
-                                  <Zap className="h-4 w-4 text-gray-600" />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between">
-                                  <p
-                                    className={`text-sm ${
-                                      !n.isRead
-                                        ? "font-semibold text-gray-900"
-                                        : "font-medium text-gray-700"
-                                    } truncate`}
-                                  >
-                                    {n.title}
-                                  </p>
-                                  {!n.isRead && (
-                                    <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                                <div
+                                  className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                    n.type === "support"
+                                      ? "bg-green-100"
+                                      : n.type === "payment"
+                                        ? "bg-blue-100"
+                                        : n.type === "credit"
+                                          ? "bg-amber-100"
+                                          : "bg-gray-100"
+                                  }`}
+                                >
+                                  {n.type === "support" ? (
+                                    <MessageSquare className="h-4 w-4 text-green-600" />
+                                  ) : n.type === "payment" ? (
+                                    <CreditCard className="h-4 w-4 text-blue-600" />
+                                  ) : n.type === "credit" ? (
+                                    <Gift className="h-4 w-4 text-amber-600" />
+                                  ) : (
+                                    <Zap className="h-4 w-4 text-gray-600" />
                                   )}
                                 </div>
-                                <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
-                                  {n.message}
-                                </p>
-                                <p className="text-[10px] text-gray-400 mt-1">
-                                  {new Date(n.createdAt).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      month: "short",
-                                      day: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    },
-                                  )}
-                                </p>
-                              </div>
-                            </button>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between">
+                                    <p
+                                      className={`text-sm ${
+                                        !n.isRead
+                                          ? "font-semibold text-gray-900"
+                                          : "font-medium text-gray-700"
+                                      } truncate`}
+                                    >
+                                      {n.title}
+                                    </p>
+                                    {!n.isRead && (
+                                      <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                                    {n.message}
+                                  </p>
+                                  <p className="text-[10px] text-gray-400 mt-1">
+                                    {new Date(n.createdAt).toLocaleDateString(
+                                      "en-US",
+                                      {
+                                        month: "short",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      },
+                                    )}
+                                  </p>
+                                </div>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  NotificationDelete({
+                                    notificationId: n._id,
+                                  });
+                                  dispatch(removeNotification(n._id));
+                                }}
+                                className="absolute top-3 right-3 p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+                                title="Delete notification"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           ))
                         )}
                       </div>

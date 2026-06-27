@@ -49,6 +49,19 @@ const notificationSlice = createSlice({
       state.items.forEach((n) => (n.isRead = true));
       state.unreadCount = 0;
     },
+    removeNotification: (state, action: PayloadAction<string>) => {
+      const idx = state.items.findIndex((n) => n._id === action.payload);
+      if (idx !== -1) {
+        if (!state.items[idx].isRead) {
+          state.unreadCount = Math.max(0, state.unreadCount - 1);
+        }
+        state.items.splice(idx, 1);
+      }
+    },
+    clearAllNotifications: (state) => {
+      state.items = [];
+      state.unreadCount = 0;
+    },
     addNotification: (state, action: PayloadAction<Notification>) => {
       state.items.unshift(action.payload);
       if (!action.payload.isRead) {
@@ -63,6 +76,8 @@ export const {
   setLoading,
   markAsRead,
   markAllAsRead,
+  removeNotification,
+  clearAllNotifications,
   addNotification,
 } = notificationSlice.actions;
 

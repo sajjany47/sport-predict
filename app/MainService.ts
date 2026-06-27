@@ -293,6 +293,19 @@ export const NotificationList = async (payload?: any) => {
   }
 };
 
+export const NotificationDelete = async (payload?: any) => {
+  try {
+    const response = await privateApi.post(
+      "/api/notification/delete",
+      payload || {},
+      { headers: getHeadersWithToken() }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+};
+
 export const NotificationRead = async (payload?: any) => {
   try {
     const response = await privateApi.post(

@@ -28,6 +28,7 @@ const protectedPaths: any = [
   "/api/notification/list",
   "/api/notification/read",
   "/api/notification/create",
+  "/api/notification/delete",
 ];
 
 export async function middleware(request: NextRequest) {
