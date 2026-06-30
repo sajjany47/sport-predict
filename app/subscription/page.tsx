@@ -56,20 +56,20 @@ const SubscriptionPage = () => {
       name: "Starter",
       tokens: 1,
       price: 49,
-      description: "Perfect for a single prediction",
-      features: ["1 Premium Token", "Standard Support", "Instant Access"],
+      description: "Perfect for a single analysis",
+      features: ["1 AI Analysis Credit", "Standard Support", "Instant Access"],
       color: "from-blue-500 to-blue-600",
       icon: Zap,
       popular: false,
     },
     {
       id: "standard",
-      name: "Standard",
+      name: "Pro Analytics",
       tokens: 5,
       price: 199,
-      description: "Best for weekend matches",
+      description: "Best for weekend match analysis",
       features: [
-        "5 Premium Tokens",
+        "5 AI Analysis Credits",
         "Priority Support",
         "Lifetime Validity",
         "Save ₹46",
@@ -80,12 +80,12 @@ const SubscriptionPage = () => {
     },
     {
       id: "premium",
-      name: "Premium",
+      name: "Elite Analytics",
       tokens: 15,
       price: 599,
-      description: "For the ultimate player",
+      description: "For the ultimate analyst",
       features: [
-        "15 Premium Tokens",
+        "15 AI Analysis Credits",
         "VIP Support",
         "Lifetime Validity",
         "Save ₹136",
@@ -104,14 +104,14 @@ const SubscriptionPage = () => {
     }
 
     const whatsappNumber = "918981374643";
-    const message = `Hello! I would like to purchase the *${plan.name}* (${plan.tokens} Tokens) for *₹${plan.price}*.
+    const message = `Hello! I would like to purchase the *${plan.name}* (${plan.tokens} Credits) for *₹${plan.price}*.
 
 *My Details:*
 - Name: ${user?.username || "N/A"}
 - Email: ${user?.email || "N/A"}
 - User ID: ${user?.id || "N/A"}
 
-I am sending this message to confirm my payment. Please add the tokens to my account.`;
+I am sending this message to confirm my payment. Please add the credits to my account.`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
@@ -145,11 +145,11 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
 
         setDailyCreditRes({ message: res.message, isSuccess: true });
         dispatch(loginSuccess({ ...prepareUser }));
-        toast.success("Token added successfully!");
+        toast.success("Credit added successfully!");
       })
       .catch((error) => {
         setDailyCreditRes({ message: error.message, isSuccess: false });
-        toast.error(error.message || "Failed to add token");
+        toast.error(error.message || "Failed to add credit");
       });
   };
 
@@ -173,17 +173,17 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
               className="mb-4 px-4 py-1.5 text-xs font-semibold tracking-wide"
             >
               <Sparkles className="h-3 w-3 mr-1.5" />
-              AI-Powered Predictions
+              AI-Powered Analytics
             </Badge>
             <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
               Get Premium{" "}
               <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
-                Prediction Tokens
+                Analytics Credits
               </span>
             </h1>
             <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto">
-              Unlock expert cricket predictions. Each token gives you one
-              premium AI-powered match analysis.
+              Unlock AI-powered sports analytics. Each credit gives you one
+              premium match analysis.
             </p>
           </div>
 
@@ -194,12 +194,12 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-blue-100 text-xs font-medium uppercase tracking-wide mb-1">
-                      Your Balance
+                      Your Analytics Credits
                     </p>
                     <p className="text-2xl md:text-3xl font-bold">
                       {user.credits || 0}{" "}
                       <span className="text-lg font-normal text-blue-200">
-                        tokens
+                        credits
                       </span>
                     </p>
                   </div>
@@ -208,8 +208,8 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                   </div>
                 </div>
                 <div className="mt-3 pt-3 border-t border-white/20 flex items-center gap-2 text-blue-100 text-xs">
-                  <BarChart3 className="h-3.5 w-3.5" />1 token = 1 premium
-                  prediction
+                  <BarChart3 className="h-3.5 w-3.5" />1 credit = 1 AI
+                  analysis
                 </div>
               </div>
             </div>
@@ -287,7 +287,7 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
               </div>
               <p className="text-xs text-center text-muted-foreground mt-3">
                 After payment, share the transaction screenshot on WhatsApp for
-                instant token activation.
+                instant credit activation.
               </p>
             </div>
           </div>
@@ -309,7 +309,7 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
                       <Badge className="bg-gradient-to-r from-blue-600 to-violet-600 text-white border-0 shadow-lg px-4 py-1">
                         <Star className="h-3 w-3 mr-1 fill-white" />
-                        Best Value
+                        Most Popular
                       </Badge>
                     </div>
                   )}
@@ -340,10 +340,10 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {pkg.tokens} token{pkg.tokens > 1 ? "s" : ""}
+                        {pkg.tokens} credit{pkg.tokens > 1 ? "s" : ""}
                         {pkg.tokens > 1 && (
                           <span className="text-blue-600 font-medium ml-1">
-                            · ₹{(pkg.price / pkg.tokens).toFixed(0)}/token
+                            · ₹{(pkg.price / pkg.tokens).toFixed(0)}/credit
                           </span>
                         )}
                       </p>
@@ -390,20 +390,20 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
               {[
                 {
                   step: "01",
-                  title: "Choose a Pack",
-                  desc: "Select the token pack that fits your needs.",
+                  title: "Choose Your Plan",
+                  desc: "Select the plan that fits your analysis needs.",
                   icon: Coins,
                 },
                 {
                   step: "02",
-                  title: "Pay via WhatsApp",
-                  desc: "Send payment and receive tokens within minutes.",
+                  title: "Pay Securely",
+                  desc: "Send payment and receive credits within minutes.",
                   icon: Smartphone,
                 },
                 {
                   step: "03",
-                  title: "Start Predicting",
-                  desc: "Use tokens to unlock premium AI predictions.",
+                  title: "Start Analyzing",
+                  desc: "Use credits to unlock premium AI analysis.",
                   icon: BarChart3,
                 },
               ].map((item) => {
@@ -426,7 +426,7 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
             </div>
           </div>
 
-          {/* Free Token Section */}
+          {/* Free Trial Section */}
           <div className="max-w-3xl mx-auto mb-16">
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-200 p-6 md:p-8 text-center">
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -436,7 +436,7 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                 Want a Free Trial?
               </h2>
               <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
-                Watch a short ad and get 1 free prediction token every day.
+                Watch a short ad and get 1 free analysis credit every day.
               </p>
               <Button
                 size="lg"
@@ -444,22 +444,22 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                 onClick={handleFreeToken}
               >
                 <Play className="h-4 w-4 mr-2 fill-current" />
-                Get Free Token
+                Get Free Credit
               </Button>
             </div>
           </div>
 
-          {/* Features Grid */}
+          {/* Why Choose Us */}
           <div className="max-w-5xl mx-auto mb-16">
             <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-10 tracking-tight">
-              Why Choose Our Predictions?
+              Why Choose Our Analytics?
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 {
                   icon: Trophy,
-                  title: "92% Win Rate",
-                  desc: "High accuracy across formats",
+                  title: "95% Model Accuracy",
+                  desc: "Advanced statistical modeling",
                   color: "text-blue-600",
                   bg: "bg-blue-50",
                 },
@@ -473,7 +473,7 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                 {
                   icon: Shield,
                   title: "100% Secure",
-                  desc: "Manual token verification",
+                  desc: "Manual credit verification",
                   color: "text-violet-600",
                   bg: "bg-violet-50",
                 },
@@ -507,6 +507,23 @@ I am sending this message to confirm my payment. Please add the tokens to my acc
                   </Card>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="max-w-3xl mx-auto mb-8">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 md:p-5">
+              <div className="flex items-start gap-3">
+                <Shield className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                <p className="text-xs text-amber-800 leading-relaxed">
+                  SportPredict365 provides AI-powered sports analytics and
+                  statistical insights for informational and entertainment
+                  purposes only. We do not facilitate betting, gambling,
+                  wagering, or real-money gaming. AI-generated insights are
+                  statistical forecasts and should not be interpreted as
+                  betting advice or guarantees of future outcomes.
+                </p>
+              </div>
             </div>
           </div>
         </div>

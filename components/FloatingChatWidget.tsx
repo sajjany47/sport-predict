@@ -243,7 +243,7 @@ const FloatingChatWidget = () => {
                     >
                       <option value="general">General</option>
                       <option value="payment">Payment</option>
-                      <option value="prediction">Prediction</option>
+                      <option value="prediction">Analytics</option>
                       <option value="technical">Technical</option>
                       <option value="account">Account</option>
                     </select>

@@ -31,7 +31,7 @@ const MarqueeNotice = ({
                   raise a ticket
                 </Link>{" "}
                 and inform the admin immediately. Missing player data affects
-                AI-generated predictions and analysis accuracy.
+                AI-generated analysis and insights accuracy.
               </span>
             </div>
           </div>

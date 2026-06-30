@@ -1,5 +1,5 @@
-import MatchesPage from "./matches/page";
+import HomePage from "./home/page";
 
 export default function Home() {
-  return <MatchesPage />;
+  return <HomePage />;
 }

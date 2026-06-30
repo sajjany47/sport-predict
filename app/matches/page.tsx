@@ -199,7 +199,7 @@ const MatchesPage = () => {
             Cricket Matches
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-gray-600 mt-1 md:mt-2">
-            Get AI-powered predictions & live match insights
+            AI-powered analysis & live match insights
           </p>
         </div>
 

@@ -301,7 +301,7 @@ const MatchCard = ({
       <div className={`mb-4 rounded-xl border overflow-hidden shadow-sm transition-transform ${correct ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
         <div className={`flex items-center justify-center py-2 ${correct ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
           {correct ? <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" /> : <XCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />}
-          <span className="font-bold text-xs sm:text-sm tracking-widest uppercase">{correct ? "Prediction Pass" : "Prediction Fail"}</span>
+                          <span className="font-bold text-xs sm:text-sm tracking-widest uppercase">{correct ? "Forecast Pass" : "Forecast Miss"}</span>
         </div>
         <div className="p-3">
           <div className="flex justify-between items-center bg-white rounded-lg p-2 mb-2 border shadow-sm">
@@ -716,7 +716,7 @@ const MatchCard = ({
 
     if (!t1 || !t2) return title;
 
-    const winnerLine = `Match Winner :${t1.name} (${t1.winnerPrediction.probability.toFixed(1)}%)|${t2.name} (${t2.winnerPrediction.probability.toFixed(1)}%)`;
+    const winnerLine = `AI Forecast :${t1.name} (${t1.winnerPrediction.probability.toFixed(1)}%)|${t2.name} (${t2.winnerPrediction.probability.toFixed(1)}%)`;
     const fi1 = t1.firstInnings;
     const fi2 = t2.firstInnings;
     const fiLine = `FirstInningScore :${t1.name} ${fi1.predicted}(${fi1.min}-${fi1.max}) | ${t2.name} ${fi2.predicted}(${fi2.min}-${fi2.max})`;
@@ -902,7 +902,7 @@ const MatchCard = ({
               ? match.prediction
                 ? "View Full Analysis"
                 : "View Match Details"
-              : "Get Prediction"}
+              : "Get Analysis"}
           </Button>
         )}
 

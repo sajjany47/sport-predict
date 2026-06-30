@@ -23,6 +23,7 @@ import {
   Activity,
   Radio,
   Home,
+  Info,
   Shield,
   Star,
 } from "lucide-react";
@@ -181,12 +182,12 @@ const MatchDetailsPage = () => {
                     {isLoading ? (
                       <div className="flex items-center space-x-2">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Generating AI Prediction...</span>
+                        <span>Generating AI Analysis...</span>
                       </div>
                     ) : (
                       <>
                         <Zap className="h-5 w-5 mr-2" />
-                        Get AI Prediction
+                        Get AI Analysis
                       </>
                     )}
                   </Button>
@@ -383,6 +384,14 @@ const MatchDetailsPage = () => {
                 </Card>
               </div>
             </div>
+          </div>
+
+          {/* AI Disclaimer */}
+          <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-blue-700">
+              AI Confidence Score represents the model&apos;s statistical assessment and is not betting advice.
+            </p>
           </div>
 
           {/* Main Content Tabs */}

@@ -183,10 +183,10 @@ const AIPredictionModal: React.FC<{
 
       console.log("Prediction Data:", data);
       setPredictionData(data);
-      toast.success("AI Prediction generated successfully!");
+      toast.success("AI Analysis generated successfully!");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to generate prediction. Please try again.");
+      toast.error("Failed to generate analysis. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -298,7 +298,7 @@ const AIPredictionModal: React.FC<{
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent
           className="w-full h-full p-4 md:mx-auto md:my-6 md:w-[95%] md:max-w-2xl md:h-auto bg-white md:rounded-2xl md:shadow-xl overflow-hidden flex flex-col"
-          aria-label="AI Match Prediction Modal"
+          aria-label="AI Match Analysis Modal"
         >
           <DialogHeader className="sticky top-0 z-20 bg-white border-b px-2 py-3 md:px-6 md:py-4">
             <div className="flex items-center justify-between">
@@ -306,7 +306,7 @@ const AIPredictionModal: React.FC<{
                 <div className="p-1.5 md:p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
                   <Brain className="h-4 w-4 md:h-6 md:w-6 text-white" />
                 </div>
-                <span>AI Match Prediction</span>
+                <span>AI Match Analysis</span>
               </DialogTitle>
               <DialogClose className="ml-3 inline-flex items-center justify-center rounded-md p-1 hover:bg-gray-100">
                 <span className="sr-only">Close</span>
@@ -323,12 +323,8 @@ const AIPredictionModal: React.FC<{
                   <h3 className="text-sm font-bold text-red-800 mb-2">
                     ⚖️ LEGAL DISCLAIMER
                   </h3>
-                  <p className="text-xs text-red-700">
-                    <strong>Betting is illegal in India.</strong> This website
-                    provides AI-powered cricket analysis and predictions for
-                    informational and entertainment purposes only. We do NOT
-                    promote, encourage, or facilitate any form of gambling,
-                    betting, or illegal activities.
+                  <p className="text-xs text-orange-700">
+                    AI Confidence Score represents the model's statistical assessment and is not betting advice. SportPredict365 provides AI-powered sports analytics for informational and entertainment purposes only.
                   </p>
                 </div>
               </div>
@@ -345,7 +341,7 @@ const AIPredictionModal: React.FC<{
                 <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8 max-w-md mx-auto px-4">
                   ⏳ Both team squads haven't been announced yet. Please check
                   back later when the teams are finalized to get accurate AI
-                  predictions.
+                  insights.
                 </p>
               </div>
             ) : (
@@ -354,12 +350,12 @@ const AIPredictionModal: React.FC<{
                   <Brain className="h-8 w-8 md:h-10 md:w-10 text-white" />
                 </div>
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
-                  Get AI-Powered Match Prediction
+                  Get AI-Powered Match Analysis
                 </h3>
                 <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8 max-w-md mx-auto px-4">
                   Our advanced AI analyzes 50+ factors including player form,
                   pitch conditions, weather, and historical data to provide
-                  accurate predictions.
+                  accurate analysis.
                 </p>
                 <Button
                   onClick={handleGetPrediction}
@@ -374,7 +370,7 @@ const AIPredictionModal: React.FC<{
                   ) : (
                     <>
                       <Sparkles className="h-4 w-4 mr-2" />
-                      Get AI Prediction (1 Credit)
+                      Get AI Analysis (1 Credit)
                     </>
                   )}
                 </Button>
@@ -390,7 +386,7 @@ const AIPredictionModal: React.FC<{
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         className="w-full h-full p-0 md:mx-auto md:my-6 md:w-[95%] md:max-w-7xl md:h-auto bg-white md:rounded-2xl md:shadow-xl overflow-hidden flex flex-col"
-        aria-label="AI Match Prediction Modal"
+        aria-label="AI Match Analysis Modal"
       >
         <DialogHeader className="sticky top-0 z-20 bg-white border-b px-4 py-3 md:px-6 md:py-4">
           <div className="flex items-center justify-between">
@@ -400,7 +396,7 @@ const AIPredictionModal: React.FC<{
               </div>
               <div>
                 <DialogTitle className="text-base md:text-xl lg:text-2xl font-semibold">
-                  AI Match Prediction
+                  AI Match Analysis
                 </DialogTitle>
                 <div className="flex items-center gap-3 text-xs md:text-sm text-gray-600 mt-1">
                   <div className="flex items-center gap-2 truncate">
@@ -442,10 +438,8 @@ const AIPredictionModal: React.FC<{
                 <h3 className="text-sm font-bold text-red-800 mb-2">
                   ⚖️ IMPORTANT LEGAL NOTICE
                 </h3>
-                <p className="text-xs text-red-700">
-                  <strong>WARNING:</strong> Betting and gambling are strictly
-                  illegal in India. This analysis is for informational purposes
-                  only.
+                <p className="text-xs text-orange-700">
+                  AI Confidence Score represents the model's statistical assessment and is not betting advice. SportPredict365 provides AI-powered sports analytics for informational and entertainment purposes only.
                 </p>
               </div>
             </div>
@@ -457,7 +451,7 @@ const AIPredictionModal: React.FC<{
               <CardHeader className="px-3 md:px-6 py-3 md:py-4">
                 <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
                   <Trophy className="h-4 w-4 md:h-5 md:w-5 text-yellow-600" />
-                  <span>Winner Prediction</span>
+                  <span>AI Match Forecast</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
@@ -594,7 +588,7 @@ const AIPredictionModal: React.FC<{
               <CardHeader className="px-3 md:px-6 py-3 md:py-4">
                 <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
                   <BarChart3 className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
-                  <span>First Innings Score Prediction</span>
+                  <span>First Innings Score Forecast</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
@@ -630,7 +624,7 @@ const AIPredictionModal: React.FC<{
                       </div>
 
                       <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border w-full">
-                        Predicted Wickets:{" "}
+                        Forecast Wickets:{" "}
                         <span className="font-semibold text-red-600">
                           {predictionData.team1?.firstInnings?.wickets || 0}
                         </span>
@@ -669,7 +663,7 @@ const AIPredictionModal: React.FC<{
                       </div>
 
                       <div className="text-xs md:text-sm text-gray-600 bg-white py-2 px-3 md:px-4 rounded-lg border w-full">
-                        Predicted Wickets:{" "}
+                        Forecast Wickets:{" "}
                         <span className="font-semibold text-red-600">
                           {predictionData.team2?.firstInnings?.wickets || 0}
                         </span>
@@ -687,7 +681,7 @@ const AIPredictionModal: React.FC<{
                 <CardHeader className="px-3 md:px-6 py-3 md:py-4">
                   <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
                     <Target className="h-4 w-4 md:h-5 md:w-5 text-red-600" />
-                    <span>Top Batsmen Prediction</span>
+                    <span>Top Batsmen Analysis</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
@@ -840,7 +834,7 @@ const AIPredictionModal: React.FC<{
                 <CardHeader className="px-3 md:px-6 py-3 md:py-4">
                   <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
                     <Zap className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
-                    <span>Top Bowlers Prediction</span>
+                    <span>Top Bowlers Analysis</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
@@ -980,7 +974,7 @@ const AIPredictionModal: React.FC<{
                   <CardHeader className="px-3 md:px-6 py-3 md:py-4">
                     <CardTitle className="flex items-center space-x-2 text-sm md:text-base">
                       <Users2 className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
-                      <span>Dream11 Team Prediction</span>
+                      <span>Dream11 Team Suggestion</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
@@ -1389,26 +1383,12 @@ const AIPredictionModal: React.FC<{
               <div className="flex items-start gap-3">
                 <Shield className="h-6 w-6 text-red-600 flex-shrink-0" />
                 <div>
-                  <h4 className="text-sm font-bold text-red-800 mb-2">
-                    ⚖️ LEGAL DISCLAIMER & IMPORTANT NOTICE
+                  <h4 className="text-sm font-bold text-orange-800 mb-2">
+                    ⚖️ DISCLAIMER
                   </h4>
-                  <div className="text-xs text-red-700 space-y-2">
-                    <p>
-                      <strong>WARNING:</strong> Gambling and betting are
-                      strictly prohibited by law in India. The Public Gambling
-                      Act of 1867 makes operating or visiting a gambling house
-                      illegal.
-                    </p>
-                    <p>
-                      <strong>PURPOSE:</strong> This website provides AI-powered
-                      cricket analysis and predictions{" "}
-                      <strong>
-                        FOR INFORMATIONAL AND ENTERTAINMENT PURPOSES ONLY
-                      </strong>
-                      . We do NOT promote, encourage, or facilitate any form of
-                      gambling, betting, or illegal activities.
-                    </p>
-                  </div>
+                  <p className="text-xs text-orange-700">
+                    AI Confidence Score represents the model's statistical assessment and is not betting advice. SportPredict365 provides AI-powered sports analytics for informational and entertainment purposes only.
+                  </p>
                 </div>
               </div>
             </div>

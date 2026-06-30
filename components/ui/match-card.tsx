@@ -398,7 +398,7 @@ const MatchCard = ({
             }}
           >
             <Target className="h-4 w-4 mr-2" />
-            {match.status === "COMPLETED" ? "View Analysis" : "Get Prediction"}
+            {match.status === "COMPLETED" ? "View Analysis" : "Get Analysis"}
           </Button>
         )}
       </CardContent>

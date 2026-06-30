@@ -10,14 +10,12 @@ import {
   Instagram,
   Youtube,
   Mail,
-  Phone,
   Clock,
 } from "lucide-react";
 
 const Footer = () => {
   const pathname = usePathname();
 
-  // Don't show footer on admin pages
   if (pathname.startsWith("/admin")) {
     return null;
   }
@@ -26,10 +24,10 @@ const Footer = () => {
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand Section */}
-          <div className="space-y-4 md:col-span-2 lg:col-span-1">
+          {/* Column 1 - Company */}
+          <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl shadow-md group-hover:scale-105 transition-transform duration-200">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl shadow-md">
                 <Trophy className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
               </div>
               <div className="flex flex-col">
@@ -37,13 +35,14 @@ const Footer = () => {
                   SportPredict
                 </span>
                 <span className="text-[10px] lg:text-xs text-gray-500">
-                  AI Cricket Predictions
+                  AI Cricket Analytics
                 </span>
               </div>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Your ultimate cricket fantasy prediction platform powered by AI.
-              Get accurate predictions and build winning Dream11 teams.
+              Advanced cricket analytics platform powered by artificial
+              intelligence. Providing statistical insights, team analysis, and
+              venue intelligence.
             </p>
             <div className="flex space-x-4 pt-2">
               <Link
@@ -77,26 +76,17 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Column 2 - Quick Links */}
           <div className="space-y-4">
             <h3 className="font-semibold text-lg text-white">Quick Links</h3>
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/"
+                  href="/home"
                   className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
                 >
                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                   Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
-                >
-                  <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                  About Us
                 </Link>
               </li>
               <li>
@@ -110,27 +100,38 @@ const Footer = () => {
               </li>
               <li>
                 <Link
+                  href="/matches"
+                  className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
+                >
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  AI Analysis
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/subscription"
                   className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
                 >
                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                  Subscription
+                  Premium
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg text-white">Support</h3>
-            <ul className="space-y-3">
               <li>
                 <Link
-                  href="/help"
+                  href="/blog"
                   className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
                 >
                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                  Help Center
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
+                >
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  About
                 </Link>
               </li>
               <li>
@@ -139,9 +140,16 @@ const Footer = () => {
                   className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
                 >
                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                  Contact Us
+                  Contact
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* Column 3 - Legal */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg text-white">Legal</h3>
+            <ul className="space-y-3">
               <li>
                 <Link
                   href="/privacy"
@@ -157,34 +165,69 @@ const Footer = () => {
                   className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
                 >
                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                  Terms of Service
+                  Terms &amp; Conditions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/refund"
+                  className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
+                >
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/responsible-use"
+                  className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
+                >
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  Responsible Use Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cookies"
+                  className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group text-sm md:text-base"
+                >
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  Cookie Policy
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact Info */}
-          <div className="space-y-4 md:col-span-2 lg:col-span-1">
-            <h3 className="font-semibold text-lg text-white">Contact Info</h3>
+          {/* Column 4 - Support */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg text-white">Support</h3>
             <ul className="space-y-4 text-sm md:text-base">
+              <li>
+                <Link
+                  href="/faq"
+                  className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group"
+                >
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  Help Center
+                </Link>
+              </li>
               <li className="flex items-start space-x-3 text-gray-400">
                 <Mail className="h-5 w-5 text-blue-400 flex-shrink-0 mt-1" />
                 <div>
-                  <p className="font-medium">Email</p>
+                  <p className="font-medium">Email Support</p>
                   <p className="text-gray-300 hover:text-blue-400 transition-colors">
-                    {process.env.NEXT_PUBLIC_EMAIL ||
-                      "support@sportpredict.com"}
+                    sportpredict247@gmail.com
                   </p>
                 </div>
               </li>
-              <li className="flex items-start space-x-3 text-gray-400">
-                <Phone className="h-5 w-5 text-blue-400 flex-shrink-0 mt-1" />
-                <div>
-                  <p className="font-medium">Phone</p>
-                  <p className="text-gray-300 hover:text-blue-400 transition-colors">
-                    {process.env.NEXT_PUBLIC_MOBILE || "+1 (555) 123-4567"}
-                  </p>
-                </div>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-gray-400 hover:text-blue-400 transition-colors flex items-center group"
+                >
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  Contact Us
+                </Link>
               </li>
               <li className="flex items-start space-x-3 text-gray-400">
                 <Clock className="h-5 w-5 text-blue-400 flex-shrink-0 mt-1" />
@@ -215,7 +258,7 @@ const Footer = () => {
                 href="/terms"
                 className="text-gray-400 hover:text-white transition-colors text-sm"
               >
-                Terms & Conditions
+                Terms &amp; Conditions
               </Link>
               <Link
                 href="/cookies"
@@ -226,11 +269,13 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Mobile-only additional info */}
-          <div className="mt-4 pt-4 border-t border-gray-800 md:hidden">
+          {/* Disclaimer */}
+          <div className="mt-4 pt-4 border-t border-gray-800">
             <p className="text-center text-xs text-gray-500">
-              Disclaimer: SportPredict is a prediction platform for
-              entertainment purposes only. Please play responsibly.
+              SportPredict365 provides AI-powered sports analytics and
+              statistical insights for informational and entertainment purposes
+              only. We do not facilitate betting, gambling, wagering, or
+              real-money gaming.
             </p>
           </div>
         </div>

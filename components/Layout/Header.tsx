@@ -148,10 +148,11 @@ const Header = () => {
 
   const navItems = [
     { href: "/home", label: "Home", icon: Home },
-    { href: "/support", label: "Support", icon: HelpCircle },
-    { href: "/subscription", label: "Token", icon: CreditCard },
     { href: "/matches", label: "Matches", icon: Calendar },
+    { href: "/subscription", label: "Premium", icon: CreditCard },
     { href: "/about", label: "About", icon: Info },
+    { href: "/blog", label: "Blog", icon: MessageSquare },
+    { href: "/support", label: "Support", icon: HelpCircle },
   ];
 
   const menuItems = [
@@ -230,7 +231,7 @@ const Header = () => {
                   SportPredict
                 </span>
                 <span className="text-[9px] xs:text-xs sm:text-xs md:text-sm text-gray-500 leading-tight">
-                  AI Cricket Predictions
+                  AI Cricket Analytics
                 </span>
               </div>
             </Link>
@@ -773,7 +774,7 @@ const Header = () => {
                             SportPredict
                           </div>
                           <div className="text-xs sm:text-sm text-gray-600">
-                            AI Cricket Predictions
+                            AI Cricket Analytics
                           </div>
                         </div>
                       )}

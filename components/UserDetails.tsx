@@ -256,7 +256,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
       iconBg: "bg-purple-100",
     },
     {
-      title: "Predictions Made",
+      title: "Analyses Used",
       value: predictionOrders.toString(),
       change: `${creditsEarned} credits earned`,
       icon: Target,
@@ -728,7 +728,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                 },
                                 {
                                   type: "prediction",
-                                  label: "Predictions",
+                                  label: "Analyses",
                                   count: predictionOrders,
                                   icon: Target,
                                   color: "blue",
@@ -863,7 +863,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                       {order.ordertype === "purchase"
                                         ? "Credit Purchase"
                                         : order.ordertype === "prediction"
-                                        ? "Match Prediction"
+                                        ? "Match Analysis"
                                         : "Free Credit"}
                                     </p>
                                     <p className="text-sm text-gray-500">
@@ -922,7 +922,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                         {order.ordertype === "purchase"
                                           ? "Credit Purchase"
                                           : order.ordertype === "prediction"
-                                          ? "Match Prediction"
+                                          ? "Match Analysis"
                                           : "Free Credit"}
                                       </p>
                                       <Badge
@@ -1012,7 +1012,7 @@ export const UserDetails = ({ userId }: { userId: any }) => {
                                             {order.ordertype === "purchase"
                                               ? "Credit Purchase"
                                               : order.ordertype === "prediction"
-                                              ? "Prediction Used"
+                                              ? "Analysis Used"
                                               : "Free Credit"}
                                           </p>
                                           <p className="text-sm text-gray-500">
