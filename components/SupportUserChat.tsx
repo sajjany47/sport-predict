@@ -76,6 +76,9 @@ const SupportUserChat = ({ data }: any) => {
       router.push("/auth/login");
     }
     fetchTicketDetails();
+    if (window.innerWidth < 1024) {
+      setShowSidebar(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, router]);
 
@@ -427,7 +430,7 @@ const SupportUserChat = ({ data }: any) => {
             variant="outline"
             size="sm"
             onClick={toggleSidebar}
-            className="md:hidden flex items-center"
+            className="lg:hidden flex items-center"
           >
             {showSidebar ? (
               <X className="h-4 w-4" />
@@ -438,7 +441,7 @@ const SupportUserChat = ({ data }: any) => {
           </Button>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
+        <div className="flex flex-col-reverse lg:flex-row gap-4 md:gap-6">
           {/* Ticket Info Sidebar */}
           {showSidebar && (
             <div className="lg:w-80 space-y-4 md:space-y-6">
@@ -548,38 +551,6 @@ const SupportUserChat = ({ data }: any) => {
                     )}
                 </CardContent>
               </Card>
-
-              <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg flex items-center">
-                    <Zap className="h-5 w-5 mr-2 text-amber-600" />
-                    Quick Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start rounded-xl hover:bg-blue-50"
-                  >
-                    <FileText className="h-4 w-4 mr-2 text-blue-600" />
-                    Request Callback
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start rounded-xl hover:bg-green-50"
-                  >
-                    <Download className="h-4 w-4 mr-2 text-green-600" />
-                    Export Conversation
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start rounded-xl hover:bg-purple-50"
-                  >
-                    <Paperclip className="h-4 w-4 mr-2 text-purple-600" />
-                    Attach Files
-                  </Button>
-                </CardContent>
-              </Card>
             </div>
           )}
 
@@ -643,7 +614,7 @@ const SupportUserChat = ({ data }: any) => {
                               <div
                                 className={`flex ${
                                   isMe ? "flex-row-reverse" : "flex-row"
-                                } items-start space-x-3 max-w-xs lg:max-w-md`}
+                                } items-start space-x-3 max-w-[85%] sm:max-w-[75%] lg:max-w-md`}
                               >
                                 {/* Avatar */}
                                 <div

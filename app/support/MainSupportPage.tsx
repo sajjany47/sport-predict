@@ -743,38 +743,7 @@ const SupportPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Quick Actions */}
-              <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-purple-50">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                    <Zap className="h-5 w-5 text-blue-600 mr-2" />
-                    Need Immediate Help?
-                  </h3>
-                  <div className="space-y-3">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-white/80"
-                    >
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      Browse Help Articles
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-white/80"
-                    >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Live Chat Support
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-white/80"
-                    >
-                      <Phone className="h-4 w-4 mr-2" />
-                      Request Callback
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+
             </div>
           </div>
         </div>

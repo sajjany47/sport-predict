@@ -444,7 +444,7 @@ const SupportPage = () => {
               {isAuthenticated ? (
                 <Card className="border-gray-200 shadow-sm">
                   <CardHeader className="border-b border-gray-100 pb-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <CardTitle className="text-lg font-bold flex items-center gap-2">
                         <Ticket className="h-5 w-5 text-blue-600" />
                         My Support Tickets
@@ -650,13 +650,13 @@ const SupportPage = () => {
                                   </div>
                                 )}
 
-                                <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-3 pt-3 border-t border-gray-50">
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="h-3 w-3" />
-                                    {formatDate(ticket.createdAt)}
+                                <div className="flex flex-wrap items-center justify-between text-[11px] text-muted-foreground mt-3 pt-3 border-t border-gray-50 gap-1">
+                                  <span className="flex items-center gap-1 min-w-0 shrink">
+                                    <Calendar className="h-3 w-3 shrink-0" />
+                                    <span className="truncate">{formatDate(ticket.createdAt)}</span>
                                   </span>
                                   {ticket.ticketUnread !== 0 && (
-                                    <span className="flex items-center gap-1 font-medium text-blue-600">
+                                    <span className="flex items-center gap-1 font-medium text-blue-600 shrink-0">
                                       <MessageCircle className="h-3 w-3" />
                                       {ticket.ticketUnread} unread
                                     </span>
@@ -767,59 +767,6 @@ const SupportPage = () => {
                         Kolkata, India
                       </p>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Actions */}
-              <Card className="border-gray-200 shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50/50">
-                <CardContent className="p-5">
-                  <h3 className="font-semibold text-gray-900 text-sm mb-3 flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-blue-600" />
-                    Quick Actions
-                  </h3>
-                  <div className="space-y-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start bg-white/80 hover:bg-white border-gray-200 text-xs h-9"
-                      onClick={() => {
-                        const subject = `Support Request - Username: ${user?.username || "User"}`;
-                        const body = `Hello SportPredict Support,\n\n[Describe your issue here]\n\nUsername: ${user?.username || "User"}\n\nThank you!`;
-                        window.location.href = `mailto:sportpredict247@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                      }}
-                    >
-                      <Mail className="h-3.5 w-3.5 mr-2" />
-                      Send Email
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start bg-white/80 hover:bg-white border-gray-200 text-xs h-9"
-                      onClick={() => {
-                        const msg = encodeURIComponent(
-                          `Hello SportPredict Support! I need help with my account.`,
-                        );
-                        window.open(
-                          `https://wa.me/918981374643?text=${msg}`,
-                          "_blank",
-                        );
-                      }}
-                    >
-                      <MessageCircle className="h-3.5 w-3.5 mr-2" />
-                      WhatsApp Chat
-                    </Button>
-                    {isAuthenticated && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start bg-white/80 hover:bg-white border-gray-200 text-xs h-9 "
-                        onClick={() => setIsCreateTicketOpen(true)}
-                      >
-                        <Ticket className="h-3.5 w-3.5 mr-2" />
-                        Create Ticket
-                      </Button>
-                    )}
                   </div>
                 </CardContent>
               </Card>
