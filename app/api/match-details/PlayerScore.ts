@@ -1,7 +1,7 @@
 import { getBrowser } from "@/lib/browser";
 
-export const PlayerScore = async (playerUrl: string, scorecardUrl: string) => {
-  const browser = await getBrowser();
+export const PlayerScore = async (playerUrl: string, scorecardUrl: string, existingBrowser?: any) => {
+  const browser = existingBrowser || (await getBrowser());
   const page = await browser.newPage();
 
   try {
@@ -10,7 +10,7 @@ export const PlayerScore = async (playerUrl: string, scorecardUrl: string) => {
     // ✅ Wait for team selection tabs
     await page.waitForSelector(".team-score-card", { timeout: 15000 }).catch(() => null);
 
-    const data = await page.evaluate(async (playerUrl) => {
+    const data = await page.evaluate(async (playerUrl: string) => {
       const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       
       const teamTabs = Array.from(document.querySelectorAll(".team-score-card"));
@@ -87,6 +87,9 @@ export const PlayerScore = async (playerUrl: string, scorecardUrl: string) => {
     return null;
   } finally {
     await page.close();
+    if (!existingBrowser && browser) {
+      await browser.close().catch(() => null);
+    }
   }
 };
 
