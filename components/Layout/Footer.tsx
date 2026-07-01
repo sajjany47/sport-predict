@@ -32,10 +32,10 @@ const Footer = () => {
               </div>
               <div className="flex flex-col">
                 <span className="text-lg lg:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  SportPredict
+                  CricVista
                 </span>
                 <span className="text-[10px] lg:text-xs text-gray-500">
-                  AI Cricket Analytics
+                  AI Cricket Intelligence & Analytics
                 </span>
               </div>
             </div>
@@ -244,7 +244,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-center md:text-left text-gray-400 text-sm">
-              &copy; {new Date().getFullYear()} SportPredict. All rights
+              &copy; {new Date().getFullYear()} CricVista. All rights
               reserved.
             </p>
             <div className="flex space-x-6">
@@ -272,10 +272,7 @@ const Footer = () => {
           {/* Disclaimer */}
           <div className="mt-4 pt-4 border-t border-gray-800">
             <p className="text-center text-xs text-gray-500">
-              SportPredict365 provides AI-powered sports analytics and
-              statistical insights for informational and entertainment purposes
-              only. We do not facilitate betting, gambling, wagering, or
-              real-money gaming.
+              CricVista is an AI-powered cricket analytics platform designed for informational and educational purposes only. We do not facilitate betting, gambling, fantasy gaming, or real-money gaming. All insights are generated using historical statistics and AI models.
             </p>
           </div>
         </div>

@@ -44,19 +44,19 @@ const subjects = [
 
 const faqItems = [
   {
-    question: "How accurate are SportPredict's predictions?",
+    question: "How accurate are CricVista's analytics?",
     answer:
-      "Our AI models consistently achieve 95%+ accuracy across all cricket formats. We analyze 50+ factors including player form, pitch conditions, weather, historical data, and head-to-head statistics to deliver the most reliable predictions in the industry.",
+      "Our AI models consistently achieve 95%+ accuracy across all cricket formats. We analyze 50+ factors including player form, pitch conditions, weather, historical data, and head-to-head statistics to deliver the most reliable analytics in the industry.",
   },
   {
-    question: "How do I subscribe to premium predictions?",
+    question: "How do I subscribe to premium analytics?",
     answer:
       "You can subscribe by visiting our Subscription page. We offer various plans — weekly, monthly, and yearly — each providing access to detailed match analysis, Dream11 team suggestions, and real-time updates. All major payment methods are supported.",
   },
   {
-    question: "Can I get a refund if a prediction is wrong?",
+    question: "Can I get a refund if an analysis is wrong?",
     answer:
-      "Predictions are based on data-driven analysis and no outcome is guaranteed. However, we offer a satisfaction guarantee — if you experience consistent inaccuracies, contact our support team and we'll review your case personally.",
+      "Analytics are based on data-driven analysis and no outcome is guaranteed. However, we offer a satisfaction guarantee — if you experience consistent inaccuracies, contact our support team and we'll review your case personally.",
   },
   {
     question: "Do you cover women's cricket and other leagues?",
@@ -527,13 +527,13 @@ const ContactPage = () => {
                   Disclaimer
                 </h4>
                 <p className="text-sm text-amber-700 leading-relaxed">
-                  SportPredict provides cricket predictions and analytics for
+                  CricVista provides cricket analytics and insights for
                   informational and entertainment purposes only. While we strive
                   for accuracy using advanced AI and data analysis, we do not
-                  guarantee any specific outcomes or results. Predictions should
+                  guarantee any specific outcomes or results. Analytics should
                   not be considered financial or betting advice. Please play
                   responsibly and comply with all applicable laws in your
-                  jurisdiction. Fantasy sports and predictions involve risk —
+                  jurisdiction. Fantasy sports and analytics involve risk —
                   never wager more than you can afford to lose.
                 </p>
               </div>

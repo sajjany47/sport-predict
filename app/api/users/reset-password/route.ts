@@ -65,7 +65,7 @@ export const POST = async (request: NextRequest) => {
       if (otpToken) {
         await MailSend({
           to: [user.email],
-          subject: "Unlock Predictions - SportPredict Email Verification OTP",
+          subject: "Unlock Predictions - CricVista Email Verification OTP",
           html: ResetPasswordTem({
             username: user.username,
             otp: otp,

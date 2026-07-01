@@ -1,7 +1,7 @@
 export const ResetPasswordTem = (data: any) => {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sportpredict.com";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cricvista.com";
   const supportEmail =
-    process.env.NEXT_PUBLIC_EMAIL || "support@sportpredict.com";
+    process.env.NEXT_PUBLIC_EMAIL || "support@cricvista.com";
   const supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (888) 123-4567";
 
   return `
@@ -10,7 +10,7 @@ export const ResetPasswordTem = (data: any) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Password Reset OTP - SportPredict</title>
+<title>Password Reset OTP - CricVista</title>
 </head>
 
 <body style="margin:0;padding:20px;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
@@ -26,10 +26,10 @@ export const ResetPasswordTem = (data: any) => {
 <tr>
 <td align="center" style="background:#1a2a6c;padding:30px;color:#ffffff;">
   <h1 style="margin:0;font-size:32px;">
-    <span style="color:#fdbb2d;">Sport</span>Predict
+    <span style="color:#fdbb2d;">Cric</span>Vista
   </h1>
   <p style="margin-top:6px;font-size:14px;opacity:0.9;">
-    The future of sports predictions
+    the future of cricket intelligence
   </p>
 </td>
 </tr>
@@ -68,7 +68,7 @@ export const ResetPasswordTem = (data: any) => {
 </h3>
 
 <p style="font-size:16px;line-height:1.6;color:#4b5563;">
-You requested to reset your SportPredict password.  
+You requested to reset your CricVista password.  
 Please use the One-Time Password (OTP) below to continue.
 </p>
 
@@ -133,7 +133,7 @@ Valid for <strong style="color:#dc2626;">10 minutes</strong>
   </h4>
   <p style="margin:0;font-size:14px;color:#7f1d1d;line-height:1.6;">
     Never share this OTP with anyone.  
-    SportPredict will never ask for your password or OTP.  
+    CricVista will never ask for your password or OTP.  
     If you didn’t request this reset, please ignore this email.
   </p>
 </td>
@@ -149,7 +149,7 @@ Need help? Contact us:<br>
 
 <p style="margin-top:28px;font-size:16px;">
 Stay secure,<br>
-<strong>The SportPredict Security Team</strong>
+<strong>The CricVista Security Team</strong>
 </p>
 
 </td>
@@ -159,7 +159,7 @@ Stay secure,<br>
 <tr>
 <td align="center" style="background:#1f2937;color:#d1d5db;padding:20px;">
   <p style="margin:0;font-size:13px;">
-    © ${new Date().getFullYear()} SportPredict. All rights reserved.
+    © ${new Date().getFullYear()} CricVista. All rights reserved.
   </p>
   <p style="margin-top:6px;font-size:12px;">
     This is an automated security email. Please do not reply.
@@ -179,9 +179,9 @@ Stay secure,<br>
 };
 
 export const ResetPasswordSuccessTem = (data: any) => {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sportpredict.com";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cricvista.com";
   const supportEmail =
-    process.env.NEXT_PUBLIC_EMAIL || "support@sportpredict.com";
+    process.env.NEXT_PUBLIC_EMAIL || "support@cricvista.com";
   const supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (888) 123-4567";
 
   return `
@@ -190,7 +190,7 @@ export const ResetPasswordSuccessTem = (data: any) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Password Reset Successful - SportPredict</title>
+<title>Password Reset Successful - CricVista</title>
 </head>
 
 <body style="margin:0;padding:20px;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
@@ -206,10 +206,10 @@ export const ResetPasswordSuccessTem = (data: any) => {
 <tr>
 <td align="center" style="background:#1a2a6c;padding:30px;color:#ffffff;">
   <h1 style="margin:0;font-size:32px;">
-    <span style="color:#fdbb2d;">Sport</span>Predict
+    <span style="color:#fdbb2d;">Cric</span>Vista
   </h1>
   <p style="margin-top:6px;font-size:14px;opacity:0.9;">
-    The future of sports predictions
+    the future of cricket intelligence
   </p>
 </td>
 </tr>
@@ -263,7 +263,7 @@ export const ResetPasswordSuccessTem = (data: any) => {
 </h3>
 
 <p style="font-size:16px;line-height:1.6;color:#4b5563;">
-Your SportPredict password has been successfully reset.
+Your CricVista password has been successfully reset.
 </p>
 
 <p style="font-size:16px;line-height:1.6;color:#4b5563;">
@@ -344,7 +344,7 @@ Need help? Contact us:<br>
 
 <p style="margin-top:28px;font-size:16px;">
 Stay safe,<br>
-<strong>The SportPredict Security Team</strong>
+<strong>The CricVista Security Team</strong>
 </p>
 
 </td>
@@ -354,7 +354,7 @@ Stay safe,<br>
 <tr>
 <td align="center" style="background:#1f2937;color:#d1d5db;padding:20px;">
   <p style="margin:0;font-size:13px;">
-    © ${new Date().getFullYear()} SportPredict. All rights reserved.
+    © ${new Date().getFullYear()} CricVista. All rights reserved.
   </p>
   <p style="margin-top:6px;font-size:12px;">
     This is an automated security notification. Please do not reply.

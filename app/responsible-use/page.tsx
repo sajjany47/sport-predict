@@ -31,7 +31,7 @@ const ResponsibleUsePage = () => {
       content: (
         <div className="space-y-4">
           <p>
-            SportPredict365 provides AI-generated sports analytics, statistical
+            CricVista provides AI-generated sports analytics, statistical
             insights, and predictive models designed to enhance your
             understanding of cricket and other sports. Our platform leverages
             machine learning algorithms to analyze historical data, player
@@ -39,8 +39,8 @@ const ResponsibleUsePage = () => {
           </p>
           <p>
             The platform is strictly intended for informational and
-            entertainment purposes only. The insights, predictions, and analyses
-            provided by SportPredict365 should be used solely as educational
+            entertainment purposes only. The insights, analytics, and analyses
+            provided by CricVista should be used solely as educational
             tools to better understand the dynamics of sports analytics.
           </p>
           <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
@@ -51,9 +51,9 @@ const ResponsibleUsePage = () => {
                   Important Disclaimer
                 </p>
                 <p className="text-amber-700 text-sm mt-1">
-                  SportPredict365 does NOT provide financial advice, betting
+                  CricVista does NOT provide financial advice, betting
                   advice, gambling recommendations, or guarantees of any kind.
-                  All predictions are statistical probabilities, not
+                  All analytics are statistical probabilities, not
                   certainties.
                 </p>
               </div>
@@ -70,7 +70,7 @@ const ResponsibleUsePage = () => {
         <div className="space-y-4">
           <div className="bg-red-50 border-2 border-red-200 p-6 rounded-xl">
             <p className="text-red-800 font-semibold text-lg leading-relaxed">
-              SportPredict365 does not facilitate, promote, or encourage
+              CricVista does not facilitate, promote, or encourage
               betting, gambling, wagering, fantasy sports with entry fees, or
               any form of real-money gaming. The platform is designed solely for
               cricket analytics education and entertainment.
@@ -85,7 +85,7 @@ const ResponsibleUsePage = () => {
           </p>
           <p>
             Users who engage in gambling activities using information from our
-            platform do so entirely at their own risk. SportPredict365 bears no
+            platform do so entirely at their own risk. CricVista bears no
             responsibility for any financial losses incurred through such
             activities.
           </p>
@@ -99,7 +99,7 @@ const ResponsibleUsePage = () => {
       content: (
         <div className="space-y-4">
           <p>
-            As a user of SportPredict365, you accept the following
+            As a user of CricVista, you accept the following
             responsibilities:
           </p>
           <ul className="space-y-3">
@@ -110,7 +110,7 @@ const ResponsibleUsePage = () => {
               },
               {
                 icon: Globe,
-                text: "You must comply with all applicable local, state, national, and international laws regarding the use of sports analytics and prediction tools.",
+                text: "You must comply with all applicable local, state, national, and international laws regarding the use of sports analytics tools.",
               },
               {
                 icon: Shield,
@@ -118,7 +118,7 @@ const ResponsibleUsePage = () => {
               },
               {
                 icon: Ban,
-                text: "You agree not to use any insights or data from SportPredict365 for illegal activities, including but not limited to illegal gambling or match-fixing.",
+                text: "You agree not to use any insights or data from CricVista for illegal activities, including but not limited to illegal gambling or match-fixing.",
               },
               {
                 icon: BookOpen,
@@ -146,7 +146,7 @@ const ResponsibleUsePage = () => {
       content: (
         <div className="space-y-4">
           <p>
-            While SportPredict365 employs advanced machine learning models and
+            While CricVista employs advanced machine learning models and
             sophisticated algorithms, it is essential to understand the
             inherent limitations of artificial intelligence in sports
             prediction:
@@ -156,7 +156,7 @@ const ResponsibleUsePage = () => {
               {
                 title: "Inherent Uncertainty",
                 description:
-                  "AI models operate on probabilities, not certainties. No prediction can account for every variable in a live sporting event.",
+                  "AI models operate on probabilities, not certainties. No analysis can account for every variable in a live sporting event.",
               },
               {
                 title: "Past Performance",
@@ -166,7 +166,7 @@ const ResponsibleUsePage = () => {
               {
                 title: "Statistical Probabilities",
                 description:
-                  "All forecasts are expressed as statistical probabilities. A 90% prediction still carries a 10% chance of being incorrect.",
+                  "All forecasts are expressed as statistical probabilities. A 90% analysis still carries a 10% chance of being incorrect.",
               },
               {
                 title: "Model Limitations",
@@ -226,7 +226,7 @@ const ResponsibleUsePage = () => {
                 icon: Clock,
                 title: "Set Boundaries",
                 description:
-                  "Establish time limits for using the platform. Excessive use of analytics tools can lead to unhealthy fixation on predictions.",
+                  "Establish time limits for using the platform. Excessive use of analytics tools can lead to unhealthy fixation on analytics.",
               },
             ].map((item, i) => {
               const Icon = item.icon;
@@ -265,7 +265,7 @@ const ResponsibleUsePage = () => {
         <div className="space-y-4">
           <p>
             Your well-being is our priority. If you have concerns about your
-            use of sports analytics, prediction tools, or related activities,
+            use of sports analytics tools or related activities,
             we encourage you to reach out:
           </p>
           <div className="bg-gradient-to-br from-teal-50 to-teal-100 border border-teal-200 p-6 rounded-xl">
@@ -312,7 +312,7 @@ const ResponsibleUsePage = () => {
       content: (
         <div className="space-y-4">
           <p>
-            SportPredict365 reserves the right to update, modify, or change
+            CricVista reserves the right to update, modify, or change
             this Responsible Use Policy at any time without prior notice.
             Changes will be effective immediately upon posting the updated
             policy on this page.
@@ -320,7 +320,7 @@ const ResponsibleUsePage = () => {
           <p>
             We encourage users to review this policy periodically to stay
             informed about how we are promoting responsible use of our
-            platform. Continued use of SportPredict365 after any modifications
+            platform. Continued use of CricVista after any modifications
             constitutes acceptance of the updated policy.
           </p>
           <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -398,7 +398,7 @@ const ResponsibleUsePage = () => {
               Use
             </h1>
             <p className="text-xl md:text-2xl mb-4 text-blue-100 max-w-3xl mx-auto leading-relaxed">
-              SportPredict365 is dedicated to providing AI-powered sports
+              CricVista is dedicated to providing AI-powered sports
               analytics for educational and entertainment purposes only. We do
               not promote or facilitate gambling.
             </p>
@@ -450,7 +450,7 @@ const ResponsibleUsePage = () => {
                   Use Responsibly. Stay Informed.
                 </h2>
                 <p className="text-blue-100 text-lg max-w-2xl mx-auto mb-6">
-                  SportPredict365 is your companion for sports analytics
+                  CricVista is your companion for sports analytics
                   education — not a tool for gambling or financial decision-making.
                   Always use insights responsibly and in accordance with your
                   local laws.

@@ -53,10 +53,10 @@ const faqData: FAQCategory[] = [
     color: "from-blue-500 to-cyan-500",
     items: [
       {
-        question: "What is SportPredict365?",
+        question: "What is CricVista?",
         icon: Brain,
         answer:
-          "SportPredict365 is an AI-powered cricket analytics platform that provides statistical insights, team analysis, venue intelligence, and AI-generated match forecasts for cricket enthusiasts. Our platform helps users make informed decisions in fantasy sports using cutting-edge machine learning technology.",
+          "CricVista is an AI-powered cricket analytics platform that provides statistical insights, team analysis, venue intelligence, and AI-generated match forecasts for cricket enthusiasts. Our platform helps users make informed decisions in fantasy sports using cutting-edge machine learning technology.",
       },
       {
         question: "How are AI insights generated?",
@@ -68,7 +68,7 @@ const faqData: FAQCategory[] = [
         question: "How accurate are AI confidence scores?",
         icon: Zap,
         answer:
-          "Confidence scores are statistical assessments based on our model's analysis. They represent the model's confidence in its prediction, not guarantees of outcomes. Historical model accuracy metrics are displayed alongside each analysis so users can make informed judgments.",
+          "Confidence scores are statistical assessments based on our model's analysis. They represent the model's confidence in its analysis, not guarantees of outcomes. Historical model accuracy metrics are displayed alongside each analysis so users can make informed judgments.",
       },
       {
         question: "What data sources are used?",
@@ -77,7 +77,7 @@ const faqData: FAQCategory[] = [
           "We use a comprehensive database that includes historical match results, player performance records, venue statistics, pitch condition reports, weather data, head-to-head records, and real-time match information from multiple reliable sports data providers.",
       },
       {
-        question: "Does SportPredict365 provide betting tips?",
+        question: "Does CricVista provide betting tips?",
         icon: AlertTriangle,
         answer:
           "No. We provide AI-powered sports analytics for informational and entertainment purposes only. We do not offer betting advice, gambling recommendations, or guarantees of outcomes. Users should always use their own judgment and consult applicable laws in their jurisdiction.",
@@ -105,7 +105,7 @@ const faqData: FAQCategory[] = [
         question: "What is included in the free plan?",
         icon: Sparkles,
         answer:
-          "The free plan includes limited daily analysis views and basic match insights. You can explore our platform, view some predictions, and get a feel for the quality of our analytics before deciding to upgrade to a premium plan.",
+          "The free plan includes limited daily analysis views and basic match insights. You can explore our platform, view some insights, and get a feel for the quality of our analytics before deciding to upgrade to a premium plan.",
       },
       {
         question: "What are the Premium plans?",
@@ -130,7 +130,7 @@ const faqData: FAQCategory[] = [
         question: "How does the AI model work?",
         icon: Brain,
         answer:
-          "Our AI uses an ensemble of statistical models that analyze multiple factors including team composition, head-to-head records, venue history, pitch conditions, player form, weather conditions, and match context. The ensemble approach combines predictions from multiple models to produce more accurate and reliable forecasts.",
+          "Our AI uses an ensemble of statistical models that analyze multiple factors including team composition, head-to-head records, venue history, pitch conditions, player form, weather conditions, and match context. The ensemble approach combines analyses from multiple models to produce more accurate and reliable forecasts.",
       },
       {
         question: "Is my data secure?",
@@ -216,7 +216,7 @@ const FAQPage = () => {
               </span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto leading-relaxed">
-              Everything you need to know about SportPredict365. Can't find what
+              Everything you need to know about CricVista. Can't find what
               you're looking for? Feel free to contact our support team.
             </p>
 
@@ -443,7 +443,7 @@ const FAQPage = () => {
             </h2>
             <p className="text-xl mb-8 text-blue-100">
               Join thousands of cricket enthusiasts making smarter decisions
-              with SportPredict365
+              with CricVista
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button

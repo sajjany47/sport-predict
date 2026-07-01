@@ -81,7 +81,7 @@ const AboutPage = () => {
       name: "Sajjan Kumar Yadav",
       role: "Senior Software Engineer & Founder",
       description:
-        "Single-handedly building and managing the entire SportPredict platform — from AI models to frontend, backend, and infrastructure.",
+        "Single-handedly building and managing the entire CricVista platform — from AI models to frontend, backend, and infrastructure.",
       avatar: "SK",
     },
   ];
@@ -184,7 +184,7 @@ const AboutPage = () => {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center px-4 py-2 bg-white/10 rounded-full text-sm font-medium mb-6 backdrop-blur-sm">
               <Trophy className="h-4 w-4 mr-2" />
-              About SportPredict365
+              About CricVista
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
               AI-Powered Cricket
@@ -214,7 +214,7 @@ const AboutPage = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white text-white hover:bg-white/10 px-8 py-3 text-lg font-semibold"
+                className="border-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold"
                 asChild
               >
                 <Link href="/matches">View Live Matches</Link>
@@ -262,12 +262,11 @@ const AboutPage = () => {
                     </h2>
                     <div className="space-y-4 text-gray-700 leading-relaxed">
                       <p className="text-lg">
-                        SportPredict365 is an AI-powered cricket analytics
-                        platform that helps users understand matches using
-                        statistical models, historical data, team performance,
-                        venue conditions, and player analytics. We do not
-                        facilitate betting, gambling, wagering, or real-money
-                        gaming.
+                        CricVista is an AI-powered cricket analytics platform
+                        that helps users understand matches using statistical
+                        models, historical data, team performance, venue
+                        conditions, and player analytics. We do not facilitate
+                        betting, gambling, wagering, or real-money gaming.
                       </p>
                       <p>
                         Our platform is designed exclusively for educational and
@@ -478,17 +477,20 @@ const AboutPage = () => {
             {values.map((value, index) => {
               const Icon = value.icon;
               return (
-                <Card key={index} className="border-0 shadow-lg text-center hover:shadow-xl transition-shadow duration-300">
+                <Card
+                  key={index}
+                  className="border-0 shadow-lg text-center hover:shadow-xl transition-shadow duration-300"
+                >
                   <CardContent className="p-8">
-                    <div className={`w-16 h-16 ${value.bgColor} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
+                    <div
+                      className={`w-16 h-16 ${value.bgColor} rounded-2xl flex items-center justify-center mx-auto mb-6`}
+                    >
                       <Icon className={`h-8 w-8 ${value.iconColor}`} />
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-4">
                       {value.title}
                     </h3>
-                    <p className="text-gray-600">
-                      {value.description}
-                    </p>
+                    <p className="text-gray-600">{value.description}</p>
                   </CardContent>
                 </Card>
               );
@@ -505,8 +507,8 @@ const AboutPage = () => {
               Ready to Explore Cricket Analytics?
             </h2>
             <p className="text-xl mb-8 text-blue-100">
-              Start your journey with SportPredict365 today and discover
-              data-driven cricket insights powered by AI
+              Start your journey with CricVista today and discover data-driven
+              cricket insights powered by AI
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -522,7 +524,7 @@ const AboutPage = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white text-white hover:bg-white/10 px-8 py-3 text-lg font-semibold"
+                className="border-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold"
                 asChild
               >
                 <Link href="/support">Contact Us</Link>

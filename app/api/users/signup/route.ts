@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         if (otpToken) {
           await MailSend({
             to: [body.email],
-            subject: "Unlock Predictions - SportPredict Email Verification OTP",
+            subject: "Unlock Predictions - CricVista Email Verification OTP",
             html: RegistrationOTP({
               otp: otp,
             }),
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
 
           await MailSend({
             to: [userData.email],
-            subject: `Welcome to SportPredict (${userData.username}) - SportPredict`,
+            subject: `Welcome to CricVista (${userData.username}) - CricVista`,
             html: UserWelcomeTemp({
               email: userData.email || "",
               username: userData.username,

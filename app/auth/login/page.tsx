@@ -100,7 +100,7 @@ const LoginPage = () => {
                 <div className="relative w-14 h-14">
                   <Image
                     src={SportLogo}
-                    alt="SportPredict Logo"
+                    alt="CricVista Logo"
                     className="object-contain"
                     fill
                     priority
@@ -110,10 +110,10 @@ const LoginPage = () => {
 
               <div className="text-left">
                 <h1 className="text-3xl font-bold text-gray-900">
-                  SportPredict
+                  CricVista
                 </h1>
                 <p className="text-gray-600 mt-1">
-                  Cricket Prediction Platform
+                  Cricket Analytics Platform
                 </p>
               </div>
             </div>

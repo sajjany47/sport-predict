@@ -1,7 +1,7 @@
 export const UserAccountClosureTemp = (data: any) => {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sportpredict.com";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cricvista.com";
   const supportEmail =
-    process.env.NEXT_PUBLIC_EMAIL || "support@sportpredict.com";
+    process.env.NEXT_PUBLIC_EMAIL || "support@cricvista.com";
   const supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (888) 123-4567";
 
   const isBanned = data.status === "banned";
@@ -28,7 +28,7 @@ export const UserAccountClosureTemp = (data: any) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SportPredict Account Status</title>
+  <title>CricVista Account Status</title>
 </head>
 
 <body style="margin:0;padding:20px;background:${
@@ -46,9 +46,9 @@ export const UserAccountClosureTemp = (data: any) => {
 <tr>
 <td align="center" style="padding:30px;background:#1a2a6c;color:white;">
   <h1 style="margin:0;font-size:32px;">
-    <span style="color:#fdbb2d;">Sport</span>Predict
+    <span style="color:#fdbb2d;">Cric</span>Vista
   </h1>
-  <p style="margin:6px 0 0;font-size:14px;">The future of sports predictions</p>
+  <p style="margin:6px 0 0;font-size:14px;">the future of cricket intelligence</p>
 </td>
 </tr>
 
@@ -86,7 +86,7 @@ Hello <strong>${data.username}</strong>,
 </p>
 
 <p style="font-size:16px;line-height:1.6;">
-Your SportPredict account has been 
+Your CricVista account has been 
 <strong style="color:${config.color};">
 ${isBanned ? "permanently banned" : "temporarily suspended"}
 </strong>
@@ -150,7 +150,7 @@ Terms of Service
 <!-- FOOTER -->
 <tr>
 <td align="center" style="padding:20px;background:#1f2937;color:#d1d5db;">
-<p style="margin:0;">© ${new Date().getFullYear()} SportPredict</p>
+<p style="margin:0;">© ${new Date().getFullYear()} CricVista</p>
 <p style="font-size:12px;margin-top:6px;">This is an automated email. Please do not reply.</p>
 </td>
 </tr>
@@ -166,7 +166,7 @@ Terms of Service
 };
 
 export const UserWelcomeTemp = (data: any) => {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sportpredict.com";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cricvista.com";
   const supportEmail =
     process.env.NEXT_PUBLIC_EMAIL || "sportpredict247@gmail.com";
   const supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (888) 123-4567";
@@ -177,7 +177,7 @@ export const UserWelcomeTemp = (data: any) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Welcome to SportPredict</title>
+<title>Welcome to CricVista</title>
 </head>
 
 <body style="margin:0;padding:20px;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
@@ -193,9 +193,9 @@ export const UserWelcomeTemp = (data: any) => {
 <tr>
 <td align="center" style="background:#1a2a6c;padding:30px;color:white;">
   <h1 style="margin:0;font-size:32px;">
-    <span style="color:#fdbb2d;">Sport</span>Predict
+    <span style="color:#fdbb2d;">Cric</span>Vista
   </h1>
-  <p style="margin-top:6px;font-size:14px;">The future of sports predictions</p>
+  <p style="margin-top:6px;font-size:14px;">the future of cricket intelligence</p>
 </td>
 </tr>
 
@@ -215,7 +215,7 @@ export const UserWelcomeTemp = (data: any) => {
     Your Winning Journey Begins Now
   </h2>
   <p style="color:#6b7280;font-size:16px;margin-top:10px;">
-    Join thousands of sports enthusiasts making accurate predictions
+    Join thousands of sports enthusiasts gaining data-driven insights
   </p>
 </td>
 </tr>
@@ -229,7 +229,7 @@ export const UserWelcomeTemp = (data: any) => {
   }</strong>,</p>
 
 <p style="font-size:16px;line-height:1.6;">
-Welcome to <strong>SportPredict</strong>! Your account has been successfully created and you’re now ready to start your prediction journey.
+Welcome to <strong>CricVista</strong>! Your account has been successfully created and you’re now ready to start your analytics journey.
 </p>
 
 <!-- ACCOUNT DETAILS -->
@@ -266,7 +266,7 @@ What You Can Do
 <td width="50%" align="center" style="padding:12px;">
 <div style="background:#fef3c7;padding:20px;border-radius:10px;">
 <div style="font-size:30px;">🎯</div>
-<strong>Make Predictions</strong>
+<strong>Explore Analytics</strong>
 <p style="font-size:14px;">Predict cricket & football</p>
 </div>
 </td>
@@ -299,9 +299,9 @@ What You Can Do
 <!-- CTA -->
 <div style="margin:30px 0;text-align:center;background:#667eea;padding:30px;border-radius:10px;color:white;">
 <h2>Ready to Start Predicting?</h2>
-<p>Make your first prediction now!</p>
+<p>Start your analysis now!</p>
 <a href="${appUrl}/matches" style="display:inline-block;margin:10px;padding:14px 28px;background:white;color:#667eea;text-decoration:none;border-radius:6px;">
-🚀 Make Prediction
+🚀 View Insights
 </a>
 </div>
 
@@ -316,7 +316,7 @@ What You Can Do
 
 <p style="margin-top:30px;">
 Welcome aboard!<br/>
-<strong>The SportPredict Team</strong>
+<strong>The CricVista Team</strong>
 </p>
 
 </td>
@@ -325,7 +325,7 @@ Welcome aboard!<br/>
 <!-- FOOTER -->
 <tr>
 <td align="center" style="background:#1f2937;padding:20px;color:#d1d5db;">
-<p>© ${new Date().getFullYear()} SportPredict</p>
+<p>© ${new Date().getFullYear()} CricVista</p>
 <p style="font-size:12px;">This is an automated email. Please do not reply.</p>
 </td>
 </tr>
@@ -342,9 +342,9 @@ Welcome aboard!<br/>
 };
 
 export const RegistrationOTP = (a: any) => {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sportpredict.com";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cricvista.com";
   const supportEmail =
-    process.env.NEXT_PUBLIC_EMAIL || "support@sportpredict.com";
+    process.env.NEXT_PUBLIC_EMAIL || "support@cricvista.com";
   const supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (888) 123-4567";
 
   const expiryMinutes = 5;
@@ -356,7 +356,7 @@ export const RegistrationOTP = (a: any) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verify Your Email - SportPredict</title>
+<title>Verify Your Email - CricVista</title>
 </head>
 
 <body style="margin:0;padding:20px;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
@@ -372,10 +372,10 @@ export const RegistrationOTP = (a: any) => {
 <tr>
 <td align="center" style="background:#1a2a6c;padding:30px;color:white;">
   <h1 style="margin:0;font-size:32px;">
-    <span style="color:#fdbb2d;">Sport</span>Predict
+    <span style="color:#fdbb2d;">Cric</span>Vista
   </h1>
   <p style="margin-top:6px;font-size:14px;opacity:0.9;">
-    The future of sports predictions
+    the future of cricket intelligence
   </p>
 </td>
 </tr>
@@ -389,7 +389,7 @@ export const RegistrationOTP = (a: any) => {
 </h2>
 
 <p style="font-size:16px;line-height:1.6;">
-Welcome to <strong>SportPredict</strong>!  
+Welcome to <strong>CricVista</strong>!  
 To activate your account, please verify your email using the OTP below.
 </p>
 
@@ -447,7 +447,7 @@ YOUR VERIFICATION CODE
 <td style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:18px;">
   <p style="margin:0;font-size:14px;color:#7f1d1d;line-height:1.6;">
     <strong>🔒 Security Reminder</strong><br><br>
-    Never share this OTP with anyone. SportPredict will never ask for your OTP via phone, email, or message.
+    Never share this OTP with anyone. CricVista will never ask for your OTP via phone, email, or message.
     If you didn’t request this verification, please ignore this email.
   </p>
 </td>
@@ -471,7 +471,7 @@ YOUR VERIFICATION CODE
 
 <p style="margin-top:30px;font-size:16px;">
 Best regards,<br>
-<strong>The SportPredict Team</strong>
+<strong>The CricVista Team</strong>
 </p>
 
 </td>
@@ -481,7 +481,7 @@ Best regards,<br>
 <tr>
 <td align="center" style="background:#1f2937;color:#d1d5db;padding:20px;">
   <p style="margin:0;font-size:13px;">
-    © ${new Date().getFullYear()} SportPredict. All rights reserved.
+    © ${new Date().getFullYear()} CricVista. All rights reserved.
   </p>
   <p style="margin-top:6px;font-size:12px;">
     This is an automated verification email. Please do not reply.
@@ -518,9 +518,9 @@ export const AdminDepositCreditsEmail = (data: {
     credits,
     totalCreditsAdded,
     amount,
-    adminName = "SportPredict Team",
+    adminName = "CricVista Team",
     appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_API_URL,
-    supportEmail = process.env.NEXT_PUBLIC_EMAIL || "support@sportpredict.com",
+    supportEmail = process.env.NEXT_PUBLIC_EMAIL || "support@cricvista.com",
     supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (555) 123-4567",
   } = data;
 
@@ -530,7 +530,7 @@ export const AdminDepositCreditsEmail = (data: {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deposit Confirmation - SportPredict</title>
+<title>Deposit Confirmation - CricVista</title>
 </head>
 
 <body style="margin:0;padding:20px;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
@@ -546,7 +546,7 @@ export const AdminDepositCreditsEmail = (data: {
 <tr>
 <td align="center" style="background:#1a2a6c;padding:30px;color:white;">
   <h1 style="margin:0;font-size:32px;">
-    <span style="color:#fdbb2d;">Sport</span>Predict
+    <span style="color:#fdbb2d;">Cric</span>Vista
   </h1>
   <p style="margin-top:6px;font-size:14px;opacity:0.9;">
     Deposit Confirmation
@@ -636,7 +636,7 @@ Need help? Contact us at <br>
 
 <p style="margin-top:30px;font-size:16px;">
 Happy predicting!<br>
-<strong>The SportPredict Team</strong>
+<strong>The CricVista Team</strong>
 </p>
 
 </td>
@@ -646,7 +646,7 @@ Happy predicting!<br>
 <tr>
 <td align="center" style="background:#1f2937;color:#d1db;padding:20px;">
   <p style="margin:0;font-size:13px;">
-    © ${new Date().getFullYear()} SportPredict. All rights reserved.
+    © ${new Date().getFullYear()} CricVista. All rights reserved.
   </p>
   <p style="margin-top:6px;font-size:12px;">
     This is an automated email. Please do not reply.
@@ -684,10 +684,10 @@ export const AdminFreeCreditsEmail = (data: {
     credits,
     totalCreditsAdded,
     reason = "As a token of our appreciation",
-    adminName = "SportPredict Admin",
+    adminName = "CricVista Admin",
     termsUrl = process.env.NEXT_PUBLIC_API_URL + "/terms",
     appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_API_URL,
-    supportEmail = process.env.NEXT_PUBLIC_EMAIL || "support@sportpredict.com",
+    supportEmail = process.env.NEXT_PUBLIC_EMAIL || "support@cricvista.com",
     supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (555) 123-4567",
   } = data;
 
@@ -697,7 +697,7 @@ export const AdminFreeCreditsEmail = (data: {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Credits Added - SportPredict</title>
+<title>Free Credits Added - CricVista</title>
 </head>
 
 <body style="margin:0;padding:20px;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
@@ -713,10 +713,10 @@ export const AdminFreeCreditsEmail = (data: {
 <tr>
 <td align="center" style="background:#1a2a6c;padding:30px;color:white;">
   <h1 style="margin:0;font-size:32px;">
-    <span style="color:#fdbb2d;">Sport</span>Predict
+    <span style="color:#fdbb2d;">Cric</span>Vista
   </h1>
   <p style="margin-top:6px;font-size:14px;opacity:0.9;">
-    The future of sports predictions
+    the future of cricket intelligence
   </p>
 </td>
 </tr>
@@ -732,7 +732,7 @@ export const AdminFreeCreditsEmail = (data: {
 <p style="font-size:16px;line-height:1.6;">
 Great news! Our admin team has added 
 <strong style="color:#f5576c;">${totalCreditsAdded} free credits</strong> 
-to your SportPredict account.
+to your CricVista account.
 </p>
 
 <!-- CREDIT HIGHLIGHT -->
@@ -782,8 +782,8 @@ to your SportPredict account.
     🚀 How to use your credits
   </h4>
   <ul style="padding-left:18px;color:#4b5563;font-size:14px;line-height:1.8;">
-    <li>Join prediction contests and matches</li>
-    <li>Win rewards by making accurate predictions</li>
+    <li>Join analytics features and matches</li>
+    <li>Win rewards by gaining data-driven insights</li>
     <li>Track your credit balance in your dashboard</li>
   </ul>
 </td>
@@ -824,7 +824,7 @@ Questions? Contact us at <br>
 
 <p style="margin-top:30px;font-size:16px;">
 Happy predicting!<br>
-<strong>The SportPredict Team</strong>
+<strong>The CricVista Team</strong>
 </p>
 
 </td>
@@ -834,7 +834,7 @@ Happy predicting!<br>
 <tr>
 <td align="center" style="background:#1f2937;color:#d1d5db;padding:20px;">
   <p style="margin:0;font-size:13px;">
-    © ${new Date().getFullYear()} SportPredict. All rights reserved.
+    © ${new Date().getFullYear()} CricVista. All rights reserved.
   </p>
   <p style="margin-top:6px;font-size:12px;">
     This is an automated email. Please do not reply.

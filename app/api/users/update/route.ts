@@ -76,7 +76,7 @@ export const POST = async (request: NextRequest) => {
           to: [findUser.email],
           subject: `User Account ${
             findUser.status === "banned" ? "Banned" : "Suspension"
-          } (${findUser.username}) - SportPredict`,
+          } (${findUser.username}) - CricVista`,
           html: UserAccountClosureTemp({
             status: findUser.status || "",
             username: findUser.username,

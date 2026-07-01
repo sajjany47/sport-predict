@@ -30,7 +30,7 @@ const sections = [
     content: (
       <div className="space-y-4 text-gray-600 leading-relaxed">
         <p>
-          When you use SportPredict365, we collect various types of information
+          When you use CricVista, we collect various types of information
           to provide and improve our services. This includes:
         </p>
         <div className="grid gap-3">
@@ -49,7 +49,7 @@ const sections = [
             <div>
               <strong className="text-gray-900">Usage Data:</strong> We
               automatically collect information about how you interact with our
-              platform, including pages visited, features used, prediction
+              platform, including pages visited, features used, analytics
               queries submitted, time spent on each section, and interaction
               patterns. This helps us optimize the user experience.
             </div>
@@ -90,7 +90,7 @@ const sections = [
     content: (
       <div className="space-y-4 text-gray-600 leading-relaxed">
         <p>
-          SportPredict365 uses the collected information for the following
+          CricVista uses the collected information for the following
           purposes:
         </p>
         <ul className="space-y-3">
@@ -139,7 +139,7 @@ const sections = [
     content: (
       <div className="space-y-4 text-gray-600 leading-relaxed">
         <p>
-          SportPredict365 uses cookies and similar technologies to enhance your
+          CricVista uses cookies and similar technologies to enhance your
           browsing experience, analyze site traffic, and understand where our
           audience comes from. Cookies are small text files stored on your
           device by your web browser.
@@ -201,7 +201,7 @@ const sections = [
           We partner with third-party analytics providers to help us understand
           how our platform is used and to improve our services. These providers
           may collect anonymous information about your interactions with
-          SportPredict365.
+          CricVista.
         </p>
         <div className="grid gap-3">
           <div className="flex gap-3 p-3 bg-blue-50/50 rounded-xl">
@@ -233,7 +233,7 @@ const sections = [
     content: (
       <div className="space-y-4 text-gray-600 leading-relaxed">
         <p>
-          When you create an account on SportPredict365, you are responsible for
+          When you create an account on CricVista, you are responsible for
           maintaining the confidentiality of your login credentials. You agree
           to notify us immediately of any unauthorized use of your account.
         </p>
@@ -261,7 +261,7 @@ const sections = [
     content: (
       <div className="space-y-4 text-gray-600 leading-relaxed">
         <p>
-          <strong className="text-gray-900">Important:</strong> SportPredict365
+          <strong className="text-gray-900">Important:</strong> CricVista
           does not store, process, or have access to your complete payment card
           information. All payment transactions are handled securely by
           third-party payment gateways.
@@ -297,7 +297,7 @@ const sections = [
     content: (
       <div className="space-y-4 text-gray-600 leading-relaxed">
         <p>
-          SportPredict365 offers both free and paid subscription plans. This
+          CricVista offers both free and paid subscription plans. This
           section outlines how we handle subscription-related data and billing
           information.
         </p>
@@ -326,7 +326,7 @@ const sections = [
     content: (
       <div className="space-y-4 text-gray-600 leading-relaxed">
         <p>
-          Protecting your data is our top priority. SportPredict365 implements
+          Protecting your data is our top priority. CricVista implements
           industry-standard security measures to safeguard your information
           against unauthorized access, alteration, disclosure, or destruction.
         </p>
@@ -496,7 +496,7 @@ const sections = [
       <div className="space-y-4 text-gray-600 leading-relaxed">
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
           <p className="text-red-800 text-sm font-medium">
-            SportPredict365 is not intended for individuals under the age of 18.
+            CricVista is not intended for individuals under the age of 18.
             We do not knowingly collect personal information from children or
             minors.
           </p>
@@ -526,7 +526,7 @@ const sections = [
     content: (
       <div className="space-y-4 text-gray-600 leading-relaxed">
         <p>
-          SportPredict365 reserves the right to update or modify this Privacy
+          CricVista reserves the right to update or modify this Privacy
           Policy at any time. We will notify you of material changes through
           prominent notice on our platform and/or via email.
         </p>
@@ -535,7 +535,7 @@ const sections = [
             "The 'Last updated' date at the top of this policy will reflect the most recent changes.",
             "Material changes will be communicated via email to registered users at least 7 days before they take effect.",
             "Minor changes or clarifications may take effect immediately upon posting.",
-            "Your continued use of SportPredict365 after changes constitute acceptance of the updated policy.",
+            "Your continued use of CricVista after changes constitute acceptance of the updated policy.",
             "We encourage you to review this Privacy Policy periodically for any updates.",
           ].map((item, i) => (
             <div key={i} className="flex gap-3">
@@ -694,7 +694,7 @@ export default function PrivacyPolicy() {
                   Disclaimer
                 </h3>
                 <p className="text-amber-800 text-sm leading-relaxed">
-                  SportPredict365 provides AI-powered sports analytics and
+                  CricVista provides AI-powered sports analytics and
                   statistical insights for informational and entertainment
                   purposes only. We do not facilitate betting, gambling,
                   wagering, or real-money gaming. Our predictions and analyses

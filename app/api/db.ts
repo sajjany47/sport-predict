@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const MONGODB_URI =
   process.env.NEXT_PUBLIC_DB_URL ||
-  "mongodb+srv://sajjany47:s%40JJAN888@cluster0.g6om3i4.mongodb.net/sport-predict?retryWrites=true&w=majority";
+  "mongodb+srv://sajjany47:s%40JJAN888@cluster0.g6om3i4.mongodb.net/cricvista?retryWrites=true&w=majority";
 
 if (!MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI environment variable.");
@@ -20,7 +20,7 @@ const dbConnect = async () => {
     cached.promise = mongoose
       .connect(MONGODB_URI, {
         bufferCommands: false,
-        dbName: "sport-predict", // optional
+        dbName: "cricvista", // optional
       })
       .then((mongoose) => {
         console.log("MongoDB connected");

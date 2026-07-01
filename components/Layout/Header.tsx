@@ -228,10 +228,10 @@ const Header = () => {
               </div>
               <div className="flex flex-col">
                 <span className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  SportPredict
+                  CricVista
                 </span>
                 <span className="text-[9px] xs:text-xs sm:text-xs md:text-sm text-gray-500 leading-tight">
-                  AI Cricket Analytics
+                  AI Cricket Intelligence & Analytics
                 </span>
               </div>
             </Link>
@@ -771,10 +771,10 @@ const Header = () => {
                       ) : (
                         <div>
                           <div className="text-lg sm:text-xl font-bold text-gray-900">
-                            SportPredict
+                            CricVista
                           </div>
                           <div className="text-xs sm:text-sm text-gray-600">
-                            AI Cricket Analytics
+                            AI Cricket Intelligence & Analytics
                           </div>
                         </div>
                       )}

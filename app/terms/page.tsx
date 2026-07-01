@@ -128,7 +128,7 @@ const TermsPage = () => {
               Terms of Service
             </h1>
             <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-              Please read these terms carefully before using the SportPredict365
+              Please read these terms carefully before using the CricVista
               platform. By using our services, you agree to be bound by these
               terms.
             </p>
@@ -191,7 +191,7 @@ const TermsPage = () => {
                     </p>
                   </div>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    These Terms govern your use of SportPredict365. By accessing
+                    These Terms govern your use of CricVista. By accessing
                     or using our platform, you agree to these terms in full.
                   </p>
                 </div>
@@ -213,14 +213,14 @@ const TermsPage = () => {
                   </div>
                   <div className="pl-0 md:pl-13 space-y-4 text-gray-700 leading-relaxed">
                     <p>
-                      By accessing or using the SportPredict365 website, mobile
+                      By accessing or using the CricVista website, mobile
                       application, or any related services (collectively, the
                       "Platform"), you agree to be bound by these Terms &
                       Conditions ("Terms"). If you do not agree to all of these
                       Terms, you must not access or use the Platform.
                     </p>
                     <p>
-                      SportPredict365 reserves the right to update or modify
+                      CricVista reserves the right to update or modify
                       these Terms at any time without prior notice. Your
                       continued use of the Platform after any changes constitutes
                       your acceptance of the revised Terms. It is your
@@ -261,11 +261,11 @@ const TermsPage = () => {
                       You are solely responsible for maintaining the
                       confidentiality of your account credentials, including
                       your password, and for all activities that occur under
-                      your account. You agree to notify SportPredict365
+                      your account. You agree to notify CricVista
                       immediately of any unauthorized use of your account.
                     </p>
                     <p>
-                      SportPredict365 reserves the right to refuse service,
+                      CricVista reserves the right to refuse service,
                       terminate accounts, remove or edit content, or cancel
                       orders at its sole discretion.
                     </p>
@@ -295,13 +295,13 @@ const TermsPage = () => {
                       (monthly or annually, depending on the plan selected)
                       and will automatically renew at the end of each billing
                       period unless cancelled before the renewal date. You
-                      authorize SportPredict365 to charge your selected payment
+                      authorize CricVista to charge your selected payment
                       method for the subscription fee at the start of each
                       billing period.
                     </p>
                     <p>
                       Payments are processed through third-party payment
-                      processors. SportPredict365 does not store or process
+                      processors. CricVista does not store or process
                       your payment card details directly. By providing your
                       payment information, you agree to the terms and privacy
                       policies of these third-party processors.
@@ -328,7 +328,7 @@ const TermsPage = () => {
                     <p>
                       All subscription fees are non-refundable except as
                       expressly stated in this Refund Policy or as required by
-                      applicable law. SportPredict365 does not provide refunds
+                      applicable law. CricVista does not provide refunds
                       or credits for any partial subscription periods or unused
                       features.
                     </p>
@@ -346,7 +346,7 @@ const TermsPage = () => {
                       reviewed on a case-by-case basis.
                     </p>
                     <p>
-                      SportPredict365 reserves the right to offer partial or
+                      CricVista reserves the right to offer partial or
                       full refunds at its sole discretion. Any refund issued
                       will be processed using the original payment method and
                       may take 5-10 business days to reflect.
@@ -371,20 +371,20 @@ const TermsPage = () => {
                       logos, icons, images, audio clips, video clips, data
                       compilations, software, algorithms, and the design,
                       structure, and arrangement thereof — are owned by
-                      SportPredict365, its licensors, or other providers and are
+                      CricVista, its licensors, or other providers and are
                       protected by applicable intellectual property and
                       proprietary rights laws.
                     </p>
                     <p>
-                      The SportPredict365 name, logo, and all related names,
+                      The CricVista name, logo, and all related names,
                       logos, product and service names, designs, and slogans are
-                      trademarks of SportPredict365 or its affiliates. You must
+                      trademarks of CricVista or its affiliates. You must
                       not use such marks without the prior written permission of
-                      SportPredict365.
+                      CricVista.
                     </p>
                     <p>
                       Subject to your compliance with these Terms,
-                      SportPredict365 grants you a limited, non-exclusive,
+                      CricVista grants you a limited, non-exclusive,
                       non-transferable, revocable license to access and use the
                       Platform for your personal, non-commercial purposes. You
                       may not reproduce, distribute, modify, create derivative
@@ -465,7 +465,7 @@ const TermsPage = () => {
                       </p>
                     </div>
                     <p>
-                      SportPredict365 provides AI-powered sports analytics and
+                      CricVista provides AI-powered sports analytics and
                       statistical insights for informational and entertainment
                       purposes only. We do not facilitate betting, gambling,
                       wagering, or real-money gaming. AI-generated insights are
@@ -481,7 +481,7 @@ const TermsPage = () => {
                       risk.
                     </p>
                     <p>
-                      SportPredict365 expressly disclaims any and all liability
+                      CricVista expressly disclaims any and all liability
                       for any loss or damage (direct, indirect, or
                       consequential) arising from your use of or reliance on
                       the AI-generated insights, predictions, or analytics
@@ -489,7 +489,7 @@ const TermsPage = () => {
                     </p>
                     <div className="bg-white/70 rounded-xl p-4 border border-amber-100">
                       <p className="text-sm font-medium text-amber-700">
-                        SportPredict365 does not promote, endorse, or
+                        CricVista does not promote, endorse, or
                         facilitate any form of gambling. The Platform is
                         designed for fantasy sports, educational, and
                         entertainment purposes only.
@@ -510,7 +510,7 @@ const TermsPage = () => {
                   </div>
                   <div className="space-y-4 text-gray-700 leading-relaxed">
                     <p>
-                      SportPredict365 reserves the right to suspend or
+                      CricVista reserves the right to suspend or
                       terminate your account and access to the Platform, with
                       or without notice, if:
                     </p>
@@ -561,7 +561,7 @@ const TermsPage = () => {
                   <div className="space-y-4 text-gray-700 leading-relaxed">
                     <p>
                       To the fullest extent permitted by applicable law,
-                      SportPredict365, its affiliates, officers, directors,
+                      CricVista, its affiliates, officers, directors,
                       employees, agents, and licensors shall not be liable for
                       any indirect, incidental, special, consequential, or
                       punitive damages, including but not limited to loss of
@@ -577,17 +577,17 @@ const TermsPage = () => {
                       purpose, or non-infringement.
                     </p>
                     <p>
-                      SportPredict365 does not warrant that the Platform will
+                      CricVista does not warrant that the Platform will
                       be uninterrupted, error-free, secure, or free of viruses
                       or other harmful components. You assume all risk for any
                       damage to your computer system or loss of data that
                       results from your use of the Platform.
                     </p>
                     <p>
-                      In no event shall SportPredict365's total liability to
+                      In no event shall CricVista's total liability to
                       you for all claims arising out of or relating to these
                       Terms or your use of the Platform exceed the amount paid
-                      by you to SportPredict365 during the twelve (12) months
+                      by you to CricVista during the twelve (12) months
                       preceding the event giving rise to the liability.
                     </p>
                   </div>
@@ -626,7 +626,7 @@ const TermsPage = () => {
                       cause of action is permanently barred.
                     </p>
                     <p>
-                      Notwithstanding the foregoing, SportPredict365 reserves
+                      Notwithstanding the foregoing, CricVista reserves
                       the right to seek injunctive or other equitable relief
                       in any court of competent jurisdiction to protect its
                       intellectual property rights or confidential
@@ -647,7 +647,7 @@ const TermsPage = () => {
                   </div>
                   <div className="space-y-4 text-gray-700 leading-relaxed">
                     <p>
-                      SportPredict365 reserves the right, at its sole
+                      CricVista reserves the right, at its sole
                       discretion, to modify, add, or remove portions of these
                       Terms at any time. If we make material changes, we will
                       notify you by posting a notice on the Platform or

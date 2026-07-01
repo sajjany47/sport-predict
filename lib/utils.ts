@@ -1178,12 +1178,12 @@ export const GetHint = (team1Chance: number, team2Chance: number) => {
     case team1Chance < 30 && team2Chance >= 70:
       return {
         team1: {
-          message: "❌ Never take chance - Avoid betting on this team",
+          message: "❌ Low confidence - Statistical factors unfavorable",
           color: "text-red-600 bg-red-50 border-red-200",
           badgeColor: "bg-red-100 text-red-800",
         },
         team2: {
-          message: "✅ Safe bet - Take chance when odds above 1.6",
+          message: "✅ Favorable conditions - Positive indicators detected",
           color: "text-green-600 bg-green-50 border-green-200",
           badgeColor: "bg-green-100 text-green-800",
         },
@@ -1193,12 +1193,12 @@ export const GetHint = (team1Chance: number, team2Chance: number) => {
     case team2Chance < 30 && team1Chance >= 70:
       return {
         team1: {
-          message: "✅ Safe bet - Take chance when odds above 1.7",
+          message: "✅ Favorable conditions - Positive indicators detected",
           color: "text-green-600 bg-green-50 border-green-200",
           badgeColor: "bg-green-100 text-green-800",
         },
         team2: {
-          message: "❌ Never take chance - Avoid betting on this team",
+          message: "❌ Low confidence - Statistical factors unfavorable",
           color: "text-red-600 bg-red-50 border-red-200",
           badgeColor: "bg-red-100 text-red-800",
         },
@@ -1208,12 +1208,12 @@ export const GetHint = (team1Chance: number, team2Chance: number) => {
     case team1Chance >= 30 && team1Chance <= 45 && team2Chance >= 55:
       return {
         team1: {
-          message: "⚠️ Risky bet - Only if odds above 3.0",
+          message: "⚠️ Moderate confidence - Mixed statistical signals",
           color: "text-yellow-600 bg-yellow-50 border-yellow-200",
           badgeColor: "bg-yellow-100 text-yellow-800",
         },
         team2: {
-          message: "🟢 Good bet - Take chance when odds above 2.5",
+          message: "🟢 Strong indicators - Multiple factors aligned",
           color: "text-green-600 bg-green-50 border-green-200",
           badgeColor: "bg-green-100 text-green-800",
         },
@@ -1223,12 +1223,12 @@ export const GetHint = (team1Chance: number, team2Chance: number) => {
     case team2Chance >= 30 && team2Chance <= 45 && team1Chance >= 55:
       return {
         team1: {
-          message: "🟢 Good bet - Take chance when odds above 2.5",
+          message: "🟢 Strong indicators - Multiple factors aligned",
           color: "text-green-600 bg-green-50 border-green-200",
           badgeColor: "bg-green-100 text-green-800",
         },
         team2: {
-          message: "⚠️ Risky bet - Only if odds above 3.0",
+          message: "⚠️ Moderate confidence - Mixed statistical signals",
           color: "text-yellow-600 bg-yellow-50 border-yellow-200",
           badgeColor: "bg-yellow-100 text-yellow-800",
         },
@@ -1238,12 +1238,12 @@ export const GetHint = (team1Chance: number, team2Chance: number) => {
     case team1Chance >= 45 && team2Chance >= 50:
       return {
         team1: {
-          message: "🟡 Consider betting - Wait for odds above 2.5",
+          message: "🟡 Neutral outlook - Monitor additional metrics",
           color: "text-yellow-600 bg-yellow-50 border-yellow-200",
           badgeColor: "bg-yellow-100 text-yellow-800",
         },
         team2: {
-          message: "🟢 Better option - Take chance when odds above 2.5",
+          message: "🟢 Preferred pick - Statistical advantage noted",
           color: "text-green-600 bg-green-50 border-green-200",
           badgeColor: "bg-green-100 text-green-800",
         },
@@ -1253,12 +1253,12 @@ export const GetHint = (team1Chance: number, team2Chance: number) => {
     case team2Chance >= 45 && team1Chance >= 50:
       return {
         team1: {
-          message: "🟢 Better option - Take chance when odds above 2.5",
+          message: "🟢 Preferred pick - Statistical advantage noted",
           color: "text-green-600 bg-green-50 border-green-200",
           badgeColor: "bg-green-100 text-green-800",
         },
         team2: {
-          message: "🟡 Consider betting - Wait for odds above 2.5",
+          message: "🟡 Neutral outlook - Monitor additional metrics",
           color: "text-yellow-600 bg-yellow-50 border-yellow-200",
           badgeColor: "bg-yellow-100 text-yellow-800",
         },
@@ -1268,12 +1268,12 @@ export const GetHint = (team1Chance: number, team2Chance: number) => {
     case Math.abs(team1Chance - team2Chance) <= 5:
       return {
         team1: {
-          message: "⚖️ Balanced match - Wait for odds above 2.8",
+          message: "⚖️ Balanced match - No clear statistical advantage",
           color: "text-blue-600 bg-blue-50 border-blue-200",
           badgeColor: "bg-blue-100 text-blue-800",
         },
         team2: {
-          message: "⚖️ Balanced match - Wait for odds above 2.8",
+          message: "⚖️ Balanced match - No clear statistical advantage",
           color: "text-blue-600 bg-blue-50 border-blue-200",
           badgeColor: "bg-blue-100 text-blue-800",
         },
@@ -1283,12 +1283,12 @@ export const GetHint = (team1Chance: number, team2Chance: number) => {
     default:
       return {
         team1: {
-          message: "🔍 Analyze match conditions before betting",
+          message: "🔍 Review detailed analysis for deeper insights",
           color: "text-gray-600 bg-gray-50 border-gray-200",
           badgeColor: "bg-gray-100 text-gray-800",
         },
         team2: {
-          message: "🔍 Analyze match conditions before betting",
+          message: "🔍 Review detailed analysis for deeper insights",
           color: "text-gray-600 bg-gray-50 border-gray-200",
           badgeColor: "bg-gray-100 text-gray-800",
         },
@@ -1498,7 +1498,7 @@ export const SendPrediction = async (prediction: any) => {
     //   finalWinner,
     //   message = "According to the analysis",
     //   stopLoss = "20 Paisa",
-    //   brandName = "SportPredict - 🎯 POWERED BY AI ❤️",
+    //   brandName = "CricVista - 🎯 POWERED BY AI ❤️",
     // } = prediction;
     const team1 = prediction?.team1?.name;
     const team2 = prediction?.team2?.name;
@@ -1515,7 +1515,7 @@ export const SendPrediction = async (prediction: any) => {
         ? team1
         : team2;
 
-    const brandName = "SportPredict - 🎯 POWERED BY AI ❤️";
+    const brandName = "CricVista - 🎯 POWERED BY AI ❤️";
     const message = "According to the analysis";
     const stopLoss = "20 Paisa";
 
@@ -1579,7 +1579,7 @@ export const SendPredictionResult = async (prediction: any, isPassed: boolean, m
         ? team1
         : team2;
 
-    const brandName = "SportPredict - 🎯 POWERED BY AI ❤️";
+    const brandName = "CricVista - 🎯 POWERED BY AI ❤️";
     const statusText = isPassed ? "✅ PREDICTION PASSED" : "❌ PREDICTION FAILED";
 
     const text = `

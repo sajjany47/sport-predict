@@ -107,7 +107,7 @@ const AdminDashboard = () => {
               Admin Dashboard
             </h1>
             <p className="text-gray-600 mt-2">
-              Overview of your SportPredict platform
+              Overview of your CricVista platform
             </p>
           </div>
           <div className="mt-4 sm:mt-0 flex items-center shadow-sm">

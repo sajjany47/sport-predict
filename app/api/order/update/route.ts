@@ -125,7 +125,7 @@ export const POST = async (req: NextRequest) => {
             });
             await MailSend({
               to: [findUser.email],
-              subject: `Payment verified(${findUser.username}) - SportPredict`,
+              subject: `Payment verified(${findUser.username}) - CricVista`,
               html: PaymentVerifiedTem({
                 subscriptionPlan: findSubscription?.name || "",
                 paymentId: findOrder.paymentId || "",
@@ -165,7 +165,7 @@ export const POST = async (req: NextRequest) => {
           if (findSubscription) {
             await MailSend({
               to: [findUser.email],
-              subject: `Transaction Failed(${findUser.username}) - SportPredict`,
+              subject: `Transaction Failed(${findUser.username}) - CricVista`,
               html: PaymentFailedTem({
                 subscriptionPlan: findSubscription?.name || "",
                 paymentId: findOrder.paymentId || "",

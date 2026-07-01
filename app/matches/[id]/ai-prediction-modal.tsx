@@ -324,7 +324,7 @@ const AIPredictionModal: React.FC<{
                     ⚖️ LEGAL DISCLAIMER
                   </h3>
                   <p className="text-xs text-orange-700">
-                    AI Confidence Score represents the model's statistical assessment and is not betting advice. SportPredict365 provides AI-powered sports analytics for informational and entertainment purposes only.
+                    AI Confidence Score represents the model&apos;s statistical assessment and is not betting advice. CricVista provides AI-powered cricket analytics for informational and entertainment purposes only.
                   </p>
                 </div>
               </div>
@@ -438,8 +438,8 @@ const AIPredictionModal: React.FC<{
                 <h3 className="text-sm font-bold text-red-800 mb-2">
                   ⚖️ IMPORTANT LEGAL NOTICE
                 </h3>
-                <p className="text-xs text-orange-700">
-                  AI Confidence Score represents the model's statistical assessment and is not betting advice. SportPredict365 provides AI-powered sports analytics for informational and entertainment purposes only.
+                  <p className="text-xs text-orange-700">
+                    AI Confidence Score represents the model&apos;s statistical assessment and is not betting advice. CricVista provides AI-powered cricket analytics for informational and entertainment purposes only.
                 </p>
               </div>
             </div>
@@ -1387,7 +1387,7 @@ const AIPredictionModal: React.FC<{
                     ⚖️ DISCLAIMER
                   </h4>
                   <p className="text-xs text-orange-700">
-                    AI Confidence Score represents the model's statistical assessment and is not betting advice. SportPredict365 provides AI-powered sports analytics for informational and entertainment purposes only.
+                    AI Confidence Score represents the model&apos;s statistical assessment and is not betting advice. CricVista provides AI-powered cricket analytics for informational and entertainment purposes only.
                   </p>
                 </div>
               </div>

@@ -25,13 +25,13 @@ const policySections = [
     icon: FileText,
     title: "Overview",
     content:
-      "SportPredict365 is a digital analytics subscription service that provides AI-powered sports predictions, insights, and data analysis. Subscriptions grant access to our web-based analytics platform, including match predictions, player performance metrics, team statistics, and fantasy sports recommendations. This Refund Policy governs all subscription purchases made on the SportPredict365 platform.",
+      "CricVista is a digital analytics subscription service that provides AI-powered sports analytics, insights, and data analysis. Subscriptions grant access to our web-based analytics platform, including match analytics, player performance metrics, team statistics, and fantasy sports recommendations. This Refund Policy governs all subscription purchases made on the CricVista platform.",
   },
   {
     icon: RotateCcw,
     title: "Subscription Cancellation",
     content:
-      "Users may cancel their subscription at any time through their account settings or by contacting our support team. Upon cancellation, access to the SportPredict365 analytics platform and all associated features will continue until the end of the current billing period. No partial refunds will be issued for the remaining days in the billing period after cancellation. To avoid being charged for the next billing cycle, cancellation must be completed before the renewal date.",
+      "Users may cancel their subscription at any time through their account settings or by contacting our support team. Upon cancellation, access to the CricVista analytics platform and all associated features will continue until the end of the current billing period. No partial refunds will be issued for the remaining days in the billing period after cancellation. To avoid being charged for the next billing cycle, cancellation must be completed before the renewal date.",
     list: [
       "Monthly subscriptions: cancel anytime, access continues until period end",
       "Annual subscriptions: cancel anytime, access continues until period end",
@@ -42,13 +42,13 @@ const policySections = [
     icon: Ban,
     title: "Refund Eligibility",
     content:
-      "SportPredict365 does not offer refunds for partially used subscription periods. However, refunds may be considered under the following exceptional circumstances:",
+      "CricVista does not offer refunds for partially used subscription periods. However, refunds may be considered under the following exceptional circumstances:",
     list: [
       "Technical issues that prevent access to the platform for an extended period (72+ hours)",
       "Duplicate charges or billing errors resulting in overpayment",
-      "Account closure initiated by SportPredict365 due to service discontinuation",
+      "Account closure initiated by CricVista due to service discontinuation",
     ],
-    note: "Refund eligibility is evaluated on a case-by-case basis. Dissatisfaction with prediction accuracy, changes in personal financial circumstances, or failure to utilize the subscription do not qualify for refunds.",
+    note: "Refund eligibility is evaluated on a case-by-case basis. Dissatisfaction with analytics accuracy, changes in personal financial circumstances, or failure to utilize the subscription do not qualify for refunds.",
   },
   {
     icon: Mail,
@@ -82,7 +82,7 @@ const policySections = [
     content:
       "We strongly encourage users to contact us directly at sportpredict247@gmail.com before initiating a chargeback with their bank or payment provider. Filing a chargeback without prior communication may result in:",
     list: [
-      "Immediate suspension of your SportPredict365 account",
+      "Immediate suspension of your CricVista account",
       "Permanent loss of access to all subscription features and historical data",
       "Ineligibility for future refunds or promotional offers",
       "Additional legal and administrative fees pursued where applicable",
@@ -114,7 +114,7 @@ const RefundPage = () => {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center px-4 py-2 bg-white/10 rounded-full text-sm font-medium mb-6 backdrop-blur-sm border border-white/10">
               <Shield className="h-4 w-4 mr-2" />
-              SportPredict365 Refund Policy
+              CricVista Refund Policy
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
               Our Commitment to
@@ -144,7 +144,7 @@ const RefundPage = () => {
                 Important Notice
               </h3>
               <p className="text-amber-800 text-sm leading-relaxed">
-                SportPredict365 provides AI-powered sports analytics for
+                CricVista provides AI-powered sports analytics for
                 informational purposes. Subscriptions are for access to the
                 analytics platform, not for betting advice or guaranteed
                 outcomes.
@@ -273,7 +273,7 @@ const RefundPage = () => {
                       </li>
                       <li className="flex items-start gap-2">
                         <ArrowRight className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                        Prediction accuracy dissatisfaction
+                        Analytics accuracy dissatisfaction
                       </li>
                       <li className="flex items-start gap-2">
                         <ArrowRight className="h-4 w-4 mt-0.5 flex-shrink-0" />

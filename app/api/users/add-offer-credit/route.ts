@@ -114,7 +114,7 @@ export const POST = async (request: NextRequest) => {
           credits: updatedCredits,
           totalCreditsAdded: body.credits,
           amount: depositAmount,
-          adminName: "SportPredict Team",
+          adminName: "CricVista Team",
           appUrl: process.env.NEXT_PUBLIC_API_URL,
           supportEmail: process.env.NEXT_PUBLIC_EMAIL,
           supportPhone: process.env.NEXT_PUBLIC_MOBILE,
@@ -135,8 +135,8 @@ export const POST = async (request: NextRequest) => {
           credits: updatedCredits,
           totalCreditsAdded: body.credits,
           reason:
-            "SportPredict added bonus tokens to your account as a special gesture.",
-          adminName: "SportPredict Team",
+            "CricVista added bonus tokens to your account as a special gesture.",
+          adminName: "CricVista Team",
           appUrl: process.env.NEXT_PUBLIC_API_URL,
           supportEmail: process.env.NEXT_PUBLIC_EMAIL,
           supportPhone: process.env.NEXT_PUBLIC_MOBILE,
@@ -145,7 +145,7 @@ export const POST = async (request: NextRequest) => {
         const emailHtml = AdminFreeCreditsEmail(emailData);
         await MailSend({
           to: [targetUser.email],
-          subject: `🎁 ${body.credits} Free Credits Added to Your SportPredict Account!`,
+          subject: `🎁 ${body.credits} Free Credits Added to Your CricVista Account!`,
           html: emailHtml,
         });
       }

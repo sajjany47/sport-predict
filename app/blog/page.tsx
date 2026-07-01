@@ -215,7 +215,7 @@ const BlogPage = () => {
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-white/20 shadow-sm mb-6">
               <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                SportPredict365 Blog
+                CricVista Blog
               </span>
             </div>
 

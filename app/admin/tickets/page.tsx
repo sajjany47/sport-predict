@@ -314,7 +314,7 @@ const AdminTicketsPage = () => {
                             options={[
                               { label: "General", value: "general" },
                               { label: "Payment", value: "payment" },
-                              { label: "Prediction", value: "prediction" },
+                              { label: "Analytics", value: "prediction" },
                               { label: "Technical", value: "technical" },
                               { label: "Account", value: "account" },
                             ]}

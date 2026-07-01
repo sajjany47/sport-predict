@@ -70,7 +70,7 @@ const AdminSidebar = () => {
           <div className="bg-blue-600 p-2 rounded-lg">
             <Trophy className="h-5 w-5 text-white" />
           </div>
-          <span className="text-lg font-bold">SportPredict</span>
+          <span className="text-lg font-bold">CricVista</span>
         </div>
         <h2 className="text-xl font-bold">Admin Panel</h2>
         <p className="text-gray-400 text-sm">Management Dashboard</p>

@@ -254,7 +254,7 @@ const RegisterPage = () => {
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl shadow-lg">
               <Trophy className="h-8 w-8 text-white" />
             </div>
-            <span className="text-3xl font-bold text-white">SportPredict</span>
+            <span className="text-3xl font-bold text-white">CricVista</span>
           </div>
           <h1 className="text-3xl font-bold text-white">Create Your Account</h1>
           <p className="text-indigo-200 mt-2">
@@ -565,7 +565,7 @@ const RegisterPage = () => {
                   Registration Successful!
                 </h3>
                 <p className="text-gray-600">
-                  Welcome to SportPredict, {userData?.username}! Your account
+                  Welcome to CricVista, {userData?.username}! Your account
                   has been created successfully. You will be redirected to the
                   matches page shortly.
                 </p>

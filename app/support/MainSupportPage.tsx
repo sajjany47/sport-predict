@@ -255,7 +255,7 @@ const SupportPage = () => {
                   </h1>
                 </div>
                 <p className="text-lg text-gray-600 ml-11">
-                  Get help with your SportPredict experience
+                  Get help with your CricVista experience
                 </p>
               </div>
               <div className="mt-4 md:mt-0">
@@ -307,7 +307,7 @@ const SupportPage = () => {
                                 options={[
                                   { label: "General", value: "general" },
                                   { label: "Payment", value: "payment" },
-                                  { label: "Prediction", value: "prediction" },
+                                  { label: "Analytics", value: "prediction" },
                                   { label: "Technical", value: "technical" },
                                   { label: "Account", value: "account" },
                                 ]}
@@ -676,7 +676,7 @@ const SupportPage = () => {
                       <p className="font-medium text-gray-900">Email Support</p>
                       <p className="text-gray-600">
                         {process.env.NEXT_PUBLIC_EMAIL ||
-                          "support@sportpredict.com"}
+                          "support@cricvista.com"}
                       </p>
                     </div>
                   </div>

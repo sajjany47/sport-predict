@@ -516,7 +516,7 @@ I am sending this message to confirm my payment. Please add the credits to my ac
               <div className="flex items-start gap-3">
                 <Shield className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
                 <p className="text-xs text-amber-800 leading-relaxed">
-                  SportPredict365 provides AI-powered sports analytics and
+                  CricVista provides AI-powered sports analytics and
                   statistical insights for informational and entertainment
                   purposes only. We do not facilitate betting, gambling,
                   wagering, or real-money gaming. AI-generated insights are

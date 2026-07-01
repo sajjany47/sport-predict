@@ -65,7 +65,7 @@ const SearchPage = ({ onClose, setSearchData }: StatusDialogProps) => {
                   component={FormikSelectField}
                   options={[
                     { label: "Purchase", value: "purchase" },
-                    { label: "Prediction", value: "prediction" },
+                    { label: "Analytics", value: "prediction" },
                     { label: "Free Credit", value: "credit" },
                   ]}
                   label="Order Type"

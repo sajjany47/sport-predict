@@ -173,7 +173,7 @@ const customerReviews = [
 
 const faqs = [
   {
-    question: "How does SportPredict365 generate its match insights?",
+    question: "How does CricVista generate its match insights?",
     answer:
       "Our platform uses advanced machine learning models that analyze over 50 factors including team composition, player form, head-to-head records, venue statistics, weather conditions, and historical patterns to deliver comprehensive match intelligence.",
   },
@@ -185,7 +185,7 @@ const faqs = [
   {
     question: "Can I access the analytics on mobile devices?",
     answer:
-      "Yes! SportPredict365 is fully responsive and works seamlessly across desktop, tablet, and mobile devices. All insights, charts, and data visualizations are optimized for any screen size.",
+      "Yes! CricVista is fully responsive and works seamlessly across desktop, tablet, and mobile devices. All insights, charts, and data visualizations are optimized for any screen size.",
   },
   {
     question: "Is there a free tier available?",
@@ -1006,7 +1006,7 @@ const HomePage = () => {
               Cricket Analysis?
             </h2>
             <p className="mx-auto mb-10 max-w-2xl text-lg text-blue-100">
-              Join thousands of cricket enthusiasts who rely on SportPredict365
+              Join thousands of cricket enthusiasts who rely on CricVista
               for data-driven insights and intelligence.
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">

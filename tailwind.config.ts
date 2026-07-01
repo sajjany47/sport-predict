@@ -61,6 +61,16 @@ const config: Config = {
           '5': 'hsl(var(--chart-5))',
         },
       },
+      spacing: {
+        '22': '5.5rem',
+        '22.5': '5.625rem',
+        '90': '90px',
+        '128': '32rem',
+        '144': '36rem',
+      },
+      maxWidth: {
+        'cv': '1280px',
+      },
       keyframes: {
         'accordion-down': {
           from: {

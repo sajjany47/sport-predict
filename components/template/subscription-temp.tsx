@@ -113,7 +113,7 @@ export const UserPaymentConfirmationTemp = (data: any) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Submitted - SportPredict</title>
+    <title>Payment Submitted - CricVista</title>
     <style>
         body {
             margin: 0;
@@ -210,8 +210,8 @@ export const UserPaymentConfirmationTemp = (data: any) => {
 <body>
     <div class="container">
         <div class="header">
-            <h1><span>Sport</span>Predict</h1>
-            <p>The future of sports predictions</p>
+            <h1><span>Cric</span>Vista</h1>
+            <p>the future of cricket intelligence</p>
         </div>
         
         <div class="content">
@@ -247,7 +247,7 @@ export const UserPaymentConfirmationTemp = (data: any) => {
             
             <p>If you have any questions, please contact our support team.</p>
             
-            <p>Best regards,<br>The SportPredict Team</p>
+            <p>Best regards,<br>The CricVista Team</p>
         </div>
         
         <div class="footer">
@@ -258,7 +258,7 @@ export const UserPaymentConfirmationTemp = (data: any) => {
                 <a href="#">Terms of Service</a> • 
                 <a href="#">Contact Us</a>
             </p>
-            <p style="margin-top: 15px; font-size: 12px; color: rgba(255, 255, 255, 0.5);">© 2023 SportPredict. All rights reserved.</p>
+            <p style="margin-top: 15px; font-size: 12px; color: rgba(255, 255, 255, 0.5);">© 2023 CricVista. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -273,7 +273,7 @@ export const AdminPaymentConfirmationTemp = (data: any) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Payment Submission - SportPredict</title>
+    <title>New Payment Submission - CricVista</title>
     <style>
         body {
             margin: 0;
@@ -369,8 +369,8 @@ export const AdminPaymentConfirmationTemp = (data: any) => {
 <body>
     <div class="container">
         <div class="header">
-            <h1><span>Sport</span>Predict</h1>
-            <p>The future of sports predictions</p>
+            <h1><span>Cric</span>Vista</h1>
+            <p>the future of cricket intelligence</p>
         </div>
         
         <div class="content">
@@ -406,7 +406,7 @@ export const AdminPaymentConfirmationTemp = (data: any) => {
               process.env.NEXT_PUBLIC_API_URL
             }" class="button">Review Payment</a>
             
-            <p>Thank you,<br>SportPredict System</p>
+            <p>Thank you,<br>CricVista System</p>
         </div>
         
         <div class="footer">
@@ -415,7 +415,7 @@ export const AdminPaymentConfirmationTemp = (data: any) => {
                 <a href="#">User Management</a> • 
                 <a href="#">Payment Review</a>
             </p>
-            <p style="margin-top: 15px; font-size: 12px; color: rgba(255, 255, 255, 0.5);">© 2023 SportPredict. All rights reserved.</p>
+            <p style="margin-top: 15px; font-size: 12px; color: rgba(255, 255, 255, 0.5);">© 2023 CricVista. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -431,7 +431,7 @@ export const PaymentVerifiedTem = (data: any) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Verified - SportPredict</title>
+    <title>Payment Verified - CricVista</title>
      <style>
         * {
             margin: 0;
@@ -622,8 +622,8 @@ export const PaymentVerifiedTem = (data: any) => {
 <body>
     <div class="container">
         <div class="header">
-            <h1><span>Sport</span>Predict</h1>
-            <p>The future of sports predictions</p>
+            <h1><span>Cric</span>Vista</h1>
+            <p>the future of cricket intelligence</p>
         </div>
         
         <div class="content">
@@ -672,13 +672,13 @@ export const PaymentVerifiedTem = (data: any) => {
                 </div>
             </div>
             
-            <p>Your subscription is now active and you have full access to all Premium features. Thank you for choosing SportPredict!</p>
+            <p>Your subscription is now active and you have full access to all Premium features. Thank you for choosing CricVista!</p>
             
             <a href="${process.env.NEXT_PUBLIC_APP_URL}" class="button">Access Your Premium Account</a>
             
             <p>If you have any questions about your subscription or need assistance, please contact our support team.</p>
             
-            <p>Best regards,<br><strong>The SportPredict Team</strong></p>
+            <p>Best regards,<br><strong>The CricVista Team</strong></p>
         </div>
         
         <div class="footer">
@@ -689,7 +689,7 @@ export const PaymentVerifiedTem = (data: any) => {
                 <a href="#">Terms of Service</a>
                 <a href="#">Contact Support</a>
             </div>
-            <p class="copyright">© 2023 SportPredict. All rights reserved.</p>
+            <p class="copyright">© 2023 CricVista. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -702,7 +702,7 @@ export const PaymentFailedTem = (data: any) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaction Failed - SportPredict</title>
+    <title>Transaction Failed - CricVista</title>
     <style>
         * {
             margin: 0;
@@ -903,8 +903,8 @@ export const PaymentFailedTem = (data: any) => {
 <body>
     <div class="container">
         <div class="header">
-            <h1><span>Sport</span>Predict</h1>
-            <p>The future of sports predictions</p>
+            <h1><span>Cric</span>Vista</h1>
+            <p>the future of cricket intelligence</p>
         </div>
         
         <div class="content">
@@ -973,7 +973,7 @@ export const PaymentFailedTem = (data: any) => {
             
             <p>If you believe this is an error or need further assistance, please contact our support team.</p>
             
-            <p>Best regards,<br><strong>The SportPredict Team</strong></p>
+            <p>Best regards,<br><strong>The CricVista Team</strong></p>
         </div>
         
         <div class="footer">
@@ -990,7 +990,7 @@ export const PaymentFailedTem = (data: any) => {
                   process.env.NEXT_PUBLIC_APP_URL
                 }/support">Contact Support</a>
             </div>
-            <p class="copyright">© 2023 SportPredict. All rights reserved.</p>
+            <p class="copyright">© 2023 CricVista. All rights reserved.</p>
         </div>
     </div>
 </body>
