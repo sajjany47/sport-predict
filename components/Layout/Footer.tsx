@@ -62,16 +62,52 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { icon: Twitter, href: "#", label: "Twitter", hoverBg: "hover:bg-sky-500/10", hoverIcon: "group-hover:text-sky-400" },
-    { icon: Linkedin, href: "#", label: "LinkedIn", hoverBg: "hover:bg-blue-600/10", hoverIcon: "group-hover:text-blue-500" },
-    { icon: Facebook, href: "#", label: "Facebook", hoverBg: "hover:bg-blue-500/10", hoverIcon: "group-hover:text-blue-400" },
-    { icon: Instagram, href: "#", label: "Instagram", hoverBg: "hover:bg-pink-500/10", hoverIcon: "group-hover:text-pink-400" },
-    { icon: Youtube, href: "#", label: "YouTube", hoverBg: "hover:bg-red-500/10", hoverIcon: "group-hover:text-red-400" },
-    { icon: Github, href: "#", label: "GitHub", hoverBg: "hover:bg-white/10", hoverIcon: "group-hover:text-white" },
+    {
+      icon: Twitter,
+      href: "#",
+      label: "Twitter",
+      hoverBg: "hover:bg-sky-500/10",
+      hoverIcon: "group-hover:text-sky-400",
+    },
+    {
+      icon: Linkedin,
+      href: "#",
+      label: "LinkedIn",
+      hoverBg: "hover:bg-blue-600/10",
+      hoverIcon: "group-hover:text-blue-500",
+    },
+    {
+      icon: Facebook,
+      href: "#",
+      label: "Facebook",
+      hoverBg: "hover:bg-blue-500/10",
+      hoverIcon: "group-hover:text-blue-400",
+    },
+    {
+      icon: Instagram,
+      href: "#",
+      label: "Instagram",
+      hoverBg: "hover:bg-pink-500/10",
+      hoverIcon: "group-hover:text-pink-400",
+    },
+    {
+      icon: Youtube,
+      href: "#",
+      label: "YouTube",
+      hoverBg: "hover:bg-red-500/10",
+      hoverIcon: "group-hover:text-red-400",
+    },
+    {
+      icon: Github,
+      href: "#",
+      label: "GitHub",
+      hoverBg: "hover:bg-white/10",
+      hoverIcon: "group-hover:text-white",
+    },
   ];
 
   return (
-    <footer className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-t-[32px]">
+    <footer className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white">
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[128px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-[128px] pointer-events-none" />
 
@@ -88,20 +124,26 @@ const Footer = () => {
             </Link>
 
             <p className="text-[15px] text-slate-400 leading-relaxed max-w-xs max-md:max-w-sm">
-              Advanced cricket analytics platform powered by artificial intelligence. Providing statistical insights, team analysis, and venue intelligence.
+              Advanced cricket analytics platform powered by artificial
+              intelligence. Providing statistical insights, team analysis, and
+              venue intelligence.
             </p>
 
             <div className="flex items-center gap-2.5 max-md:justify-center">
-              {socialLinks.map(({ icon: Icon, href, label, hoverBg, hoverIcon }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  aria-label={label}
-                  className={`group w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-slate-500 transition-all duration-300 hover:-translate-y-1 ${hoverBg}`}
-                >
-                  <Icon className={`h-4 w-4 transition-colors duration-300 ${hoverIcon}`} />
-                </Link>
-              ))}
+              {socialLinks.map(
+                ({ icon: Icon, href, label, hoverBg, hoverIcon }) => (
+                  <Link
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    className={`group w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-slate-500 transition-all duration-300 hover:-translate-y-1 ${hoverBg}`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 transition-colors duration-300 ${hoverIcon}`}
+                    />
+                  </Link>
+                ),
+              )}
             </div>
           </div>
 
@@ -159,9 +201,10 @@ const Footer = () => {
           <div className="space-y-5 max-md:text-center max-md:flex max-md:flex-col max-md:items-center">
             <h3 className="text-[22px] font-bold text-white">Newsletter</h3>
             <p className="text-[15px] text-slate-400 leading-relaxed max-w-xs">
-              Stay updated with the latest cricket insights and platform updates.
+              Stay updated with the latest cricket insights and platform
+              updates.
             </p>
-            <form onSubmit={handleSubscribe} className="space-y-3 w-full max-w-sm">
+            {/* <form onSubmit={handleSubscribe} className="space-y-3 w-full max-w-sm">
               <div className="relative">
                 <input
                   type="email"
@@ -184,7 +227,7 @@ const Footer = () => {
                   Successfully subscribed!
                 </p>
               )}
-            </form>
+            </form> */}
           </div>
         </div>
 
@@ -193,7 +236,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
           <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm max-md:text-center">
             <p className="text-xs text-slate-500 leading-relaxed">
-              CricVista is an AI-powered cricket analytics platform for informational and educational purposes only. We do not provide betting, gambling, wagering or real-money gaming services.
+              CricVista is an AI-powered cricket analytics platform for
+              informational and educational purposes only. We do not provide
+              betting, gambling, wagering or real-money gaming services.
             </p>
           </div>
 

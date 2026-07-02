@@ -227,7 +227,8 @@ const BlogPage = () => {
 
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed">
               Expert analysis, data-driven insights, and in-depth articles
-              powered by AI to help you understand the game beyond the scorecard.
+              powered by AI to help you understand the game beyond the
+              scorecard.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-3 max-w-lg mx-auto">
@@ -287,8 +288,8 @@ const BlogPage = () => {
               No articles found
             </h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm max-w-sm mx-auto">
-              Try adjusting your search or filter to find what you&apos;re looking
-              for.
+              Try adjusting your search or filter to find what you&apos;re
+              looking for.
             </p>
             <Button
               variant="outline"
@@ -416,7 +417,7 @@ const BlogPage = () => {
               Get the latest cricket analytics articles and insights delivered
               to your inbox every week.
             </p>
-            <div className="flex flex-col sm:flex-row items-center gap-3 max-w-md mx-auto">
+            {/* <div className="flex flex-col sm:flex-row items-center gap-3 max-w-md mx-auto">
               <Input
                 placeholder="Enter your email"
                 className="h-12 bg-white/20 border-white/30 text-white placeholder:text-blue-200 rounded-xl focus:ring-2 focus:ring-white/50"
@@ -424,7 +425,7 @@ const BlogPage = () => {
               <Button className="h-12 px-6 bg-white text-blue-700 hover:bg-blue-50 rounded-xl font-semibold shadow-lg whitespace-nowrap">
                 Subscribe
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
