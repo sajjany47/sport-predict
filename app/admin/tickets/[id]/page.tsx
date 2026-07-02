@@ -393,7 +393,7 @@ const TicketDetailsPage = () => {
 
   // Function to determine if message is from user or admin
   const isCurrentUserMessage = (message: any) => {
-    return message.replyBy._id === user?.id;
+    return message?.replyBy?._id === user?.id;
   };
 
   const formatTime = (dateString: string) => {
@@ -746,10 +746,12 @@ const TicketDetailsPage = () => {
                                         ) : (
                                           <UserCheck className="h-3 w-3" />
                                         )}
-                                        <span>{msg.replyBy.name}</span>
+                                        <span>{msg?.replyBy?.name}</span>
                                       </span>
                                       <span>•</span>
-                                      <span>{formatTime(msg.replyAt)}</span>
+                                      <span>
+                                        {formatTime(msg?.replyAt ?? new Date())}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
