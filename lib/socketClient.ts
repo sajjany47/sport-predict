@@ -9,15 +9,15 @@ const getSocketUrl = (): string => {
     if (process.env.NEXT_PUBLIC_SOCKET_URL) {
       return process.env.NEXT_PUBLIC_SOCKET_URL;
     }
-    const hostname = window.location.hostname;
-    // If we're on localhost or 127.0.0.1, connect to localhost:3005
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return "http://localhost:3005";
-    }
-    // Otherwise, default to the window location origin (which works if reverse proxy or same domain is used)
+
+    // Socket.IO shares the same HTTP server and origin as Next.js.
     return window.location.origin;
   }
-  return process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3005";
+
+  return (
+    process.env.NEXT_PUBLIC_SOCKET_URL ||
+    `http://127.0.0.1:${process.env.PORT || 3004}`
+  );
 };
 
 export const getSocket = (): Socket => {

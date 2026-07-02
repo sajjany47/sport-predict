@@ -11,7 +11,9 @@ import {
 } from "@/components/template/UserTemp";
 
 const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3005";
+  process.env.SOCKET_SERVER_URL ||
+  process.env.NEXT_PUBLIC_SOCKET_URL ||
+  `http://127.0.0.1:${process.env.PORT || 3004}`;
 
 const notifySocket = async (endpoint: string, payload: any) => {
   try {
