@@ -61,6 +61,14 @@ const Footer = () => {
     { label: "Contact Support", href: "/contact" },
   ];
 
+  const legalLinks = [
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms & Conditions", href: "/terms" },
+    { label: "Refund Policy", href: "/refund" },
+    { label: "Responsible Use", href: "/responsible-use" },
+    { label: "Cookie Policy", href: "/privacy" },
+  ];
+
   const socialLinks = [
     {
       icon: Twitter,
@@ -112,7 +120,7 @@ const Footer = () => {
       <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-[128px] pointer-events-none" />
 
       <div className="relative z-10 container-cv pt-20 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 max-lg:gap-10 max-md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 max-lg:gap-10 max-md:gap-8">
           <div className="space-y-6 max-md:text-center max-md:flex max-md:flex-col max-md:items-center">
             <Link href="/" className="inline-flex items-center gap-3 group">
               <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-all duration-300">
@@ -191,6 +199,23 @@ const Footer = () => {
                     className="text-[16px] text-slate-400 hover:text-blue-400 transition-all duration-200 inline-flex items-center gap-2 group"
                   >
                     <span className="w-1 h-1 rounded-full bg-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 max-md:hidden" />
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="space-y-5 max-md:text-center">
+            <h3 className="text-[22px] font-bold text-white">Legal</h3>
+            <ul className="space-y-3.5 max-md:flex max-md:flex-col max-md:items-center">
+              {legalLinks.map(({ label, href }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
+                    className="text-[16px] text-slate-400 hover:text-blue-400 transition-all duration-200 inline-flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 rounded-full bg-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 max-md:hidden" />
                     {label}
                   </Link>
                 </li>
