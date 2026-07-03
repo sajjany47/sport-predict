@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
+﻿/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -155,7 +155,7 @@ const faqData: FAQCategory[] = [
         question: "How do I contact support?",
         icon: Mail,
         answer:
-          "You can reach us via email at sportpredict247@gmail.com, use the in-app support chat feature available on the dashboard, or visit our Contact page to submit a support request. We're here to help with any questions or issues you may encounter.",
+          "You can reach us via email at cricvista247@gmail.com, use the in-app support chat feature available on the dashboard, or visit our Contact page to submit a support request. We're here to help with any questions or issues you may encounter.",
       },
       {
         question: "How quickly does support respond?",
@@ -423,7 +423,7 @@ const FAQPage = () => {
                   className="border-blue-200 text-blue-700 hover:bg-blue-50 px-8"
                   asChild
                 >
-                  <Link href="mailto:sportpredict247@gmail.com">
+                  <Link href="mailto:cricvista247@gmail.com">
                     <Mail className="h-5 w-5 mr-2" />
                     Email Us
                   </Link>

@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
+﻿/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -337,10 +337,10 @@ const TermsPage = () => {
                       technical error or billing issue on our part, please
                       contact our support team at{" "}
                       <a
-                        href="mailto:sportpredict247@gmail.com"
+                        href="mailto:cricvista247@gmail.com"
                         className="text-blue-600 hover:underline font-medium"
                       >
-                        sportpredict247@gmail.com
+                        cricvista247@gmail.com
                       </a>{" "}
                       within 7 days of the transaction. Each request will be
                       reviewed on a case-by-case basis.
@@ -693,10 +693,10 @@ const TermsPage = () => {
                         <div>
                           <p className="font-semibold text-gray-900">Email</p>
                           <a
-                            href="mailto:sportpredict247@gmail.com"
+                            href="mailto:cricvista247@gmail.com"
                             className="text-blue-600 hover:underline font-medium"
                           >
-                            sportpredict247@gmail.com
+                            cricvista247@gmail.com
                           </a>
                         </div>
                       </div>
@@ -729,7 +729,7 @@ const TermsPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="mailto:sportpredict247@gmail.com"
+                href="mailto:cricvista247@gmail.com"
                 className="inline-flex items-center px-6 py-3 bg-white text-blue-600 rounded-xl hover:bg-gray-100 transition-colors font-semibold shadow-lg"
               >
                 <Mail className="h-5 w-5 mr-2" />

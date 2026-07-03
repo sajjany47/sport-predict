@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
+﻿/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React from "react";
@@ -54,7 +54,7 @@ const policySections = [
     icon: Mail,
     title: "How to Request a Refund",
     content:
-      "To submit a refund request, please send an email to sportpredict247@gmail.com with the following information:",
+      "To submit a refund request, please send an email to cricvista247@gmail.com with the following information:",
     list: [
       "Full name associated with the account",
       "Registered email address",
@@ -80,7 +80,7 @@ const policySections = [
     icon: AlertTriangle,
     title: "Chargebacks",
     content:
-      "We strongly encourage users to contact us directly at sportpredict247@gmail.com before initiating a chargeback with their bank or payment provider. Filing a chargeback without prior communication may result in:",
+      "We strongly encourage users to contact us directly at cricvista247@gmail.com before initiating a chargeback with their bank or payment provider. Filing a chargeback without prior communication may result in:",
     list: [
       "Immediate suspension of your CricVista account",
       "Permanent loss of access to all subscription features and historical data",
@@ -95,7 +95,7 @@ const policySections = [
     content:
       "If you have any questions, concerns, or requests regarding this Refund Policy or your subscription, please reach out to us:",
     list: [
-      'Email: <a href="mailto:sportpredict247@gmail.com" class="text-blue-600 hover:underline font-medium">sportpredict247@gmail.com</a>',
+      'Email: <a href="mailto:cricvista247@gmail.com" class="text-blue-600 hover:underline font-medium">cricvista247@gmail.com</a>',
       'Support Portal: <a href="/support" class="text-blue-600 hover:underline font-medium">Visit our Support Center</a>',
       "Response Time: Within 24-48 hours on business days",
     ],
@@ -287,7 +287,7 @@ const RefundPage = () => {
                     All refund requests must be submitted within 30 days of
                     purchase. Need help?{" "}
                     <a
-                      href="mailto:sportpredict247@gmail.com"
+                      href="mailto:cricvista247@gmail.com"
                       className="text-yellow-300 hover:text-yellow-200 underline font-medium"
                     >
                       Contact us

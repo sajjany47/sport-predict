@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
+﻿/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React from "react";
@@ -181,10 +181,10 @@ const sections = [
           platform. For more information about how we use cookies, please
           contact us at{" "}
           <a
-            href="mailto:sportpredict247@gmail.com"
+            href="mailto:cricvista247@gmail.com"
             className="text-blue-600 hover:underline font-medium"
           >
-            sportpredict247@gmail.com
+            cricvista247@gmail.com
           </a>
           .
         </p>
@@ -477,10 +477,10 @@ const sections = [
         <p>
           To exercise any of these rights, please contact us at{" "}
           <a
-            href="mailto:sportpredict247@gmail.com"
+            href="mailto:cricvista247@gmail.com"
             className="text-blue-600 hover:underline font-medium"
           >
-            sportpredict247@gmail.com
+            cricvista247@gmail.com
           </a>
           . We will respond to your request within 30 days as required by
           applicable regulations.
@@ -571,10 +571,10 @@ const sections = [
               <div>
                 <p className="text-sm text-gray-500">Email</p>
                 <a
-                  href="mailto:sportpredict247@gmail.com"
+                  href="mailto:cricvista247@gmail.com"
                   className="text-blue-600 hover:underline font-medium"
                 >
-                  sportpredict247@gmail.com
+                  cricvista247@gmail.com
                 </a>
               </div>
             </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -191,7 +191,7 @@ const PaymentSuccessPage = () => {
           <p className="text-sm text-gray-500">
             Need help?{" "}
             <a
-              href="mailto:sportpredict247@gmail.com"
+              href="mailto:cricvista247@gmail.com"
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
               Contact Support

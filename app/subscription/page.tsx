@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
+﻿/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React, { useState } from "react";
@@ -262,7 +262,7 @@ I am sending this message to confirm my payment. Please add the credits to my ac
                         Email
                       </p>
                       <p className="text-sm font-bold text-gray-900">
-                        sportpredict247@gmail.com
+                        cricvista247@gmail.com
                       </p>
                     </div>
                   </div>
@@ -272,7 +272,7 @@ I am sending this message to confirm my payment. Please add the credits to my ac
                     className="h-8 w-8 rounded-lg hover:bg-blue-50 text-blue-600 shrink-0"
                     onClick={() =>
                       copyToClipboard(
-                        "sportpredict247@gmail.com",
+                        "cricvista247@gmail.com",
                         "Email support",
                       )
                     }

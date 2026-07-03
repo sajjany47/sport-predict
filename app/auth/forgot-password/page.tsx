@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -339,7 +339,7 @@ const ForgotPasswordPage = () => {
                     href="mailto:support@example.com"
                     className="text-indigo-600 hover:underline"
                   >
-                    sportpredict247@gmail.com
+                    cricvista247@gmail.com
                   </a>
                 </p>
               </>

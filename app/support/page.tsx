@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
+﻿/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -348,7 +348,7 @@ const SupportPage = () => {
                           Email
                         </p>
                         <p className="text-sm font-bold text-white">
-                          sportpredict247@gmail.com
+                          cricvista247@gmail.com
                         </p>
                       </div>
                     </div>
@@ -358,7 +358,7 @@ const SupportPage = () => {
                       className="h-8 w-8 rounded-lg hover:bg-white/10 text-blue-200 shrink-0"
                       onClick={() =>
                         copyToClipboard(
-                          "sportpredict247@gmail.com",
+                          "cricvista247@gmail.com",
                           "Email support",
                         )
                       }
@@ -738,7 +738,7 @@ const SupportPage = () => {
                         Email
                       </p>
                       <p className="text-xs font-semibold text-gray-900 truncate">
-                        sportpredict247@gmail.com
+                        cricvista247@gmail.com
                       </p>
                     </div>
                   </div>

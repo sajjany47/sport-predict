@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
+﻿/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React, { useState } from "react";
@@ -113,8 +113,8 @@ const ContactPage = () => {
     {
       icon: Mail,
       label: "Email",
-      value: "sportpredict247@gmail.com",
-      copyValue: "sportpredict247@gmail.com",
+      value: "cricvista247@gmail.com",
+      copyValue: "cricvista247@gmail.com",
       copyLabel: "Email address",
       bgColor: "bg-blue-100",
       iconColor: "text-blue-600",

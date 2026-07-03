@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -317,7 +317,7 @@ export default function PaymentCallback() {
               Need help?{" "}
               <a
                 href={`mailto:${
-                  process.env.NEXT_PUBLIC_EMAIL || "sportpredict247@gmail.com"
+                  process.env.NEXT_PUBLIC_EMAIL || "cricvista247@gmail.com"
                 }`}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
@@ -394,11 +394,11 @@ export default function PaymentCallback() {
               <br />
               <a
                 href={`mailto:${
-                  process.env.NEXT_PUBLIC_EMAIL || "sportpredict247@gmail.com"
+                  process.env.NEXT_PUBLIC_EMAIL || "cricvista247@gmail.com"
                 }`}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                {process.env.NEXT_PUBLIC_EMAIL || "sportpredict247@gmail.com"}
+                {process.env.NEXT_PUBLIC_EMAIL || "cricvista247@gmail.com"}
               </a>
             </p>
           </div>

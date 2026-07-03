@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
+﻿/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React from "react";
@@ -278,10 +278,10 @@ const ResponsibleUsePage = () => {
                   Contact Us Anytime
                 </p>
                 <a
-                  href="mailto:sportpredict247@gmail.com"
+                  href="mailto:cricvista247@gmail.com"
                   className="text-teal-700 hover:text-teal-900 underline text-lg font-medium"
                 >
-                  sportpredict247@gmail.com
+                  cricvista247@gmail.com
                 </a>
               </div>
             </div>

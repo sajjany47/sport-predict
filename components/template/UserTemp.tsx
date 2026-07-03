@@ -1,4 +1,4 @@
-export const UserAccountClosureTemp = (data: any) => {
+﻿export const UserAccountClosureTemp = (data: any) => {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cricvista.com";
   const supportEmail =
     process.env.NEXT_PUBLIC_EMAIL || "support@cricvista.com";
@@ -168,7 +168,7 @@ Terms of Service
 export const UserWelcomeTemp = (data: any) => {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cricvista.com";
   const supportEmail =
-    process.env.NEXT_PUBLIC_EMAIL || "sportpredict247@gmail.com";
+    process.env.NEXT_PUBLIC_EMAIL || "cricvista247@gmail.com";
   const supportPhone = process.env.NEXT_PUBLIC_MOBILE || "+1 (888) 123-4567";
 
   return `
