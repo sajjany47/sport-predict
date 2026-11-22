@@ -22,7 +22,15 @@ export const orderValidationSchema = yup.object().shape({
   paymentMode: yup
     .string()
     .nullable()
-    .oneOf(["UPI", "NETBANKING", "QRCODE", "PROMOTION", "DEDUCTION", null]),
+    .oneOf([
+      "UPI",
+      "NETBANKING",
+      "QRCODE",
+      "PROMOTION",
+      "DEDUCTION",
+      "RAZORPAY",
+      null,
+    ]),
 
   receiverId: yup.string().nullable(),
 

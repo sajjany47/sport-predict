@@ -23,6 +23,9 @@ const protectedPaths: any = [
   "/api/support/list",
   "/api/support/:id",
   "/api/payment-intent",
+  // Only the create endpoint needs a logged-in user; the verify endpoint is
+  // authenticated by the signed result token from the payment gateway.
+  "/api/external-payment/create",
   "/api/users/add-offer-credit",
   "/api/match-details",
   "/api/notification/list",

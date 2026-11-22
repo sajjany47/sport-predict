@@ -33,8 +33,15 @@ import {
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { DailyCreditAd } from "@/components/GetDailyCredit";
-import { UserOrderCredit } from "../MainService";
+import { StartRazorpayPayment, UserOrderCredit } from "../MainService";
 import { loginSuccess } from "@/store/slices/authSlice";
+import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
+
+// Keep display-only icons next to the shared catalog used by the payment API.
+const staticPlans = SUBSCRIPTION_PLANS.map((plan) => ({
+  ...plan,
+  icon: plan.id === "starter" ? Zap : plan.id === "premium" ? Crown : Coins,
+}));
 
 const SubscriptionPage = () => {
   const { isAuthenticated, user } = useSelector(
@@ -50,51 +57,27 @@ const SubscriptionPage = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  const staticPlans = [
-    {
-      id: "starter",
-      name: "Starter",
-      tokens: 1,
-      price: 49,
-      description: "Perfect for a single analysis",
-      features: ["1 AI Analysis Credit", "Standard Support", "Instant Access"],
-      color: "from-blue-500 to-blue-600",
-      icon: Zap,
-      popular: false,
-    },
-    {
-      id: "standard",
-      name: "Pro Analytics",
-      tokens: 5,
-      price: 199,
-      description: "Best for weekend match analysis",
-      features: [
-        "5 AI Analysis Credits",
-        "Priority Support",
-        "Lifetime Validity",
-        "Save ₹46",
-      ],
-      color: "from-violet-500 to-violet-600",
-      icon: Coins,
-      popular: true,
-    },
-    {
-      id: "premium",
-      name: "Elite Analytics",
-      tokens: 15,
-      price: 599,
-      description: "For the ultimate analyst",
-      features: [
-        "15 AI Analysis Credits",
-        "VIP Support",
-        "Lifetime Validity",
-        "Save ₹136",
-      ],
-      color: "from-amber-500 to-amber-600",
-      icon: Crown,
-      popular: false,
-    },
-  ];
+  const handleRazorpayPayment = async (plan: any) => {
+    if (!isAuthenticated) {
+      toast.error("Please login to continue");
+      router.push("/auth/login");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await StartRazorpayPayment({ planId: plan.id });
+      if (!response?.url) {
+        throw new Error(response?.message || "Payment could not be started");
+      }
+      // Full-page redirect: the hosted /pay page collects the payment and
+      // returns the signed result to /payment/razorpay-callback.
+      window.location.assign(response.url);
+    } catch (error: any) {
+      toast.error(error.message || "Payment could not be started");
+      setLoading(false);
+    }
+  };
 
   const handleWhatsAppPayment = (plan: any) => {
     if (!isAuthenticated) {
@@ -286,8 +269,8 @@ I am sending this message to confirm my payment. Please add the credits to my ac
                 </div>
               </div>
               <p className="text-xs text-center text-muted-foreground mt-3">
-                After payment, share the transaction screenshot on WhatsApp for
-                instant credit activation.
+                Online payments activate credits instantly. For manual payments,
+                share the transaction screenshot on WhatsApp for activation.
               </p>
             </div>
           </div>
@@ -362,19 +345,28 @@ I am sending this message to confirm my payment. Please add the credits to my ac
                       ))}
                     </ul>
 
-                    {/* Button */}
+                    {/* Buttons */}
                     <Button
                       className={`w-full h-12 text-base font-semibold gap-2 shadow-md hover:shadow-lg transition-all ${
                         pkg.popular
                           ? "bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white"
                           : "bg-gray-900 hover:bg-gray-800 text-white"
                       }`}
-                      onClick={() => handleWhatsAppPayment(pkg)}
+                      disabled={loading}
+                      onClick={() => handleRazorpayPayment(pkg)}
                     >
-                      <MessageCircle className="h-4 w-4" />
-                      Buy via WhatsApp
+                      <CreditCard className="h-4 w-4" />
+                      {loading ? "Opening payment…" : "Pay securely"}
                       <ArrowRight className="h-4 w-4 ml-auto opacity-50" />
                     </Button>
+                    <button
+                      type="button"
+                      onClick={() => handleWhatsAppPayment(pkg)}
+                      className="mt-3 w-full text-center text-xs text-muted-foreground hover:text-green-600 transition-colors"
+                    >
+                      <MessageCircle className="h-3 w-3 inline mr-1" />
+                      Or pay via WhatsApp with our support team
+                    </button>
                   </CardContent>
                 </Card>
               );
@@ -397,7 +389,7 @@ I am sending this message to confirm my payment. Please add the credits to my ac
                 {
                   step: "02",
                   title: "Pay Securely",
-                  desc: "Send payment and receive credits within minutes.",
+                  desc: "Pay securely online; credits are added instantly.",
                   icon: Smartphone,
                 },
                 {

@@ -18,6 +18,8 @@ const OrderSchema = new Schema(
       type: Schema.Types.ObjectId,
       default: null,
     },
+    // Catalog id used when credits are bought through the shared Razorpay gateway.
+    planId: { type: String, default: null },
     userId: Schema.Types.ObjectId,
     credits: { type: Number, default: null },
     paymentStatus: { type: Boolean, default: false },
@@ -30,7 +32,7 @@ const OrderSchema = new Schema(
     paymentMode: {
       type: String,
       default: null,
-      enum: ["UPI", "NETBANKING", "QRCODE", "PROMOTION", "DEDUCTION"],
+      enum: ["UPI", "NETBANKING", "QRCODE", "PROMOTION", "DEDUCTION", "RAZORPAY"],
     },
     remarks: { type: String, default: null },
     paymentDetails: { type: Array, default: null },

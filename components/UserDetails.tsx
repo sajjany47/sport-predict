@@ -168,6 +168,8 @@ export const UserDetails = ({ userId }: { userId: any }) => {
         return <Gift className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />;
       case "DEDUCTION":
         return <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />;
+      case "RAZORPAY":
+        return <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 text-violet-600" />;
       default:
         return <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />;
     }

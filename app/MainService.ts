@@ -221,6 +221,22 @@ export const TicketDetails = async (id: any) => {
   }
 };
 
+/** Start a purchase paid through the shared Sajjan Mart Razorpay page. */
+export const StartRazorpayPayment = async (payload: any) => {
+  try {
+    const response = await privateApi.post(
+      "/api/external-payment/create",
+      payload,
+      { headers: getHeadersWithToken() },
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Payment could not be started",
+    );
+  }
+};
+
 export const PaymentCreate = async (payload: any) => {
   try {
     const response = await privateApi.post("/api/payment-intent", payload, {
