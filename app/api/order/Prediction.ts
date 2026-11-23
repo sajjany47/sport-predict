@@ -1,4 +1,4 @@
-import { CheckIntValue, GetConfidence, GetHint } from "@/lib/utils";
+import { GetConfidence, GetHint } from "@/lib/utils";
 
 const safe = (value: number): number =>
   Number.isFinite(value) && !Number.isNaN(value) ? value : 0;
@@ -38,13 +38,31 @@ const matchOver = (description: string): MatchOverConfig => {
 };
 
 const parseBattingScore = (score: string) => {
-  const match = score?.match(/\d+/g);
-  if (!match || match.length < 2) return { runs: 0, balls: 0 };
-  return { runs: Number(match[0]), balls: Number(match[1]) };
+  const match = String(score ?? "").match(/(\d+)\s*\((\d+)\)/);
+  if (!match) return { runs: 0, balls: 0 };
+  return { runs: Number(match[1]), balls: Number(match[2]) };
 };
 
-const getPlayerBattingStats = (player: any) => {
-  const batting = player?.recentForm?.batting ?? [];
+const numberValue = (value: any): number => {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  const parsed = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const relevantFormat = (format: string) => {
+  const f = format?.toLowerCase() ?? "t20";
+  if (f.includes("test")) return "test";
+  if (f.includes("odi") || f.includes("one day")) return "odi";
+  if (f.includes("t10")) return "t10";
+  if (f.includes("hundred")) return "hundred";
+  return "t20";
+};
+
+const getPlayerBattingStats = (player: any, format: string) => {
+  const mode = relevantFormat(format);
+  const batting = (player?.recentForm?.batting ?? []).filter((m: any) =>
+    String(m.match ?? "").toLowerCase().includes(mode),
+  );
   let totalRuns = 0;
   let totalBalls = 0;
   batting.forEach((m: any) => {
@@ -52,32 +70,38 @@ const getPlayerBattingStats = (player: any) => {
     totalRuns += runs;
     totalBalls += balls;
   });
-  const matches = batting.length || 1;
-  let avgRuns = safe(totalRuns / matches);
-  let avgBalls = safe(totalBalls / matches);
+  const matches = batting.length;
+  let avgRuns = matches ? safe(totalRuns / matches) : 0;
+  let avgBalls = matches ? safe(totalBalls / matches) : 0;
   let strikeRate = avgBalls > 0 ? safe((avgRuns / avgBalls) * 100) : 0;
 
   const role = normalizeRole(player.role);
   let roleMultiplier =
     role === "Batter" ? 1.8 : role === "All Rounder" ? 1.2 : 0.3;
 
-  if (player?.careerStats?.batting?.length) {
-    const career = player.careerStats.batting[0];
-    const careerAvgRuns = Number(career.average);
-    const careerStrikeRate = Number(career.strikeRate);
+  const career = (player?.careerStats?.batting ?? []).find((s: any) =>
+    String(s.format ?? "").toLowerCase().includes(mode),
+  );
+  if (career) {
+    const careerAvgRuns = numberValue(career.average);
+    const careerStrikeRate = numberValue(career.strikeRate);
     const careerAvgBalls =
       careerStrikeRate > 0 ? (careerAvgRuns * 100) / careerStrikeRate : 0;
 
-    avgRuns = safe((avgRuns + careerAvgRuns) / 2);
-    avgBalls = safe((avgBalls + careerAvgBalls) / 2);
-    strikeRate = safe((strikeRate + careerStrikeRate) / 2);
+    const recentWeight = matches ? Math.min(0.75, matches / 10) : 0;
+    avgRuns = safe(avgRuns * recentWeight + careerAvgRuns * (1 - recentWeight));
+    avgBalls = safe(avgBalls * recentWeight + careerAvgBalls * (1 - recentWeight));
+    strikeRate = safe(strikeRate * recentWeight + careerStrikeRate * (1 - recentWeight));
   }
   const impactRuns = safe(avgRuns * roleMultiplier * (strikeRate / 100));
   return { avgRuns, avgBalls, strikeRate, impactRuns };
 };
 
-const getPlayerBowlingStats = (player: any) => {
-  const bowling = player?.recentForm?.bowling ?? [];
+const getPlayerBowlingStats = (player: any, format: string) => {
+  const mode = relevantFormat(format);
+  const bowling = (player?.recentForm?.bowling ?? []).filter((m: any) =>
+    String(m.match ?? "").toLowerCase().includes(mode),
+  );
   let totalRuns = 0;
   let totalWickets = 0;
   let validMatches = 0;
@@ -98,11 +122,12 @@ const getPlayerBowlingStats = (player: any) => {
   let roleMultiplier =
     role === "Bowler" ? 1.8 : role === "All Rounder" ? 1.2 : 0.1;
 
-  if (player?.careerStats?.bowling?.length) {
-    const career = player.careerStats.bowling[0];
-    const careerAvgWickets =
-      Number(career.wickets) / Number(career.matches || 1);
-    const careerAvgRuns = careerAvgWickets * Number(career.average || 0);
+  const career = (player?.careerStats?.bowling ?? []).find((s: any) =>
+    String(s.format ?? "").toLowerCase().includes(mode),
+  );
+  if (career) {
+    const careerAvgWickets = numberValue(career.wickets) / Math.max(1, numberValue(career.matches));
+    const careerAvgRuns = numberValue(career.economy) * matchOver(format).bowlerOverLimit;
 
     avgWickets = safe((avgWickets + careerAvgWickets) / 2);
     avgRunsConced = safe((avgRunsConced + careerAvgRuns) / 2);
@@ -115,9 +140,9 @@ const getPlayerBowlingStats = (player: any) => {
   };
 };
 
-const getPlayerFullStats = (player: any) => {
-  const bat = getPlayerBattingStats(player);
-  const bowl = getPlayerBowlingStats(player);
+const getPlayerFullStats = (player: any, format: string) => {
+  const bat = getPlayerBattingStats(player, format);
+  const bowl = getPlayerBowlingStats(player, format);
 
   const impactRuns = bat.impactRuns;
   const impactWickets = bowl.impactWickets;
@@ -148,29 +173,30 @@ const squadAnanlysis = (team: any, matchDescription: string) => {
     : (team?.benchPlayers ?? []);
 
   let teamRuns = 0;
-  let teamBalls = 0;
   let teamRunsConced = 0;
   let teamWickets = 0;
 
   const processedSquad: any[] = [];
 
   squad.forEach((p: any) => {
-    const stats = getPlayerFullStats(p);
+    const stats = getPlayerFullStats(p, matchDescription);
     processedSquad.push(stats);
 
     teamRuns += stats.impactRun;
-    teamBalls += stats.avgBalls;
     teamRunsConced += stats.impactRunConced;
     teamWickets += stats.impactWicket;
   });
 
-  const runRate = teamBalls > 0 ? safe(teamRuns / teamBalls) : 0;
   const overs = matchOver(matchDescription);
+  // Player averages describe likely contribution, not a full innings rate.
+  // Sum projected batting output, then shrink toward a format baseline.
+  const baseline = overs.totalOvers <= 10 ? 100 : overs.totalOvers <= 20 ? 160 : overs.totalOvers <= 50 ? 260 : 300;
+  const lineupProjection = teamRuns * (squad.length ? 11 / squad.length : 1);
+  const bowlingExpected = teamWickets > 0 ? (teamRunsConced / teamWickets) * Math.min(7, teamWickets) : baseline;
 
   return {
-    predictedScore: safe(runRate * overs.ballsPerInnings),
-    totalTeamRunsConced:
-      teamWickets > 0 ? safe((teamRunsConced / teamWickets) * 5) : 0,
+    predictedScore: safe(lineupProjection * 0.55 + baseline * 0.45),
+    totalTeamRunsConced: safe(bowlingExpected),
     teamWicket: teamWickets,
     processedSquad,
   };
@@ -182,13 +208,15 @@ export const CalculateTeamFormStats = (team: any) => {
   let totalMatches = 0;
   let wins = 0;
 
-  team.matches.forEach((match: any) => {
-    const teamData = match.teams.find((t: any) => t.name === team.teamId);
-    const opponentData = match.teams.find((t: any) => t.name !== team.teamId);
+  (team?.matches ?? []).forEach((match: any) => {
+    const teams = match?.teams ?? [];
+    const teamData = teams.find((t: any) => t.name === team.teamId);
+    const opponentData = teams.find((t: any) => t.name !== team.teamId);
 
     if (teamData && opponentData) {
-      const scoredRuns = parseInt(teamData.score.split("/")[0]);
-      const concededRuns = parseInt(opponentData.score.split("/")[0]);
+      const scoredRuns = numberValue(String(teamData.score ?? "").split("/")[0]);
+      const concededRuns = numberValue(String(opponentData.score ?? "").split("/")[0]);
+      if (!scoredRuns && !concededRuns) return;
       totalScored += scoredRuns;
       totalConceded += concededRuns;
       totalMatches++;
@@ -203,33 +231,6 @@ export const CalculateTeamFormStats = (team: any) => {
   const winPercentage = totalMatches ? (wins / totalMatches) * 100 : 50;
 
   return { avgScore, avgConceded, winPercentage, totalMatches };
-};
-
-const getRankFactor = (rank: number) => {
-  if (!rank || rank <= 1) return 1;
-  const k = 0.045;
-  const p = 1.15;
-  const factor = Math.exp(-k * Math.pow(rank - 1, p));
-  return Math.max(0.1, Math.min(1, factor));
-};
-
-const CalculateTeamWinningPercentage = (a: any, b: any) => {
-  const teamA = CheckIntValue(a);
-  const teamB = CheckIntValue(b);
-  const totalOverallWinPercentage = teamA + teamB;
-  if (totalOverallWinPercentage === 0) return { teamA: 50, teamB: 50 };
-
-  const teamAOverallWinPercentage = (teamA / totalOverallWinPercentage) * 100;
-  const teamBOverallWinPercentage = (teamB / totalOverallWinPercentage) * 100;
-
-  return { teamA: teamAOverallWinPercentage, teamB: teamBOverallWinPercentage };
-};
-
-const avgValue = (value1: any, value2: any) => {
-  const a = CheckIntValue(value1);
-  const b = CheckIntValue(value2);
-  let c = (a + b) / 2;
-  return c;
 };
 
 const getTopPerformers = (processedSquad: any[], rankNormalised: number) => {
@@ -350,191 +351,52 @@ export const Prediction = async (data: any): Promise<any> => {
   const teamA = data.squads?.[0] || {};
   const teamB = data.squads?.[1] || {};
 
-  let teamARankNormalised = 1;
-  let teamBRankNormalised = 1;
-
   const teamRank = data.matchInfo?.teams || [];
-  const matchDescription = data.matchInfo?.matchDescription || "T20";
+  const matchDescription = data.matchInfo?.format || data.matchInfo?.matchDescription || "T20";
+  const teamAScore = squadAnanlysis(teamA, matchDescription);
+  const teamBScore = squadAnanlysis(teamB, matchDescription);
+  const clamp = (n: number, low: number, high: number) => Math.max(low, Math.min(high, n));
+  const average = (...values: any[]) => {
+    const nums = values.map(numberValue).filter((n) => n > 0);
+    return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
+  };
+  const comparisonTeams = data?.comparision?.teams ?? {};
+  const teamAKey = Object.keys(comparisonTeams).find((key) => comparisonTeams[key]?.name === teamA.teamName) || "team1";
+  const teamBKey = Object.keys(comparisonTeams).find((key) => comparisonTeams[key]?.name === teamB.teamName) || "team2";
+  const getComparison = (metric: string, section: "overall" | "venue", key: string) => {
+    const row = data?.comparision?.comparison?.[section]?.find((x: any) => x.metric === metric);
+    return row ? numberValue(row[key]) : 0;
+  };
+  // Estimate expected first innings from the batting XI, opponent bowling, recent team scores and venue.
+  const formA = data?.teamForm?.find((t: any) => t.teamId === teamA.teamName);
+  const formB = data?.teamForm?.find((t: any) => t.teamId === teamB.teamName);
+  const formStatsA = formA ? CalculateTeamFormStats(formA) : null;
+  const formStatsB = formB ? CalculateTeamFormStats(formB) : null;
+  const venue = data?.venueDetails?.stats ?? {};
+  const baseline = average(venue.avg1stInns, venue.avg2ndInns) || (matchOver(matchDescription).totalOvers <= 10 ? 100 : matchOver(matchDescription).totalOvers <= 20 ? 160 : 260);
+  const teamAComparison = average(getComparison("Avg Score", "overall", teamAKey), getComparison("Avg Score", "venue", teamAKey));
+  const teamBComparison = average(getComparison("Avg Score", "overall", teamBKey), getComparison("Avg Score", "venue", teamBKey));
+  const teamAPredicted = Math.round(clamp(average(teamAScore.predictedScore, teamBScore.totalTeamRunsConced, formStatsA?.avgScore, formStatsB?.avgConceded, teamAComparison, baseline), baseline * 0.55, baseline * 1.55));
+  const teamBPredicted = Math.round(clamp(average(teamBScore.predictedScore, teamAScore.totalTeamRunsConced, formStatsB?.avgScore, formStatsA?.avgConceded, teamBComparison, baseline), baseline * 0.55, baseline * 1.55));
 
-  let teamAScore = squadAnanlysis(teamA, matchDescription);
-  let teamBScore = squadAnanlysis(teamB, matchDescription);
-
-  let teamAPredicted =
-    (teamAScore.predictedScore + teamBScore.totalTeamRunsConced) / 2;
-  let teamBPredicted =
-    (teamBScore.predictedScore + teamAScore.totalTeamRunsConced) / 2;
-
-  let teamAWinPercentage = 50;
-  let teamBWinPercentage = 50;
-
-  if (teamRank[0]?.teamRank && teamRank[1]?.teamRank) {
-    const findTeamARank = teamRank.find(
-      (item: any) => item.teamShortName === teamA.teamName,
-    );
-    const findTeamBRank = teamRank.find(
-      (item: any) => item.teamShortName === teamB.teamName,
-    );
-
-    if (findTeamARank && findTeamBRank) {
-      const aRank = Number(findTeamARank.teamRank.rank);
-      const bRank = Number(findTeamBRank.teamRank.rank);
-
-      const factorA = getRankFactor(aRank);
-      const factorB = getRankFactor(bRank);
-
-      const matchBaseline = (factorA + factorB) / 2;
-
-      const normalizedA = factorA / matchBaseline;
-      const normalizedB = factorB / matchBaseline;
-
-      teamARankNormalised = normalizedA;
-      teamBRankNormalised = normalizedB;
-
-      teamAPredicted *= normalizedA;
-      teamBPredicted *= normalizedB;
-    }
-  }
-
-  if (data?.teamForm && data?.teamForm.length > 0) {
-    const findTeamAForm = data.teamForm.find(
-      (e: any) => e.teamId === teamA.teamName,
-    );
-    const findTeamBForm = data.teamForm.find(
-      (e: any) => e.teamId === teamB.teamName,
-    );
-    if (findTeamAForm && findTeamBForm) {
-      const teamAFormStats = CalculateTeamFormStats(findTeamAForm);
-      const teamBFormStats = CalculateTeamFormStats(findTeamBForm);
-
-      const winPercentage = CalculateTeamWinningPercentage(
-        teamAFormStats.winPercentage ?? 50,
-        teamBFormStats.winPercentage ?? 50,
-      );
-
-      teamAWinPercentage = avgValue(teamAWinPercentage, winPercentage.teamA);
-      teamBWinPercentage = avgValue(teamBWinPercentage, winPercentage.teamB);
-
-      teamAPredicted =
-        (teamAPredicted +
-          (teamAFormStats.avgScore + teamBFormStats.avgConceded) / 2) /
-        2;
-      teamBPredicted =
-        (teamBPredicted +
-          (teamBFormStats.avgScore + teamAFormStats.avgConceded) / 2) /
-        2;
-    }
-  }
-
-  if (data?.comparision?.comparison) {
-    const getMetricValue = (arr: any, metric: any, teamKey: any) => {
-      const item = arr.find((m: any) => m.metric === metric);
-      if (!item) return 0;
-      let value = item[teamKey];
-      if (typeof value === "string" && value.includes("%")) {
-        return Number(value.replace("%", ""));
-      }
-      return Number(value);
-    };
-    const buildTeamComparisonData = (
-      comparisonData: any,
-      teamKey: "team1" | "team2",
-    ) => {
-      return {
-        overallWinningPercentage: getMetricValue(
-          comparisonData.overall,
-          "Win",
-          teamKey,
-        ),
-        overallInningsScore: getMetricValue(
-          comparisonData.overall,
-          "Avg Score",
-          teamKey,
-        ),
-        venueWinningPercentage: getMetricValue(
-          comparisonData.venue,
-          "Win",
-          teamKey,
-        ),
-        venueInningsScore: getMetricValue(
-          comparisonData.venue,
-          "Avg Score",
-          teamKey,
-        ),
-      };
-    };
-    const getTeamKey = (teamName: string) => {
-      const teamKeys = Object.keys(data.comparision.teams);
-      return teamKeys.find(
-        (key) => data.comparision.teams[key].name === teamName,
-      ) as "team1" | "team2";
-    };
-
-    const comparisonData = data.comparision.comparison;
-    const teamAKey = getTeamKey(teamA.teamName) || "team1";
-    const teamBKey = getTeamKey(teamB.teamName) || "team2";
-
-    const teamAComparisionData = buildTeamComparisonData(
-      comparisonData,
-      teamAKey,
-    );
-    const teamBComparisionData = buildTeamComparisonData(
-      comparisonData,
-      teamBKey,
-    );
-
-    const overallWinPercentage = CalculateTeamWinningPercentage(
-      teamAComparisionData.overallWinningPercentage ?? 50,
-      teamBComparisionData.overallWinningPercentage ?? 50,
-    );
-    const venueWinPercentage = CalculateTeamWinningPercentage(
-      teamAComparisionData?.venueWinningPercentage ?? 50,
-      teamBComparisionData?.venueWinningPercentage ?? 50,
-    );
-
-    const combinedWinPercentage = CalculateTeamWinningPercentage(
-      overallWinPercentage.teamA + venueWinPercentage.teamA,
-      overallWinPercentage.teamB + venueWinPercentage.teamB,
-    );
-
-    teamAPredicted = avgValue(
-      teamAPredicted,
-      (teamAComparisionData.overallInningsScore +
-        teamAComparisionData.venueInningsScore) /
-        2,
-    );
-    teamBPredicted = avgValue(
-      teamBPredicted,
-      (teamBComparisionData.overallInningsScore +
-        teamBComparisionData.venueInningsScore) /
-        2,
-    );
-
-    teamAWinPercentage = avgValue(
-      teamAWinPercentage,
-      combinedWinPercentage.teamA,
-    );
-    teamBWinPercentage = avgValue(
-      teamBWinPercentage,
-      combinedWinPercentage.teamB,
-    );
-  }
-
-  if (data?.venueDetails?.stats) {
-    const venueStats = data?.venueDetails?.stats;
-    const combineScore = avgValue(venueStats.avg1stInns, venueStats.avg2ndInns);
-    teamAPredicted = avgValue(teamAPredicted, combineScore);
-    teamBPredicted = avgValue(teamBPredicted, combineScore);
-  }
-
-  const teamChance = CalculateTeamWinningPercentage(
-    teamAPredicted,
-    teamBPredicted,
-  );
-
-  const avgWinningChance = CalculateTeamWinningPercentage(
-    teamChance.teamA + teamAWinPercentage,
-    teamChance.teamB + teamBWinPercentage,
-  );
+  // Blend independent signals first, then map the rating difference through a logistic curve.
+  const probabilitySignals: { a: number; b: number; weight: number }[] = [];
+  probabilitySignals.push({ a: teamAPredicted, b: teamBPredicted, weight: 0.35 });
+  if (formStatsA && formStatsB && formStatsA.totalMatches + formStatsB.totalMatches > 0) probabilitySignals.push({ a: formStatsA.winPercentage, b: formStatsB.winPercentage, weight: 0.3 });
+  const overallA = getComparison("Win", "overall", teamAKey), overallB = getComparison("Win", "overall", teamBKey);
+  if (overallA + overallB > 0) probabilitySignals.push({ a: overallA, b: overallB, weight: 0.18 });
+  const venueA = getComparison("Win", "venue", teamAKey), venueB = getComparison("Win", "venue", teamBKey);
+  if (venueA + venueB > 0) probabilitySignals.push({ a: venueA, b: venueB, weight: 0.1 });
+  const rankA = teamRank.find((t: any) => t.teamShortName === teamA.teamName)?.teamRank;
+  const rankB = teamRank.find((t: any) => t.teamShortName === teamB.teamName)?.teamRank;
+  if (numberValue(rankA?.rating) + numberValue(rankB?.rating) > 0) probabilitySignals.push({ a: numberValue(rankA.rating), b: numberValue(rankB.rating), weight: 0.07 });
+  const totalWeight = probabilitySignals.reduce((sum, s) => sum + s.weight, 0);
+  const ratingA = probabilitySignals.reduce((sum, s) => sum + (s.a / Math.max(1, s.a + s.b)) * 100 * s.weight, 0) / totalWeight;
+  const ratingB = probabilitySignals.reduce((sum, s) => sum + (s.b / Math.max(1, s.a + s.b)) * 100 * s.weight, 0) / totalWeight;
+  const rawA = 100 / (1 + Math.exp(-(ratingA - ratingB) / 12));
+  const winA = Math.round(clamp(rawA, 5, 95) * 10) / 10;
+  const avgWinningChance = { teamA: winA, teamB: Math.round((100 - winA) * 10) / 10 };
+  const teamARankNormalised = 1, teamBRankNormalised = 1;
 
   const maxProbability = Math.max(
     avgWinningChance.teamA,
